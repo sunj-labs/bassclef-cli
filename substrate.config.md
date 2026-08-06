@@ -46,6 +46,20 @@ distribution: npm
 npm_package: "@thebassclef/core"
 npm_registry: https://registry.npmjs.org
 
+## Bassclef substrate location (dev-time)
+#
+# Where WU-2/3 tests read bassclef substrate from during THIS repo's
+# development. Runtime shipped-adopter workflow reads from the installed
+# npm package assets (dist/substrate/**), not from this path. Adding
+# this key preemptively per architect-review 2026-08-06 (item 6):
+# without it, WU-2's first read from disk lands the boundary decision
+# accidentally.
+#
+# Override at runtime with the BASSCLEF_REPO_PATH env var.
+#
+bassclef_peer_repo_path: ~/src/sunj-labs/bassclef
+bassclef_peer_repo_env: BASSCLEF_REPO_PATH
+
 ## Onboarding follow-on skip state
 #
 # Set by /onboard-repo when the operator explicitly skips a follow-on

@@ -1,0 +1,52 @@
+{
+  "name": "@thebassclef/core",
+  "version": "0.0.1",
+  "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
+  "keywords": ["bassclef", "claude-code", "cli", "scaffolding"],
+  "homepage": "https://github.com/sunj-labs/bassclef-cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunj-labs/bassclef-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sunj-labs/bassclef-cli/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "sunj-labs",
+  "type": "module",
+  "bin": {
+    "bassclef": "dist/cli.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^2.0.0"
+  }
+}
