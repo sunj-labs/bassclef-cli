@@ -9,6 +9,16 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added
+- `bassclef init` — writes `.claude/settings.json` + `substrate.config.md` + `.bassclef/init.manifest.json` into a project directory. Safety contract in ADR-002 (fail-safe overwrite, atomic writes, path scoping, symlink refusal unconditional).
+- Six flags: `--force`, `--dry-run`, `--dir <path>`, `--allow-root`, `--allow-any-dir`, `--verbose`.
+- Init manifest carries template versions and per-file outcomes so the sync command can upgrade cleanly.
+- ADR-002 — bassclef init safety contract. Semver-locks defaults, files, escape-hatch matrix, exit codes.
+
+### Notes
+- Settings template ships MINIMAL — no `../bassclef` sibling assumption. Sync will populate substrate references when it lands.
+- `bassclef sync` remains a stub. Real implementation lands in the sync workunit.
+
 ## [0.0.1] — 2026-08-06
 
 Initial scaffold. Shell only — real command behavior lands in WU-2 and

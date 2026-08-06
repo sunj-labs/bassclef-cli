@@ -16,14 +16,18 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 shipped as PR #2 (awaiting operator review); WU-2 (init command) next
+iteration_phase: WU-1 shipped (PR #3 merged); WU-2 (init command) on feat/wu-2-init awaiting PR
 previous_bet: —
 next_bet: —
 
-## Active PRs (awaiting review)
+## Shipped
 
-- PR #1 — chore/bassclef-bootstrap (substrate config layer): https://github.com/sunj-labs/bassclef-cli/pull/1
-- PR #2 — feat/wu-1-scaffold (scaffold shell, stacked on PR #1): https://github.com/sunj-labs/bassclef-cli/pull/2
+- PR #1 — chore/bassclef-bootstrap MERGED (substrate config layer)
+- PR #3 — feat/wu-1-scaffold MERGED (scaffold shell + package.json + LICENSE + WU-1 tests)
+
+## In flight
+
+- feat/wu-2-init (bassclef init command with safety contract) — 48 tests green, ready to open PR
 
 ## Active agents
 
@@ -52,10 +56,10 @@ next_bet: —
 - [ ] Object model documented
 
 ### Construction — IN PROGRESS
-- [x] TypeScript + Vite scaffold — shipped as PR #2 (feat/wu-1-scaffold)
-- [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — shipped as PR #2
-- [ ] Init command — init workunit next
-- [ ] Sync command — sync workunit
+- [x] TypeScript + Vite scaffold — merged (PR #3)
+- [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — merged (PR #3)
+- [x] Init command with safety contract (ADR-002) — on feat/wu-2-init awaiting PR
+- [ ] Sync command — reads .bassclef/init.manifest.json to know what to upgrade
 - [ ] npm publish workflow — publish workunit
 
 ### Transition — PENDING
