@@ -1,0 +1,61 @@
+// bassclef-configs.jsonc — unified adopter configuration discovery surface
+//
+// JSON Schema: standards/state-spine/schemas/bassclef-configs.schema.json
+// Full reference: standards/bassclef-configs-schema.md
+{
+  // Whether bassclef's substrate syncs from upstream at SessionStart.
+  // Off in this repo because user-scope ~/.claude/hooks/bassclef-sync.sh
+  // already populates .claude/ on every session — flipping this on would
+  // double-fire.
+  "sync": { "enabled": false },
+
+  // Per-agent LLM model routing. Most agents stay cheap-fast; Builder
+  // gets balanced for code quality; Shaper gets capable for problem framing.
+  "model_tier": {
+    "Builder": "balanced",
+    "Closer": "cheap-fast",
+    "Deployer": "cheap-fast",
+    "DocsWriter": "cheap-fast",
+    "Explorer": "cheap-fast",
+    "Orchestrator": "cheap-fast",
+    "Reviewer": "cheap-fast",
+    "Shaper": "capable"
+  },
+
+  // Adopter plan tier. Sequential mode for this repo.
+  "plan_tier": "tier-1",
+
+  // Plain-English discipline for agent reply prose to operator.
+  // Advisory scan of the last message for bassclef-internal jargon.
+  "prose_discipline": {
+    "kiss_words_turn_prose": true
+  },
+
+  // Per-path testing-tier enforcement. Empty matchers for now; WU-1 will
+  // add the TypeScript source layout and this seed can be populated when
+  // src/ and tests/ shapes are known.
+  "testing": {
+    "global_floor": 1,
+    "path_matchers": []
+  },
+
+  // Tech stack vocabulary per handoff answers.
+  //   frontend: none    — this is a CLI + library package, no UI
+  //   backend: none     — no server
+  //   runtime: node     — min version 20
+  //   lang: typescript
+  //   pkg_manager: npm
+  //   orm: none
+  "tech_stack": {
+    "lang": "typescript",
+    "frontend": "none",
+    "backend": "none",
+    "runtime": "node",
+    "runtime_min_version": "20",
+    "orm": "none",
+    "pkg_manager": "npm",
+    "deploy": "npm",
+    "declared_at": "2026-08-06",
+    "declared_via": "onboard-repo"
+  }
+}
