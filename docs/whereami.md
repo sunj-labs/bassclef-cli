@@ -16,13 +16,18 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 (TypeScript + Vite scaffold — pending)
+iteration_phase: WU-1 shipped as PR #2 (awaiting operator review); WU-2 (init command) next
 previous_bet: —
 next_bet: —
 
+## Active PRs (awaiting review)
+
+- PR #1 — chore/bassclef-bootstrap (substrate config layer): https://github.com/sunj-labs/bassclef-cli/pull/1
+- PR #2 — feat/wu-1-scaffold (scaffold shell, stacked on PR #1): https://github.com/sunj-labs/bassclef-cli/pull/2
+
 ## Active agents
 
-- orchestrator-gated-sequential (bootstrap + WU-1 handoff)
+- orchestrator-gated-sequential (autonomous overnight — bootstrap + WU-1 shipped)
 
 ## Subsystem phases
 
@@ -46,11 +51,12 @@ next_bet: —
 - [ ] Design principles established
 - [ ] Object model documented
 
-### Construction — PENDING
-- [ ] TypeScript + Vite scaffold (WU-1)
-- [ ] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE (WU-1)
-- [ ] Sync command (WU-2/3)
-- [ ] npm publish workflow (WU-4)
+### Construction — IN PROGRESS
+- [x] TypeScript + Vite scaffold — shipped as PR #2 (feat/wu-1-scaffold)
+- [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — shipped as PR #2
+- [ ] Init command — init workunit next
+- [ ] Sync command — sync workunit
+- [ ] npm publish workflow — publish workunit
 
 ### Transition — PENDING
 - [ ] Production deploy gate configured (npm trusted publishing)
@@ -64,8 +70,8 @@ none yet — file when first risk materializes
 
 ## Last updated
 
-2026-08-06T00:00:00+0000 — session-start (bootstrap via /onboard-repo)
-session: 2026-08-06-onboard-repo
+2026-08-06T02:55:00+0000 — session-end (bootstrap + WU-1 shipped as PRs #1 and #2)
+session: docs/session-logs/2026-08-06-onboard-plus-wu-1.md
 
 ## Configuration
 
