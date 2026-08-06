@@ -2,23 +2,32 @@
 
 This repo was created by a bassclef-upstream session on 2026-08-06 as the execution home for Goal A (build + launch `@thebassclef/core` on npm).
 
-## What already happened when Claude Code first launched here
+## Turn 1 — /onboard-repo
 
-Nothing you need to do — `~/.claude/hooks/bassclef-sync.sh` (user scope, installed on your machine) fires at every SessionStart. It populated `.claude/` here on your first session: symlinks to skills + rules + luminaries (pointing at `~/src/sunj-labs/bassclef`), hooks directory, and a settings.json. This is the current-state install path.
+```
+/onboard-repo
+```
 
-**Known first-session friction:** two SessionStart hook errors appear before bassclef-sync completes population — `session-reflection.sh` and `session-start-recap-inject.sh` at `$CLAUDE_PROJECT_DIR/.claude/hooks/` don't exist yet at that point. Race condition. Filed as sunj-labs/bassclef-upstream#1145. Not fatal — the session continues, and the hooks exist for the next SessionStart.
+Pick Path A. Answer Phase 2.x `tech_stack` prompts:
 
-## Do NOT run /onboard-repo
+- `frontend`: `none`
+- `backend`: `none`
+- `runtime`: `node` (min version 20)
+- `lang`: `typescript`
+- `pkg_manager`: `npm`
+- `orm`: `none`
 
-The substrate is already installed via user-scope bassclef-sync. `/onboard-repo` would layer additional settings.json edits on top. That whole per-repo settings.json pattern is being replaced by `managed-settings.d/bassclef.json` (design in `design/discoveries/2026-08-04-managed-settings-d-as-bassclef-wiring-channel.md`). Adapter exists; rollout to this machine pending. Filed under sunj-labs/bassclef-upstream#1145 for Goal B.
+**Known tech debt (do NOT block on it):** /onboard-repo writes per-repo `.claude/settings.json` today. That editing pattern is being replaced by `managed-settings.d/bassclef.json` per `design/discoveries/2026-08-04-managed-settings-d-as-bassclef-wiring-channel.md`. Tracked at sunj-labs/bassclef-upstream#1145 + folded into Goal B WU-1. Run /onboard-repo anyway — the settings.json layered on top is safe, just duplicated with the user-scope bassclef-sync that already populated `.claude/` here on first SessionStart.
 
-## Turn 1 — /longrun prep
+**Also known — first-session hook errors:** Two SessionStart hooks (`session-reflection.sh` + `session-start-recap-inject.sh`) fire not-found errors before bassclef-sync completes the first `.claude/hooks/` population. Race condition. Not fatal. Also tracked in #1145.
+
+## Turn 2 — /longrun prep
 
 ```
 /longrun prep
 ```
 
-Reads `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md` as the pickup contract. WU-0 is already done on the bassclef-upstream side. Next is WU-1 — bootstrap the TypeScript + Vite scaffold per the bet's step map.
+Reads `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md` as the pickup contract. WU-0 done on bassclef-upstream side. Next is WU-1 — bootstrap the TypeScript + Vite scaffold per the bet's step map.
 
 ## Context you should have
 
@@ -40,6 +49,5 @@ WU-1 per the bet doc — bootstrap TypeScript + Vite build + package.json with `
 ## What NOT to install
 
 - Do NOT create `.bassclef-source.json` pointing at the tarball path — tarball has zero adopters; going straight to npm. Memory: `project-tarball-distribution-deprecated`.
-- Do NOT add tarball-related settings.json entries — same reason.
 
 Good luck. The bet doc is your compass.
