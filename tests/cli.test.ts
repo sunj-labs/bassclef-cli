@@ -1,18 +1,17 @@
-// WU-1 Tier 0 tests — CLI shell.
+// CLI shell tests. Init command tests live in tests/init.test.ts.
 //
 // Beck: test-list first, then implementation.
-// Tests that MUST pass before WU-1 ships:
 //
 //   [x] `bassclef --version` prints the pinned version + exits 0
 //   [x] `bassclef --help` prints usage + exits 0
 //   [x] `bassclef` (no args) prints usage + exits 0
-//   [x] `bassclef init` prints "WU-2 will land" + exits non-zero
-//   [x] `bassclef sync` prints "WU-3 will land" + exits non-zero
+//   [x] `bassclef init --help` prints init usage + exits 0
+//   [x] `bassclef sync` prints a "later work" message + exits non-zero
 //   [x] `bassclef nonsense` prints unknown-command + usage + exits non-zero
 //   [x] `version` export from index equals package.json version
 //
-// Deferred to WU-2/3 (real command tests): idempotent init, sync from
-// stale version, sync error paths.
+// Init behavior tests are in tests/init.test.ts. Sync stub still lives
+// here until the sync workunit replaces it.
 
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
@@ -57,16 +56,18 @@ describe('bassclef CLI shell (WU-1)', () => {
     expect(r.stdout).toContain('Usage:');
   });
 
-  it('stubs `init` with a WU-2 message + non-zero exit', () => {
-    const r = runCli(['init']);
-    expect(r.status).not.toBe(0);
-    expect(r.stderr).toContain('WU-2');
+  it('prints init-specific usage on `init --help`', () => {
+    const r = runCli(['init', '--help']);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('bassclef init');
+    expect(r.stdout).toContain('--force');
+    expect(r.stdout).toContain('--dry-run');
   });
 
-  it('stubs `sync` with a WU-3 message + non-zero exit', () => {
+  it('stubs `sync` with a later-work message + non-zero exit', () => {
     const r = runCli(['sync']);
     expect(r.status).not.toBe(0);
-    expect(r.stderr).toContain('WU-3');
+    expect(r.stderr).toMatch(/later|not yet/i);
   });
 
   it('rejects an unknown command with usage + non-zero exit', () => {

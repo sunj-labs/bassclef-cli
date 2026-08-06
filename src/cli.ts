@@ -13,16 +13,18 @@
 // Add it when the surface widens.
 
 import { version } from './index.js';
-import { runInit } from './commands/init.js';
+import { runInit, usage as initUsage } from './commands/init.js';
 import { runSync } from './commands/sync.js';
 
 const USAGE = `bassclef — install and upgrade bassclef in your project
 
 Usage:
-  bassclef init         Write bassclef config into the current project (WU-2)
-  bassclef sync         Upgrade bassclef config in place (WU-3)
-  bassclef --version    Print the running version
-  bassclef --help       Print this message
+  bassclef init [options] Write bassclef config into a project directory
+  bassclef sync           Upgrade bassclef config in place (later work)
+  bassclef --version      Print the running version
+  bassclef --help         Print this message
+
+Run \`bassclef init --help\` for init options + the safety defaults.
 
 Version: ${version}
 Docs:    https://github.com/sunj-labs/bassclef-cli
@@ -42,7 +44,13 @@ function main(argv: readonly string[]): number {
   }
 
   if (first === 'init') {
-    return runInit();
+    const rest = argv.slice(1);
+    // `bassclef init --help` prints init-specific usage without running.
+    if (rest.includes('--help') || rest.includes('-h')) {
+      process.stdout.write(initUsage());
+      return 0;
+    }
+    return runInit(rest);
   }
 
   if (first === 'sync') {
@@ -55,6 +63,5 @@ function main(argv: readonly string[]): number {
   return 1;
 }
 
-// process.argv[0] = node, process.argv[1] = this script, rest = user args
 const exitCode = main(process.argv.slice(2));
 process.exit(exitCode);

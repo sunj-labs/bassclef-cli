@@ -30,9 +30,21 @@ full declaration.
 
 ## Current state
 
-Phase: Inception. Iteration: `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md`.
-Next WU: WU-1 (TypeScript + Vite scaffold + package.json + LICENSE).
+Phase: Construction. Iteration: `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md`.
+WU-1 (scaffold + package.json + LICENSE) shipped as PR #3, merged. WU-2
+(`bassclef init` command) is on `feat/wu-2-init`. Next: WU-3 (sync).
 Read `docs/whereami.md` at session-start for the live snapshot.
+
+## Shipped commands
+
+- `bassclef --version` / `--help` — prints info; exits 0.
+- `bassclef init [--force] [--dry-run] [--dir <path>] [--allow-root] [--allow-any-dir] [--verbose]` — writes `.claude/settings.json` + `substrate.config.md` + `.bassclef/init.manifest.json` into a project directory. Safety contract: `docs/adrs/ADR-002-bassclef-init-safety-contract.md`.
+- `bassclef sync` — stub; sync workunit lands the real implementation.
+
+## Architecture decisions
+
+- `docs/adrs/ADR-001-npm-package-build-toolchain.md` — Vite (library mode) + TypeScript + Vitest pinned.
+- `docs/adrs/ADR-002-bassclef-init-safety-contract.md` — init command's fail-safe defaults, atomic writes, path scoping, escape-hatch matrix. Semver-locked from 0.0.2.
 
 ## Primary luminary triad (per iteration bet)
 
