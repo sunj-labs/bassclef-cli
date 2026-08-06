@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`template-version lock (WU-3 P6) > settings.json output at v0.0.1 has a locked hash 1`] = `
+{
+  "hash": "88f15560199c1bb7cae5828cb699a6b95c53ef2ebdbbf241fd37c78e2ba475a1",
+  "key": "settings.json@0.0.1",
+}
+`;
+
+exports[`template-version lock (WU-3 P6) > substrate.config.md output at v0.0.1 has a locked hash 1`] = `
+{
+  "hash": "7e468da5e472b7ff8e782822ad83f795fbd78aac7aa96eaa803620c73a7b7599",
+  "key": "substrate.config.md@0.0.1",
+}
+`;

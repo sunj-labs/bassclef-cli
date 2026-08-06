@@ -64,10 +64,12 @@ describe('bassclef CLI shell (WU-1)', () => {
     expect(r.stdout).toContain('--dry-run');
   });
 
-  it('stubs `sync` with a later-work message + non-zero exit', () => {
-    const r = runCli(['sync']);
-    expect(r.status).not.toBe(0);
-    expect(r.stderr).toMatch(/later|not yet/i);
+  it('prints sync-specific usage on `sync --help`', () => {
+    const r = runCli(['sync', '--help']);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('bassclef sync');
+    expect(r.stdout).toContain('--force');
+    expect(r.stdout).toContain('--replace-edits');
   });
 
   it('rejects an unknown command with usage + non-zero exit', () => {

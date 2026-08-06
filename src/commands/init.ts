@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
 import { writeSafely, mkdirSafely, WriteError } from '../lib/write-safely.js';
+import { hashContent } from '../lib/hash.js';
 import { version as pkgVersion } from '../index.js';
 import {
   settingsJsonTemplate,
@@ -23,11 +24,9 @@ import {
   substrateConfigMdTemplate,
   SUBSTRATE_CONFIG_TEMPLATE_VERSION,
 } from './init-templates/substrate-config-md.js';
-import {
-  manifestTemplate,
-  MANIFEST_TEMPLATE_VERSION,
-  type ManifestEntry,
-} from './init-templates/manifest-json.js';
+import { manifestTemplate } from './init-templates/manifest-json.js';
+import type { ManifestEntry } from '../lib/manifest-types.js';
+import { MANIFEST_RELATIVE_PATH } from '../lib/manifest-io.js';
 
 interface FilePlan {
   label: string;
@@ -83,6 +82,20 @@ export function runInit(argv: readonly string[]): number {
       return 1;
     }
     throw e;
+  }
+
+  // Manifest-exists refusal per ADR-003. Init refuses to re-baseline
+  // a project that already has a manifest unless --force. Sync is the
+  // path for updates; init is the path for greenfield bootstrap.
+  if (!args.force && !args.dryRun) {
+    const manifestPath = join(targetDir, MANIFEST_RELATIVE_PATH);
+    if (existsSync(manifestPath)) {
+      process.stderr.write(
+        'bassclef init: already initialized (manifest exists). ' +
+          'Run `bassclef sync` to apply updates, or `bassclef init --force` to re-baseline.\n'
+      );
+      return 1;
+    }
   }
 
   // Build the plan.
@@ -250,12 +263,24 @@ export function shouldRefuseRoot(currentUid: number | undefined, allowRoot: bool
 }
 
 function writeManifest(targetDir: string, results: readonly FileResult[]): void {
-  const entries: ManifestEntry[] = results.map((r) => ({
-    path: r.plan.relativePath,
-    template: r.plan.templateName,
-    template_version: r.plan.templateVersion,
-    outcome: r.outcome,
-  }));
+  const entries: ManifestEntry[] = results.map((r) => {
+    const entry: ManifestEntry = {
+      path: r.plan.relativePath,
+      template: r.plan.templateName,
+      template_version: r.plan.templateVersion,
+      outcome: r.outcome,
+    };
+    // Hash the content we actually wrote so sync can detect adopter
+    // edits later. Only include a hash when we actually created the
+    // file — an unchanged file may have been adopter-edited already,
+    // and we do not want to falsely lock in the current disk content
+    // as our baseline.
+    if (r.outcome === 'created') {
+      entry.content_hash_sha256 = hashContent(r.plan.content);
+      entry.updated_at = new Date().toISOString();
+    }
+    return entry;
+  });
   const manifestDir = join(targetDir, '.bassclef');
   const manifestPath = join(manifestDir, 'init.manifest.json');
   const content = manifestTemplate({

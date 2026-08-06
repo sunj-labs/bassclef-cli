@@ -39,12 +39,13 @@ Read `docs/whereami.md` at session-start for the live snapshot.
 
 - `bassclef --version` / `--help` — prints info; exits 0.
 - `bassclef init [--force] [--dry-run] [--dir <path>] [--allow-root] [--allow-any-dir] [--verbose]` — writes `.claude/settings.json` + `substrate.config.md` + `.bassclef/init.manifest.json` into a project directory. Safety contract: `docs/adrs/ADR-002-bassclef-init-safety-contract.md`.
-- `bassclef sync` — stub; sync workunit lands the real implementation.
+- `bassclef sync [--force] [--replace-edits] [--dry-run] [--diff] [--dir <path>] [--allow-root] [--allow-any-dir] [--verbose]` — reads the init manifest, detects change per file (four cases: Current / NeedsUpdate / Edited / Deleted), applies updates under the right flag combination. Two independent force flags: `--force` for version updates, `--replace-edits` for adopter-edit override. Contract: `docs/adrs/ADR-003-bassclef-sync-safety-contract.md`.
 
 ## Architecture decisions
 
 - `docs/adrs/ADR-001-npm-package-build-toolchain.md` — Vite (library mode) + TypeScript + Vitest pinned.
 - `docs/adrs/ADR-002-bassclef-init-safety-contract.md` — init command's fail-safe defaults, atomic writes, path scoping, escape-hatch matrix. Semver-locked from 0.0.2.
+- `docs/adrs/ADR-003-bassclef-sync-safety-contract.md` — sync command's two-force-flag design, content-hash detection, SHA-256 normalization steps, single-writer assumption. Semver-locked from 0.0.2.
 
 ## Primary luminary triad (per iteration bet)
 
