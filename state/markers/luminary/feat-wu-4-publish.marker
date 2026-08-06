@@ -1,0 +1,6 @@
+# Luminary consult for WU-4 publish pipeline
+# Full consult in docs/decompositions/wu-4-publish.md L41-92.
+
+lead: saltzer-schroeder
+supporting: [alan-cooper, john-ousterhout, vaughn-vernon]
+rotation_reason: publish is the ONLY write path to the npm registry.

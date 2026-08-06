@@ -1,0 +1,11 @@
+# Pre-mortem light for WU-4 publish pipeline
+#
+# Full pre-mortem in docs/decompositions/wu-4-publish.md L96-175:
+#   - 3 luminary lenses (Saltzer-Schroeder, Cooper, Ousterhout)
+#   - 3 risks per lens (9 total)
+# Each risk names owner + mitigation.
+
+lenses: [saltzer-schroeder, alan-cooper, john-ousterhout]
+risks: 9
+strongest_risk: workflow filename renamed silently breaks publishing
+mitigation: workflow-path Tier 0 test + ADR-004 semver-lock
