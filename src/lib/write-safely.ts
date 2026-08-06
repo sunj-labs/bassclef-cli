@@ -41,6 +41,13 @@ export class WriteError extends Error {
 
 export interface WriteOptions {
   force?: boolean;
+  /**
+   * File mode to apply after creation. When undefined, uses 0o644.
+   * Sync reads the current file's mode via lstat before overwriting so
+   * adopter-chosen permissions (e.g. 0600 on shared machines) survive
+   * a sync. ADR-003 pins this behavior.
+   */
+  mode?: number;
 }
 
 const FLAGS_CREATE = constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW | constants.O_WRONLY;
@@ -100,8 +107,9 @@ export function writeSafely(path: string, content: string, opts: WriteOptions = 
   }
 
   let fd: number;
+  const mode = opts.mode ?? 0o644;
   try {
-    fd = openSync(path, FLAGS_CREATE, 0o644);
+    fd = openSync(path, FLAGS_CREATE, mode);
   } catch (e) {
     const err = e as NodeJS.ErrnoException;
     if (err.code === 'EEXIST') {

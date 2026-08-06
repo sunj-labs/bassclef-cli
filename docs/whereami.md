@@ -16,7 +16,7 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 shipped (PR #3 merged); WU-2 (init command) on feat/wu-2-init awaiting PR
+iteration_phase: WU-1 + WU-2 merged; WU-3 (sync command) on feat/wu-3-sync awaiting PR
 previous_bet: —
 next_bet: —
 
@@ -24,10 +24,11 @@ next_bet: —
 
 - PR #1 — chore/bassclef-bootstrap MERGED (substrate config layer)
 - PR #3 — feat/wu-1-scaffold MERGED (scaffold shell + package.json + LICENSE + WU-1 tests)
+- PR #4 — feat/wu-2-init MERGED (bassclef init command with ADR-002 safety contract)
 
 ## In flight
 
-- feat/wu-2-init (bassclef init command with safety contract) — 48 tests green, ready to open PR
+- feat/wu-3-sync (bassclef sync command with ADR-003 safety contract) — 74 tests green, ready to open PR
 
 ## Active agents
 
@@ -58,8 +59,8 @@ next_bet: —
 ### Construction — IN PROGRESS
 - [x] TypeScript + Vite scaffold — merged (PR #3)
 - [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — merged (PR #3)
-- [x] Init command with safety contract (ADR-002) — on feat/wu-2-init awaiting PR
-- [ ] Sync command — reads .bassclef/init.manifest.json to know what to upgrade
+- [x] Init command with safety contract (ADR-002) — merged (PR #4)
+- [x] Sync command with safety contract (ADR-003) — on feat/wu-3-sync awaiting PR
 - [ ] npm publish workflow — publish workunit
 
 ### Transition — PENDING

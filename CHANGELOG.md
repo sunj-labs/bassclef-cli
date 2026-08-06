@@ -11,13 +11,22 @@ bet 2026-08-06b.
 
 ### Added
 - `bassclef init` — writes `.claude/settings.json` + `substrate.config.md` + `.bassclef/init.manifest.json` into a project directory. Safety contract in ADR-002 (fail-safe overwrite, atomic writes, path scoping, symlink refusal unconditional).
-- Six flags: `--force`, `--dry-run`, `--dir <path>`, `--allow-root`, `--allow-any-dir`, `--verbose`.
-- Init manifest carries template versions and per-file outcomes so the sync command can upgrade cleanly.
+- Init flags: `--force`, `--dry-run`, `--dir <path>`, `--allow-root`, `--allow-any-dir`, `--verbose`.
+- Init manifest carries template versions + content hashes + per-file outcomes so sync can upgrade cleanly.
 - ADR-002 — bassclef init safety contract. Semver-locks defaults, files, escape-hatch matrix, exit codes.
+- `bassclef sync` — reads the init manifest, detects change per file (four cases: Current / NeedsUpdate / Edited / Deleted), applies updates under `--force` (versions) + `--replace-edits` (adopter edits). Content-hash detection catches adopter edits via SHA-256 with BOM strip + CRLF normalization.
+- Sync flags: `--force`, `--replace-edits`, `--dry-run`, `--diff`, `--dir`, `--allow-root`, `--allow-any-dir`, `--verbose`.
+- Exit code 4 added for "manifest schema is newer than this package understands."
+- ADR-003 — bassclef sync safety contract. Semver-locks two-force-flag design, content-hash normalization steps, single-writer assumption, exit codes.
+
+### Changed
+- Init refuses to re-baseline an existing manifest without `--force`. `bassclef sync` is the path for updates; init is greenfield-only.
+- Init manifest schema bumped to 0.0.2 (adds `content_hash_sha256`, `updated_at`; renamed `template_version` → `manifest_schema_version` at the `$bassclef` block).
 
 ### Notes
-- Settings template ships MINIMAL — no `../bassclef` sibling assumption. Sync will populate substrate references when it lands.
-- `bassclef sync` remains a stub. Real implementation lands in the sync workunit.
+- Settings template ships MINIMAL — no `../bassclef` sibling assumption. Sync populates references when templates ship real content.
+- Content-hash algorithm is semver-locked from 0.0.2. Any change to the normalization steps is a MAJOR bump.
+- No file lock — two concurrent bassclef processes on the same target dir race. Single-writer discipline is the operator's responsibility.
 
 ## [0.0.1] — 2026-08-06
 

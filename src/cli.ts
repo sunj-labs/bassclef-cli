@@ -14,17 +14,18 @@
 
 import { version } from './index.js';
 import { runInit, usage as initUsage } from './commands/init.js';
-import { runSync } from './commands/sync.js';
+import { runSync, usage as syncUsage } from './commands/sync.js';
 
 const USAGE = `bassclef — install and upgrade bassclef in your project
 
 Usage:
   bassclef init [options] Write bassclef config into a project directory
-  bassclef sync           Upgrade bassclef config in place (later work)
+  bassclef sync [options] Update bassclef-managed files in place
   bassclef --version      Print the running version
   bassclef --help         Print this message
 
 Run \`bassclef init --help\` for init options + the safety defaults.
+Run \`bassclef sync --help\` for sync options + the update semantics.
 
 Version: ${version}
 Docs:    https://github.com/sunj-labs/bassclef-cli
@@ -54,7 +55,12 @@ function main(argv: readonly string[]): number {
   }
 
   if (first === 'sync') {
-    return runSync();
+    const rest = argv.slice(1);
+    if (rest.includes('--help') || rest.includes('-h')) {
+      process.stdout.write(syncUsage());
+      return 0;
+    }
+    return runSync(rest);
   }
 
   process.stderr.write(

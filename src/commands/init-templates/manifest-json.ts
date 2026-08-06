@@ -1,41 +1,9 @@
-// Init manifest — .bassclef/init.manifest.json.
+// Rendering function for .bassclef/init.manifest.json.
 //
-// Written by `bassclef init` on every successful (or partial) run.
-// The manifest records:
-//   - which files init wrote or skipped
-//   - the template version each file used
-//   - the package version of `@thebassclef/core` at run time
-//   - the ISO timestamp of the run
-//
-// The sync command (later work) reads the manifest to know exactly
-// which templates need upgrading — no content hash guessing, no full
-// history walk. If the manifest is missing (older init, or user
-// deleted it), sync falls back to a safe "read the marker keys inside
-// each written file" flow.
-//
-// A future `bassclef uninit` command reads the manifest to reverse
-// the writes safely.
+// Types + schema-version live in src/lib/manifest-types.ts so this
+// module has one job: turn a Manifest into a JSON string.
 
-export const MANIFEST_TEMPLATE_VERSION = '0.0.1' as const;
-
-export interface ManifestEntry {
-  path: string;
-  template: string;
-  template_version: string;
-  outcome: 'created' | 'unchanged' | 'refused' | 'error';
-}
-
-export interface Manifest {
-  $bassclef: {
-    template: 'init.manifest.json';
-    template_version: typeof MANIFEST_TEMPLATE_VERSION;
-    generated_by: '@thebassclef/core';
-    generated_by_version: string;
-  };
-  created_at: string;
-  target_dir: string;
-  files: ManifestEntry[];
-}
+import { Manifest, MANIFEST_SCHEMA_VERSION, type ManifestEntry } from '../../lib/manifest-types.js';
 
 export function manifestTemplate(input: {
   pkgVersion: string;
@@ -45,7 +13,7 @@ export function manifestTemplate(input: {
   const value: Manifest = {
     $bassclef: {
       template: 'init.manifest.json',
-      template_version: MANIFEST_TEMPLATE_VERSION,
+      manifest_schema_version: MANIFEST_SCHEMA_VERSION,
       generated_by: '@thebassclef/core',
       generated_by_version: input.pkgVersion,
     },

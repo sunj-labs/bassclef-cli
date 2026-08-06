@@ -82,11 +82,19 @@ describe('bassclef init — happy path', () => {
     expect(r.stdout + r.stderr).toContain('created');
   });
 
-  it('re-run reports already initialized + exits 0', () => {
+  it('refuses re-run when the manifest exists (points at sync)', () => {
+    // Per ADR-003 P7: init refuses to re-baseline a project that already
+    // has a manifest. Sync is the path for updates.
     runCli([], { cwd: workDir });
     const r = runCli([], { cwd: workDir });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toMatch(/already initialized|bassclef sync/i);
+  });
+
+  it('re-baselines the manifest with --force', () => {
+    runCli([], { cwd: workDir });
+    const r = runCli(['--force'], { cwd: workDir });
     expect(r.status).toBe(0);
-    expect(r.stdout + r.stderr).toMatch(/already|unchanged/i);
   });
 });
 
