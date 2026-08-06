@@ -139,6 +139,122 @@ Sam wants a summary. `--diff` opts in to full detail.
    - Owner: template revisions before release
    - Mitigation: not addressed by sync. This is a CI concern (publish workunit) — pre-publish check that generated files parse correctly. Note in ADR-003 as out of scope for sync.
 
+## State diagram — the four-case classifier
+
+`classify` in `src/commands/sync.ts` reads the manifest entry + the
+current file + the current template and returns one of six cases.
+Per-flag transitions drive the action.
+
+```mermaid
+stateDiagram-v2
+    [*] --> CheckFile
+    CheckFile --> Deleted: file missing
+    CheckFile --> ReadFile: file present
+    ReadFile --> NoMarker: content lacks bassclef marker
+    ReadFile --> UnknownHash: manifest has no content_hash
+    ReadFile --> HashCompare: manifest has content_hash
+
+    HashCompare --> Current: hashes match AND template version matches
+    HashCompare --> NeedsUpdate: hash matches, template version differs
+    HashCompare --> Edited: hash differs
+
+    Current --> [*]: action=no-op
+    Deleted --> RestoreOrRefuse
+    NeedsUpdate --> ForceOrRefuse
+    Edited --> ReplaceEditsOrRefuse
+    NoMarker --> [*]: action=refuse (file not ours)
+    UnknownHash --> [*]: action=refuse (name init --force to re-baseline)
+
+    RestoreOrRefuse --> WriteFile: --force AND --replace-edits
+    RestoreOrRefuse --> [*]: action=refuse (need both flags)
+
+    ForceOrRefuse --> WriteFile: --force
+    ForceOrRefuse --> [*]: action=refuse (need --force)
+
+    ReplaceEditsOrRefuse --> WriteFile: --replace-edits
+    ReplaceEditsOrRefuse --> [*]: action=refuse (need --replace-edits)
+
+    WriteFile --> UpdateManifest: writeSafely succeeded
+    WriteFile --> [*]: action=error (WriteError)
+    UpdateManifest --> [*]: action=updated
+```
+
+Edge cases the diagram covers:
+
+- Ambiguity: hash mismatch when the true cause was a crashed prior
+  sync (not an adopter edit). The `Edited` refusal message names both
+  causes rather than asserting one — per ADR-003.
+- Symlink refusal at `WriteFile` — inherited from `writeSafely`; neither
+  `--force` nor `--replace-edits` overrides.
+- `Deleted` needs BOTH flags (separation of privilege) — a stronger
+  gate than `NeedsUpdate` OR `Edited` alone.
+- `NoMarker`: adopter replaced the file wholesale (no `$bassclef`
+  marker anywhere in the content); sync refuses even with both flags.
+
+## Sequence diagram — bassclef sync loop
+
+```mermaid
+sequenceDiagram
+    participant User as Operator (Sam)
+    participant CLI as bassclef CLI
+    participant Sync as runSync
+    participant Argv as parseSyncArgs
+    participant Root as shouldRefuseRoot
+    participant Dir as resolveTargetDir
+    participant Read as readManifest<br/>(src/lib/manifest-io.ts)
+    participant Classify as classify(entry)
+    participant Hash as hashContent<br/>(src/lib/hash.ts)
+    participant Write as writeSafely<br/>(force + mode)
+    participant WriteMan as writeManifest
+    participant FS as Filesystem
+
+    User->>CLI: bassclef sync [--force] [--replace-edits] [--dry-run]
+    CLI->>Sync: runSync(argv)
+    Sync->>Argv: parseSyncArgs
+    Argv-->>Sync: SyncArgs OR throw
+    Sync->>Root: shouldRefuseRoot(uid, allowRoot)
+    Root-->>Sync: boolean
+    Sync->>Dir: resolveTargetDir
+    Dir-->>Sync: canonical path
+    Sync->>Read: readManifest(targetDir)
+    Read->>FS: readFileSync .bassclef/init.manifest.json
+    FS-->>Read: JSON string OR ENOENT
+    Read-->>Sync: Manifest OR ManifestReadError
+    alt Missing / Malformed / SchemaTooNew
+        Sync-->>User: stderr + exit 1 or 4
+    else parsed
+        loop per ManifestEntry
+            Sync->>Classify: classify(entry, targetDir, args)
+            Classify->>FS: existsSync(fullPath)
+            FS-->>Classify: bool
+            Classify->>FS: readFileSync(fullPath)
+            FS-->>Classify: current bytes
+            Classify->>Hash: hashContent(current)
+            Hash-->>Classify: sha256 hex
+            Classify-->>Sync: FileDecision {case, action, refusalReason}
+        end
+        alt --dry-run
+            Sync-->>User: per-file plan + exit 0
+        else real run
+            loop per updatable FileDecision
+                Sync->>FS: lstatSync for mode preservation
+                Sync->>Write: writeSafely(path, newContent, {force, mode})
+                Write->>FS: unlink + atomic open + write
+                Sync->>WriteMan: writeManifest(targetDir, manifest)
+                WriteMan->>Write: writeSafely(manifest.json, force)
+                Write->>FS: atomic write
+            end
+            Sync-->>User: summary + exit 0/1/2
+        end
+    end
+```
+
+Traceability:
+
+- `classify` at `src/commands/sync.ts` L131-263 implements the state machine above.
+- Per-file manifest commit (`writeManifest` inside the loop) is documented in ADR-003 §Per-file write sequence and shown as the transition into `UpdateManifest`.
+- Every actor above traces to a specific export in `src/lib/` or `src/commands/`.
+
 ## Boundary objects
 
 | Boundary | Shape |

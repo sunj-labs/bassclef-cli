@@ -147,6 +147,100 @@ Per bet L147. Fail vividly; enumerate reasons; name owner + mitigation.
      read for templates. No asset copy step needed. Confirms ADR-001
      invariant that only `dist/` + `README.md` + `LICENSE` ship.
 
+## State diagram — per-file outcome
+
+Each file listed in the plan runs the same state machine. `writeSafely`
+(`src/lib/write-safely.ts`) is the single audited mutation point;
+every transition below fires there.
+
+```mermaid
+stateDiagram-v2
+    [*] --> CheckExistence
+    CheckExistence --> CreateFile: file does not exist
+    CheckExistence --> AlreadyExists: file exists, no --force
+    CheckExistence --> Overwriting: file exists, --force set
+    CheckExistence --> SymlinkAtTarget: lstat says symlink
+    CheckExistence --> ParentMissingOrLocked: parent absent OR readonly
+
+    SymlinkAtTarget --> RefusedSymlink: unconditional, --force ignored
+    ParentMissingOrLocked --> RefusedParent
+
+    Overwriting --> UnlinkOld
+    UnlinkOld --> CreateFile
+
+    CreateFile --> WriteOK: openSync O_CREAT O_EXCL O_NOFOLLOW succeeded
+    CreateFile --> RefusedRaceSymlink: ELOOP at open time
+    CreateFile --> RefusedRaceExists: EEXIST at open time
+
+    WriteOK --> [*]: outcome=created
+    AlreadyExists --> [*]: outcome=unchanged
+    RefusedSymlink --> [*]: outcome=refused
+    RefusedParent --> [*]: outcome=error
+    RefusedRaceSymlink --> [*]: outcome=refused
+    RefusedRaceExists --> [*]: outcome=error
+```
+
+Edge cases the diagram covers:
+
+- Symlink at target with `--force` → still `refused` (unconditional per ADR-002)
+- TOCTOU race — attacker plants a symlink between the lstat pre-check and the atomic open. `O_NOFOLLOW` at open time closes the gap and produces `RefusedRaceSymlink`.
+- Parent directory missing or read-only → `error`, not `refused` (write path failed, not policy)
+- `--force` alone still refuses a symlink; only unlinks a regular file
+
+## Sequence diagram — bassclef init dispatch
+
+```mermaid
+sequenceDiagram
+    participant User as Operator (Sam)
+    participant CLI as bassclef CLI<br/>(src/cli.ts)
+    participant Init as runInit<br/>(src/commands/init.ts)
+    participant Argv as parseInitArgs<br/>(init-argv.ts)
+    participant Root as shouldRefuseRoot
+    participant Dir as resolveTargetDir<br/>(src/lib/resolve-target-dir.ts)
+    participant Mkdir as mkdirSafely
+    participant Write as writeSafely<br/>(src/lib/write-safely.ts)
+    participant Manifest as writeManifest<br/>(local helper)
+    participant FS as Filesystem
+
+    User->>CLI: bassclef init [--flags]
+    CLI->>Init: runInit(argv slice)
+    Init->>Argv: parseInitArgs(argv)
+    Argv-->>Init: InitArgs OR throw ArgvError
+    Init->>Root: shouldRefuseRoot(uid, allowRoot)
+    Root-->>Init: boolean
+    alt refuse
+        Init-->>User: stderr + exit 1
+    else proceed
+        Init->>Dir: resolveTargetDir(cwd, cliArg, allowAnyDir)
+        Dir-->>Init: canonical path OR throw ResolveError
+        Init->>Init: check .bassclef/init.manifest.json exists
+        alt manifest exists, no --force
+            Init-->>User: "already initialized" + exit 1
+        else clean or --force
+            loop per FilePlan
+                Init->>Mkdir: mkdirSafely(parent)
+                Mkdir->>FS: lstat + mkdir if absent
+                Mkdir-->>Init: ok OR WriteError
+                Init->>Write: writeSafely(path, content, opts)
+                Write->>FS: lstat + open O_CREAT O_EXCL O_NOFOLLOW
+                FS-->>Write: fd OR EEXIST/ELOOP
+                Write->>FS: write + close
+                Write-->>Init: void OR WriteError
+                Init->>Init: record FileResult
+            end
+            Init->>Manifest: writeManifest(targetDir, results)
+            Manifest->>Write: writeSafely(manifest.json, force=true)
+            Write->>FS: unlink old + atomic open + write
+            Init-->>User: summary + exit 0 (or 2 on error)
+        end
+    end
+```
+
+Traceability:
+
+- Every actor above appears in `src/commands/init.ts` and its imports.
+- ADR-002 §Complete-mediation names `writeSafely` + `mkdirSafely` as the ONLY filesystem writers in this chain — the diagram makes that concrete.
+
 ## Boundary objects — what adopters see
 
 | Boundary | Shape |
