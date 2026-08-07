@@ -16,7 +16,11 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 + WU-2 + WU-3 merged; WU-4 (publish pipeline) on feat/wu-4-publish awaiting PR
+iteration_phase: WU-1 + WU-2 + WU-3 merged; WU-4 (publish pipeline) shipped as PR #7 awaiting review
+
+## Operator recap
+
+Empty repo to shipped npm-publish pipeline in one run. Four workunits merged (bootstrap + scaffold + init + sync) plus a documentation PR that backfilled state and sequence diagrams. WU-4 with trusted publisher + ADR-004 is open as PR #7. Next: review + merge PR #7, flip ADR statuses to accepted, complete one-time publish setup, tag 0.0.2.
 previous_bet: —
 next_bet: —
 
@@ -63,7 +67,7 @@ next_bet: —
 - [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — merged (PR #3)
 - [x] Init command with safety contract (ADR-002) — merged (PR #4)
 - [x] Sync command with safety contract (ADR-003) — merged (PR #5)
-- [x] npm publish workflow with safety contract (ADR-004) — on feat/wu-4-publish awaiting PR
+- [x] npm publish workflow with safety contract (ADR-004) — shipped as PR #7 awaiting review
 
 ### Transition — PENDING
 - [ ] Production deploy gate configured (npm trusted publishing)
@@ -77,8 +81,8 @@ none yet — file when first risk materializes
 
 ## Last updated
 
-2026-08-06T02:55:00+0000 — session-end (bootstrap + WU-1 shipped as PRs #1 and #2)
-session: docs/session-logs/2026-08-06-onboard-plus-wu-1.md
+2026-08-07T00:07:00+0000 — session-end (bootstrap + 4 workunits + diagram backfill; PRs #1, #3, #4, #5, #6 merged; PR #7 awaiting review)
+session: docs/session-logs/2026-08-07-session-close.md
 
 ## Configuration
 
