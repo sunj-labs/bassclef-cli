@@ -9,7 +9,15 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
-### Added
+### Added — publish pipeline
+- `.github/workflows/publish.yml` — one-job GitHub Actions workflow at a semver-locked path. Triggers on `release: [published]` and `workflow_dispatch`. Publishes to npm via trusted publisher with `--provenance --ignore-scripts`.
+- `scripts/validate-tag.mjs` — refuses tags that do not string-equal `package.json` version, tags outside the semver format, and tags not reachable from `origin/main`. Also picks the dist-tag (`latest` for stable, `next` for pre-release).
+- `scripts/andon-scan.mjs` — scans every file `npm pack` would ship for operator-private terms (absolute home paths, `docs/operator-private/` references, emails outside LICENSE + package.json author). Per-file `# andon-allow: <regex>` header supported. Exit 2 on any hit.
+- `scripts/tier-filter.mjs` — refuses any shipped Markdown file whose YAML frontmatter has `tier: upstream`. Handles LF, CRLF, UTF-8 BOM, leading blank lines, and quoted values (single + double). Exit 3 on any hit.
+- `docs/publish-setup.md` — one-time operator playbook covering npm 2FA, package name reservation, trusted publisher config, GitHub Environment, per-release flow, and a post-publish audit habit.
+- ADR-004 — publish pipeline safety contract. Semver-locks workflow path, triggers, permissions, ordered checks, dist-tag rule, exit codes, tag-format regex, refusal message shape, and tier-filter YAML normalization.
+
+### Added — sync command
 - `bassclef init` — writes `.claude/settings.json` + `substrate.config.md` + `.bassclef/init.manifest.json` into a project directory. Safety contract in ADR-002 (fail-safe overwrite, atomic writes, path scoping, symlink refusal unconditional).
 - Init flags: `--force`, `--dry-run`, `--dir <path>`, `--allow-root`, `--allow-any-dir`, `--verbose`.
 - Init manifest carries template versions + content hashes + per-file outcomes so sync can upgrade cleanly.

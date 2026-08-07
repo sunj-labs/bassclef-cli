@@ -1,0 +1,15 @@
+# Lead-lens sign-off for WU-4
+#
+# Saltzer-Schroeder principles applied and confirmed:
+#   1. Economy of mechanism — workflow YAML ~99 lines; each script <=150
+#   2. Fail-safe defaults — every check REFUSES on failure
+#   3. Complete mediation — one workflow file; trusted publisher only
+#   4. Open design — workflow is public; no secrets
+#   5. Separation of privilege — single-reviewer accepted risk per ADR-004
+#   6. Least privilege — id-token:write + contents:read ONLY
+#   7. Least common mechanism — each scan script is single-purpose
+#   8. Psychological acceptability — refusal messages name fix
+
+lead: saltzer-schroeder
+sign_off: 2026-08-06T20:44:00Z
+adr: ADR-004

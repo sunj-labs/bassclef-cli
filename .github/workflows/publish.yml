@@ -1,0 +1,108 @@
+# Publish pipeline for @thebassclef/core.
+#
+# Contract: docs/adrs/ADR-004-publish-pipeline-safety-contract.md.
+#
+# WORKFLOW PATH IS SEMVER-LOCKED. Renaming this file requires:
+#   1. An ADR amendment (or a superseding ADR).
+#   2. An npm trusted-publisher config change at
+#      npmjs.com/settings/<user>/packages/@thebassclef/core.
+# A rename PR without the npm-side change breaks publishing silently.
+
+name: publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g., v0.0.2). Must exist as a git tag."
+        required: true
+        type: string
+
+permissions:
+  # id-token: required for npm provenance attestation via trusted publisher.
+  # contents: required for actions/checkout.
+  # No packages: write. No contents: write. No pull-requests: write.
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    environment: npm-publish
+
+    steps:
+      - name: Resolve tag
+        id: resolve-tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "prerelease=${{ github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout at tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve-tag.outputs.tag }}
+          # Fetch full history so the ancestor check in validate-tag works.
+          fetch-depth: 0
+
+      - name: Setup Node 20 with npm provenance
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install with --ignore-scripts
+        # ADR-004 §Ordered steps 3 — blocks arbitrary script execution
+        # from any transitive dependency at install time.
+        run: npm ci --ignore-scripts
+
+      - name: Validate tag matches package.json + reachable from main
+        run: node scripts/validate-tag.mjs "${{ steps.resolve-tag.outputs.tag }}"
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Pack (dry run) to get the exact shipped file list
+        run: npm pack --dry-run --json > /tmp/pack.json
+
+      - name: Andon scan for operator-private terms
+        run: node scripts/andon-scan.mjs /tmp/pack.json
+
+      - name: Tier filter refuses tier=upstream frontmatter
+        run: node scripts/tier-filter.mjs /tmp/pack.json
+
+      - name: Publish to npm
+        # ADR-004 §Ordered steps 12:
+        #   --provenance    generates the attestation from the OIDC token
+        #   --ignore-scripts  belt-and-suspenders on top of ADR-001's
+        #                     no-prepublishOnly + no-postinstall discipline
+        # Trusted publisher config on npmjs.com replaces NPM_TOKEN entirely.
+        run: |
+          if [ "${{ steps.resolve-tag.outputs.prerelease }}" = "true" ]; then
+            npm publish --provenance --ignore-scripts --tag next
+          else
+            npm publish --provenance --ignore-scripts --tag latest
+          fi
+
+      - name: Post-publish confirmation
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          {
+            echo "## Published"
+            echo ""
+            echo "- Package: https://www.npmjs.com/package/@thebassclef/core/v/$VERSION"
+            echo "- Provenance: https://www.npmjs.com/package/@thebassclef/core/v/$VERSION#provenance"
+          } >> "$GITHUB_STEP_SUMMARY"
