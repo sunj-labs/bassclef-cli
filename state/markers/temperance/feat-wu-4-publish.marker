@@ -1,0 +1,6 @@
+# Temperance marker — feat/wu-4-publish (about to branch to feat/wu-5-semver)
+- date: 2026-08-08
+- branch: feat/wu-4-publish (base for next branch)
+- scope-decision: ship WU-5 (versioning + changelog doc) + setup-docs + WU-9 (tag 0.0.2). Skip WU-6 (upstream), WU-7 (Adam PRs), WU-8 (needs live 0.0.2).
+- drift-trigger: WU-5 crosses 180 turns, or scope touches auth/schema/workflow file at pinned path
+- session-shape: /longrun option b — 180-320 turn estimate
