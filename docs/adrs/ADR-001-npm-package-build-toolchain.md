@@ -2,8 +2,10 @@
 tier: standard
 id: ADR-001
 title: Pin build toolchain for @thebassclef/core — Vite (library mode) + TypeScript + Vitest
-status: proposed
+status: accepted
 date: 2026-08-06
+accepted: 2026-08-08
+accepted_via: PR #3 merged — WU-1 scaffold shipped the decisions this ADR pins
 supersedes: null
 superseded_by: null
 ---

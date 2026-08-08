@@ -2,8 +2,10 @@
 tier: standard
 id: ADR-004
 title: Pin the safety contract for the publish pipeline — trusted publisher + tag validator + andon scan + tier filter + fixed workflow path
-status: proposed
+status: accepted
 date: 2026-08-06
+accepted: 2026-08-08
+accepted_via: PR #7 merged — WU-4 publish pipeline shipped the safety contract this ADR pins
 supersedes: null
 superseded_by: null
 ---

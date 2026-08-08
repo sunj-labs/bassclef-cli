@@ -2,8 +2,10 @@
 tier: standard
 id: ADR-003
 title: Pin the safety contract for `bassclef sync` — two independent force flags + content-hash detection + per-file manifest commits
-status: proposed
+status: accepted
 date: 2026-08-06
+accepted: 2026-08-08
+accepted_via: PR #5 merged — WU-3 sync command shipped the safety contract this ADR pins
 supersedes: null
 superseded_by: null
 ---

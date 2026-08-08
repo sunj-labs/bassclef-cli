@@ -1,0 +1,10 @@
+# Temperance marker — feat/wu-5-semver
+- date: 2026-08-08
+- branch: feat/wu-5-semver
+- session-shape: /longrun option b (WU-5 + setup-docs + WU-9) — 180-320 turn estimate
+- scope-decision — WU-5 THIS BRANCH: ship standards/npm-versioning-and-changelog.md + amended CHANGELOG.md template + version bump script (scripts/bump-version.mjs) + Tier 0 tests. Closes bassclef-upstream#3 (packaging + versioning gap, 3+ weeks open) + bassclef-upstream#1110 (bump policy).
+- scope-decision — LATER BRANCHES: setup-docs (docs/publish-setup.md fill-in) → new branch. WU-9 (tag 0.0.2) → new branch after setup-docs merges.
+- drift-trigger: WU-5 crosses 180 turns; scope pulls in Adam's PRs (WU-7 stays deferred per bet L128); scope touches auth/schema/pipeline workflow file
+- prior-work-in-scope: WU-4 (publish pipeline) landed PR #7; ADR-004 pinned; version bump script script must respect the "no prepublishOnly" invariant (ADR-001) + must set package.json version that scripts/validate-tag.mjs will string-equal at publish time
+- primary-luminary this WU: john-ousterhout (deep module — bump script hides bump policy from operator; interface is `npm run bump [major|minor|patch]`)
+- supporting-luminaries: saltzer-schroeder (bump script writes to package.json — audited write), alan-cooper (changelog format Sam can scan)
