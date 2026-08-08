@@ -9,6 +9,16 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added — semver + changelog methodology (WU-5)
+- `standards/npm-versioning-and-changelog.md` — semver rules for 0.x and 1.0+ phases, changelog format per Keep a Changelog 1.1.0, deprecation grace window rules per adopter cohort size.
+- `scripts/bump-version.mjs` — one command per bump size (`npm run bump patch|minor|major`). Rewrites `CHANGELOG.md` — renames `[Unreleased]` to `[X.Y.Z] - YYYY-MM-DD`, inserts fresh empty `[Unreleased]` block, updates compare links. Atomic writes for both `package.json` and `CHANGELOG.md`. Refuses on dirty working tree (except package.json + CHANGELOG.md), missing CHANGELOG, empty Unreleased block, invalid bump arg.
+- `--allow-dirty` flag to bypass dirty-tree check. `--date YYYY-MM-DD` flag to override today's UTC date.
+- Pre-release strip per semver §11 — any bump from `0.1.0-rc.1` lands on `0.1.0`.
+- 27 Tier 0 tests covering parseArgs, computeNewVersion, renameUnreleasedBlock, refuseIfDirty.
+- `docs/use-cases/UC-script-bump.md` — brief use case per Cockburn tiering.
+- `docs/decompositions/wu-5-methodology.md` — WU-5 decomposition with pre-mortem light + test list.
+- `npm run bump` script wired in `package.json`.
+
 ### Added — publish pipeline
 - `.github/workflows/publish.yml` — one-job GitHub Actions workflow at a semver-locked path. Triggers on `release: [published]` and `workflow_dispatch`. Publishes to npm via trusted publisher with `--provenance --ignore-scripts`.
 - `scripts/validate-tag.mjs` — refuses tags that do not string-equal `package.json` version, tags outside the semver format, and tags not reachable from `origin/main`. Also picks the dist-tag (`latest` for stable, `next` for pre-release).
