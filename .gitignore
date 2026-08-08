@@ -201,6 +201,9 @@ state/markers/verify/
 state/markers/hook-heartbeat/
 state/markers/turn-counter/
 state/markers/diagnose/
+state/markers/session-timing/
+state/markers/turn-grade/
+state/markers/turn-prose-flags/
 
 # Bassclef-sync managed symlinks — subdirectories the top block missed
 # (session-reflection.d gets populated by user-scope sync too)

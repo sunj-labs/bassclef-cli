@@ -1,0 +1,10 @@
+# Temperance marker — feat/wu-5-methodology
+- date: 2026-08-08
+- branch: feat/wu-5-methodology (parallel to feat/wu-5-semver PR #8 backfill)
+- session-shape: /longrun option b, checkpoint 2 — WU-5 code work
+- scope-decision THIS BRANCH: ship standards/npm-versioning-and-changelog.md + scripts/bump-version.mjs + amended CHANGELOG.md + Tier 0 tests. Closes bassclef-upstream#3 (packaging + versioning gap) + bassclef-upstream#1110 (bump policy).
+- scope-decision LATER: setup-docs (docs/publish-setup.md fill-in) + WU-9 (tag 0.0.2) — separate branches.
+- drift-trigger: WU-5 crosses 120 turns; scope touches auth/schema/publish workflow file; PR #8 needs to merge before this PR lands so ADR-005 + use case refs resolve on main
+- primary-luminary: john-ousterhout (deep module — bump script hides bump policy from operator)
+- supporting-luminaries: saltzer-schroeder (bump script writes to package.json), alan-cooper (changelog format Sam can scan)
+- parallel-branch-dependency: this branch stays independent of PR #8. WU-5 references ADR-005 + use cases; those land on main via PR #8. If PR #9 (this branch) merges first, refs point to unmerged docs — merge order matters.
