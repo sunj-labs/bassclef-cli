@@ -54,6 +54,9 @@ bet 2026-08-06b.
 - **CLI unknown-command exit-code drift (D-5.2).** See Changed above.
 - **Whereami D-9.1 skipped.** The stale setup-docs line lives on the unmerged session-close PR #10, not on main. Handled separately when that PR resolves.
 
+### Added — iteration f traceability primer
+- `docs/requirements/2026-08-11-npm-distribution.md` — first requirement diagram for @thebassclef/core, using SysML notation («containment», «deriveReqt», «refine», «satisfy», «verify»). Registers R-NPM-001 through R-NPM-013 from bet L152-164 acceptance items. Traceability matrix maps each requirement to its ADR, use case, source, and test files. Mermaid graph shows the chain end to end. Gap analysis names 5 requirements pending later iterations. Applied test case for the Traceability Subsystem promote at `docs/promotes/2026-08-11-traceability-subsystem.md`.
+
 ### Security
 - **Source-map exclusion (iteration a).** `package.json` `files` field is now an explicit whitelist (`dist/*.js`, `dist/*.cjs`, `dist/*.d.ts`) instead of the bulk `dist` entry. `vite.config.ts` `sourcemap` flipped from `true` to `'hidden'` — build still emits map files for local debugging but strips the `//# sourceMappingURL=` reference from shipped `.js`. Together the two layers block the shipping pattern that produced the Anthropic v2.1.88 leak in March 2026 (59.8 MB source map exposed ~513K lines of TypeScript per InfoQ + Layer5 write-ups). Semver-locked from 0.0.2 per ADR-001 §Invariants.
 - `tests/pack-no-source-maps.test.ts` — 6 Tier 0 tests verify both layers of the source-map exclusion. Runs on every `npm test`.
