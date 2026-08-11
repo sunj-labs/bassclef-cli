@@ -1,8 +1,10 @@
 // bassclef init test list — per Beck TDD.
 //
+// @verifies R-NPM-002
+//
 // End-to-end tests spawning the compiled CLI at dist/cli.js on a fresh
 // temp directory. These are the Tier 0 tests the ADR-002 contract
-// depends on.
+// depends on. Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // [x] fresh empty target → both files written; exit 0; verbose lists each
 // [x] rerun on already-initialized dir → files unchanged; exit 0; "already initialized"

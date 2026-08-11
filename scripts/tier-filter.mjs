@@ -2,7 +2,10 @@
 // tier-filter.mjs — refuses if any shipped Markdown file has YAML
 // frontmatter with `tier: upstream`.
 //
+// @requirement R-NPM-004
+//
 // Contract: ADR-004 §Ordered steps, check 10.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // Usage:
 //   npm pack --dry-run --json > /tmp/pack.json

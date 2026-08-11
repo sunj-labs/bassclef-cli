@@ -1,5 +1,7 @@
 // pack-no-source-maps test list — per Beck TDD.
 //
+// @verifies R-NPM-001
+//
 // The npm tarball must not contain source-map files. This is the
 // Anthropic v2.1.88 leak pattern (59.8 MB source map exposed 513K
 // lines of TypeScript in March 2026 per InfoQ + Layer5 write-ups).

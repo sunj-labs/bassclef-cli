@@ -2,9 +2,13 @@
 // scripts/bump-version.mjs
 //
 // Bumps the @thebassclef/core version + rewrites CHANGELOG.md.
+//
+// @requirement R-NPM-007
+//
 // See standards/npm-versioning-and-changelog.md for the policy.
 // See docs/decompositions/wu-5-methodology.md for the code shape.
 // See docs/use-cases/UC-script-bump.md for the operator flow.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';

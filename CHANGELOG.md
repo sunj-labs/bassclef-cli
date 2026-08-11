@@ -9,6 +9,14 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added — iteration d traceability enforcement
+- **Mechanical enforcement for the requirement diagram (Phase 1.5 of the Traceability Subsystem promote).** New `tests/requirements-traceability.test.ts` — 8 Tier 0 tests. Parses the registry from `docs/requirements/2026-08-11-npm-distribution.md`. Walks `src/`, `scripts/`, `vite.config.ts` for `@requirement R-NPM-XXX` annotations. Walks `tests/` for `@verifies R-NPM-XXX` annotations. Asserts every satisfied non-meta requirement has at least one satisfy edge AND at least one verify edge. Asserts every referenced ID exists in the registry (no orphans).
+- **`@requirement` annotations added to 8 source files.** `src/commands/init.ts` (R-NPM-002), `src/commands/sync.ts` (R-NPM-003), `vite.config.ts` (R-NPM-001), `scripts/tier-filter.mjs` (R-NPM-004), `scripts/andon-scan.mjs` (R-NPM-005), `scripts/validate-tag.mjs` (R-NPM-006), `scripts/bump-version.mjs` (R-NPM-007), `.github/workflows/publish.yml` (R-NPM-006, R-NPM-011, R-NPM-012).
+- **`@verifies` annotations added to 7 test files.** `tests/init.test.ts` (R-NPM-002), `sync.test.ts` (R-NPM-003), `tier-filter.test.ts` (R-NPM-004), `andon-scan.test.ts` (R-NPM-005), `workflow-path.test.ts` (R-NPM-006), `bump-version.test.ts` (R-NPM-007), `pack-no-source-maps.test.ts` (R-NPM-001).
+- **Meta-requirement exemption.** R-NPM-012 (All Tier 0 tests GREEN) exempt from per-file checks — satisfied by the workflow running vitest and verified by the same step. Named in the exempt set inside `requirements-traceability.test.ts`.
+- **CI enforcement.** The publish workflow's `Test` step in the `checks` job runs `npm test`, which runs vitest, which runs the new traceability test. Any future PR that changes source without updating the diagram (or vice versa) fails CI at the checks step.
+- Iteration d closes the Feathers rule applied to docs: the diagram now has a safety net.
+
 ### Added — semver + changelog methodology (WU-5)
 - `standards/npm-versioning-and-changelog.md` — semver rules for 0.x and 1.0+ phases, changelog format per Keep a Changelog 1.1.0, deprecation grace window rules per adopter cohort size.
 - `scripts/bump-version.mjs` — one command per bump size (`npm run bump patch|minor|major`). Rewrites `CHANGELOG.md` — renames `[Unreleased]` to `[X.Y.Z] - YYYY-MM-DD`, inserts fresh empty `[Unreleased]` block, updates compare links. Atomic writes for both `package.json` and `CHANGELOG.md`. Refuses on dirty working tree (except package.json + CHANGELOG.md), missing CHANGELOG, empty Unreleased block, invalid bump arg.

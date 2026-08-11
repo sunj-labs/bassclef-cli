@@ -3,7 +3,10 @@
 // package.json version, or the tag is not semver-shaped, or the tagged
 // commit is not reachable from origin/main.
 //
+// @requirement R-NPM-006
+//
 // Contract: ADR-004 §Ordered steps, check 4.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // Usage:
 //   node scripts/validate-tag.mjs <tag>

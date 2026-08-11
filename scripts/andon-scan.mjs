@@ -2,7 +2,10 @@
 // andon-scan.mjs — refuses if operator-private terms appear in files
 // npm pack will ship.
 //
+// @requirement R-NPM-005
+//
 // Contract: ADR-004 §Ordered steps, check 9.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // Usage:
 //   npm pack --dry-run --json > /tmp/pack.json

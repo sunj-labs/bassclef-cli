@@ -1,5 +1,7 @@
 // Workflow-path invariant test — per ADR-004 §Workflow file path L74.
 //
+// @verifies R-NPM-006
+//
 // `.github/workflows/publish.yml` is semver-locked. The npm trusted-
 // publisher config on npmjs.com pins this exact path. Renaming the
 // file breaks publishing silently — the workflow runs, but npm
