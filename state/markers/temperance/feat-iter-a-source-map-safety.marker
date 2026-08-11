@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-a-source-map-safety
+- date: 2026-08-11
+- branch: feat/iter-a-source-map-safety
+- scope-decision:
+  - right thing: block source-map files from shipping in the npm package before first tag; prevent the Anthropic v2.1.88 leak pattern
+  - right way: package.json files field explicit whitelist + vite sourcemap 'hidden' + Vitest asserting npm pack --dry-run has no .map; ADR-001 invariant + CHANGELOG entry
+  - drift trigger: pause if the fix breaks the existing build or if any of the 15 existing tests fail
+- lens: saltzer-schroeder (least common mechanism), michael-feathers (characterization test for what ships)

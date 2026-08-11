@@ -41,6 +41,10 @@ bet 2026-08-06b.
 - Init refuses to re-baseline an existing manifest without `--force`. `bassclef sync` is the path for updates; init is greenfield-only.
 - Init manifest schema bumped to 0.0.2 (adds `content_hash_sha256`, `updated_at`; renamed `template_version` → `manifest_schema_version` at the `$bassclef` block).
 
+### Security
+- **Source-map exclusion (iteration a).** `package.json` `files` field is now an explicit whitelist (`dist/*.js`, `dist/*.cjs`, `dist/*.d.ts`) instead of the bulk `dist` entry. `vite.config.ts` `sourcemap` flipped from `true` to `'hidden'` — build still emits map files for local debugging but strips the `//# sourceMappingURL=` reference from shipped `.js`. Together the two layers block the shipping pattern that produced the Anthropic v2.1.88 leak in March 2026 (59.8 MB source map exposed ~513K lines of TypeScript per InfoQ + Layer5 write-ups). Semver-locked from 0.0.2 per ADR-001 §Invariants.
+- `tests/pack-no-source-maps.test.ts` — 6 Tier 0 tests verify both layers of the source-map exclusion. Runs on every `npm test`.
+
 ### Notes
 - Settings template ships MINIMAL — no `../bassclef` sibling assumption. Sync populates references when templates ship real content.
 - Content-hash algorithm is semver-locked from 0.0.2. Any change to the normalization steps is a MAJOR bump.

@@ -116,9 +116,24 @@ ADR-NNN` if we swap to tsup at review time).
 
 - No `prepublishOnly` script that auto-builds. Publish and build are
   separate steps (bet L98; Evil Martians 2026 guide).
-- No source shipped to npm. Only `dist`, `README.md`, `LICENSE`
-  (package.json `files` whitelist).
+- No source shipped to npm. Only `dist/*.js`, `dist/*.cjs`,
+  `dist/*.d.ts`, `README.md`, and `LICENSE` (package.json `files`
+  explicit whitelist — no directory-bulk entries). This shape blocks
+  source-map files (`*.map`) from riding along with the dist bundle
+  even when the build emits them. Amended 2026-08-11 per
+  feat/iter-a-source-map-safety.
 - Node 20 floor pinned in `engines`; refuse install below.
+- **Source-map exclusion (semver-locked from 0.0.2).** Vite `sourcemap`
+  MUST be `false`, `'hidden'`, or omitted. `sourcemap: true` is
+  refused because it emits a `//# sourceMappingURL=` reference in the
+  shipped `.js`, which points at a missing file for adopters (a leak
+  hint at minimum) and doubles as the delivery vector when `.map`
+  files ship. Tests at `tests/pack-no-source-maps.test.ts` verify
+  both layers (package.json files whitelist + vite sourcemap value).
+  Reason: Anthropic v2.1.88 shipped a 59.8 MB source map exposing
+  ~513K lines of TypeScript in March 2026 from a similar default
+  config (InfoQ + Layer5 write-ups). Any change to this invariant is
+  a MAJOR bump under semver.
 
 ## References
 
