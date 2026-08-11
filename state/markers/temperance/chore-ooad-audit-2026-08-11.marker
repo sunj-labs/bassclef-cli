@@ -1,0 +1,9 @@
+# Temperance marker — chore/ooad-audit-2026-08-11
+- date: 2026-08-11
+- branch: chore/ooad-audit-2026-08-11
+- scope-decision:
+  - right thing: audit the 5 ADRs + 4 use cases + interaction design + 5 decompositions against actual code; fix drift; propose hardening
+  - right way: read each artifact, compare to shipped code inline, log drift, patch in place, reflect at end
+  - drift trigger: pause if audit surfaces >3 substantive design changes (that becomes a design-refactor bet, not an audit fix)
+- reads: docs/whereami.md, docs/adrs/ADR-001..005, docs/interaction-design/2026-08-08-npm-distribution.md, docs/use-cases/UC-*.md, docs/publish-setup.md
+- lens: john-ousterhout (deep modules — does the ADR match the module boundary shipped?), michael-feathers (characterization — pin actual behavior before naming drift)
