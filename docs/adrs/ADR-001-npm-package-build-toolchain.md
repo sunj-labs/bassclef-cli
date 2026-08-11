@@ -76,9 +76,11 @@ Rationale for accepting Vite over the CLI-idiom alternative (tsup):
 
 ## Status
 
-`proposed` — WU-1 lands this ADR alongside the scaffold PR; operator
-review flips to `accepted` (or requests amendment to `superseded_by:
-ADR-NNN` if we swap to tsup at review time).
+`accepted` on 2026-08-08 via PR #3 (scaffold merged; see frontmatter
+`accepted_via`). Amended 2026-08-11 in iteration a to add the
+source-map exclusion invariant (PR #11). Amended 2026-08-11 in
+iteration b to add the shebang banner invariant and align this Status
+body with the frontmatter (this PR). No supersession pending.
 
 ## Consequences
 
@@ -134,6 +136,18 @@ ADR-NNN` if we swap to tsup at review time).
   ~513K lines of TypeScript in March 2026 from a similar default
   config (InfoQ + Layer5 write-ups). Any change to this invariant is
   a MAJOR bump under semver.
+- **Shebang banner on `dist/cli.js` (semver-locked from 0.0.2).** The
+  Vite `rollupOptions.output.banner` MUST inject `#!/usr/bin/env node`
+  as the first line of the CLI bundle. Without it, the `bassclef`
+  binary installed globally by `npm install -g @thebassclef/core`
+  fails with an exec-format error on macOS and Linux (npm's POSIX
+  `bin` shim resolves through the shebang, not the file extension).
+  This is a silent-failure class — the build succeeds locally, tests
+  pass, publish looks clean, and every first adopter install breaks.
+  Verified in code at `vite.config.ts` L54-55. Amended 2026-08-11 in
+  iteration b to close the audit finding that the invariant lived in
+  code but not in the ADR. Any change to this invariant is a MAJOR
+  bump under semver.
 
 ## References
 

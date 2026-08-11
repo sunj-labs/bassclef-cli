@@ -66,7 +66,7 @@ Sync reads `.bassclef/init.manifest.json`. For each file listed:
 4. Classify per file into one of four cases (below).
 5. Apply per-case default action.
 
-**Four cases:**
+**Six cases:**
 
 | Case | Condition | Default action |
 |---|---|---|
@@ -74,6 +74,10 @@ Sync reads `.bassclef/init.manifest.json`. For each file listed:
 | `NeedsUpdate` | file exists, hash matches manifest, template version is newer | REFUSE unless `--force` |
 | `Edited` | file exists, hash does NOT match manifest | REFUSE unless `--replace-edits` |
 | `Deleted` | file does not exist | REFUSE unless both `--force` AND `--replace-edits` |
+| `NoMarker` | file exists, does NOT carry the `$bassclef` marker (JSON) or `bassclef_template:` frontmatter (Markdown) | REFUSE unconditionally — no flag override. File is not managed by bassclef. |
+| `UnknownHash` | manifest entry lacks `content_hash_sha256` (legacy manifest written before hash tracking) | REFUSE unconditionally — cure is `bassclef init --force` to re-baseline the manifest. |
+
+`NoMarker` was named earlier in this ADR under §"Files sync will touch" (L147-154 of the pre-amendment text); this table now lists it as a first-class case for parity with sync.ts L60-66 and UC-sync L131-132. `UnknownHash` was named only in UC-sync at authoring time; this amendment brings it into the ADR case catalog. Both were added to this table on 2026-08-11 in iteration b to close the audit finding that the code and UC listed six cases while the ADR listed four.
 
 **Ambiguity case (crash recovery):**
 
@@ -189,8 +193,11 @@ time (`O_CREAT | O_EXCL | O_NOFOLLOW`), not a paired read/write API.
 
 ## Status
 
-`proposed` — ships with the WU-3 PR. Flip to `accepted` before 0.0.2
-tag.
+`accepted` on 2026-08-08 via PR #5 (sync command merged; see
+frontmatter `accepted_via`). Amended 2026-08-11 in iteration b to
+align this Status body with the frontmatter and extend the case table
+to name the two refusal shapes the code already ships (NoMarker and
+UnknownHash). No supersession pending.
 
 ## Consequences
 

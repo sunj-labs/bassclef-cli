@@ -40,6 +40,19 @@ bet 2026-08-06b.
 ### Changed
 - Init refuses to re-baseline an existing manifest without `--force`. `bassclef sync` is the path for updates; init is greenfield-only.
 - Init manifest schema bumped to 0.0.2 (adds `content_hash_sha256`, `updated_at`; renamed `template_version` → `manifest_schema_version` at the `$bassclef` block).
+- **CLI unknown-command exit (iteration b).** `bassclef <unknown>` now exits 3 (invalid args per ADR-002 §Exit codes) instead of 1. Aligns with the "Unknown → exit 3" boundary contract in the interaction design doc. Scripted callers that keyed on `!= 0` still pass; callers that keyed specifically on `== 1` need to update. Semver-locked from 0.0.2.
+
+### Fixed — iteration b drift pass
+- **ADR Status body drift (D-1.1 + D-2.4 + D-3.3 + D-4.2).** ADRs 001-004 had Status bodies that read "proposed" while their frontmatter said "accepted". Bodies now match the frontmatter. Reason: the ADRs were authored 2026-08-06 in a proposed state then flipped to accepted 2026-08-08 without updating the body prose. ADR-005 was authored fresh at 2026-08-08 without a Status body and stays that way.
+- **ADR-001 shebang banner invariant (D-1.2).** Named the semver-locked contract that Vite `rollupOptions.output.banner` MUST inject `#!/usr/bin/env node` on `dist/cli.js`. The invariant lived in `vite.config.ts` L54-55 but not in the ADR — a silent-failure class if removed.
+- **ADR-002 files count (D-2.1).** Context section said `bassclef init` writes two files; Invariants section said three. Both now say three (`.claude/settings.json`, `substrate.config.md`, `.bassclef/init.manifest.json`).
+- **ADR-002 complete-mediation extension (D-2.2).** Named `mkdirSafely` alongside `writeSafely` under §Complete-mediation. Init's parent-directory creation runs through the same audited surface as writes.
+- **ADR-003 case table extension (D-3.1).** Named `NoMarker` and `UnknownHash` as first-class sync cases. Both were shipped in `sync.ts` and UC-sync but not listed in the ADR's case table.
+- **UC-sync unified-diff wording (D-3.4).** UC-sync claimed `--diff` produces a unified diff per file. Actual code shows a template-version summary; full unified diff is later work. UC now reflects the real shape and cites the code comment.
+- **UC-script-bump `--allow-dirty` logging claim (D-8.2).** UC said the flag logs to stderr; code silently returns. UC now reflects the real shape and marks the stderr log as a possible follow-on.
+- **Interaction-design git-tag data source (D-8.3).** Boundary contract said the workflow reads the tag via `${{ github.ref }}`. Actual workflow reads via `github.event.release.tag_name` or `inputs.tag`. Doc now matches.
+- **CLI unknown-command exit-code drift (D-5.2).** See Changed above.
+- **Whereami D-9.1 skipped.** The stale setup-docs line lives on the unmerged session-close PR #10, not on main. Handled separately when that PR resolves.
 
 ### Security
 - **Source-map exclusion (iteration a).** `package.json` `files` field is now an explicit whitelist (`dist/*.js`, `dist/*.cjs`, `dist/*.d.ts`) instead of the bulk `dist` entry. `vite.config.ts` `sourcemap` flipped from `true` to `'hidden'` — build still emits map files for local debugging but strips the `//# sourceMappingURL=` reference from shipped `.js`. Together the two layers block the shipping pattern that produced the Anthropic v2.1.88 leak in March 2026 (59.8 MB source map exposed ~513K lines of TypeScript per InfoQ + Layer5 write-ups). Semver-locked from 0.0.2 per ADR-001 §Invariants.

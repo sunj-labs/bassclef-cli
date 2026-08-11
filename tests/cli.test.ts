@@ -7,7 +7,7 @@
 //   [x] `bassclef` (no args) prints usage + exits 0
 //   [x] `bassclef init --help` prints init usage + exits 0
 //   [x] `bassclef sync` prints a "later work" message + exits non-zero
-//   [x] `bassclef nonsense` prints unknown-command + usage + exits non-zero
+//   [x] `bassclef nonsense` prints unknown-command + usage + exits 3 (invalid args per ADR-002)
 //   [x] `version` export from index equals package.json version
 //
 // Init behavior tests are in tests/init.test.ts. Sync stub still lives
@@ -72,9 +72,9 @@ describe('bassclef CLI shell (WU-1)', () => {
     expect(r.stdout).toContain('--replace-edits');
   });
 
-  it('rejects an unknown command with usage + non-zero exit', () => {
+  it('rejects an unknown command with usage + exit 3 (invalid args per ADR-002 §Exit codes)', () => {
     const r = runCli(['nonsense']);
-    expect(r.status).not.toBe(0);
+    expect(r.status).toBe(3);
     expect(r.stderr).toContain('nonsense');
     expect(r.stderr).toContain('Usage:');
   });

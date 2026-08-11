@@ -94,7 +94,8 @@ Sam. Has an initialized project (`.bassclef/init.manifest.json` exists). Updated
 - Exit 0.
 
 **1b. Sam passes `--diff`:**
-- CLI produces a unified diff per file that would change.
+- CLI prints a template-version summary per file that would change (current template version → manifest recorded version).
+- Full unified-diff output per file is deferred to a follow-on WU; the current shape provides enough signal for the maintainer to spot a mismatch. See `sync.ts` L294 note.
 - Applies with or without `--dry-run`.
 
 **4a. Manifest is missing:**
