@@ -55,7 +55,17 @@ export default defineConfig({
         banner: (chunk) => (chunk.fileName === 'cli.js' ? '#!/usr/bin/env node' : ''),
       },
     },
-    sourcemap: true,
+    // sourcemap: 'hidden' emits .map files for local debugging but strips
+    // the //# sourceMappingURL= reference from .js/.cjs so shipped code
+    // does not point at the maps. Belt and suspenders: package.json
+    // files field explicitly whitelists only .js, .cjs, .d.ts so .map
+    // files never enter the npm tarball even if a future build change
+    // re-enables inline references. See ADR-001 §Invariants (source-map
+    // exclusion, added 2026-08-11 in feat/iter-a-source-map-safety) for
+    // the semver-locked contract. Reason for the discipline: Anthropic
+    // v2.1.88 shipped 59.8 MB source map from a similar Bun default
+    // config in March 2026 (per InfoQ + Layer5 write-ups).
+    sourcemap: 'hidden',
     minify: false,
   },
   plugins: [

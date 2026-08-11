@@ -29,7 +29,9 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist",
+    "dist/*.js",
+    "dist/*.cjs",
+    "dist/*.d.ts",
     "README.md",
     "LICENSE"
   ],
