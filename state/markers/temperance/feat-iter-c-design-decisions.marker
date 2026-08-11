@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-c-design-decisions
+- date: 2026-08-11
+- branch: feat/iter-c-design-decisions
+- scope-decision:
+  - right thing: land 4 design decisions per operator picks — split publish workflow (c.1.B), keep future lite/standard/ultra proposal in ADR-005 with namespace reservation intent (c.2), move init manifest-exists invariant to ADR-002 (c.3.A), move CHANGELOG 0.0.1 to Unreleased (c.4.B)
+  - right way: mechanical patches + one workflow refactor; verify build + tests still pass; interaction design + UC-script-publish updated to match new workflow shape; file operator ticket for namespace reservation separately
+  - drift trigger: pause if workflow split breaks trusted-publisher OIDC binding or if the full test suite drops below 143/143
+- lens: saltzer-schroeder (c.1), ousterhout (c.3), feathers (c.4), brooks (c.2)

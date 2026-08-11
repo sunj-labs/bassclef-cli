@@ -46,6 +46,33 @@ describe('workflow path invariant (ADR-004)', () => {
     expect(permBlock).not.toContain('packages: write');
     expect(permBlock).not.toContain('pull-requests: write');
   });
+
+  it('the workflow splits into checks + publish jobs (iteration c per D-4.1)', () => {
+    // Two-job shape means the approver sees andon + tier-filter output
+    // BEFORE the environment gate fires. Before iteration c the
+    // environment gate sat on a single publish job, gating the whole
+    // job before checkout — the approver had no check data to look at.
+    //
+    // Iteration c split into two jobs so the publish job (which carries
+    // the environment) needs the checks job. Approval fires AFTER
+    // checks green. See ADR-004 §Ordered steps + interaction-design
+    // sequence diagram for the shape.
+    const yaml = readFileSync(WORKFLOW_PATH, 'utf8');
+    expect(yaml).toMatch(/^\s+checks:\s*$/m);
+    expect(yaml).toMatch(/^\s+publish:\s*$/m);
+    expect(yaml).toContain('needs: checks');
+  });
+
+  it('the publish job carries environment: npm-publish; the checks job does not', () => {
+    // The environment gate lives on the publish job only. Placing it on
+    // the checks job would gate the checks themselves, which defeats
+    // the whole reason for the split.
+    const yaml = readFileSync(WORKFLOW_PATH, 'utf8');
+    const publishBlock = extractJobBlock(yaml, 'publish');
+    const checksBlock = extractJobBlock(yaml, 'checks');
+    expect(publishBlock).toContain('environment: npm-publish');
+    expect(checksBlock).not.toContain('environment:');
+  });
 });
 
 function extractPermissionsBlock(yaml: string): string {
@@ -64,6 +91,31 @@ function extractPermissionsBlock(yaml: string): string {
     if (line === '' || /^\S/.test(line)) break; // exit on next top-level key
     // Skip comment lines — they explain what is NOT granted.
     if (/^\s*#/.test(line)) continue;
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
+// Extract a job block by name from the jobs: section. Returns lines
+// under the job header up to the next job header or end of file.
+function extractJobBlock(yaml: string, jobName: string): string {
+  const lines = yaml.split('\n');
+  let start = -1;
+  const jobHeader = new RegExp(`^  ${jobName}:\\s*$`);
+  for (let i = 0; i < lines.length; i++) {
+    if (jobHeader.test(lines[i]!)) {
+      start = i + 1;
+      break;
+    }
+  }
+  if (start < 0) return '';
+  const out: string[] = [];
+  for (let i = start; i < lines.length; i++) {
+    const line = lines[i]!;
+    // Next job header is `  <name>:` at exactly 2-space indent.
+    if (/^  \w+:\s*$/.test(line)) break;
+    // Top-level key would also end the block.
+    if (line.length > 0 && /^\S/.test(line)) break;
     out.push(line);
   }
   return out.join('\n');

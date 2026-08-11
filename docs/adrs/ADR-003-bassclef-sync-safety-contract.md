@@ -163,13 +163,6 @@ ambiguity message.
 - Writes nothing (not the target files, not the manifest).
 - Exit code matches what a real run would produce.
 
-**Init amendments (backward-compatible for unreleased 0.0.2):**
-
-- Init writes `content_hash_sha256` per file into the manifest.
-- Init refuses if the manifest already exists (exit 1) unless `--force`
-  is passed. `--force` re-baselines the manifest (new `created_at`,
-  new hashes). This preserves the manifest as a WU-3 contract.
-
 **Exit codes:**
 
 - `0` — success (all Current, or all updates applied)
@@ -197,7 +190,10 @@ time (`O_CREAT | O_EXCL | O_NOFOLLOW`), not a paired read/write API.
 frontmatter `accepted_via`). Amended 2026-08-11 in iteration b to
 align this Status body with the frontmatter and extend the case table
 to name the two refusal shapes the code already ships (NoMarker and
-UnknownHash). No supersession pending.
+UnknownHash). Amended 2026-08-11 in iteration c to remove the "Init
+amendments" section per audit finding D-3.2 (cross-ADR ownership);
+init's manifest-exists refusal now lives in ADR-002 §Invariants where
+init behavior belongs. No supersession pending.
 
 ## Consequences
 

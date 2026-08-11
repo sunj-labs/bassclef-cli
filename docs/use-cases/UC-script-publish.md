@@ -33,24 +33,27 @@ Maintainer. Has a green working tree at the tag they want to publish. Has truste
 
 ## Main success scenario
 
+The workflow runs as two jobs per iteration c workflow split (audit finding D-4.1). Job 1 `checks` runs all validation; job 2 `publish` needs job 1 and carries the environment gate.
+
 1. Maintainer bumps `package.json` version via WU-5's bump script (`npm run bump patch|minor|major`).
 2. Maintainer commits, tags (`git tag vX.Y.Z`), and pushes both the commit and the tag.
 3. Maintainer creates a GitHub Release (`gh release create vX.Y.Z`).
 4. GitHub fires a `release: published` event.
-5. Actions workflow triggers on the event.
-6. Workflow checks out the code at the tag ref.
-7. `validate-tag.mjs` refuses if tag != `package.json` version, or if the tag is not reachable from `origin/main`. On refuse: workflow red, exit 1, nothing published.
-8. Workflow runs `npm ci --ignore-scripts` — installs deps without running any install scripts.
-9. Workflow runs `npm run build` — clean rebuild from source.
-10. Workflow runs `npm test` and `npm run typecheck`.
-11. Workflow runs `npm pack --dry-run --json` — produces the tarball file list.
+5. Actions workflow triggers on the event; `checks` job starts.
+6. `checks` resolves the tag and checks out at the tag ref.
+7. `checks` runs `npm ci --ignore-scripts` — installs deps without running any install scripts.
+8. `validate-tag.mjs` refuses if tag != `package.json` version, or if the tag is not reachable from `origin/main`. On refuse: workflow red, exit 1, nothing published.
+9. `checks` runs `npm run build` — clean rebuild from source.
+10. `checks` runs `npm test` and `npm run typecheck`.
+11. `checks` runs `npm pack --dry-run --json` — produces the tarball file list.
 12. `andon-scan.mjs` scans the tarball for operator-private terms. On match: workflow red, exit 2, nothing published.
 13. `tier-filter.mjs` parses YAML frontmatter on each shipped file. Refuses on any file with `tier: upstream`. On match: workflow red, exit 3, nothing published.
-14. Workflow requests approval on the `npm-publish` Environment.
-15. Maintainer opens the workflow run page and clicks approve.
-16. Workflow runs `npm publish --provenance --ignore-scripts` via trusted publisher. No `NPM_TOKEN` used.
-17. npm accepts the publish + generates provenance attestation.
-18. Workflow writes step summary with npmjs.com URL + provenance URL.
+14. `checks` job finishes green; `publish` job requests approval on the `npm-publish` Environment.
+15. Maintainer opens the workflow run page. Sees the `checks` job green with each step's log available. Clicks approve.
+16. `publish` job starts. Re-checks out at the tag ref, re-installs, rebuilds deterministically.
+17. `publish` runs `npm publish --provenance --ignore-scripts` via trusted publisher. No `NPM_TOKEN` used.
+18. npm accepts the publish + generates provenance attestation.
+19. `publish` writes step summary with npmjs.com URL + provenance URL.
 
 ## Extensions (brief)
 

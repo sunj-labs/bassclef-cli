@@ -61,30 +61,20 @@ bet 2026-08-06b.
 - **Source-map exclusion (iteration a).** `package.json` `files` field is now an explicit whitelist (`dist/*.js`, `dist/*.cjs`, `dist/*.d.ts`) instead of the bulk `dist` entry. `vite.config.ts` `sourcemap` flipped from `true` to `'hidden'` — build still emits map files for local debugging but strips the `//# sourceMappingURL=` reference from shipped `.js`. Together the two layers block the shipping pattern that produced the Anthropic v2.1.88 leak in March 2026 (59.8 MB source map exposed ~513K lines of TypeScript per InfoQ + Layer5 write-ups). Semver-locked from 0.0.2 per ADR-001 §Invariants.
 - `tests/pack-no-source-maps.test.ts` — 6 Tier 0 tests verify both layers of the source-map exclusion. Runs on every `npm test`.
 
+### Added — iteration c design decisions
+- **Publish workflow split into two jobs (c.1.B per audit finding D-4.1).** `.github/workflows/publish.yml` now has a `checks` job (validate-tag + build + test + typecheck + andon + tier filter) and a `publish` job with `needs: checks` and `environment: npm-publish`. Approval fires AFTER checks land green, so the approver sees the check output on the workflow run page before clicking approve. Two new Tier 0 tests in `tests/workflow-path.test.ts` pin the two-job shape and the environment-on-publish-only invariant.
+- **Namespace reservation intent (c.2).** ADR-005 gains a §Namespace reservation section naming the future package identities `@thebassclef/lite`, `@thebassclef/standard`, `@thebassclef/ultra` and the manual `npm publish` reservation shape. Operator ticket filed on bassclef-cli for the actual reservation step.
+
+### Changed
+- Init refuses to re-baseline an existing manifest without `--force`. `bassclef sync` is the path for updates; init is greenfield-only.
+- Init manifest schema bumped to 0.0.2 (adds `content_hash_sha256`, `updated_at`; renamed `template_version` → `manifest_schema_version` at the `$bassclef` block).
+- **CLI unknown-command exit (iteration b).** `bassclef <unknown>` now exits 3 (invalid args per ADR-002 §Exit codes) instead of 1. Aligns with the "Unknown → exit 3" boundary contract in the interaction design doc. Scripted callers that keyed on `!= 0` still pass; callers that keyed specifically on `== 1` need to update. Semver-locked from 0.0.2.
+- **Cross-ADR ownership reshaped (c.3.A per audit finding D-2.3 + D-3.2).** Init's manifest-exists refusal invariant moved from ADR-003 §"Init amendments" (which the audit surfaced was cross-ADR ownership drift) into ADR-002 §Invariants where init behavior belongs. ADR-003 §"Init amendments" section removed. Behavior unchanged; documentation now respects Ousterhout deep-module discipline (one contract, one file).
+
 ### Notes
 - Settings template ships MINIMAL — no `../bassclef` sibling assumption. Sync populates references when templates ship real content.
 - Content-hash algorithm is semver-locked from 0.0.2. Any change to the normalization steps is a MAJOR bump.
 - No file lock — two concurrent bassclef processes on the same target dir race. Single-writer discipline is the operator's responsibility.
+- **CHANGELOG 0.0.1 house-keeping (c.4.B per audit finding D-8.1).** The prior `[0.0.1] — 2026-08-06` section described state that had not actually been published to npm (no `v0.0.1` git tag exists; `docs/publish-setup.md` L21-31 names 0.0.1 as a manual reservation step still pending). Content merged upward into Unreleased. When the operator runs the manual reservation, the version bump script converts Unreleased to `[0.0.2]` for the first workflow-published release.
 
-## [0.0.1] — 2026-08-06
-
-Initial scaffold. Shell only — real command behavior lands in WU-2 and
-later.
-
-### Added
-- CLI shell — `bassclef --version`, `bassclef --help`, `bassclef init` (stub), `bassclef sync` (stub).
-- Programmatic API — `version: string` export from `@thebassclef/core`.
-- Package shape — `bin` field, `files` whitelist, `exports` map, dual module (ESM + CJS), `types` (.d.ts).
-- Build stack — Vite 5 (library mode) + TypeScript 5.5 + Vitest 2.
-- Node 20 minimum via `engines.node: ">=20"`.
-- Apache-2.0 LICENSE.
-- README.md — Cooper first-touch pass.
-- ADR-001 — build toolchain pin.
-
-### Notes
-- Zero runtime dependencies. Dev dependencies only.
-- No `postinstall` / `preinstall` / `prepublishOnly` scripts.
-- `bassclef init` and `bassclef sync` exit non-zero with a "WU-2/3 will land this" message. Intentional — the scaffold ships before the behavior so publish + install can be tested end-to-end.
-
-[Unreleased]: https://github.com/sunj-labs/bassclef-cli/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/sunj-labs/bassclef-cli/releases/tag/v0.0.1
+[Unreleased]: https://github.com/sunj-labs/bassclef-cli/commits/main
