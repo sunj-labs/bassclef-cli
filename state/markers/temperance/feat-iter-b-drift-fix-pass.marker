@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-b-drift-fix-pass
+- date: 2026-08-11
+- branch: feat/iter-b-drift-fix-pass
+- scope-decision:
+  - right thing: fix 13 doc-vs-code drift items surfaced by the audit + 1 CHANGELOG entry (14 changes across 8 files)
+  - right way: mechanical patches only; no design change; no cross-ADR ownership reshape (that goes to iteration c); tests updated for the cli.ts exit-code change
+  - drift trigger: pause if any fix requires a design decision or if the full test suite drops below 143/143
+- lens: michael-feathers (characterization — pin what shipped, then update docs to match)

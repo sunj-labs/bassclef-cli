@@ -66,7 +66,12 @@ function main(argv: readonly string[]): number {
   process.stderr.write(
     `bassclef: unknown command '${first}'\n\n` + USAGE
   );
-  return 1;
+  // Exit 3 per ADR-002/ADR-003 §Exit codes (invalid args). Aligns with
+  // the "Unknown → exit 3" boundary contract in the interaction design
+  // doc (docs/interaction-design/2026-08-08-npm-distribution.md L242).
+  // Prior versions returned 1 here — see audit finding D-5.2 and
+  // iteration b for the alignment.
+  return 3;
 }
 
 const exitCode = main(process.argv.slice(2));

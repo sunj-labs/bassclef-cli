@@ -16,11 +16,12 @@ superseded_by: null
 
 WU-2 of iteration bet `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md`
 lands the first `@thebassclef/core` command that writes files to a
-user's disk. `bassclef init` creates two files under the target
+user's disk. `bassclef init` creates three files under the target
 directory:
 
 - `.claude/settings.json`
 - `substrate.config.md`
+- `.bassclef/init.manifest.json` (best-effort; enables `bassclef sync`)
 
 (`.claude/kilo.json` deferred to a later WU pending Kilo schema
 decision — see decomposition N1.)
@@ -98,11 +99,17 @@ rename dance; the atomic open is the safety.
 
 **Complete mediation.**
 
-Every file write in the codebase runs through `src/lib/write-safely.ts`
-`writeSafely(path, content, options)`. No `fs.writeFileSync`,
-`fs.appendFileSync`, or stream-write appears anywhere else in the
-init command chain. Enforced by convention + review; a follow-on
-lint rule may make this mechanical.
+Every filesystem MUTATION in the codebase runs through
+`src/lib/write-safely.ts` — `writeSafely(path, content, options)` for
+file writes AND `mkdirSafely(path)` for directory creation. No
+`fs.writeFileSync`, `fs.appendFileSync`, `fs.mkdirSync`, or stream-
+write appears anywhere else in the init command chain. Init at
+`src/commands/init.ts` L164 calls `mkdirSafely` to create parent
+directories before every file write — the mediation covers directory
+creation because a directory-creation defect leaks the same class of
+symlink-race risk that write mediation blocks. Enforced by convention
+plus review; a follow-on lint rule may make this mechanical. Amended
+2026-08-11 in iteration b to name the mkdir case explicitly.
 
 **Escape-hatch matrix.**
 
@@ -126,8 +133,12 @@ No files are written. The output shape does not depend on
 
 ## Status
 
-`proposed` — this ADR ships with the WU-2 PR. Operator review flips
-to `accepted` before 0.0.2 tags.
+`accepted` on 2026-08-08 via PR #4 (init command merged; see
+frontmatter `accepted_via`). Amended 2026-08-11 in iteration b to
+align this Status body with the frontmatter, correct the files-count
+mismatch between the Context and the Invariants sections, and extend
+the complete-mediation scope to include directory creation. No
+supersession pending.
 
 ## Consequences
 

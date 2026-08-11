@@ -194,8 +194,12 @@ operator sees the URL without leaving the workflow run page.
 
 ## Status
 
-`proposed` — ships with the WU-4 PR. Flip to `accepted` before the
-first tagged release (v0.0.2).
+`accepted` on 2026-08-08 via PR #7 (publish pipeline merged; see
+frontmatter `accepted_via`). Amended 2026-08-11 in iteration b to
+align this Status body with the frontmatter. No supersession pending.
+Environment gate placement (approve-before-checks vs
+approve-after-checks) is under review as an iteration c decision;
+that outcome may amend this ADR further.
 
 ## Consequences
 

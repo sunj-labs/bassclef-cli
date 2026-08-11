@@ -53,7 +53,7 @@ Maintainer. Just finished merging a PR that adds a feature or fixes a bug. Wants
 - **`CHANGELOG.md` missing**: exit 1 with "run from repo root."
 - **`## [Unreleased]` block empty**: exit 1 with "add changes before bumping." Maintainer edits CHANGELOG.md under `## [Unreleased]`, re-runs.
 - **Dirty working tree (unrelated file modified)**: exit 1 with "commit or stash first, or pass `--allow-dirty`." Maintainer either cleans the tree or bypasses.
-- **`--allow-dirty`**: skips the dirty check. Logged to stderr.
+- **`--allow-dirty`**: skips the dirty check silently. No stderr log today; a follow-on may add one for auditability (see `bump-version.mjs` L108).
 - **`--date YYYY-MM-DD`**: overrides today's UTC date. Useful for tests + backdated releases.
 - **Pre-release stripping**: if current version is `0.1.0-rc.1`, any bump strips the pre-release suffix first per semver §11. Patch of `0.1.0-rc.1` → `0.1.0`.
 
