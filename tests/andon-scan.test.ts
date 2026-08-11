@@ -1,7 +1,10 @@
 // andon-scan test list — per Beck TDD.
 //
+// @verifies R-NPM-005
+//
 // scanContent takes (filename, content, allowRegexes) and returns
 // findings as an array of {term, line, context}.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // The term list is defined in scripts/andon-scan.mjs. Tests exercise
 // the scanner against synthetic content, not real dist output.

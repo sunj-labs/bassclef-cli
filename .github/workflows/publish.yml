@@ -1,6 +1,17 @@
 # Publish pipeline for @thebassclef/core.
 #
+# @requirement R-NPM-006
+# @requirement R-NPM-011
+# @requirement R-NPM-012
+#
 # Contract: docs/adrs/ADR-004-publish-pipeline-safety-contract.md.
+# Registry: docs/requirements/2026-08-11-npm-distribution.md.
+#
+# The workflow satisfies three requirements — R-NPM-006 (trusted
+# publisher + provenance), R-NPM-011 (first tagged release path), and
+# R-NPM-012 (all Tier 0 tests green — enforced by the `npm test` step
+# in the checks job, which runs the traceability check at
+# tests/requirements-traceability.test.ts alongside the other 16 tests).
 #
 # WORKFLOW PATH IS SEMVER-LOCKED. Renaming this file requires:
 #   1. An ADR amendment (or a superseding ADR).

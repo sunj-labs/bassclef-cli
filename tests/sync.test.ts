@@ -1,8 +1,11 @@
 // bassclef sync test list — per Beck TDD.
 //
+// @verifies R-NPM-003
+//
 // End-to-end tests spawning the compiled CLI at dist/cli.js on a fresh
 // temp directory. Uses `bassclef init` to establish the baseline, then
 // exercises sync against synthetic conditions.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // [x] no manifest → refuses; exit 1; message names `bassclef init`
 // [x] manifest present, all files current → no changes; exit 0

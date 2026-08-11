@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-d-traceability-enforcement
+- date: 2026-08-11
+- branch: feat/iter-d-traceability-enforcement
+- scope-decision:
+  - right thing: add mechanical enforcement to the requirement diagram shipped in iteration f — @verifies frontmatter on test files, @requirement annotations on source files, new Vitest suite asserting the chain holds, publish workflow runs the check
+  - right way: Beck TDD — write the enforcement test first, watch it fail, add annotations to make it pass; keep annotations narrow to satisfied requirements only; don't annotate config files (not code, not testable)
+  - drift trigger: pause if the test surfaces requirements without satisfy or verify edges beyond the 5 already known gaps in the registry
+- lens: alexander-egyed (transitive consistency), michael-feathers (characterization tests), tony-hoare (contracts as verified invariants)

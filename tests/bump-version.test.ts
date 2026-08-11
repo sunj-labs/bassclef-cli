@@ -1,7 +1,10 @@
 // bump-version test list — per Beck TDD.
 //
+// @verifies R-NPM-007
+//
 // The script has five pure functions + one main().
 // Tests exercise the pure functions directly. main() gets a smoke test.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // [x] parseArgs — patch accepted
 // [x] parseArgs — minor accepted

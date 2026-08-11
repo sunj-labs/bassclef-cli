@@ -1,8 +1,11 @@
 // tier-filter test list — per Beck TDD.
 //
+// @verifies R-NPM-004
+//
 // scanFrontmatter takes (filename, content) and returns a hit when
 // the YAML frontmatter block at BOF contains `tier: upstream` as a
 // top-level key. Substring matches anywhere else pass.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // [x] file with frontmatter `tier: upstream` → refuse
 // [x] file with frontmatter `tier: lite` → pass

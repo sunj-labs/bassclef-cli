@@ -1,3 +1,8 @@
+// @requirement R-NPM-001
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
+// R-NPM-001 covers repo scaffold shape — TypeScript + Vite + files
+// whitelist + Apache-2.0 license per bet L152.
+
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'node:path';

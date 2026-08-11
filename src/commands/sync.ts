@@ -1,7 +1,10 @@
 // `bassclef sync` — updates bassclef-managed files in place.
 //
+// @requirement R-NPM-003
+//
 // Contract: docs/adrs/ADR-003-bassclef-sync-safety-contract.md.
 // Design: docs/decompositions/wu-3-sync.md.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // Sync reads the init manifest, computes the current content hash of
 // each managed file, and classifies per file into one of four cases:

@@ -1,7 +1,10 @@
 // `bassclef init` — writes bassclef config into a project directory.
 //
+// @requirement R-NPM-002
+//
 // Contract: docs/adrs/ADR-002-bassclef-init-safety-contract.md.
 // Design: docs/decompositions/wu-2-init.md.
+// Registry: docs/requirements/2026-08-11-npm-distribution.md.
 //
 // Ousterhout deep-module: the command interface is
 //   bassclef init [--force] [--dry-run] [--dir <path>] [--allow-root]
