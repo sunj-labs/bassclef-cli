@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-f-requirement-diagram
+- date: 2026-08-11
+- branch: feat/iter-f-requirement-diagram
+- scope-decision:
+  - right thing: build docs/requirements/2026-08-11-npm-distribution.md as the applied test case for the Traceability Subsystem promote — SysML-style mermaid graph over the 13 bet acceptance items, 5 ADRs, 4 UCs, 8 code files, 16 test files
+  - right way: single markdown doc with frontmatter + requirement registry + traceability matrix + mermaid graph + gap analysis; no code changes; no automation
+  - drift trigger: pause if the graph reveals a requirement with no satisfier or verifier (that becomes an iteration c or d item, not this one)
+- lens: alexander-egyed (transitive consistency), orlena-gotel (pre/post trace taxonomy)
