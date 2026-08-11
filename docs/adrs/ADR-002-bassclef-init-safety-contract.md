@@ -189,6 +189,16 @@ Defaults:
 - Default refuses to write outside `$HOME`.
 - Default refuses to write to a directory not owned by the current uid.
 - Symlink refusal is unconditional. No flag can bypass in 0.x.
+- **Default refuses to re-baseline an already-initialized project**
+  (manifest-exists refusal). If `.bassclef/init.manifest.json` exists
+  at the target, init exits 1 with a message naming `bassclef sync` as
+  the update path and `bassclef init --force` as the re-baseline path.
+  Sync is the path for updates; init is the path for greenfield
+  bootstrap. Verified at `src/commands/init.ts` L87-99 + UC-init L103-
+  105. Amended 2026-08-11 in iteration c per audit finding D-2.3 — the
+  invariant lived in code + UC but was described only in ADR-003
+  §"Init amendments"; this move puts init contracts in the init ADR
+  per Ousterhout deep-module discipline.
 
 Files written:
 

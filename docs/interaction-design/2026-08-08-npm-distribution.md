@@ -215,8 +215,9 @@ sequenceDiagram
     participant Op as Maintainer
     participant Local as Local repo
     participant Git as GitHub
-    participant GHA as GitHub Actions
+    participant Checks as GHA — checks job
     participant Env as Environment approver (Op again)
+    participant Publish as GHA — publish job
     participant NPM as npm CLI
     participant Registry as npm registry
 
@@ -224,15 +225,18 @@ sequenceDiagram
     Local->>Local: bump package.json + move CHANGELOG unreleased block to versioned block + commit
     Op->>Local: git tag v0.0.3 && git push origin v0.0.3
     Op->>Git: gh release create v0.0.3
-    Git->>GHA: release event (published)
-    GHA->>GHA: checkout + validate-tag + install + build + test + typecheck + pack + andon + tier-filter
-    GHA->>Env: request npm-publish Environment approval
-    Env-->>GHA: approved
-    GHA->>NPM: npm publish --provenance --ignore-scripts (via trusted publisher)
+    Git->>Checks: release event (published)
+    Checks->>Checks: resolve-tag + checkout + install + validate-tag + build + test + typecheck + pack + andon + tier-filter
+    Note over Checks: Job outputs — tag + prerelease
+    Checks->>Env: request npm-publish Environment approval<br/>(only after checks green — iteration c)
+    Env->>Op: sees check output on workflow run page
+    Env-->>Publish: approved
+    Publish->>Publish: re-checkout + install + rebuild (deterministic)
+    Publish->>NPM: npm publish --provenance --ignore-scripts (via trusted publisher)
     NPM->>Registry: publish + attestation
     Registry-->>NPM: 200 OK
-    NPM-->>GHA: version live
-    GHA->>Op: step summary with npmjs.com URL + provenance URL
+    NPM-->>Publish: version live
+    Publish->>Op: step summary with npmjs.com URL + provenance URL
 ```
 
 ## Boundary contracts

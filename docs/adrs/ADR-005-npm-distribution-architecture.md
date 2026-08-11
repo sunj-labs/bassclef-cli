@@ -105,6 +105,27 @@ The `files` field in package.json enforces this whitelist. The tier-filter scrip
 - Future tier packages (`@thebassclef/standard`, `@thebassclef/ultra`) each with different bundled substrate slices per bet #1143.
 - Kilo runtime port (Phase 2 per bet L168) can consume Road 1 as-is without depending on Road 2.
 
+### Namespace reservation
+
+The three future package names (`@thebassclef/lite`,
+`@thebassclef/standard`, `@thebassclef/ultra`) sit inside the
+`@thebassclef` npm scope, which the maintainer already owns via
+`@thebassclef/core`. Anyone with a free npm account can register a
+package name inside a scope they do not own only if the scope's owner
+has not claimed it. The reservation shape:
+
+1. Publish an empty `0.0.1` scaffold under each name via manual
+   `npm login` + `npm publish --access public`. Same one-time step as
+   `@thebassclef/core@0.0.1` per `docs/publish-setup.md` L21-31.
+2. Package pages carry a README that says "reserved for future
+   bundled variant per ADR-005; do not install."
+3. When the actual variant ships, the version bump goes through the
+   workflow at `.github/workflows/publish.yml` per ADR-004.
+
+Namespace reservation is operator work; the CLI cannot log into
+npmjs.com. Tracked as a follow-on operator ticket. See the bassclef-cli
+issue tagged `namespace-reservation`.
+
 **Blocks:**
 
 - One-command install with substrate baked in. Adopters who want that either wait for a future `@thebassclef/lite` package or do the two-step setup.

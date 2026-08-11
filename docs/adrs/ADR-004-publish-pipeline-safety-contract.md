@@ -96,28 +96,59 @@ Nothing the workflow can modify in the repo.
 
 ### Ordered steps (refuse on any failure)
 
-1. `actions/checkout` at the tag ref.
-2. `actions/setup-node` at Node 20 with npm registry configured for
+The workflow runs as two jobs (iteration c per audit finding D-4.1).
+Job 1 (`checks`) runs on every trigger with no approval gate. Job 2
+(`publish`) needs job 1 and carries the environment gate. The approver
+sees the checks job green on the workflow run page before clicking
+approve.
+
+**Job 1 — checks:**
+
+1. Resolve tag (from release event OR workflow_dispatch input).
+2. `actions/checkout` at the tag ref (fetch-depth: 0 for ancestor check).
+3. `actions/setup-node` at Node 20 with npm registry configured for
    provenance.
-3. `npm ci --ignore-scripts` — install with no script execution.
-4. `node scripts/validate-tag.mjs "$TAG"` — string-equal match
+4. `npm ci --ignore-scripts` — install with no script execution.
+5. `node scripts/validate-tag.mjs "$TAG"` — string-equal match
    against `package.json` version + ancestor check against `origin/main`.
-5. `npm run build` — clean rebuild from source.
-6. `npm test` — full test suite.
-7. `npm run typecheck` — TypeScript strict.
-8. `npm pack --dry-run --json > /tmp/pack.json` — the exact file
+6. `npm run build` — clean rebuild from source.
+7. `npm test` — full test suite.
+8. `npm run typecheck` — TypeScript strict.
+9. `npm pack --dry-run --json > /tmp/pack.json` — the exact file
    list npm will ship, without shipping.
-9. `node scripts/andon-scan.mjs /tmp/pack.json` — operator-private
-   term scan.
-10. `node scripts/tier-filter.mjs /tmp/pack.json` —
+10. `node scripts/andon-scan.mjs /tmp/pack.json` — operator-private
+    term scan.
+11. `node scripts/tier-filter.mjs /tmp/pack.json` —
     `tier: upstream` YAML frontmatter scan.
-11. **Environment gate: `npm-publish`** — operator approval required
-    before the next step runs.
-12. `npm publish --provenance --ignore-scripts` — dist-tag driven by
-    the `prerelease` flag: `latest` for stable, `next` for
-    pre-release.
-13. Write the published URL to `$GITHUB_STEP_SUMMARY` for operator
+
+Job 1 exports two outputs — `tag` and `prerelease` — for job 2.
+
+**Environment gate: `npm-publish`** — job 2 waits for operator approval.
+Because the gate sits on job 2 with `needs: checks`, approval fires
+only after job 1 finishes green. Operator sees the completed check
+output on the workflow run page and clicks approve with evidence.
+Under the pre-iteration-c single-job shape the environment gate sat
+on the only job and fired before checkout, giving the approver nothing
+to review.
+
+**Job 2 — publish:**
+
+12. `actions/checkout` at the tag ref (re-checkout is deterministic).
+13. `actions/setup-node` at Node 20 (same as job 1).
+14. `npm ci --ignore-scripts` (same as job 1).
+15. `npm run build` — rebuild from source. Same inputs, same tool
+    versions, same install flags produce the same `dist/` bytes.
+16. `npm publish --provenance --ignore-scripts` — dist-tag driven by
+    the `prerelease` output from job 1: `latest` for stable, `next`
+    for pre-release.
+17. Write the published URL to `$GITHUB_STEP_SUMMARY` for operator
     confirmation.
+
+The rebuild in job 2 costs about 30 seconds of duplicated work versus
+sharing an artifact from job 1. The trade-off buys job 2 being self-
+contained — no artifact-share configuration to maintain, no hidden
+coupling between jobs. Verified in `tests/workflow-path.test.ts` L52-64
+that job 2 carries `environment: npm-publish` and job 1 does not.
 
 ### Content of each check
 
@@ -163,8 +194,12 @@ Nothing the workflow can modify in the repo.
 
 Environment name: `npm-publish`. Configured in the repo's
 `Settings → Environments`. Required reviewer: the single operator
-(kingofrock). Accepted-risk decision per Saltzer principle 5
-(separation of privilege):
+(kingofrock). The gate lives on the `publish` job only (per iteration
+c workflow split); the `checks` job runs without a gate and its output
+lands on the workflow run page before the approver clicks approve.
+
+Accepted-risk decision per Saltzer principle 5 (separation of
+privilege):
 
 - N-of-M is impossible with one maintainer. Adding the same account
   twice adds no defense.
@@ -196,10 +231,11 @@ operator sees the URL without leaving the workflow run page.
 
 `accepted` on 2026-08-08 via PR #7 (publish pipeline merged; see
 frontmatter `accepted_via`). Amended 2026-08-11 in iteration b to
-align this Status body with the frontmatter. No supersession pending.
-Environment gate placement (approve-before-checks vs
-approve-after-checks) is under review as an iteration c decision;
-that outcome may amend this ADR further.
+align this Status body with the frontmatter. Amended 2026-08-11 in
+iteration c to split the workflow into two jobs (`checks` + `publish`)
+so the environment gate fires AFTER checks land green. Approver sees
+check output on the workflow run page before clicking approve. No
+supersession pending.
 
 ## Consequences
 
