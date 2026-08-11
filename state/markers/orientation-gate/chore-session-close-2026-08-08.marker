@@ -1,0 +1,11 @@
+# Orientation-gate marker — chore/session-close-2026-08-08
+- date: 2026-08-11
+- branch: chore/session-close-2026-08-08
+- reads:
+  - docs/whereami.md (L1-109)
+  - docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md (L1-202)
+  - gh pr list bassclef-cli (1 open — #10 session-close)
+  - gh issue list bassclef-cli (0 open)
+  - git log --oneline (12 commits since bootstrap)
+- parent chain: active goal has no parent_bet; parent_roadmap = docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md (on bassclef-upstream, not local)
+- notes: single-goal execution repo; no cross-goal lookback needed here
