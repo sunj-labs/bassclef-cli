@@ -278,6 +278,8 @@ sequenceDiagram
 
 Phase 2 of the plan below adds accessors + hook that extend this shape substrate-wide.
 
+**Phase 2 concrete-shape evidence (added 2026-08-12):** The proposed substrate hook is drafted at `docs/proposed-substrate-hooks/requirement-annotation-check.md` in bassclef-cli. It specifies the PreToolUse Edit / Write / MultiEdit handler, the classification (source vs test vs registry), the checks per class, the failure format, the override paths, the sibling composition with `pattern-annotation-validate.sh` + `assert-verify-steering.sh`, a runnable-in-principle bash sketch, and the Tier 0 test cases. Substrate reviewers can react to concrete design before the substrate PR opens. Also documented in bassclef-cli — git pre-commit hook that bridges the gap between iteration d's CI Vitest and Phase 2's substrate hook (`scripts/pre-commit-traceability.sh`, PR #21).
+
 ---
 
 ## Phased plan
@@ -304,13 +306,15 @@ Cost: ~200-400 turns for a scoped author-and-ship. Methodology layer only. Zero 
 Ships:
 - Requirement entity type added to `standards/state-spine.md` per bassclef schema-validation discipline
 - `lib/state.sh` gains `state_requirement_get`, `state_requirement_list`, `state_requirement_verifies` accessors
-- New hook: `.claude/hooks/traceability-index-build.sh` — PreToolUse Edit/Write on tracked paths auto-rebuilds forward + reverse indexes
+- **New hook — `.claude/hooks/requirement-annotation-check.sh`** — PreToolUse Edit / Write / MultiEdit on `src/**`, `scripts/**`, `tests/**`, `vite.config.ts`, `tsconfig.json`, and `docs/requirements/*.md`. Blocks writes that break the annotation chain — orphan IDs, removing a sole satisfier, flipping GAP → satisfied without paired annotations. Concrete spec drafted at `docs/proposed-substrate-hooks/requirement-annotation-check.md` in bassclef-cli (iteration h, PR pending). The spec includes bash implementation sketch, Tier 0 test cases, sibling composition (with `pattern-annotation-validate.sh` and `assert-verify-steering.sh`), override paths.
+- Optional second hook — `.claude/hooks/traceability-index-build.sh` — PreToolUse rebuild of forward + reverse indexes (deferred; the check hook covers immediate needs).
 - New skill: `/impact-analyze <path>` — walks the graph, emits impact report at `state/markers/impact-analysis/<branch>.md`
 - Tier 0 tests on the accessor + the hook per `.claude/rules/testing-tier-config.md`
 
 Cost: substantive substrate work. Estimate deferred until Phase 1 lands and calibrates.
 
 **Acceptance:**
+- `requirement-annotation-check.sh` fires on adopter Edit / Write per the spec; blocks orphan IDs and sole-satisfier removals
 - Impact analysis produces correct upstream + downstream node lists on a fixture repo
 - Accessors pass state-spine schema validation
 - Hook fires idempotently; index rebuild is under 200ms on repos with under 1000 nodes
