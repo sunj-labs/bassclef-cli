@@ -1,0 +1,7 @@
+# Temperance marker — docs/promote-cross-ref-to-upstream
+- date: 2026-08-12
+- branch: docs/promote-cross-ref-to-upstream
+- scope-decision:
+  - right thing: add "Filed as bassclef-upstream#1182 on 2026-08-12" note at the top of docs/promotes/2026-08-11-traceability-subsystem.md so the trail is visible from either direction
+  - right way: single one-line note under the H1 heading; no other content change
+  - drift trigger: pause if the edit touches anything beyond that one note
