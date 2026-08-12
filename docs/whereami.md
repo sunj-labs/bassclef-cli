@@ -9,80 +9,138 @@ Read at session-start, updated at session-end.
 
 ## Project-level phase
 
-phase: Inception
-note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. Bassclef substrate is inherited via user-scope `~/.claude/hooks/bassclef-sync.sh`; this repo carries only the config layer + build artifacts.
+phase: Construction
+note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. Bassclef substrate inherited via user-scope `~/.claude/hooks/bassclef-sync.sh`; this repo carries only the config layer + build artifacts. Model C direction (open core) locked in ADR-005 §Amendment 2026-08-12 pass 2.
 
 ## Active iteration
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 + WU-2 + WU-3 merged; WU-4 (publish pipeline) shipped as PR #7 awaiting review
+iteration_phase: WU-1 through WU-5 merged + 8 audit-driven iterations shipped (a, b, c, d, f, g, h, plus 2 ADR-005 amendments for Model C). WU-6 through WU-9 remain. Iteration e (first tag 0.0.2) blocked on operator setup — trusted publisher + GitHub Environment `npm-publish`.
 
 ## Operator recap
 
-Empty repo to shipped npm-publish pipeline in one run. Four workunits merged (bootstrap + scaffold + init + sync) plus a documentation PR that backfilled state and sequence diagrams. WU-4 with trusted publisher + ADR-004 is open as PR #7. Next: review + merge PR #7, flip ADR statuses to accepted, complete one-time publish setup, tag 0.0.2.
+Session 2026-08-11 through 2026-08-12 ran a full audit + fix arc plus a Model C pivot. Audit surfaced 20 drift items across 6 classes. Shipped 12 PRs closing every item. Model C direction (open core with paid tiers via npm auth token) accepted; extraction contract with bassclef-upstream accepted after ADR-051 landed as commit `d54e701a` in PR #1185. Traceability Subsystem promote filed at bassclef-upstream #1182. Local reader implementation waits at bassclef-cli #25 on bassclef-upstream #1184 shipping the extract build. Iteration e still needs the operator-side trusted-publisher setup before first tag ships.
 previous_bet: —
 next_bet: —
 
-## Shipped
+## Shipped (across session history)
+
+**Base ship (WU-1 through WU-5 per goal doc):**
 
 - PR #1 — chore/bassclef-bootstrap MERGED (substrate config layer)
 - PR #3 — feat/wu-1-scaffold MERGED (scaffold shell + package.json + LICENSE + WU-1 tests)
 - PR #4 — feat/wu-2-init MERGED (bassclef init command with ADR-002 safety contract)
 - PR #5 — feat/wu-3-sync MERGED (bassclef sync command with ADR-003 safety contract)
 - PR #6 — chore/decomp-diagrams-backfill MERGED (WU-2 + WU-3 state + sequence diagrams)
+- PR #7 — feat/wu-4-publish MERGED (publish pipeline with ADR-004)
+- PR #8 — docs(wu-5): backfill ADRs + interaction-design + use cases MERGED
+- PR #9 — feat(wu-5): semver + changelog methodology + bump script MERGED
+
+**Session 2026-08-11 to 2026-08-12 (audit + Model C arc):**
+
+- PR #11 — feat(security): source-map exclusion before first tag MERGED (iteration a)
+- PR #12 — docs(audit): OOAD audit outputs + Traceability Subsystem promote draft MERGED
+- PR #13 — fix(docs): iteration b drift fix pass — 13 items MERGED
+- PR #14 — docs(requirements): SysML requirement diagram MERGED (iteration f)
+- PR #15 — feat(design): iteration c — 4 design decisions MERGED
+- PR #17 — feat(traceability): iteration d — mechanical enforcement MERGED
+- PR #18 — docs(traceability): sequence diagrams added to requirements + promote MERGED
+- PR #21 — feat(traceability): iteration g — git pre-commit hook bridge MERGED
+- PR #22 — docs(traceability): iteration h — substrate hook spec MERGED
+- PR #23 — docs(promote): cross-reference filed ticket bassclef-upstream#1182 MERGED
+- PR #24 — docs(adr): ADR-005 amendment — pivot to Model C MERGED
+- PR #26 — docs(adr): ADR-005 second amendment — Model C contract accepted MERGED
 
 ## In flight
 
-- feat/wu-4-publish (publish pipeline with ADR-004 safety contract) — 110 tests green, ready to open PR
+- Iteration e — first tagged 0.0.2 release. Blocked on operator setup (trusted publisher on npmjs.com + GitHub Environment `npm-publish`).
+- bassclef-cli #25 — Model C reader implementation. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
+- bassclef-cli #16 — `@thebassclef/lite` reservation. Operator started this session; ticket stays open until `@thebassclef/lite@0.0.1` shows on npmjs.com.
+- bassclef-cli #19 — `@thebassclef/standard` reservation. Lower priority.
+- bassclef-cli #20 — `@thebassclef/ultra` reservation. Lower priority.
+
+## Cross-repo tickets filed this session
+
+- bassclef-upstream #1182 — Traceability Subsystem umbrella promote. Filed 2026-08-12. Awaits triage.
+- bassclef-upstream #1184 comment 5265798011 — confirmation of (A) for lite tier extraction. Waits on upstream `/longrun` schedule.
 
 ## Active agents
 
-- orchestrator-gated-sequential (autonomous overnight — bootstrap + WU-1 shipped)
+- operator-gated-sequential (this session ran orchestrator-gated for the audit + fix arc)
 
 ## Subsystem phases
 
 | Subsystem | Phase | Last iteration | Notes |
 |-----------|-------|---------------|-------|
-| npm package (`@thebassclef/core`) | Inception | 2026-08-06 | scaffold pending |
-| CLI dispatcher | Inception | 2026-08-06 | shape TBD in WU-1 |
+| npm package (`@thebassclef/core`) | Construction | 2026-08-12 | 12 audit-driven PRs merged; iteration e blocked on operator npm setup |
+| CLI dispatcher | Construction | 2026-08-12 | Complete: init + sync + publish workflow all merged |
+| Publish pipeline | Construction | 2026-08-12 | Two-job shape (checks + publish) with environment gate after checks green |
+| Bump discipline | Construction | 2026-08-08 | `scripts/bump-version.mjs` + `standards/npm-versioning-and-changelog.md` + 27 tests |
+| Requirement traceability | Construction | 2026-08-12 | Static diagram + Vitest enforcement + git pre-commit + upstream promote filed |
+| npm 0.0.1 reservation | DONE | 2026-07-12 (pre-session) | `@thebassclef/core@0.0.1` on npm; verified via `npm view` this session |
 
 ## Gate progress (project-level)
 
-### Inception — IN PROGRESS
-- [x] Vision doc (Goal A bet at docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md)
+### Inception — COMPLETE
+- [x] Vision doc (goal at docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md)
 - [ ] Risk register populated
-- [x] Appetite set (8 WUs per bet)
-- [x] Viability hypothesis written (bet doc)
+- [x] Appetite set (8 WUs per goal)
+- [x] Viability hypothesis written (goal doc)
 - [x] Build/buy/defer decision (build — npm distribution)
 
-### Elaboration — PENDING
-- [ ] Architecture decisions (ADRs)
-- [ ] Standards defined
-- [ ] Design principles established
-- [ ] Object model documented
+### Elaboration — COMPLETE
+- [x] Architecture decisions (ADR-001 through ADR-005 all accepted; ADR-005 twice amended for Model C direction + contract)
+- [x] Standards defined (`standards/npm-versioning-and-changelog.md`; upstream ships `lite-manifest.json` for extraction contract)
+- [ ] Design principles established (partial — luminary map + ADRs cover most surfaces)
+- [x] Object model documented (interaction-design + 4 UCs + 5 decompositions + requirement diagram)
 
 ### Construction — IN PROGRESS
 - [x] TypeScript + Vite scaffold — merged (PR #3)
-- [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — merged (PR #3)
+- [x] package.json with `bin` + files array whitelist + Apache-2.0 LICENSE — merged (PR #3, whitelist tightened in PR #11)
 - [x] Init command with safety contract (ADR-002) — merged (PR #4)
 - [x] Sync command with safety contract (ADR-003) — merged (PR #5)
-- [x] npm publish workflow with safety contract (ADR-004) — shipped as PR #7 awaiting review
+- [x] npm publish workflow with safety contract (ADR-004) — merged (PR #7, split into two jobs in PR #15)
+- [x] Semver + changelog methodology — merged (PR #8, #9)
+- [x] Source-map safety — merged (PR #11)
+- [x] Static requirement diagram — merged (PR #14)
+- [x] Traceability enforcement Vitest — merged (PR #17)
+- [x] Model C direction + contract accepted — merged (PR #24, #26)
+- [ ] Model C reader implementation (bassclef-cli #25) — waits on bassclef-upstream #1184
+- [ ] Cold-adopter harness against npm path (WU-6 — bassclef-upstream side)
+- [ ] Adam Sharpe security PRs (WU-7 — deferred per goal L128)
+- [ ] Sam demo (WU-8 — needs live 0.0.2)
 
 ### Transition — PENDING
-- [ ] Production deploy gate configured (npm trusted publishing)
-- [ ] Smoke tests green
-- [ ] Release notes published
-- [ ] Chronicle closeout
+- [x] npm 0.0.1 name reservation (done 2026-07-12; verified this session)
+- [ ] Trusted publisher config on npmjs.com (operator setup)
+- [ ] GitHub Environment `npm-publish` with operator as required reviewer (operator setup)
+- [ ] First tagged 0.0.2 release (iteration e; blocked on the two above)
+- [ ] `/architect-review` run at goal close
+- [ ] Session log for goal close
+
+## Open promote tickets
+
+**bassclef-upstream:**
+
+- #1167 — wire OOAD dispatch into /longrun
+- #1168 — wire OOAD dispatch into /build
+- #1169 — mechanize oo-ad-entry-point.md as PreToolUse hook
+- #1170 — adr-discipline-check.sh warn on proposed ADRs after PRs merge
+- #1171 — umbrella: OOAD artifacts as first-class inputs to /build /longrun /sprint
+- #1182 — Traceability Subsystem umbrella (filed this session)
+- #1184 — extract build implementation per ADR-051 D4 (awaits `/longrun` schedule)
 
 ## Risk register
 
-none yet — file when first risk materializes
+- WU-7 (Adam Sharpe security PRs) deferred per goal L128 — must land before 0.1.0 or 0.0.3.
+- Model C reader work (bassclef-cli #25) depends on bassclef-upstream #1184 shipping. If upstream deprioritizes, iteration e still ships (0.0.2 stays on the current story) but the Model C bundled shape slips.
+- Paid tier extraction contract (Q4 from Model C amendment) pending. If deferred too long, could block a paid-tier launch when the moment comes.
 
 ## Last updated
 
-2026-08-07T00:07:00+0000 — session-end (bootstrap + 4 workunits + diagram backfill; PRs #1, #3, #4, #5, #6 merged; PR #7 awaiting review)
-session: docs/session-logs/2026-08-07-session-close.md
+2026-08-12T11:25:21Z — session-end (audit + Model C pivot arc; 12 PRs merged, 4 tickets filed, 1 upstream comment)
+session: docs/session-logs/2026-08-12-model-c-plus-traceability-arc.md
 
 ## Configuration
 
