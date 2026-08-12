@@ -9,6 +9,11 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added — iteration h substrate hook spec (Phase 2 evidence)
+- `docs/proposed-substrate-hooks/requirement-annotation-check.md` — full spec of the PreToolUse hook that should ship on bassclef substrate. Describes trigger (Edit / Write / MultiEdit on source, test, vite.config.ts, tsconfig.json, docs/requirements/*.md), inputs, per-class behavior (source, test, registry), failure format per bassclef `blocked-items.md`, override paths, sibling composition (with `pattern-annotation-validate.sh` and `assert-verify-steering.sh`), bash implementation sketch, and 12 Tier 0 test cases. Serves as Phase 2 concrete-shape evidence for the Traceability Subsystem promote at `docs/promotes/2026-08-11-traceability-subsystem.md`.
+- Promote updated — Phase 1 evidence section names the spec; Phase 2 §Ships list points at the spec path; §Acceptance adds a hook-fires-per-spec item.
+- Iteration h is not implementation. The spec is a design doc adopters + upstream reviewers read before the substrate PR opens. Zero runtime impact until Phase 2 ships.
+
 ### Added — iteration g git pre-commit hook (traceability bridge)
 - `scripts/pre-commit-traceability.sh` — bash hook that runs `tests/requirements-traceability.test.ts` before every commit that touches `src/`, `scripts/`, `tests/`, `vite.config.ts`, or `docs/requirements/`. Fast — one Vitest file, roughly 200ms cold. Path-filtered so unrelated commits are not slowed. Fails with an actionable message pointing at the requirements doc.
 - `scripts/install-git-hooks.sh` — one-time helper. Copies the pre-commit script into `.git/hooks/pre-commit`. Idempotent; refuses to overwrite an unrelated existing hook unless `--force`. `--dry-run` prints what would happen.

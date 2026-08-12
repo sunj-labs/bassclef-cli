@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-h-substrate-hook-spec
+- date: 2026-08-12
+- branch: feat/iter-h-substrate-hook-spec
+- scope-decision:
+  - right thing: draft docs/proposed-substrate-hooks/requirement-annotation-check.md — full spec of the PreToolUse hook that should live on bassclef substrate; describes matcher, behavior, override paths, composition with other substrate hooks, bash implementation sketch; updates docs/promotes/ to reference the spec as Phase 2 concrete-shape evidence
+  - right way: mirror the shape of existing bassclef hook spec docs; cite the applied test case in bassclef-cli as validation; keep implementation sketch runnable-in-principle, not runnable-today
+  - drift trigger: pause if the spec starts prescribing bassclef substrate internals I do not have evidence for
+- lens: john-ousterhout (deep modules; small hook interface, deep behavior), michael-nygard (stability patterns; the hook is a circuit breaker at write time)
