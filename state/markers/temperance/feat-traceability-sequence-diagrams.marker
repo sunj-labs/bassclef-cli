@@ -1,0 +1,8 @@
+# Temperance marker — feat/traceability-sequence-diagrams
+- date: 2026-08-12
+- branch: feat/traceability-sequence-diagrams
+- scope-decision:
+  - right thing: add the 3 sequence diagrams (author flow, test implementation, CI wiring) to docs/requirements/2026-08-11-npm-distribution.md and docs/promotes/2026-08-11-traceability-subsystem.md
+  - right way: mermaid inline; keep the promote's addition as Phase 1 evidence citing the applied test case
+  - drift trigger: pause if the diagrams stop rendering on GitHub preview
+- lens: donald-norman (feedback loops made visible), edward-tufte (data-ink over decoration)

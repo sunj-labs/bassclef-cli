@@ -212,6 +212,165 @@ flowchart TB
   class R008,R009,R010,R011,R013 gap
 ```
 
+## Sequence diagrams — enforcement
+
+The static diagram sits above. Iteration d ships mechanical enforcement so the diagram stays honest as code evolves. Three views describe how the enforcement runs.
+
+### View 1 — author flow
+
+What a developer does to add or change a satisfied requirement, and how the test catches missing annotations.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev
+    participant Diagram as docs/requirements/*.md
+    participant Source as src/**, scripts/**, vite.config.ts
+    participant Test as tests/**.test.ts
+    participant TraceTest as tests/requirements-traceability.test.ts
+    participant Vitest as npx vitest run
+
+    Note over Dev,Diagram: Step A — declare the requirement
+    Dev->>Diagram: add R-NPM-XXX row with status=satisfied
+
+    Note over Dev,Source: Step B — implement code
+    Dev->>Source: add @requirement R-NPM-XXX comment at file top
+
+    Note over Dev,Test: Step C — verify with a test
+    Dev->>Test: add @verifies R-NPM-XXX comment at file top
+    Dev->>Test: write assertions that exercise the requirement
+
+    Note over Dev,Vitest: Step D — run tests locally
+    Dev->>Vitest: npm test
+
+    Vitest->>TraceTest: run traceability suite
+    TraceTest->>Diagram: read registry markdown
+    TraceTest->>Source: walk + extract @requirement IDs
+    TraceTest->>Test: walk + extract @verifies IDs (skips self)
+    alt every satisfied non-meta requirement has satisfy + verify edges
+        TraceTest-->>Vitest: 8 tests pass
+        Vitest-->>Dev: 153/153 green
+    else annotation missing on source or test
+        TraceTest-->>Vitest: fail with the missing R-NPM-XXX ID
+        Vitest-->>Dev: red — fix by adding the missing annotation
+    else orphan ID in code (not in registry)
+        TraceTest-->>Vitest: fail with the orphan ID
+        Vitest-->>Dev: red — fix by adding the row to the registry OR removing the annotation
+    end
+```
+
+### View 2 — test implementation
+
+The algorithm inside `tests/requirements-traceability.test.ts`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Fs as node:fs
+    participant Parse as parseRegistry()
+    participant Walk as walkFiles()
+    participant Extract as extractIds()
+    participant Assert as expect()
+
+    Note over Fs,Parse: Registry parsing
+    Fs->>Parse: read docs/requirements/*.md
+    Parse->>Parse: split lines
+    loop each line matching pipe-R-NPM-XXX-pipe
+        alt status cell starts with "satisfied"
+            Parse->>Parse: push entry (status = satisfied)
+        else status cell starts with "gap"
+            Parse->>Parse: push entry (status = GAP)
+        else neither
+            Note right of Parse: skip (traceability matrix row)
+        end
+    end
+    Parse-->>Assert: registry entries (13 rows)
+
+    Note over Fs,Walk: Source walk
+    Fs->>Walk: readdirSync(src/), scripts/, vite.config.ts
+    loop each file with .ts, .mjs, .js
+        Walk->>Extract: pass file content + directive="requirement"
+        Extract->>Extract: regex /@requirement\s+(R-NPM-\d{3})/g
+        Extract-->>Walk: [R-NPM-002, R-NPM-003, ...]
+    end
+    Walk-->>Assert: satisfyMap keyed by ID → [source files]
+
+    Note over Fs,Walk: Test walk
+    Fs->>Walk: readdirSync(tests/) — skip requirements-traceability.test.ts
+    loop each remaining test file
+        Walk->>Extract: pass file content + directive="verifies"
+        Extract-->>Walk: [R-NPM-002, R-NPM-003, ...]
+    end
+    Walk-->>Assert: verifyMap keyed by ID → [test files]
+
+    Note over Assert: 8 assertions run
+    Assert->>Assert: 13 registry rows
+    Assert->>Assert: 8 satisfied + 5 GAP
+    Assert->>Assert: every satisfied non-meta ID in satisfyMap
+    Assert->>Assert: every satisfied non-meta ID in verifyMap
+    Assert->>Assert: no orphan IDs
+    Assert->>Assert: parseRegistry unit — empty markdown = []
+    Assert->>Assert: parseRegistry unit — no table = []
+    Assert->>Assert: extractIds unit — both directive shapes
+```
+
+### View 3 — CI wiring
+
+Where the test fires in the publish workflow.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev
+    participant GitHub
+    participant Checks as workflow — checks job
+    participant Vitest as npm test
+    participant TraceTest as requirements-traceability.test.ts
+    participant Approver as Env approver
+    participant Publish as workflow — publish job
+
+    Dev->>GitHub: push commit OR create release tag
+    GitHub->>Checks: trigger workflow (release or workflow_dispatch)
+
+    Checks->>Checks: resolve-tag
+    Checks->>Checks: checkout at tag
+    Checks->>Checks: npm ci --ignore-scripts
+    Checks->>Checks: validate-tag.mjs (semver + ancestor)
+    Checks->>Checks: npm run build
+
+    Note over Checks,TraceTest: Traceability enforcement fires here
+    Checks->>Vitest: npm test
+    Vitest->>TraceTest: run 8 traceability tests among 17 files
+    alt all annotations complete + no orphans
+        TraceTest-->>Vitest: pass
+        Vitest-->>Checks: 153/153 pass
+    else drift
+        TraceTest-->>Vitest: fail with the missing or orphan ID
+        Vitest-->>Checks: red
+        Checks-->>GitHub: workflow red; nothing publishes
+        GitHub-->>Dev: fix the annotation, push again
+    end
+
+    Checks->>Checks: npm run typecheck
+    Checks->>Checks: npm pack --dry-run
+    Checks->>Checks: andon-scan.mjs
+    Checks->>Checks: tier-filter.mjs
+    Note over Checks: checks job green
+
+    Checks->>Approver: request npm-publish Environment approval
+    Approver->>Approver: view check output on run page
+    Approver->>Publish: click approve
+
+    Publish->>Publish: re-checkout + install + build
+    Publish->>Publish: npm publish --provenance --ignore-scripts
+    Publish-->>Dev: step summary with npmjs.com URL + provenance
+```
+
+### What the diagrams do NOT show
+
+- **Reverse impact analysis.** Phase 2 of the promote adds accessors that answer "I changed src/sync.ts — what breaks?" by walking edges. Today that walk is manual — read the traceability matrix column.
+- **Diagram auto-regeneration.** The registry table is edited by hand. Iteration d does not automate diagram regeneration when new source files land.
+
 ## Gap analysis
 
 Five requirements have no satisfier or verifier today. Each traces to a later iteration or an out-of-scope path.
