@@ -1,0 +1,8 @@
+# Temperance marker — feat/iter-g-pre-commit-traceability
+- date: 2026-08-12
+- branch: feat/iter-g-pre-commit-traceability
+- scope-decision:
+  - right thing: ship scripts/pre-commit-traceability.sh + scripts/install-git-hooks.sh + README section documenting the install; hook runs the traceability test before commit when staged files touch src/scripts/tests/vite.config.ts/docs/requirements
+  - right way: fast (~200ms — traceability test only, not full suite); path-filtered (skips when no traceability-relevant files staged); documented install; no substrate hook territory (git-side, not .claude/hooks)
+  - drift trigger: pause if the pre-commit hook itself breaks the developer workflow (e.g., slows commits noticeably) or if it conflicts with an existing .git/hooks/pre-commit
+- lens: alan-cooper (Sam persona — install is one command), donald-norman (feedback loop — commit blocks with actionable message)

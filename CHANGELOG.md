@@ -9,6 +9,12 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added — iteration g git pre-commit hook (traceability bridge)
+- `scripts/pre-commit-traceability.sh` — bash hook that runs `tests/requirements-traceability.test.ts` before every commit that touches `src/`, `scripts/`, `tests/`, `vite.config.ts`, or `docs/requirements/`. Fast — one Vitest file, roughly 200ms cold. Path-filtered so unrelated commits are not slowed. Fails with an actionable message pointing at the requirements doc.
+- `scripts/install-git-hooks.sh` — one-time helper. Copies the pre-commit script into `.git/hooks/pre-commit`. Idempotent; refuses to overwrite an unrelated existing hook unless `--force`. `--dry-run` prints what would happen.
+- README gains a Contributing section documenting the one-command install + the `SKIP_TRACEABILITY_CHECK=1` bypass.
+- **Not a bassclef substrate hook.** This is a git-side hook the adopter installs by hand. The substrate hook equivalent (PreToolUse Edit/Write) lives in Phase 2 of the Traceability Subsystem promote as the abstracted subsystem shape. Iteration g bridges the gap until Phase 2 ships.
+
 ### Added — iteration d traceability enforcement
 - **Mechanical enforcement for the requirement diagram (Phase 1.5 of the Traceability Subsystem promote).** New `tests/requirements-traceability.test.ts` — 8 Tier 0 tests. Parses the registry from `docs/requirements/2026-08-11-npm-distribution.md`. Walks `src/`, `scripts/`, `vite.config.ts` for `@requirement R-NPM-XXX` annotations. Walks `tests/` for `@verifies R-NPM-XXX` annotations. Asserts every satisfied non-meta requirement has at least one satisfy edge AND at least one verify edge. Asserts every referenced ID exists in the registry (no orphans).
 - **`@requirement` annotations added to 8 source files.** `src/commands/init.ts` (R-NPM-002), `src/commands/sync.ts` (R-NPM-003), `vite.config.ts` (R-NPM-001), `scripts/tier-filter.mjs` (R-NPM-004), `scripts/andon-scan.mjs` (R-NPM-005), `scripts/validate-tag.mjs` (R-NPM-006), `scripts/bump-version.mjs` (R-NPM-007), `.github/workflows/publish.yml` (R-NPM-006, R-NPM-011, R-NPM-012).
