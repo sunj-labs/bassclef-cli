@@ -156,6 +156,130 @@ Five new luminary files land alongside the primitive layer. Each carries a stub-
 
 ---
 
+## Phase 1 evidence — applied test case ships enforcement (added 2026-08-12)
+
+The filing repo (bassclef-cli) shipped Phase 1.5 as iteration d on 2026-08-11 (PR #17 merged as commit 77c2817). The shape below is the working example bassclef-upstream reviewers can react to. The 5 luminaries + rules proposed in Phase 1 sit downstream of what the applied test case already demonstrates.
+
+**Author flow** — what a developer does to add or change a satisfied requirement, and how the test catches missing annotations.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev
+    participant Diagram as docs/requirements/*.md
+    participant Source as src/**, scripts/**, vite.config.ts
+    participant Test as tests/**.test.ts
+    participant TraceTest as tests/requirements-traceability.test.ts
+    participant Vitest as npx vitest run
+
+    Note over Dev,Diagram: Step A — declare the requirement
+    Dev->>Diagram: add R-NPM-XXX row with status=satisfied
+
+    Note over Dev,Source: Step B — implement code
+    Dev->>Source: add @requirement R-NPM-XXX comment at file top
+
+    Note over Dev,Test: Step C — verify with a test
+    Dev->>Test: add @verifies R-NPM-XXX comment at file top
+
+    Note over Dev,Vitest: Step D — run tests locally
+    Dev->>Vitest: npm test
+    Vitest->>TraceTest: run traceability suite
+    TraceTest->>Diagram: read registry markdown
+    TraceTest->>Source: walk + extract @requirement IDs
+    TraceTest->>Test: walk + extract @verifies IDs (skips self)
+    alt every satisfied non-meta requirement has satisfy + verify edges
+        TraceTest-->>Vitest: 8 tests pass
+        Vitest-->>Dev: 153/153 green
+    else annotation missing or orphan ID
+        TraceTest-->>Vitest: fail with the offending ID
+        Vitest-->>Dev: red — fix the annotation or the registry
+    end
+```
+
+**Test implementation** — algorithm inside `tests/requirements-traceability.test.ts`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Fs as node:fs
+    participant Parse as parseRegistry()
+    participant Walk as walkFiles()
+    participant Extract as extractIds()
+    participant Assert as expect()
+
+    Fs->>Parse: read docs/requirements/*.md
+    loop each line matching pipe-R-NPM-XXX-pipe
+        alt status cell starts with "satisfied" OR "gap"
+            Parse->>Parse: push entry
+        else neither
+            Note right of Parse: skip (traceability matrix row)
+        end
+    end
+    Parse-->>Assert: registry entries (13 rows)
+
+    Fs->>Walk: readdirSync(src/), scripts/, vite.config.ts
+    Walk->>Extract: extract @requirement IDs per file
+    Walk-->>Assert: satisfyMap keyed by ID
+
+    Fs->>Walk: readdirSync(tests/) — skip requirements-traceability.test.ts
+    Walk->>Extract: extract @verifies IDs per file
+    Walk-->>Assert: verifyMap keyed by ID
+
+    Assert->>Assert: every satisfied non-meta ID in satisfyMap
+    Assert->>Assert: every satisfied non-meta ID in verifyMap
+    Assert->>Assert: no orphan IDs
+```
+
+**CI wiring** — where the test fires in the publish workflow.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev
+    participant GitHub
+    participant Checks as workflow — checks job
+    participant Vitest as npm test
+    participant TraceTest as requirements-traceability.test.ts
+    participant Approver as Env approver
+    participant Publish as workflow — publish job
+
+    Dev->>GitHub: push commit OR create release tag
+    GitHub->>Checks: trigger workflow
+
+    Checks->>Vitest: npm test (among other checks)
+    Vitest->>TraceTest: run 8 traceability tests
+    alt all annotations complete
+        TraceTest-->>Vitest: pass
+        Vitest-->>Checks: 153/153 pass
+    else drift
+        TraceTest-->>Vitest: fail
+        Vitest-->>Checks: red
+        Checks-->>GitHub: workflow red; nothing publishes
+        GitHub-->>Dev: fix the annotation, push again
+    end
+
+    Note over Checks: checks job green
+    Checks->>Approver: request npm-publish Environment approval
+    Approver->>Approver: view check output on run page
+    Approver->>Publish: click approve
+    Publish->>Publish: re-checkout + install + build
+    Publish->>Publish: npm publish --provenance
+    Publish-->>Dev: step summary with npmjs.com URL
+```
+
+**Numbers from the applied test case (as of 2026-08-11):**
+
+- 8 tests in `tests/requirements-traceability.test.ts`.
+- 8 source files carry `@requirement R-NPM-XXX` annotations.
+- 7 test files carry `@verifies R-NPM-XXX` annotations.
+- 1 meta-requirement exemption (R-NPM-012 — All Tier 0 tests GREEN).
+- 153/153 total tests pass.
+- CI enforcement lives on the workflow `checks` job via `npm test`.
+
+Phase 2 of the plan below adds accessors + hook that extend this shape substrate-wide.
+
+---
+
 ## Phased plan
 
 ### Phase 1 — Methodology + reference model (this promote's V1)
