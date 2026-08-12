@@ -15,6 +15,8 @@ sister_tickets:
 
 # /promote — Traceability Subsystem + 5 luminaries for requirements engineering
 
+**Filed as bassclef-upstream#1182 on 2026-08-12.** Ticket link — https://github.com/sunj-labs/bassclef-upstream/issues/1182.
+
 **Problem (≤500 chars):** Bassclef adopters ship code, ADRs, use cases, decompositions, and tests, but nothing links the requirement → design → code → test chain into one graph a reader can see or a machine can walk. When a code change breaks a documented invariant, no gate fires — the drift is found by audit weeks later. Every adopter reproduces the same audit cost. The change we want is a Traceability Subsystem as a first-class substrate primitive, so requirement changes propagate through the chain automatically.
 
 ---
