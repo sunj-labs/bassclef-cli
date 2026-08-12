@@ -176,6 +176,39 @@ The prompt sent to upstream lives in `docs/promotes/2026-08-11-traceability-subs
 
 **Falsifier.** If bassclef-upstream's reply reveals the extraction contract is architecturally impractical (say, upstream cannot reliably identify a lite subset), Model C falls back to Model A (multi-package). ADR-005 gets a second amendment naming the fallback.
 
+## Amendment 2026-08-12 pass 2 — direction AND contract accepted
+
+**Status:** direction accepted (pass 1) plus extraction contract accepted (this pass) for the free tier. Paid tier extraction contract (Q4) remains pending.
+
+**Upstream reply landed 2026-08-12** in the shape of bassclef-upstream ADR-051 (commit `d54e701a`, PR #1185) plus companion answers on the four questions the pass-1 amendment named. Full context in bassclef-upstream's reply on this repo's session log for 2026-08-12.
+
+**Q1 — LITE TIER MANIFEST — resolved.** bassclef-upstream ships `lite-manifest.json` at the repo root. `manifest_version` semver applies — partners pin against it; adding an entry = minor bump; removing = major bump (breaks partners). 108 entries as of `manifest_version` 1.2.2. Schema at `standards/lite-manifest.schema.json`; human-readable index at `docs/lite-manifest.md`; writer-side drift check via `scripts/lite-manifest-drift-check.sh` plus the GitHub workflow of the same name. The manifest gets derived from per-file `tier:` frontmatter plus operator curation; the published contract is the manifest file. **bassclef-cli reads the manifest, not raw frontmatter** — walking frontmatter would fork the source (the anti-pattern bassclef-upstream #1143 names).
+
+**Q2 — EXTRACTION MECHANISM — resolved with a modification.** ADR-051 D1 moved primary extract to bassclef-upstream. bassclef-upstream ships a build step (`scripts/build-lite-bundle.sh` per bassclef-upstream #1184) that walks `lite-manifest.json`, applies operator-private filter + andon scan at extract time, writes a `dist/lite/` tree. bassclef-cli reads that tree unchanged. bassclef-cli keeps its existing `tier-filter.mjs` + `andon-scan.mjs` as backup gates per Saltzer-Schroeder complete mediation. bassclef-upstream ran a 6-lens formal `/luminary` consult that voted 6-0 on primary placement upstream.
+
+**Q3 — VERSION PINNING — resolved.** bassclef-cli's build workflow runs `git fetch --tags && git checkout $(git describe --tags --abbrev=0 --match='v*')` at the bassclef-upstream clone step. It records the picked tag in `@thebassclef/core`'s `package.json` build metadata (exact field name lands with bassclef-cli #25). The publish PR body names the tag picked. Adopter accountability lives at the CLI status line per bassclef-upstream #873 sub-cure 1 — adopters always see which version they got. Runtime `bassclef sync` stays orthogonal — it exists for git-clone adopters via `bassclef-sync.sh` per bassclef-upstream `standards/bassclef-source-config.md`. Two paths cohabit; npm-installed users get whatever ships in `@thebassclef/core@N`.
+
+**Q4 — SAME CONTRACT FOR PAID TIERS — pending.** bassclef-upstream noted that companion npm package (option B in the pass-1 amendment) is a real alternative for Model C paid tiers with auth gating natural via npm paid tokens. Decision deferred until the free tier ships cleanly and operational experience informs the choice. bassclef-cli #25 out-of-scope explicitly names paid tier extraction as a separate decision.
+
+**Consequences that pass 1 flagged now resolved:**
+
+- §Decision L37-42 amendment — `@thebassclef/core` ship shape adds `dist/lite/**` alongside `dist/` + README + LICENSE. Lands in bassclef-cli #25 workflow work.
+- §What Road 1 explicitly does NOT ship L77-83 amendment — the "skills, rules, hooks, luminaries, agents" line loses the "any" qualifier. Under Model C, `@thebassclef/core` ships the lite subset per the manifest. Lands in bassclef-cli #25.
+- §Namespace reservation L108-127 — clarified in pass 1. `@thebassclef/lite` reservation is defensive only per issue #16. `@thebassclef/standard-pro` and `@thebassclef/ultra-pro` are the working names for paid packages (subject to Q4 decision).
+
+**Sequencing:** bassclef-upstream bundles #1184 D4 implementation + bassclef-cli reader change + bassclef-upstream #873 sub-cure 1 status line into one atomic ship (~300-500 turns per upstream estimate). bassclef-cli #25 tracks the bassclef-cli-side changes in that bundle.
+
+**Iteration e (first tag 0.0.2) sequencing unchanged.** Ships on the current story — CLI + init templates, no substrate. Model C bundled ship shape lands in the follow-on cut once bassclef-upstream #1184 provides the `dist/lite/` tree to consume. Likely 0.1.0 (minor bump) since the file set adopters see changes per Keep a Changelog conventions.
+
+**Cross-references:**
+
+- bassclef-upstream ADR-051 — https://github.com/sunj-labs/bassclef-upstream/blob/main/architecture/decisions/ADR-051-*.md (path pattern; exact filename lands with PR #1185 merge)
+- bassclef-upstream PR #1185 — merged commit `d54e701a` shipping ADR-051
+- bassclef-upstream #1184 — extract build implementation (waits on bassclef-cli confirmation, which was posted 2026-08-12)
+- bassclef-upstream #1143 — tier manifest as contract for all tiers (open epic; anchors Vernon + Hoare + Parnas)
+- bassclef-upstream #873 sub-cure 1 — status line version tag accountability (rides #1184)
+- bassclef-cli #25 — follow-on ticket tracking the bassclef-cli-side reader changes
+
 ## Relationship to sibling ADRs
 
 This ADR is the arc-level shape. The 4 sibling ADRs pin WU-level contracts:

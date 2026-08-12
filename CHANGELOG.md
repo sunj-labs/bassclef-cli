@@ -9,6 +9,16 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Changed — ADR-005 second amendment (Model C contract accepted)
+- `docs/adrs/ADR-005-npm-distribution-architecture.md` gains a §Amendment 2026-08-12 pass 2 section. Flips the pass-1 pending markers to accepted after bassclef-upstream answered on the four questions.
+- Q1 resolved — bassclef-upstream ships `lite-manifest.json` at repo root with `manifest_version` semver. 108 entries in 1.2.2. bassclef-cli reads the manifest, not raw frontmatter (per bassclef-upstream #1143 anti-pattern).
+- Q2 resolved — bassclef-upstream ADR-051 D1 (commit `d54e701a`, PR #1185) moves primary extract upstream. bassclef-upstream ships `dist/lite/` pre-built with operator-private filter + andon scan applied. bassclef-cli reads the tree unchanged; keeps `tier-filter.mjs` + `andon-scan.mjs` as backup gates per Saltzer-Schroeder complete mediation.
+- Q3 resolved — bassclef-cli auto-follows latest v-tag at build time. Records picked tag in `package.json` build metadata. Runtime `bassclef sync` stays orthogonal.
+- Q4 pending — paid tier extraction contract deferred until free tier ships cleanly.
+- bassclef-cli #25 filed to track the reader implementation on this side. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
+- Confirmation of (A) for extraction shape posted at bassclef-upstream #1184 (comment 5265798011).
+- Iteration e (first tag 0.0.2) sequencing unchanged. Model C bundled ship shape lands in a follow-on cut once #1184 ships.
+
 ### Changed — ADR-005 amendment for Model C (open core with paid tiers)
 - `docs/adrs/ADR-005-npm-distribution-architecture.md` gains a §Amendment 2026-08-12 — pivot to Model C section. Direction accepted; extraction contract with bassclef-upstream pending upstream reply.
 - New shape: `@thebassclef/core` = free CLI + lite substrate bundled (change from prior "dist, README, LICENSE, nothing else"). `@thebassclef/standard-pro` + `@thebassclef/ultra-pro` = paid packages installed via npm auth token. `@thebassclef/lite` reserved defensively per issue #16 but likely never ships as a real package.
