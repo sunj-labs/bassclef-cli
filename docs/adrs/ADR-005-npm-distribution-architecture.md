@@ -130,6 +130,52 @@ issue tagged `namespace-reservation`.
 
 - One-command install with substrate baked in. Adopters who want that either wait for a future `@thebassclef/lite` package or do the two-step setup.
 
+## Amendment 2026-08-12 — pivot to Model C (open core with paid tiers)
+
+**Status of this amendment:** direction accepted; extraction contract with `sunj-labs/bassclef-upstream` pending upstream reply. Once upstream confirms shape, this section flips to `accepted` and the older §Enables + §Namespace reservation content above gets consolidated.
+
+**What changed.** The prior text (§Enables L104 + §Namespace reservation) framed `@thebassclef/lite` as a future bundled variant of the CLI. That framing did not name a business model. The operator's direction as of 2026-08-12 — the substrate should support a paid tier option. Model C (open core) fits that direction better than the prior multi-package framing.
+
+**Model C direction.**
+
+- `@thebassclef/core` — free. CLI plus **lite substrate content bundled**. Adopter runs `npm install -g @thebassclef/core` and gets a working bassclef-lite setup with one command. Change from prior ADR-005 L37-42 which said "compiled TypeScript in dist/, README.md, LICENSE. Nothing else." The new ship includes a `dist/substrate/` directory with the lite tier files.
+- `@thebassclef/standard-pro` — paid. Adds standard tier substrate content on top of core. Installed as a separate package after purchase; requires npm auth token issued at purchase. Name subject to upstream confirmation.
+- `@thebassclef/ultra-pro` — paid. Same shape as standard-pro but with ultra tier substrate. Name subject to upstream confirmation.
+- `@thebassclef/lite` — reserved defensively per issue #16 but likely never ships. Lite content lives inside `@thebassclef/core`. The name reservation prevents squatting; nothing paid or free ships under it.
+
+**Why Model C over the prior framing.**
+
+- Paid features never touch a non-paying adopter's disk. Server-side npm auth enforces access; not a client-side check that a determined adopter can defeat.
+- Single-command install for the free tier. No two-step setup for adopters who want lite behavior.
+- Tier release cadences stay independent. A lite update ships as `@thebassclef/core@X.Y.Z`; a standard update ships as `@thebassclef/standard-pro@A.B.C`; neither forces the other.
+- Business flexibility. Paid tiers can carry per-seat licensing, trial keys, expiry rules — all via npm auth tokens issued by the maintainer.
+
+**Extraction contract with bassclef-upstream (pending).**
+
+bassclef-upstream is the source of substrate content today. Under Model C, bassclef-upstream will build a "lite tier" file set that bassclef-cli extracts at publish time. Details pending upstream reply. Open questions:
+
+- Where the lite manifest lives (single JSON file? tier frontmatter on each file? convention path?).
+- How bassclef-cli's publish workflow pulls the files (git clone + tier filter? separate `@thebassclef/substrate` npm package? per-tier tarballs at stable URLs?).
+- How version pinning works (pin to bassclef-upstream tag? track HEAD? something else?).
+- Same or different contract for the paid tiers.
+
+The prompt sent to upstream lives in `docs/promotes/2026-08-11-traceability-subsystem.md` amendment plus a separate handoff filed at bassclef-upstream (see `sunj-labs/bassclef-upstream` issue reference to follow). Substrate design at upstream should not change; only the extraction contract for bassclef-cli.
+
+**Consequences for the prior ADR sections.**
+
+- §Decision L37-42 — `@thebassclef/core` contents changes from "dist, README, LICENSE" to "dist, README, LICENSE, dist/substrate/lite/**". `files` field in package.json expands. Amend when the extraction contract lands.
+- §What Road 1 explicitly does NOT ship L77-83 — the "Skills, Rules, Hooks, Luminaries, Agents" line no longer holds under Model C. Amend when the extraction contract lands. Under Model C, `@thebassclef/core` DOES ship the lite subset of those categories.
+- §Namespace reservation L108-127 — the three reserved names stay reserved defensively. Roles clarified — `@thebassclef/lite` is defensive only; `@thebassclef/standard-pro` and `@thebassclef/ultra-pro` are the paid packages when they ship.
+
+**Iteration e implications.**
+
+- `@thebassclef/core@0.0.2` scope for iteration e — stays as the current CLI + init templates plus no substrate. The Model C ship shape (bundle lite substrate) lands in a later iteration once bassclef-upstream confirms the extraction contract. This lets us ship 0.0.2 on the current story without waiting on upstream.
+- Future 0.1.0 (or similar) cuts once Model C ships — that is when `dist/substrate/lite/` gets bundled.
+
+**Issue #16 status.** Reservation of `@thebassclef/lite` still owed per issue #16. Reason changes from "future bundled variant" to "defensive naming; name likely never ships as a real package." Reservation itself still the right move.
+
+**Falsifier.** If bassclef-upstream's reply reveals the extraction contract is architecturally impractical (say, upstream cannot reliably identify a lite subset), Model C falls back to Model A (multi-package). ADR-005 gets a second amendment naming the fallback.
+
 ## Relationship to sibling ADRs
 
 This ADR is the arc-level shape. The 4 sibling ADRs pin WU-level contracts:

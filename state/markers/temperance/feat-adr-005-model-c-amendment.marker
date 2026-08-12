@@ -1,0 +1,8 @@
+# Temperance marker — feat/adr-005-model-c-amendment
+- date: 2026-08-12
+- branch: feat/adr-005-model-c-amendment
+- scope-decision:
+  - right thing: amend ADR-005 with a Model C direction — open core with free CLI + lite substrate bundled, paid tiers as separate scoped packages; note the extraction contract with bassclef-upstream is pending upstream reply
+  - right way: dated amendment section that flips the future-package language from "@thebassclef/lite bundled variant" to "@thebassclef/standard-pro + ultra-pro paid add-ons"; keep the old text visible so history reads clean; mark parts that need upstream confirmation as pending
+  - drift trigger: pause if the amendment tries to specify the extraction contract details before upstream weighs in
+- lens: john-ousterhout (deep modules; keep the ADR clear about which decisions are settled vs pending), martin-fowler (evolutionary design; ADRs amend, they do not rewrite)
