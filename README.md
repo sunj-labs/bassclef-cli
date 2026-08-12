@@ -39,6 +39,31 @@ will land this" message and exit non-zero. This is intentional; the
 scaffold ships before the behavior so publish + install can be
 tested end-to-end.
 
+## Contributing
+
+Traceability check runs on every commit that touches source, tests,
+`vite.config.ts`, or `docs/requirements/`. One-time install:
+
+```
+bash scripts/install-git-hooks.sh
+```
+
+The hook fires the traceability test at
+`tests/requirements-traceability.test.ts`. The test walks source for
+`@requirement R-NPM-XXX` comments and tests for `@verifies R-NPM-XXX`
+comments. It fails if a satisfied requirement is missing an edge or
+if a referenced ID is not in the registry at
+`docs/requirements/2026-08-11-npm-distribution.md`.
+
+Bypass in a bind:
+
+```
+SKIP_TRACEABILITY_CHECK=1 git commit -m "..."
+```
+
+The workflow's `checks` job still runs the full test suite (including
+the traceability check) so bypassed commits get caught at CI.
+
 ## License
 
 Apache-2.0. See [LICENSE](./LICENSE).
