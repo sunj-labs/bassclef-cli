@@ -1,0 +1,7 @@
+# Temperance marker — feat/adr-005-model-c-contract-accepted
+- date: 2026-08-12
+- branch: feat/adr-005-model-c-contract-accepted
+- scope-decision:
+  - right thing: flip ADR-005 §Amendment 2026-08-12 from "direction accepted, contract pending" to "direction and contract accepted" — cite bassclef-upstream's answers on Q1-Q3, cross-reference ADR-051 + PR #1185 + #1184 + #1143 + #873 + bassclef-cli #25; keep Q4 (paid tiers) as pending
+  - right way: append a dated §Amendment 2026-08-12 pass 2 subsection rather than editing the pass-1 text in place; readers see the timeline
+  - drift trigger: pause if the amendment tries to specify workflow implementation details (that belongs in bassclef-cli #25, not the ADR)
