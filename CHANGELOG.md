@@ -9,6 +9,12 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Changed — ADR-005 amendment for Model C (open core with paid tiers)
+- `docs/adrs/ADR-005-npm-distribution-architecture.md` gains a §Amendment 2026-08-12 — pivot to Model C section. Direction accepted; extraction contract with bassclef-upstream pending upstream reply.
+- New shape: `@thebassclef/core` = free CLI + lite substrate bundled (change from prior "dist, README, LICENSE, nothing else"). `@thebassclef/standard-pro` + `@thebassclef/ultra-pro` = paid packages installed via npm auth token. `@thebassclef/lite` reserved defensively per issue #16 but likely never ships as a real package.
+- Iteration e (first tag 0.0.2) unchanged. Model C ship shape (bundle lite substrate) lands in a later cut once upstream confirms the extraction contract.
+- Prompt drafted for bassclef-upstream asking them to clarify the extraction contract (manifest shape, pull mechanism, version pinning, paid-tier symmetry). Prompt lives in session turn output; operator sends it to bassclef-upstream by hand.
+
 ### Added — iteration h substrate hook spec (Phase 2 evidence)
 - `docs/proposed-substrate-hooks/requirement-annotation-check.md` — full spec of the PreToolUse hook that should ship on bassclef substrate. Describes trigger (Edit / Write / MultiEdit on source, test, vite.config.ts, tsconfig.json, docs/requirements/*.md), inputs, per-class behavior (source, test, registry), failure format per bassclef `blocked-items.md`, override paths, sibling composition (with `pattern-annotation-validate.sh` and `assert-verify-steering.sh`), bash implementation sketch, and 12 Tier 0 test cases. Serves as Phase 2 concrete-shape evidence for the Traceability Subsystem promote at `docs/promotes/2026-08-11-traceability-subsystem.md`.
 - Promote updated — Phase 1 evidence section names the spec; Phase 2 §Ships list points at the spec path; §Acceptance adds a hook-fires-per-spec item.
