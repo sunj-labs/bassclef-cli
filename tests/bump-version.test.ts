@@ -31,13 +31,20 @@
 // [x] refuseIfDirty — allows dirty on package.json + CHANGELOG.md only
 // [x] refuseIfDirty — refuses on unrelated modified file
 // [x] refuseIfDirty — clean tree passes
+// [x] refuseIfDirty — allows dirty on src/index.ts (bump script writes it too)
+// [x] writeIndexTsVersion — replaces the version literal
+// [x] writeIndexTsVersion — refuses when the constant is missing
 
 import { describe, it, expect } from 'vitest';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   parseArgs,
   computeNewVersion,
   renameUnreleasedBlock,
   refuseIfDirty,
+  writeIndexTsVersion,
   ArgvError,
   RefusedError,
 } from '../scripts/bump-version.mjs';
@@ -223,5 +230,36 @@ describe('refuseIfDirty', () => {
 
   it('passes on clean tree', () => {
     expect(() => refuseIfDirty(false, cleanRunner)).not.toThrow();
+  });
+
+  it('allows dirty on src/index.ts (bump script writes it too)', () => {
+    const runner = () => ' M src/index.ts\n';
+    expect(() => refuseIfDirty(false, runner)).not.toThrow();
+  });
+});
+
+describe('writeIndexTsVersion', () => {
+  it('replaces the version literal', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bump-index-'));
+    const path = join(dir, 'index.ts');
+    const before = `// header\nexport const version = '0.0.1' as const;\n`;
+    writeFileSync(path, before, 'utf8');
+    try {
+      writeIndexTsVersion(path, '0.0.2');
+      expect(readFileSync(path, 'utf8')).toContain(`export const version = '0.0.2' as const;`);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses when the constant is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bump-index-'));
+    const path = join(dir, 'index.ts');
+    writeFileSync(path, `// no version constant here\n`, 'utf8');
+    try {
+      expect(() => writeIndexTsVersion(path, '0.0.2')).toThrow(RefusedError);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

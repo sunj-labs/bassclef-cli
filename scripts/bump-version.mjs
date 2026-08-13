@@ -113,12 +113,12 @@ export function refuseIfDirty(allowDirty, runCmd) {
   const runner = runCmd || ((cmd) => execSync(cmd).toString());
   const status = runner('git status --porcelain');
   const lines = status.split('\n').filter(Boolean);
+  const allowed = new Set(['package.json', 'CHANGELOG.md', 'src/index.ts']);
   const disallowed = lines.filter(line => {
     // porcelain format: XY<space>path where XY is a 2-char status field.
     const match = line.match(/^..\s(.+)$/);
     if (!match) return true;
-    const filePath = match[1];
-    return filePath !== 'package.json' && filePath !== 'CHANGELOG.md';
+    return !allowed.has(match[1]);
   });
   if (disallowed.length > 0) {
     throw new RefusedError(
@@ -136,6 +136,27 @@ export function writePackageJsonVersion(pkgPath, newVersion) {
   const tmpPath = pkgPath + '.tmp';
   writeFileSync(tmpPath, updated, 'utf8');
   renameSync(tmpPath, pkgPath);
+}
+
+// Keeps the src/index.ts version constant in sync with package.json.
+// The constant is what `bassclef --version` prints, so drift breaks
+// the CLI + programmatic API tests. Refuses when the literal is
+// missing rather than silently no-op.
+export function writeIndexTsVersion(indexTsPath, newVersion) {
+  const text = readFileSync(indexTsPath, 'utf8');
+  const pattern = /export const version = '[^']+' as const;/;
+  if (!pattern.test(text)) {
+    throw new RefusedError(
+      `Version constant not found in ${indexTsPath}. Expected: export const version = '...' as const;`
+    );
+  }
+  const updated = text.replace(
+    pattern,
+    `export const version = '${newVersion}' as const;`
+  );
+  const tmpPath = indexTsPath + '.tmp';
+  writeFileSync(tmpPath, updated, 'utf8');
+  renameSync(tmpPath, indexTsPath);
 }
 
 export function writeChangelog(changelogPath, newText) {
@@ -186,9 +207,15 @@ export async function main(argv, cwd) {
     writeChangelog(changelogPath, newChangelog);
     writePackageJsonVersion(pkgPath, newVersion);
 
+    const indexTsPath = path.join(workDir, 'src/index.ts');
+    if (!existsSync(indexTsPath)) {
+      throw new RefusedError(`src/index.ts not found at ${indexTsPath}. Run from repo root.`);
+    }
+    writeIndexTsVersion(indexTsPath, newVersion);
+
     process.stdout.write(`Bumped: ${pkg.version} → ${newVersion}\n`);
     process.stdout.write('Next steps:\n');
-    process.stdout.write('  git add package.json CHANGELOG.md\n');
+    process.stdout.write('  git add package.json CHANGELOG.md src/index.ts\n');
     process.stdout.write(`  git commit -m "chore: release v${newVersion}"\n`);
     process.stdout.write(`  git tag v${newVersion}\n`);
     process.stdout.write(`  git push origin main v${newVersion}\n`);

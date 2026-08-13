@@ -86,7 +86,7 @@ One row per requirement. Columns for derived_from (ADR), refined_by (UC + decomp
 | R-NPM-004 | ADR-004 | UC-script-publish, wu-4-publish.md | `scripts/tier-filter.mjs`, `.github/workflows/publish.yml` | `tier-filter.test.ts`, `workflow-path.test.ts` |
 | R-NPM-005 | ADR-004 | UC-script-publish, wu-4-publish.md | `scripts/andon-scan.mjs` | `andon-scan.test.ts` |
 | R-NPM-006 | ADR-004 | UC-script-publish, `docs/publish-setup.md` | `.github/workflows/publish.yml` | `workflow-path.test.ts`, `validate-tag.test.ts` (partial — runtime verification at first publish) |
-| R-NPM-007 | ADR-005 | UC-script-bump, wu-5-methodology.md, `standards/npm-versioning-and-changelog.md` | `scripts/bump-version.mjs`, `CHANGELOG.md` | `bump-version.test.ts` |
+| R-NPM-007 | ADR-005 | UC-script-bump, wu-5-methodology.md, `standards/npm-versioning-and-changelog.md` | `scripts/bump-version.mjs`, `CHANGELOG.md`, `src/index.ts` | `bump-version.test.ts`, `version-sync.test.ts` |
 | R-NPM-008 | — | — (upstream) | — (upstream) | — (upstream) |
 | R-NPM-009 | — (pending) | — (deferred) | — (deferred) | — (deferred) |
 | R-NPM-010 | ADR-005 | interaction-design (Sam persona) | (future) demo recording + timing | (future) manual timing evidence |

@@ -1,3 +1,38 @@
+
+# The sync-managed block above ignores `lib` (top-level symlink) but the
+# pattern also matches src/lib/. Un-ignore the source tree.
+!src/lib
+!src/lib/**
+
+# Bassclef runtime artifacts (per-machine, not content)
+.claude/LAST_SAVE
+.claude/SESSION_LOCK
+.claude/CHECKPOINT.md
+.claude/settings.local.json
+state/markers/verify/
+
+# Node.js / npm build artifacts (WU-1)
+node_modules/
+dist/
+*.tgz
+.DS_Store
+npm-debug.log*
+.env
+.env.local
+
+# Bassclef SDLC + runtime marker directories (per-session, not content)
+docs/sdlc-traces/
+state/markers/verify/
+state/markers/hook-heartbeat/
+state/markers/turn-counter/
+state/markers/diagnose/
+state/markers/session-timing/
+state/markers/turn-grade/
+state/markers/turn-prose-flags/
+
+# Bassclef-sync managed symlinks — subdirectories the top block missed
+# (session-reflection.d gets populated by user-scope sync too)
+.claude/hooks/session-reflection.d/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 .claude/skills/agent-research-spawn
 .claude/skills/architect-review
@@ -113,6 +148,7 @@
 .claude/hooks/destructive-command-guard.sh
 .claude/hooks/diagnose-expansion-inject.sh
 .claude/hooks/file-rename-discipline-check.sh
+.claude/hooks/hook-classifier-canary.sh
 .claude/hooks/kiss-default-check.sh
 .claude/hooks/kiss-expansion-inject.sh
 .claude/hooks/longrun-expansion-inject.sh
@@ -141,6 +177,7 @@
 .claude/hooks/pre-gh-release-body-scrub.sh
 .claude/hooks/pre-gh-sibling-repo-scrub.sh
 .claude/hooks/pre-git-commit-msg-scrub.sh
+.claude/hooks/pre-release-tier-alignment-check.sh
 .claude/hooks/pre-task-lock.sh
 .claude/hooks/promote-expansion-inject.sh
 .claude/hooks/reviewer-dispatch-check.sh
@@ -149,8 +186,6 @@
 .claude/hooks/save-state.sh
 .claude/hooks/session-end-version-status.sh
 .claude/hooks/session-end.sh
-.claude/hooks/session-reflection.sh
-.claude/hooks/session-start-recap-inject.sh
 .claude/hooks/shadcn-first-check.sh
 .claude/hooks/skill-body-grade-gate.sh
 .claude/hooks/skill-body-intent-drift.sh
@@ -159,52 +194,18 @@
 .claude/hooks/state-validate.sh
 .claude/hooks/stop-assertion-shape-scan.sh
 .claude/hooks/substrate-clarity-gate.sh
+.claude/hooks/substrate-registration-canary.sh
 .claude/hooks/temperance-gate.sh
+.claude/hooks/test-classifier-canary.sh
 .claude/hooks/testing-tier-enforce.sh
 .claude/hooks/tool-failure-diagnosis.sh
 .claude/hooks/trace-helper.sh
 .claude/hooks/turn-prose-grade-measure.sh
 .claude/hooks/turn-prose-kiss-check.sh
 .claude/hooks/type-check.sh
-.claude/hooks/vendored-dispatcher-refresh.sh
 .claude/hooks/vocabulary-migration-check.sh
 .claude/hooks/whereami-utc-gate.sh
 .claude/bassclef-orientation.md
 lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
-
-# The sync-managed block above ignores `lib` (top-level symlink) but the
-# pattern also matches src/lib/. Un-ignore the source tree.
-!src/lib
-!src/lib/**
-
-# Bassclef runtime artifacts (per-machine, not content)
-.claude/LAST_SAVE
-.claude/SESSION_LOCK
-.claude/CHECKPOINT.md
-.claude/settings.local.json
-state/markers/verify/
-
-# Node.js / npm build artifacts (WU-1)
-node_modules/
-dist/
-*.tgz
-.DS_Store
-npm-debug.log*
-.env
-.env.local
-
-# Bassclef SDLC + runtime marker directories (per-session, not content)
-docs/sdlc-traces/
-state/markers/verify/
-state/markers/hook-heartbeat/
-state/markers/turn-counter/
-state/markers/diagnose/
-state/markers/session-timing/
-state/markers/turn-grade/
-state/markers/turn-prose-flags/
-
-# Bassclef-sync managed symlinks — subdirectories the top block missed
-# (session-reflection.d gets populated by user-scope sync too)
-.claude/hooks/session-reflection.d/
