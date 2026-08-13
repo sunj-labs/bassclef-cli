@@ -9,6 +9,15 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Notes
+
+## [0.0.2] - 2026-08-13
 ### Changed — ADR-005 second amendment (Model C contract accepted)
 - `docs/adrs/ADR-005-npm-distribution-architecture.md` gains a §Amendment 2026-08-12 pass 2 section. Flips the pass-1 pending markers to accepted after bassclef-upstream answered on the four questions.
 - Q1 resolved — bassclef-upstream ships `lite-manifest.json` at repo root with `manifest_version` semver. 108 entries in 1.2.2. bassclef-cli reads the manifest, not raw frontmatter (per bassclef-upstream #1143 anti-pattern).
