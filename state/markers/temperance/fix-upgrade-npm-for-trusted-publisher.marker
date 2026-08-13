@@ -1,0 +1,5 @@
+# Temperance marker — fix/upgrade-npm-for-trusted-publisher
+- date: 2026-08-13
+- branch: fix/upgrade-npm-for-trusted-publisher
+- scope-decision: add `npm install -g npm@latest` step before publish; tests hypothesis K that trusted publishers need npm 11.5.1+ and Node 20's bundled npm 10.x is the block
+- lens: michael-feathers (characterization test — pins the version invariant that publish needs)
