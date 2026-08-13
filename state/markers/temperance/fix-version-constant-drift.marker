@@ -1,0 +1,6 @@
+# Temperance marker — fix/version-constant-drift
+- date: 2026-08-13
+- branch: fix/version-constant-drift
+- scope-decision: fix src/index.ts hardcoded version + extend bump script to update it + add invariant test; then re-tag v0.0.2
+- lens: kent-beck (test-first), john-ousterhout (eliminate error class by design)
+- drift-trigger: adding template-version bumping to same script — those are separate concerns (package semver vs template semver), file follow-on if operator wants lockstep
