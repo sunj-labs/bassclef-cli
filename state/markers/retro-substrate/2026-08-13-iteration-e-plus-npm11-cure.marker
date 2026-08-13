@@ -1,0 +1,9 @@
+# Retro substrate observations — 2026-08-13-iteration-e-plus-npm11-cure
+- date: 2026-08-13
+- session: 2026-08-13-iteration-e-plus-npm11-cure
+- observations:
+  - dedup: version constant drift class — commented candidate on sunj-labs/bassclef-upstream#1118 (proposed)
+  - dedup: save-state auto-commit to main branch — commented candidate on sunj-labs/bassclef-upstream#973 (proposed)
+  - dedup: node 20 ships npm 10 which silently fails trusted publisher — commented candidate on sunj-labs/bassclef-upstream#205 (proposed)
+  - proposed: trusted publisher setup runbook — new ticket candidate (needs operator confirm before /promote fires)
+  - proposed: publish workflow template should include npm@11 upgrade step by default — new ticket candidate

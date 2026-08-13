@@ -20,7 +20,9 @@ iteration_phase: WU-1 through WU-5 merged + 8 audit-driven iterations shipped (a
 
 ## Operator recap
 
-Session 2026-08-11 through 2026-08-12 ran a full audit + fix arc plus a Model C pivot. Audit surfaced 20 drift items across 6 classes. Shipped 12 PRs closing every item. Model C direction (open core with paid tiers via npm auth token) accepted; extraction contract with bassclef-upstream accepted after ADR-051 landed as commit `d54e701a` in PR #1185. Traceability Subsystem promote filed at bassclef-upstream #1182. Local reader implementation waits at bassclef-cli #25 on bassclef-upstream #1184 shipping the extract build. Iteration e still needs the operator-side trusted-publisher setup before first tag ships.
+Session 2026-08-13 shipped iteration e. `@thebassclef/core@0.0.2` is live on npm with provenance attestation. Seven publish attempts before the seventh landed — root cause was Node 20 shipping npm 10.x, and npm 10 silently omits trusted publisher headers on publish. Pinning `npm@11` cured the class. Five PRs shipped (#28-#32). Next longrun prep sits at `docs/next-longrun-prep-2026-08-13-npm-install-harness.md` — option b (full OOAD ceremony for the install harness) recommended.
+
+previous_recap: session 2026-08-11 through 2026-08-12 ran full audit + fix arc plus Model C pivot; 12 PRs merged; Traceability Subsystem promote filed at bassclef-upstream #1182.
 previous_bet: —
 next_bet: —
 
@@ -52,9 +54,19 @@ next_bet: —
 - PR #24 — docs(adr): ADR-005 amendment — pivot to Model C MERGED
 - PR #26 — docs(adr): ADR-005 second amendment — Model C contract accepted MERGED
 
+**Session 2026-08-13 (iteration e + npm 11 cure):**
+
+- PR #28 — chore: release v0.0.2 MERGED
+- PR #29 — fix: sync src/index.ts version constant with package.json MERGED
+- PR #30 — fix(ci): declare id-token permission at publish job level MERGED
+- PR #31 — fix(ci): upgrade npm before publish for trusted publisher MERGED
+- PR #32 — fix(ci): pin npm upgrade to @11 for node 20 compat MERGED
+- npm publish landed on run 31688236246 — `@thebassclef/core@0.0.2` live with provenance
+
 ## In flight
 
-- Iteration e — first tagged 0.0.2 release. Blocked on operator setup (trusted publisher on npmjs.com + GitHub Environment `npm-publish`).
+- Iteration i — npm install harness with full OOAD ceremony. Prep at `docs/next-longrun-prep-2026-08-13-npm-install-harness.md`. Option b recommended.
+- PR #10 — pre-existing stale session-close PR from 2026-08-08. Merge-conflict-dirty. Operator disposition pending (path a rebase / b close / c leave).
 - bassclef-cli #25 — Model C reader implementation. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
 - bassclef-cli #16 — `@thebassclef/lite` reservation. Operator started this session; ticket stays open until `@thebassclef/lite@0.0.1` shows on npmjs.com.
 - bassclef-cli #19 — `@thebassclef/standard` reservation. Lower priority.
@@ -112,10 +124,11 @@ next_bet: —
 - [ ] Sam demo (WU-8 — needs live 0.0.2)
 
 ### Transition — PENDING
-- [x] npm 0.0.1 name reservation (done 2026-07-12; verified this session)
-- [ ] Trusted publisher config on npmjs.com (operator setup)
-- [ ] GitHub Environment `npm-publish` with operator as required reviewer (operator setup)
-- [ ] First tagged 0.0.2 release (iteration e; blocked on the two above)
+- [x] npm 0.0.1 name reservation (done 2026-07-12)
+- [x] Trusted publisher config on npmjs.com (operator setup 2026-08-13)
+- [x] GitHub Environment `npm-publish` with operator as required reviewer (operator setup)
+- [x] First tagged 0.0.2 release (iteration e SHIPPED 2026-08-13; workflow run 31688236246)
+- [ ] Install harness (iteration i — next longrun; prep at docs/next-longrun-prep-2026-08-13-npm-install-harness.md)
 - [ ] `/architect-review` run at goal close
 - [ ] Session log for goal close
 
@@ -139,8 +152,8 @@ next_bet: —
 
 ## Last updated
 
-2026-08-12T11:25:21Z — session-end (audit + Model C pivot arc; 12 PRs merged, 4 tickets filed, 1 upstream comment)
-session: docs/session-logs/2026-08-12-model-c-plus-traceability-arc.md
+2026-08-13T09:52:00Z — session-end (iteration e + npm 11 cure; 5 PRs merged; @thebassclef/core@0.0.2 live on npm with provenance)
+session: docs/session-logs/2026-08-13-iteration-e-plus-npm11-cure.md
 
 ## Configuration
 
