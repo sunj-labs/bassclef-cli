@@ -1,0 +1,8 @@
+# Temperance marker — chore/release-0.0.2
+- date: 2026-08-13
+- branch: chore/release-0.0.2
+- scope-decision:
+  - right thing: bump package.json to 0.0.2 + move CHANGELOG Unreleased → [0.0.2] via npm run bump patch; PR to main; tag v0.0.2 from main; gh release create; watch workflow; approve at environment gate; verify publish + provenance
+  - right way: bump script does the mechanical work; commit + PR + merge via existing atomic-PR discipline; tag only after main lands; gh release create --generate-notes triggers workflow via release:published event
+  - drift trigger: pause if bump script fails OR workflow fails at any check (validate-tag, andon-scan, tier-filter, tests) OR trusted-publisher auth rejects
+- lens: saltzer-schroeder (every check must fire), michael-nygard (stability patterns — this is the first real run of the pipeline)
