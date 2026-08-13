@@ -1,0 +1,6 @@
+# Temperance marker — fix/publish-job-permissions
+- date: 2026-08-13
+- branch: fix/publish-job-permissions
+- scope-decision: add job-level permissions block to publish.yml (id-token: write, contents: read); tests the hypothesis that npm's OIDC path needs job-scoped permissions even though workflow-level should inherit
+- lens: michael-nygard (belt-and-suspenders on stability path)
+- drift-trigger: expanding to unrelated workflow edits; keep to the 3-line permissions add only
