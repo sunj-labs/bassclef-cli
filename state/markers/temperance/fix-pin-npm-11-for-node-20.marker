@@ -1,0 +1,5 @@
+# Temperance marker — fix/pin-npm-11-for-node-20
+- date: 2026-08-13
+- branch: fix/pin-npm-11-for-node-20
+- scope-decision: change one line — @latest → @11 — to fix EBADENGINE from PR #31
+- lens: hyrum-wright (npm@latest is unstable; pin ranges compatible with runtime)
