@@ -135,6 +135,14 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Upgrade npm for trusted publisher support
+        # Node 20 ships with npm 10.x. Trusted publishers via OIDC need
+        # npm 11.5.1+. Without this, the OIDC token mints cleanly (sigstore
+        # accepts the signing request) but registry.npmjs.org returns 404
+        # on the PUT because the older CLI does not send the trusted
+        # publisher headers. Five v0.0.2 attempts confirmed the pattern.
+        run: npm install -g npm@latest
+
       - name: Install with --ignore-scripts
         run: npm ci --ignore-scripts
 
