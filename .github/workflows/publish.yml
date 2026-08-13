@@ -113,6 +113,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: checks
     environment: npm-publish
+    # Job-level re-declaration. Workflow-level permissions at line 45-50 should
+    # inherit, but three v0.0.2 attempts hit npm 404 despite matching trusted
+    # publisher config. GitHub docs say inheritance works; anecdotal reports in
+    # npm/cli say OIDC subject claim carries the environment reliably only when
+    # permissions live at job scope. Belt-and-suspenders for the OIDC path.
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout at tag
