@@ -20,9 +20,10 @@ iteration_phase: WU-1 through WU-5 merged + 8 audit-driven iterations shipped (a
 
 ## Operator recap
 
-Session 2026-08-13 shipped iteration e. `@thebassclef/core@0.0.2` is live on npm with provenance attestation. Seven publish attempts before the seventh landed — root cause was Node 20 shipping npm 10.x, and npm 10 silently omits trusted publisher headers on publish. Pinning `npm@11` cured the class. Five PRs shipped (#28-#32). Next longrun prep sits at `docs/next-longrun-prep-2026-08-13-npm-install-harness.md` — option b (full OOAD ceremony for the install harness) recommended.
+Short 2026-08-18 followup session. Filed bassclef-upstream#1197 — meta-ticket for the OOAD-plus-traceability chain as a first-class bassclef offering, with a luminary consult ask on over-engineering guard + adopter tier boundary. Cross-commented on umbrella #1171. Closed stale PR #10 without merge (path b). No code shipped.
 
-previous_recap: session 2026-08-11 through 2026-08-12 ran full audit + fix arc plus Model C pivot; 12 PRs merged; Traceability Subsystem promote filed at bassclef-upstream #1182.
+previous_recap: session 2026-08-13 shipped iteration e. @thebassclef/core@0.0.2 live on npm with provenance. Seven publish attempts before the seventh landed. Root cause was Node 20 shipping npm 10.x, and npm 10 silently omits trusted publisher headers. Pinning npm@11 cured the class.
+
 previous_bet: —
 next_bet: —
 
@@ -152,8 +153,8 @@ next_bet: —
 
 ## Last updated
 
-2026-08-13T09:52:00Z — session-end (iteration e + npm 11 cure; 5 PRs merged; @thebassclef/core@0.0.2 live on npm with provenance)
-session: docs/session-logs/2026-08-13-iteration-e-plus-npm11-cure.md
+2026-08-18T09:00:00Z — session-end (followups; bassclef-upstream#1197 filed; PR #10 closed; no code shipped)
+session: docs/session-logs/2026-08-18-followups-close.md
 
 ## Configuration
 
