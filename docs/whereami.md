@@ -16,11 +16,13 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
 iteration_started: 2026-08-06
-iteration_phase: WU-1 through WU-5 merged + 8 audit-driven iterations shipped (a, b, c, d, f, g, h, plus 2 ADR-005 amendments for Model C). WU-6 through WU-9 remain. Iteration e (first tag 0.0.2) blocked on operator setup — trusted publisher + GitHub Environment `npm-publish`.
+iteration_phase: WU-1 through WU-5 + iteration e (v0.0.2 live) + iteration i (install harness) SHIPPED. Iteration i landed 7 commits under feat/iteration-i-npm-install-harness — full OOAD chain (domain + UC + GRASP + ADR-006 + R-NPM-014 registry + harness code + CI workflow). WU-6 (upstream harness check class), WU-7 (Adam Sharpe security PRs, deferred), WU-8 (Sam demo), WU-9 (first tagged 0.1.0) remain.
 
 ## Operator recap
 
-Short 2026-08-18 followup session. Filed bassclef-upstream#1197 — meta-ticket for the OOAD-plus-traceability chain as a first-class bassclef offering, with a luminary consult ask on over-engineering guard + adopter tier boundary. Cross-commented on umbrella #1171. Closed stale PR #10 without merge (path b). No code shipped.
+2026-08-27 session shipped iteration i — install harness for @thebassclef/core with full OOAD ceremony per operator direction. 7 commits on feat/iteration-i-npm-install-harness. 11 tests pass at 735ms local; 1 test skipped by design (published-fetch scenario env-gated). Two /loop iterations both RED → GREEN in one cycle each (npm -g flag defect at Step 6a; stale walking-skeleton assertion at Step 6b). Feathers lead lens signed off; Cockburn + Cooper + Nygard + Prater + Ousterhout supporting. 3 pre-mortem light runs (Step 0, Step 6b, Step 7); 27 total risks named + strongest folded per step. Step 8 pattern-annotation pass surfaced substrate gap — 3 bassclef-upstream catalog entries missing (fowler test-fixture, gof command, gof template-method); false annotations removed per pattern-annotation.md rule; follow-on candidate named in session log. Step 9 workflow verify deferred to post-merge (feature branch can't dispatch workflow_dispatch until file lands on default). PR awaits operator review.
+
+previous_recap: Short 2026-08-18 followup session. Filed bassclef-upstream#1197 — meta-ticket for the OOAD-plus-traceability chain as a first-class bassclef offering, with a luminary consult ask on over-engineering guard + adopter tier boundary. Cross-commented on umbrella #1171. Closed stale PR #10 without merge (path b). No code shipped.
 
 previous_recap: session 2026-08-13 shipped iteration e. @thebassclef/core@0.0.2 live on npm with provenance. Seven publish attempts before the seventh landed. Root cause was Node 20 shipping npm 10.x, and npm 10 silently omits trusted publisher headers. Pinning npm@11 cured the class.
 
@@ -66,7 +68,7 @@ next_bet: —
 
 ## In flight
 
-- Iteration i — npm install harness with full OOAD ceremony. Prep at `docs/next-longrun-prep-2026-08-13-npm-install-harness.md`. Option b recommended.
+- Iteration i — install harness SHIPPED 2026-08-27; PR on feat/iteration-i-npm-install-harness awaits operator review + merge.
 - PR #10 — pre-existing stale session-close PR from 2026-08-08. Merge-conflict-dirty. Operator disposition pending (path a rebase / b close / c leave).
 - bassclef-cli #25 — Model C reader implementation. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
 - bassclef-cli #16 — `@thebassclef/lite` reservation. Operator started this session; ticket stays open until `@thebassclef/lite@0.0.1` shows on npmjs.com.
@@ -120,7 +122,8 @@ next_bet: —
 - [x] Traceability enforcement Vitest — merged (PR #17)
 - [x] Model C direction + contract accepted — merged (PR #24, #26)
 - [ ] Model C reader implementation (bassclef-cli #25) — waits on bassclef-upstream #1184
-- [ ] Cold-adopter harness against npm path (WU-6 — bassclef-upstream side)
+- [x] Install harness (iteration i) — 7 commits on feat/iteration-i-npm-install-harness; 11 tests pass + 1 env-gated skip
+- [ ] Cold-adopter harness against npm path (WU-6 — bassclef-upstream side; separate from iteration i)
 - [ ] Adam Sharpe security PRs (WU-7 — deferred per goal L128)
 - [ ] Sam demo (WU-8 — needs live 0.0.2)
 
@@ -129,7 +132,7 @@ next_bet: —
 - [x] Trusted publisher config on npmjs.com (operator setup 2026-08-13)
 - [x] GitHub Environment `npm-publish` with operator as required reviewer (operator setup)
 - [x] First tagged 0.0.2 release (iteration e SHIPPED 2026-08-13; workflow run 31688236246)
-- [ ] Install harness (iteration i — next longrun; prep at docs/next-longrun-prep-2026-08-13-npm-install-harness.md)
+- [x] Install harness (iteration i) — SHIPPED 2026-08-27; PR awaits operator merge
 - [ ] `/architect-review` run at goal close
 - [ ] Session log for goal close
 
@@ -153,8 +156,8 @@ next_bet: —
 
 ## Last updated
 
-2026-08-18T09:00:00Z — session-end (followups; bassclef-upstream#1197 filed; PR #10 closed; no code shipped)
-session: docs/session-logs/2026-08-18-followups-close.md
+2026-08-27T00:55:00Z — session-end (iteration i install harness shipped; 7 commits; PR awaits operator merge)
+session: docs/session-logs/2026-08-27-iteration-i-npm-install-harness.md
 
 ## Configuration
 
