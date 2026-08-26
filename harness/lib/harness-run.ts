@@ -53,16 +53,56 @@ export class HarnessRun {
         verb: '--version',
         result: VerificationResult.forVersion(versionCaptured, tarball.version),
       });
-      if (this.opts.failFast !== false && !verbs[verbs.length - 1].result.ok) {
+      if (this.shouldStopAfter(verbs)) {
         return this.summarize(verbs, fixture);
       }
-      // Verb 2 — init (Step 6b extension will enable; skeleton stops here)
-      // Verb 3 — sync --dry-run (Step 6b extension will enable; skeleton stops here)
+      // Verb 2 — init
+      // Init verifies ADR-002 behavior. workDir lives under OS tmp (not
+      // $HOME), so --allow-any-dir is required per ADR-002 L79-81. Pre-mortem
+      // R1.1 flagged this; without the flag init exits 1 refusing to write
+      // outside $HOME.
+      const workDir = fixture.workDir();
+      const initCaptured = await new CliInvocation(
+        installed.binPath,
+        'init',
+        ['--dir', workDir, '--allow-any-dir'],
+      ).run({ timeoutMs: this.opts.timeoutMs });
+      verbs.push({
+        verb: 'init',
+        result: VerificationResult.forInit(initCaptured, workDir),
+      });
+      if (this.shouldStopAfter(verbs)) {
+        return this.summarize(verbs, fixture);
+      }
+      // Verb 3 — sync --dry-run
+      // Sync reads what init wrote — same workDir. Dry-run so no state
+      // changes. Freshly initialized dir should report no diff per ADR-003.
+      const syncCaptured = await new CliInvocation(
+        installed.binPath,
+        'sync',
+        ['--dir', workDir, '--dry-run', '--allow-any-dir'],
+      ).run({ timeoutMs: this.opts.timeoutMs });
+      verbs.push({
+        verb: 'sync --dry-run',
+        result: VerificationResult.forSyncDryRun(syncCaptured),
+      });
       return await this.summarize(verbs, fixture);
     } catch (err) {
       fatalError = (err as Error).message;
       return await this.summarize(verbs, fixture, fatalError);
     }
+  }
+
+  private shouldStopAfter(verbs: HarnessOutcome['verbs']): boolean {
+    // failFast defaults true. When true, stop on first failure so the failing
+    // verb's captured output surfaces without dilution. When false (e.g., the
+    // full-coverage test), run every verb even when one fails so the log
+    // carries the full diagnostic set. Pre-mortem R2.2 named this trade-off.
+    if (this.opts.failFast === false) {
+      return false;
+    }
+    const last = verbs[verbs.length - 1];
+    return last !== undefined && !last.result.ok;
   }
 
   private async pack(fixture: Fixture): Promise<TarballPackResult> {
