@@ -1,9 +1,13 @@
 // @requirement R-NPM-014
-// @pattern patterns/code/gof/command.md (catalog check pending Step 8)
 //
 // CliInvocation — one CLI run. Captures exit + stdout + stderr. Shields
 // callers from Node child_process quirks (Indirection per GRASP Step 3).
 // See docs/decompositions/npm-install-harness.md § "CliInvocation".
+//
+// Pattern note (Step 8): GoF Command pattern applies here but
+// patterns/code/gof/command.md does not yet exist in the bassclef-upstream
+// catalog. Annotation removed per .claude/rules/pattern-annotation.md L46-49.
+// Follow-on ticket tracks catalog fill.
 
 import { spawnSync } from 'node:child_process';
 

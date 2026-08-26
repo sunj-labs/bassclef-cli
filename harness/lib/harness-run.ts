@@ -1,9 +1,15 @@
 // @requirement R-NPM-014
-// @pattern patterns/code/gof/template-method.md (catalog check pending Step 8)
 //
 // HarnessRun — top-level Controller. Sequences the pipeline for one scenario
 // (local pack OR published fetch). See
 // docs/decompositions/npm-install-harness.md § "HarnessRun".
+//
+// Pattern note (Step 8): GoF Template Method pattern applies here (the
+// pipeline order is fixed; per-scenario variance lives only in the pack()
+// factory step). Catalog patterns/code/gof/template-method.md does not yet
+// exist in bassclef-upstream. Annotation removed per
+// .claude/rules/pattern-annotation.md L46-49. Follow-on ticket tracks
+// catalog fill.
 
 import { Fixture } from './fixture.js';
 import { TarballPack, TarballPackResult } from './tarball-pack.js';

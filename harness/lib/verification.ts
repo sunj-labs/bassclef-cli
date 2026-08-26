@@ -1,8 +1,12 @@
 // @requirement R-NPM-014
-// @pattern patterns/code/gof/strategy.md (factory-per-verb; catalog check pending Step 8)
+// @pattern patterns/code/gof/strategy.md
 //
 // VerificationResult — pass/fail judgment per verb. One factory method per
-// verb. See docs/decompositions/npm-install-harness.md § "VerificationResult".
+// verb. Each factory encapsulates one verification algorithm — that IS the
+// Strategy shape from GoF. See
+// docs/decompositions/npm-install-harness.md § "VerificationResult" for
+// GRASP + patterns/code/gof/strategy.md (bassclef-upstream) for the catalog
+// entry. Catalog existence verified during Step 8 annotation pass.
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';

@@ -1,9 +1,13 @@
 // @requirement R-NPM-014
-// @pattern patterns/code/fowler/test-fixture.md (catalog check pending Step 8)
 //
 // Fixture — scoped temp dir + npm prefix for one HarnessRun instance.
 // Owns cleanup on all exit paths per ADR-006 Decision 5 + Nygard fail-safe.
 // See docs/decompositions/npm-install-harness.md § "Fixture" for GRASP rationale.
+//
+// Pattern note (Step 8): Meszaros/Fowler Test Fixture pattern applies here
+// but bassclef-upstream catalog does not yet carry the entry. Annotation
+// removed per .claude/rules/pattern-annotation.md L46-49. Follow-on ticket
+// tracks catalog fill.
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
