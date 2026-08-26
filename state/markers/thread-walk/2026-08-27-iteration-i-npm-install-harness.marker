@@ -1,0 +1,50 @@
+# Thread-walk marker — 2026-08-27-iteration-i-npm-install-harness
+- date: 2026-08-27
+- branch: feat/iteration-i-npm-install-harness
+
+## Parent chain walked
+
+Depth 0 (leaf): docs/iteration-bets/2026-08-27-iteration-i-npm-install-harness.md
+Depth 1 (parent): docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
+Depth 2 (root — parent_roadmap): bassclef-upstream/docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md
+Chain terminates at depth 2 (no further parent_roadmap or parent_bet).
+
+## Drivers surfaced (from parent bet 2026-08-06b)
+
+- Sam persona install path stays 2 commands (npm install -g + bassclef init) per bet L52-56 + ADR-005 L63-65
+- Publish pipeline shipped (ADR-004; PR #7 merged) but no adopter contract test rides after
+- WU-6 through WU-9 remain per whereami L123-125; iteration i covers the harness gap that WU-6 upstream check class does NOT cover (different scope; same word "harness")
+- Deferred security posture (WU-7 Adam Sharpe) must land before 0.1.0 or 0.0.3 per whereami L150 risk register
+
+## Drivers surfaced (from parent roadmap 2026-07-20-bassclef-lite-market-entry)
+
+- 5 existing adopters use GitHub collaborator clone (frontmatter parent_drivers L20)
+- 9 signups waiting for lite tarball download (frontmatter parent_drivers L21)
+- Solo operator bandwidth 20-40h weekly (frontmatter parent_drivers L22)
+- upstream owns Path 1 substrate + tarball flag + ADR-045 + schema (frontmatter parent_drivers L24)
+- Michael Feathers listed in roadmap authoring_luminaries.primary — this bet's lead lens aligns
+
+## Open acceptance from parent bet
+
+- [ ] Cold-adopter harness against npm path (bet acceptance L159) — WU-6 upstream check class; this bet does NOT close it
+- [ ] Adam Sharpe security PRs (bet acceptance L160) — WU-7 deferred; this bet does NOT close it
+- [ ] Sam demo (bet acceptance L161) — WU-8; needs live 0.0.2 (live) plus install harness (this bet) plus operator time
+- [ ] /architect-review run at bet close (bet acceptance L164) — deferred until iteration i + WU-6 + WU-7 + WU-8 land
+
+## Out-of-scope from parent bet
+
+- Kilo runtime port (Phase 2)
+- Standard-tier + ultra-tier npm packages
+- Unscoped `bassclef` name transfer
+
+## Out-of-scope from parent roadmap
+
+- bassclef-web positioning + landing (owned by bassclef-web repo; not this bet)
+
+## Cycle check
+
+Chain depth 2; no repeated slug. No cycle detected.
+
+## Freshness verdict
+
+Chain-current — parent bet + parent roadmap both authored 2026-08-06 and 2026-07-20; no supersession pending.
