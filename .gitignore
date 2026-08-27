@@ -1,8 +1,10 @@
 
 # The sync-managed block above ignores `lib` (top-level symlink) but the
-# pattern also matches src/lib/. Un-ignore the source tree.
+# pattern also matches src/lib/ and harness/lib/. Un-ignore both trees.
 !src/lib
 !src/lib/**
+!harness
+!harness/**
 
 # Bassclef runtime artifacts (per-machine, not content)
 .claude/LAST_SAVE
@@ -209,3 +211,9 @@ state/markers/turn-prose-flags/
 lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# Un-ignore harness/ tree AFTER the sync-managed `lib` pattern above —
+# rule order matters (later wins). The bare `lib` in the managed block
+# would otherwise re-ignore harness/lib. Iteration i (2026-08-27) added.
+!harness
+!harness/**

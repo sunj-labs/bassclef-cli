@@ -71,8 +71,11 @@ Requirement IDs follow `R-<domain>-<NNN>`. Domain is `NPM` for this bet's scope.
 | R-NPM-011 | First tagged 0.0.2 release published to npm | bet L162 | GAP — pending iteration e |
 | R-NPM-012 | All Tier 0 tests GREEN | bet L163 | satisfied (143/143 local) |
 | R-NPM-013 | `/architect-review` run at bet close; report merged | bet L164 | GAP — pending bet close |
+| R-NPM-014 | Install harness verifies tarball installs + runs on fresh Node — local pack + published fetch scenarios | iteration i goal L152 | in flight (iteration i Steps 6-10 remaining) |
 
-Ratio: 8 satisfied, 5 gaps. `62%` complete against acceptance. Every gap traces to a specific iteration in the current plan.
+Ratio: 8 satisfied, 5 gaps, 1 in flight (R-NPM-014). `57%` complete against acceptance (down from 62% because iteration i adds a new requirement). Every gap traces to a specific iteration in the current plan.
+
+**Update note (iteration i Step 5).** R-NPM-011 status remains "GAP — pending iteration e" in this table for backward-compatible reading; iteration e SHIPPED per whereami L60-66 (workflow run 31688236246; @thebassclef/core@0.0.2 live with provenance). Registry status refresh is a separate housekeeping edit not folded into iteration i scope.
 
 ## Traceability matrix
 
@@ -93,8 +96,9 @@ One row per requirement. Columns for derived_from (ADR), refined_by (UC + decomp
 | R-NPM-011 | ADR-004, ADR-005 | `docs/publish-setup.md` | (future) v0.0.2 tag + `npm publish` via workflow | (future) workflow-run + npm registry |
 | R-NPM-012 | — | `.claude/rules/testing-tier-config.md` (bassclef substrate) | 16 test files | `npx vitest run` (local); CI check not yet wired |
 | R-NPM-013 | — | `.claude/skills/architect-review/SKILL.md` (bassclef substrate) | (future) `/architect-review` dispatch | (future) architect-review output |
+| R-NPM-014 | ADR-006 | UC-npm-install-harness, npm-install-harness-domain.md (Step 1), npm-install-harness.md GRASP (Step 3) | `harness/npm-install.test.ts`, `harness/lib/{fixture,tarball-pack,install-scope,cli-invocation,verification,harness-run}.ts`, `.github/workflows/harness.yml` | `harness/npm-install.test.ts` (Tier 0 with test-list block per `.claude/rules/test-list-discipline.md`; Step 6 ships) |
 
-Confidence high on rows 1-7 (files verified on disk this session). Confidence lower on future rows 10-11 (satisfied_by is TBD by design — those requirements ship in later iterations).
+Confidence high on rows 1-7 (files verified on disk this session). Confidence lower on future rows 10-11 (satisfied_by is TBD by design — those requirements ship in later iterations). R-NPM-014 satisfy + verify paths land at Step 6 of iteration i.
 
 ## Requirement graph (SysML notation)
 

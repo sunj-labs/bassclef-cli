@@ -1,0 +1,134 @@
+# Install harness for @thebassclef/core (iteration i).
+#
+# @requirement R-NPM-014
+#
+# Contract: docs/adrs/ADR-006-install-harness.md.
+# Domain: docs/decompositions/npm-install-harness-domain.md.
+# GRASP: docs/decompositions/npm-install-harness.md.
+# Use case: docs/use-cases/UC-npm-install-harness.md.
+#
+# Verifies the shipped npm tarball installs cleanly on fresh Node and runs
+# three verbs (--version, init, sync --dry-run). Two scenarios per ADR-006
+# Decision 3 — local pack (working copy) plus published fetch (live npm
+# registry). Local pack runs always; published fetch runs when
+# HARNESS_INCLUDE_PUBLISHED env var is set (this workflow sets it).
+#
+# Triggers per ADR-006 Decision 4 — release:types:[published] plus
+# workflow_dispatch with tag input for manual re-runs. Not on push, not on
+# schedule, not on pull_request. Manual dispatch on unpublished PR branches
+# would need a live version to fetch and there is none.
+
+name: harness
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to run harness against (e.g. v0.0.2). Defaults to latest release.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    name: install harness (local pack + published fetch)
+    runs-on: ubuntu-latest
+    # Pre-mortem R3.2 — 15 minutes covers harness (~5 min) plus npm setup
+    # (~2 min) plus propagation wait (up to 3 min) plus margin.
+    timeout-minutes: 15
+
+    env:
+      # Pre-mortem R1.2 — explicit env var so published test runs on release
+      # events instead of skipping silently.
+      HARNESS_INCLUDE_PUBLISHED: '1'
+
+    steps:
+      - name: Resolve tag
+        id: resolve
+        # Pre-mortem R1.3 — one path for both trigger types. Release event
+        # supplies github.event.release.tag_name; workflow_dispatch supplies
+        # inputs.tag (or fallback to the latest release tag).
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          elif [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="$(gh release view --json tagName --jq .tagName)"
+          fi
+          # Strip leading v for the npm version string.
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved TAG=$TAG VERSION=$VERSION"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Checkout at tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve.outputs.tag }}
+          fetch-depth: 1
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm to 11
+        # Iteration e cure — Node 20 ships npm 10.x which silently omits
+        # trusted publisher headers. Publish workflow pins npm 11 for the
+        # same reason. Harness mirrors that pin so subprocess behavior
+        # matches shipped release conditions.
+        run: npm install -g npm@11
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build cli (dist/ needed for local pack)
+        run: npm run build
+
+      - name: Wait for npm registry propagation
+        # Pre-mortem R1.1 — just-published version may 404 on npm pack for
+        # first 30-60s after release. Poll npm view until the version shows.
+        # Cap at 3 minutes; if the version never appears the workflow fails
+        # with a clear message rather than a confusing pack error.
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve.outputs.version }}"
+          MAX_ATTEMPTS=18
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            if npm view "@thebassclef/core@${VERSION}" version >/dev/null 2>&1; then
+              echo "npm registry has @thebassclef/core@${VERSION} (attempt $i)"
+              exit 0
+            fi
+            echo "attempt $i: @thebassclef/core@${VERSION} not yet on registry; sleeping 10s"
+            sleep 10
+          done
+          echo "ERROR: @thebassclef/core@${VERSION} did not appear on registry within 3 minutes"
+          exit 1
+
+      - name: Run install harness
+        # Runs vitest against harness/npm-install.test.ts. HARNESS_INCLUDE_PUBLISHED
+        # in job env enables the published-scenario test. Local scenario always
+        # runs. Extension unit tests always run (mock CliCaptured; no subprocess).
+        run: npm run harness:npm-install
+
+      - name: Report harness outcome
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "## Harness PASSED for ${{ steps.resolve.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Both scenarios verified — local pack + published fetch." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Harness FAILED for ${{ steps.resolve.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Check the harness step output above for the failing scenario + verb + captured stderr." >> "$GITHUB_STEP_SUMMARY"
+          fi
