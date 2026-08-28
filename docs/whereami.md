@@ -20,11 +20,11 @@ iteration_phase: WU-1 through WU-5 + iteration e (v0.0.2 live) + iteration i (in
 
 ## Operator recap
 
-2026-08-27 session shipped iteration i — install harness for @thebassclef/core with full OOAD ceremony per operator direction. 7 commits on feat/iteration-i-npm-install-harness. 11 tests pass at 735ms local; 1 test skipped by design (published-fetch scenario env-gated). Two /loop iterations both RED → GREEN in one cycle each (npm -g flag defect at Step 6a; stale walking-skeleton assertion at Step 6b). Feathers lead lens signed off; Cockburn + Cooper + Nygard + Prater + Ousterhout supporting. 3 pre-mortem light runs (Step 0, Step 6b, Step 7); 27 total risks named + strongest folded per step. Step 8 pattern-annotation pass surfaced substrate gap — 3 bassclef-upstream catalog entries missing (fowler test-fixture, gof command, gof template-method); false annotations removed per pattern-annotation.md rule; follow-on candidate named in session log. Step 9 workflow verify deferred to post-merge (feature branch can't dispatch workflow_dispatch until file lands on default). PR awaits operator review.
+2026-08-28 short session — operator dispatched /longrun prep for the npm-native lite substrate bundling plan, then waved off. The prompt belonged in bassclef-web, not bassclef-cli. Compressed prep did read the plan doc + whereami + parent goal frontmatter and drafted Option b (combined Phase 1 + Phase 2) scope, but no goal doc was created and no commits landed. Plan doc at docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md is still current for the next bassclef-cli /longrun that picks up npm-native lite bundling.
+
+previous_recap: 2026-08-27 session shipped iteration i — install harness for @thebassclef/core with full OOAD ceremony per operator direction. 7 commits on feat/iteration-i-npm-install-harness. 11 tests pass at 735ms local; 1 test skipped by design (published-fetch scenario env-gated). Two /loop iterations both RED → GREEN in one cycle each (npm -g flag defect at Step 6a; stale walking-skeleton assertion at Step 6b). Feathers lead lens signed off; Cockburn + Cooper + Nygard + Prater + Ousterhout supporting. 3 pre-mortem light runs (Step 0, Step 6b, Step 7); 27 total risks named + strongest folded per step. Step 8 pattern-annotation pass surfaced substrate gap — 3 bassclef-upstream catalog entries missing (fowler test-fixture, gof command, gof template-method); false annotations removed per pattern-annotation.md rule; follow-on candidate named in session log. Step 9 workflow verify deferred to post-merge (feature branch can't dispatch workflow_dispatch until file lands on default). PR awaits operator review.
 
 previous_recap: Short 2026-08-18 followup session. Filed bassclef-upstream#1197 — meta-ticket for the OOAD-plus-traceability chain as a first-class bassclef offering, with a luminary consult ask on over-engineering guard + adopter tier boundary. Cross-commented on umbrella #1171. Closed stale PR #10 without merge (path b). No code shipped.
-
-previous_recap: session 2026-08-13 shipped iteration e. @thebassclef/core@0.0.2 live on npm with provenance. Seven publish attempts before the seventh landed. Root cause was Node 20 shipping npm 10.x, and npm 10 silently omits trusted publisher headers. Pinning npm@11 cured the class.
 
 previous_bet: —
 next_bet: —
@@ -156,8 +156,8 @@ next_bet: —
 
 ## Last updated
 
-2026-08-27T00:55:00Z — session-end (iteration i install harness shipped; 7 commits; PR awaits operator merge)
-session: docs/session-logs/2026-08-27-iteration-i-npm-install-harness.md
+2026-08-28T15:02:36Z — session-end (short session; /longrun prep waved off; wrong repo; no code changed)
+session: docs/session-logs/2026-08-28-longrun-prep-waved-off.md
 
 ## Configuration
 
