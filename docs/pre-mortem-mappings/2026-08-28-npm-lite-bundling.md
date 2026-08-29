@@ -1,129 +1,122 @@
 ---
 date: 2026-08-28
 goal: 2026-08-28d-npm-lite-substrate-bundling
-version: v2
-v1_replaced_at: Step 3.5 (after ADR-007 D1-D6 landed)
+version: v3
+v2_replaced_at: 2026-08-29 (RFC-0001 accepted with disposition revised B)
 lenses: [john-ousterhout, david-parnas, michael-nygard]
+rfc_council: [linus-torvalds, hyrum-wright, frederick-brooks, saltzer-schroeder, don-norman]
 lead_lens: john-ousterhout
-next_revision: v3 at Step 7 (signoff — flip all rows to `verified`)
+next_revision: v4 at Step 7 (signoff — flip all rows to `verified`)
 ---
 
-# Risk ledger — npm-native lite substrate bundling (v2)
+# Risk ledger — npm-native lite substrate bundling (v3, scope-b1)
 
 ## Purpose
 
-This ledger extends the /pre-mortem light output. Each row pairs a named risk with a compensator, a build target, and a verification method. The build phase wires to it — tests carry `// @risk: R#` comments, commits carry `[risk: R#]` trailers, Step 7 signoff runs a grep audit and blocks if any row lacks matching evidence.
+This ledger pairs risks with compensators, build targets, and verification methods. Build wiring — tests carry `// @risk: R#` OR `// @rfc: <ID>` comments; commits carry `[risk: R#]` OR `[rfc: <ID>]` trailers; Step 7 signoff runs a grep audit and blocks if any row lacks matching evidence.
 
-## What changed v1 → v2
+v3 reflects RFC-0001 disposition (revised B): scope trimmed to scope-b1; migration deferred to scope-e; RemoteFetchStrategy dropped as premature.
 
-- **Row R10 added** — remote fetch Strategy rate limits (new risk from ADR-007 D2 opening the `BASSCLEF_MANIFEST_URL` path)
-- **R2 refined** — build target path fixed at `scripts/prepublish-bundle-substrate.mjs`; verification adds `engines: {node: ">=20"}` guard in package.json
-- **R3 corrected** — `src/lib/write-safely.ts` already exists (pre-Step-4 `ls src/lib/` confirmed via `tests/write-safely.test.ts` import path); compensator changed from "extract new helper" to "verify sole write path and `copySubstrate` uses it"
-- **R4 corrected** — `src/lib/manifest-io.ts` already exists with `readManifest`/`writeManifest` (confirmed via `tests/manifest-io.test.ts` at line 18-23); compensator changed from "new `init-manifest.ts` module" to "extend existing `manifest-io.ts` with `detectLegacyManifest()` + 149-entry support"
-- **R7 refined** — verification now names the specific `prepublish` script command + expected stderr string
-- **R8 refined** — compensator explicitly includes SHA-256 hash preservation for existing 3 config files during migration (Q4 from decomp resolved); build target now references extended `manifest-io.ts`
-- **R9 refined** — verification names the CI job (`.github/workflows/publish.yml` size-check step) + local test command
-- All 9 v1 rows: build target file paths confirmed against decomp § Control objects + ADR-007 D1-D6 + real state of `src/lib/`
-- All 9 v1 rows: verification commands refined to be greppable + runnable
+## What changed v2 → v3
 
-Every ledger row now has:
+- **R8 removed** — migration Path A moved to scope-e (next /longrun). Adopter migration is the whole shape of that goal.
+- **R10 removed** — RemoteFetchStrategy dropped per RFC finding B3 (YAGNI — sibling checkout is sole source for scope-b1).
+- **R7 simplified** — verification names sibling-only (no remote strategy path to check).
+- **Added 6 cure rows from RFC-0001** — L2 sync output shape, H1 manifest schema evolution, H2 count parameterization, H3 bundle path lock, N1 progress signal, N2 error messages.
+- **Test count** 29 → 22 (drops R8 3 tests, R10 2 tests; adds RFC cure tests: L2 1, H1 1, H2 covered inline, N1 1, N2 1 = 4 net add; final: 22).
+- **Decision-to-risk cross-ref updated** — ADR-007 D2 and D5 removed; new D2-cure and D5-cure sections added per RFC absorption.
+
+Every ledger row still has:
 - Concrete file path in build target
 - Runnable verification command
-- Ties to a Tier 0 test in `docs/decompositions/2026-08-28-npm-lite-bundling.md` § Test list
-- Ties to at least one ADR-007 decision
+- Ties to a Tier 0 test
+- Ties to at least one ADR-007 decision OR RFC-0001 finding
 
-## Ledger
+## Ledger — original risk rows (R#)
 
 | ID | Risk | Lens | Compensator | Build target | Verification | Status |
 |---|---|---|---|---|---|---|
 | **R1** | `copy-substrate.ts` grows shallow — surface API takes 5+ args, hides little | Ousterhout | One public method `copySubstrate(targetDir: string, options: CopyOptions): Promise<CopyResult>` — hide walk + `writeSafely` + hash-check inside | Step 6 `src/lib/copy-substrate.ts` (new) | `grep -c "^export" src/lib/copy-substrate.ts` = 1 | pending |
 | **R2** | Prepublish script becomes a chain of `execSync` calls | Ousterhout | Pure Node — no `execSync`, no `spawn`; read manifest, walk paths, copy files. Node 20+ required via `engines: {node: ">=20"}` in package.json | Step 5 `scripts/prepublish-bundle-substrate.mjs` (new) + Step 5 `package.json` engines guard | `grep -cE "execSync\|spawn" scripts/prepublish-bundle-substrate.mjs` = 0 AND `jq '.engines.node' package.json` returns `">=20"` | pending |
-| **R3** | `copySubstrate` might re-implement atomic-write logic instead of importing existing helper | Ousterhout | Verify existing `src/lib/write-safely.ts` is sole write path AND `copySubstrate` imports it (helper already exists) | Step 6 `src/lib/copy-substrate.ts` (new) imports existing `src/lib/write-safely.ts`; no re-implementation | `grep -rc "writeFileSync" src/` = 1 (helper only); no direct `fs.writeFileSync` in copy-substrate.ts | pending |
-| **R4** | Adopter init manifest schema leaks into consumers as raw JSON reads OR new consumers bypass the existing typed module | Parnas | Extend existing `src/lib/manifest-io.ts` with `detectLegacyManifest()` + 149-entry support; new consumers import `readManifest` / `writeManifest` from there | Step 6 `src/lib/manifest-io.ts` (extended; ~20 LOC delta) + `src/lib/manifest-types.ts` (extended with `LegacyDetection` type) | `grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0; extended module exports `detectLegacyManifest` | pending |
-| **R5** | Bundle layout (`substrate/` tree structure) leaks into consumer code | Parnas | Consumer walks the manifest, not the filesystem. Layout is implementation detail hidden inside `copy-substrate.ts` | Step 6 `src/lib/copy-substrate.ts` | `grep -rc "'substrate/" src/commands/ src/cli.ts` = 0 (consumer code has zero literal references) | pending |
+| **R3** | `copySubstrate` might re-implement atomic-write logic instead of importing existing helper | Ousterhout | Verify existing `src/lib/write-safely.ts` is sole write path AND `copySubstrate` imports it (helper already exists) | Step 6 `src/lib/copy-substrate.ts` (new) imports existing `src/lib/write-safely.ts` | `grep -rc "writeFileSync" src/` = 1 (helper only); no direct `fs.writeFileSync` in copy-substrate.ts | pending |
+| **R4** | Adopter init manifest schema leaks into consumers as raw JSON reads OR new consumers bypass the existing typed module | Parnas | Extend existing `src/lib/manifest-io.ts` with 149-entry support; new consumers import `readManifest` / `writeManifest` from there | Step 6 `src/lib/manifest-io.ts` (extended; ~10 LOC delta for scope-b1 — no `detectLegacyManifest` yet, that's scope-e) + `src/lib/manifest-types.ts` (extended entry array shape) | `grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0 | pending |
+| **R5** | Bundle layout (`substrate/` tree structure) leaks into consumer code | Parnas | Consumer walks the manifest, not the filesystem. Layout is implementation detail hidden inside `copy-substrate.ts` | Step 6 `src/lib/copy-substrate.ts` | `grep -rc "'substrate/" src/commands/ src/cli.ts` = 0 | pending |
 | **R6** | Paths (`.claude/hooks/`, `.claude/skills/`) hard-coded across multiple files | Parnas | One source-of-truth constants module — `src/lib/paths.ts` exports `SUBSTRATE_ROOT` + `CLAUDE_TARGET_ROOT` | Step 4 test setup + Step 6 `src/lib/paths.ts` (new) | Test pins constants; `grep -rE "\.claude/(hooks\|skills\|rules)" src/ --exclude=src/lib/paths.ts` = 0 | pending |
-| **R7** | `npm publish` silently ships empty substrate if sibling manifest is missing | Nygard | Fail fast — verify manifest exists AND all 146 source files exist AND `substrate/` file count matches AND size < 5MB BEFORE `npm pack` proceeds | Step 5 `scripts/prepublish-bundle-substrate.mjs` (3 checks per ADR-007 D3) | Test: `mv ../bassclef-upstream/lite-manifest.json ../bassclef-upstream/lite-manifest.json.bak && node scripts/prepublish-bundle-substrate.mjs; echo exit=$?` → nonzero + stderr contains `manifest missing at expected path` | pending |
-| **R8** | Adopter migration breaks — existing 3-file installs hit extended sync classifier on next `bassclef sync` | Nygard | Version bump 0.1.0 (minor per semver) + migration doc + sync-time legacy-manifest detection + SHA-256 hash computation for existing 3 config files preserved in new 149-entry manifest (Q4 resolved) | Step 6 `src/commands/sync.ts` (Path A migration) + `docs/migrations/0.1.0.md` (new) + `src/lib/manifest-io.ts` extended with `detectLegacyManifest()` | Test in `tests/harness/sync-migration.test.ts`: fresh temp dir → v0.0.2 fixture init → v0.1.0 fixture sync → assert 146 files added AND 3 config file hashes preserved AND no data loss | pending |
-| **R9** | Package size grows past npm limits or slows install materially | Nygard | Size check in CI (5MB ceiling per ADR-007 D3) + `npm pack` output measured in Tier 0 test | Step 5 prepublish postflight check + Step 4 `tests/harness/prepublish-bundle.test.ts` + Step 5 amendment to `.github/workflows/publish.yml` (new size-check step before publish) | CI job asserts `du -sb $(npm pack --dry-run --json | jq -r '.[0].filename') < 5242880` (5MB in bytes); local test: `npm pack && ls -la @thebassclef-core-*.tgz` under 5MB | pending |
-| **R10** | Remote fetch Strategy hits GitHub raw content rate limits (~60 req/hr anonymous) — CI runs fail with HTTP 429 in busy windows | Nygard | Cache manifest per CI job (`actions/cache` keyed on manifest URL SHA) OR use authenticated GitHub API request when `GITHUB_TOKEN` available OR use tagged commit URL with 24h cache | Step 5 `scripts/prepublish-bundle-substrate.mjs` — RemoteFetchStrategy adds retry-with-backoff + auth-header when env present | Test in `tests/harness/prepublish-bundle.test.ts`: mock HTTP 429 response → script retries with backoff (max 3 attempts, exponential); mock HTTP 200 with auth header when `GITHUB_TOKEN` set | pending |
+| **R7** | `npm publish` silently ships empty substrate if sibling manifest is missing | Nygard | Fail fast — verify sibling manifest exists AND all source files exist AND `substrate/` file count matches AND size < 5MB BEFORE `npm pack` proceeds | Step 5 `scripts/prepublish-bundle-substrate.mjs` (3 checks per ADR-007 D3) | Test: `mv ../bassclef-upstream/lite-manifest.json ../bassclef-upstream/lite-manifest.json.bak && node scripts/prepublish-bundle-substrate.mjs; echo exit=$?` → nonzero + stderr contains `manifest missing at expected path` | pending |
+| **R9** | Package size grows past npm limits or slows install materially | Nygard | Size check in CI (5MB ceiling per ADR-007 D3) + `npm pack` output measured in Tier 0 test | Step 5 prepublish postflight + Step 4 test + Step 5 `.github/workflows/publish.yml` size-check step | CI job asserts `du -sb $(npm pack --dry-run --json | jq -r '.[0].filename') < 5242880`; local test: `npm pack && ls -la @thebassclef-core-*.tgz` under 5MB | pending |
 
-## Lens summary — strongest per lens (v2 reconsidered)
+## Ledger — RFC-0001 cure rows (absorbed in scope-b1)
 
-Per @luminary consultation after ADR-007 landed:
+| ID | Finding | Origin | Compensator | Build target | Verification | Status |
+|---|---|---|---|---|---|---|
+| **L2** | Sync output shape drift on 149 files breaks scripts binding to 0.0.2 shape | Linus | Per-directory summary as default; `--verbose` for per-file lines | ADR-007 D5-cure amendment + Step 6 `src/commands/sync.ts` output shape | Test in `tests/harness/sync-output.test.ts`: default output has ≤ N lines (one per directory); `--verbose` output has 149 lines | pending |
+| **H1** | Init manifest schema is an observable adopter API — needs semver lock + evolution rule | Hyrum | Add "manifest schema evolution" section to ADR-007 (semver-locked; add-only, never remove) | ADR-007 new invariant section + `src/lib/manifest-types.ts` schema_version bump discipline | Test: extend `tests/harness/manifest-schema.test.ts` — read v0.0.2 manifest schema; assert extended v0.1.0 shape is superset (all v0.0.2 fields still present) | pending |
+| **H2** | Hard-coded "146" in tests binds adopters to the count | Hyrum | Parameterize — every test asserts `manifest.entries.length`, never literal count | All Step 4 test files | `grep -rE '\b146\b' tests/harness/` returns only fixture data lines; no assertion literals | pending |
+| **H3** | Bundle layout `substrate/<path>` becomes observable — future rearrangement breaks adopters | Hyrum | Document `substrate/<path>` as semver-locked in ADR-007 D1 (additive changes OK; rearrangements are MAJOR) | ADR-007 D1 invariant addition | Grep ADR-007 D1 for "semver-locked" + "substrate/<path>" — invariant text present | pending |
+| **N1** | Init at 149 files feels hung to Sam — no progress signal | Norman | Per-directory line as each directory completes (`hooks: 25 files ✓`) | ADR-007 D4-cure amendment + Step 6 `src/lib/copy-substrate.ts` output callback | Test in `tests/harness/copy-substrate.test.ts` — copy 3-directory fixture; assert 3 progress lines emitted; each names a directory | pending |
+| **N2** | Copy error messages are system-model, not user-model | Norman | Error messages name the FIX, not the CAUSE — pattern from ADR-002 D8 | ADR-007 D4-cure amendment + Step 6 `src/lib/copy-substrate.ts` error strings | Test: force hash mismatch on fixture; assert error message contains "rerun ... --force" (fix guidance) not just "SHA256 mismatch" | pending |
 
-- **Ousterhout (deep modules)** — R1 strongest. `copy-substrate.ts` is the module every consumer depends on. One public method is the design contract. Verification is one grep command; audit is mechanical.
-- **Parnas (information hiding)** — R4 strongest. Manifest schema wraps drive init AND sync AND migration. Raw JSON reads outside the module leak schema across 3 call sites minimum. R6 close second — path constants have similar leak potential across 5+ modules.
-- **Nygard (stability patterns)** — R8 strongest (unchanged from v1). Adopter migration is highest blast risk. R10 close second — new risk from D2 remote strategy path; less blast but real for CI users.
+## Lens summary — strongest per lens (v3)
+
+- **Ousterhout (deep modules)** — R1 strongest. `copy-substrate.ts` is the module every consumer depends on. Verification is one grep command.
+- **Parnas (information hiding)** — R4 strongest. Manifest schema drives init AND sync AND (in scope-e) migration. R6 close second on path constants.
+- **Nygard (stability patterns)** — R7 strongest for scope-b1 (fail-fast on missing manifest). R8 remains active for scope-e when migration ships.
+- **Linus (RFC council)** — L2 highest impact — silent adopter script break.
+- **Hyrum (RFC council)** — H1 highest impact — pins the interface surface for every future version.
+- **Norman (RFC council)** — N1 + N2 both high — Sam's experience during the ~2-5 second copy phase.
 
 ## Build wiring — how the ledger pins to code
 
-Three touchpoints wire the ledger to code (per bassclef-upstream#1420):
+Three touchpoints — original from v2, extended for RFC cures:
 
-1. **Test files carry `// @risk: R#` comments** naming which risk they verify. Example:
-   ```typescript
-   // @risk: R7 — publish fails fast on missing manifest
-   test('prepublish exits nonzero when sibling manifest absent', () => { ... })
-   ```
-
-2. **Commits carry `[risk: R#]` trailers** per compensator shipped. Example:
-   ```
-   feat(prepublish): fail fast on missing sibling manifest [risk: R7]
-   ```
-
-3. **Step 7 signoff runs grep audit** — cross-check ledger against tests + commits:
+1. **Test files carry `// @risk: R#` OR `// @rfc: <ID>` comments** naming which row they verify
+2. **Commits carry `[risk: R#]` OR `[rfc: <ID>]` trailers**
+3. **Step 7 signoff runs grep audit** against ledger:
    ```bash
-   grep -r "@risk:" tests/ | grep -oE "R[0-9]+" | sort -u > /tmp/tests-covered.txt
-   git log --grep "\[risk:" | grep -oE "R[0-9]+" | sort -u > /tmp/commits-covered.txt
-   grep -oE "^\| \*\*R[0-9]+\*\*" docs/pre-mortem-mappings/2026-08-28-npm-lite-bundling.md \
-     | grep -oE "R[0-9]+" > /tmp/ledger-risks.txt
-   diff /tmp/ledger-risks.txt /tmp/tests-covered.txt  # empty = all risks tested
-   diff /tmp/ledger-risks.txt /tmp/commits-covered.txt  # empty = all risks committed
+   grep -rE "@(risk|rfc):" tests/ | grep -oE "R[0-9]+|[A-Z][0-9]+" | sort -u > /tmp/tests-covered.txt
+   git log --grep -E "\[(risk|rfc):" | grep -oE "R[0-9]+|[A-Z][0-9]+" | sort -u > /tmp/commits-covered.txt
+   grep -oE "^\| \*\*(R[0-9]+|[A-Z][0-9]+)\*\*" docs/pre-mortem-mappings/2026-08-28-npm-lite-bundling.md \
+     | grep -oE "R[0-9]+|[A-Z][0-9]+" > /tmp/ledger-rows.txt
+   diff /tmp/ledger-rows.txt /tmp/tests-covered.txt
+   diff /tmp/ledger-rows.txt /tmp/commits-covered.txt
    ```
 
-Any risk without a matching test AND commit blocks signoff at Step 7 (MUST per goal doc acceptance).
+## Decision-to-risk cross-ref (v3)
 
-## Status transitions
-
-- `pending` — risk named; no compensator shipped yet
-- `in-progress` — test written (Beck RED); compensator source in flight
-- `shipped` — compensator source committed with `[risk: R#]` trailer; test GREEN
-- `verified` — Step 7 grep audit confirms ledger row has matching test + commit; signoff clears row
-
-All 10 rows currently at `pending`. Rows flip through the transitions across Steps 4-7. Step 7 signoff requires all rows at `verified`.
-
-## Decision-to-risk cross-ref (v2)
-
-Every ADR-007 decision maps to at least one risk row. Every risk row maps to at least one ADR-007 decision.
-
-| ADR-007 Decision | Risk rows honored |
+| ADR-007 Decision | Rows honored |
 |---|---|
-| D1 — Bundle mechanism (`substrate/` in package) | R1 (one method) + R5 (walks manifest not filesystem) |
-| D2 — Strategy manifest source | R7 (fail-fast) + R10 (remote rate limits) |
-| D3 — Prepublish safety envelope (3 checks) | R7 (missing manifest) + R9 (size ceiling) |
-| D4 — Init copy semantics | R3 (shared writeSafely) + R7 fallback (hash verification) |
-| D5 — Sync migration semantics (Path A) | R8 (adopter migration + hash preservation) |
-| D6 — Version bump + release cadence | R8 (migration doc names version explicitly) |
+| D1 — Bundle mechanism (`substrate/` in package) | R1, R5, H3 (bundle path lock) |
+| ~~D2 — Strategy manifest source~~ | REMOVED per RFC B3; sibling-only |
+| D3 — Prepublish safety envelope (3 checks) | R7, R9 |
+| D4 — Init copy semantics | R3, R7 fallback (hash verify), N1, N2 |
+| ~~D5 — Sync migration semantics~~ | REMOVED per RFC B1; deferred to scope-e |
+| D5-cure (new) — Sync output shape | L2 |
+| D6 — Version bump + release cadence | (documented via CHANGELOG L3) |
+| D7 (new) — Manifest schema evolution | H1 |
 
-Rows R2 (no execSync) + R4 (typed manifest module) + R6 (path constants) live in decomp § Control objects. They're code-shape enforcement rather than ADR-level adopter contract, so they don't map to ADR-007 decisions but do map to Tier 0 tests.
+R2, R4, R6, H2 live in decomp § Control objects / Test list; code-shape enforcement rather than ADR-level.
 
-## Test count summary (unchanged from decomp)
+## Test count summary (v3)
 
-27 Tier 0 tests + 2 fixtures across 5 harness files. Each carries `// @risk: R#`. Signoff runs grep audit against this ledger.
+Total: **22 Tier 0 tests + 2 fixtures** across 6 harness files.
 
-Test additions for R10 (v2 new):
-- `tests/harness/prepublish-bundle.test.ts` gains 2 tests (rate limit retry + auth header)
-- Test count becomes **29 tests + 2 fixtures**
+| File | Tests | Ties |
+|---|---|---|
+| tests/harness/prepublish-bundle.test.ts | 6 | R2, R7, R9 |
+| tests/harness/copy-substrate.test.ts | 10 | R1, R3, R5, R7-fallback, N1, N2 |
+| tests/harness/manifest-io-legacy.test.ts | 3 | R4, H1 |
+| tests/harness/sync-output.test.ts | 2 | L2 |
+| tests/harness/paths.test.ts | 1 | R6 |
+| tests/harness/schema-guard.test.ts | (folded into manifest-io-legacy) | H1 |
 
-## Followup — /promote if pattern proves out
-
-If this ledger pattern reduces defect leakage on bassclef-cli goal 2026-08-28d, /promote as a first-class /longrun output — see bassclef-upstream#1420 (filed this session).
+Deferred to scope-e:
+- tests/harness/sync-migration.test.ts (R8 + L1)
+- tests/harness/prepublish-remote-fetch.test.ts (R10 + S1 restoration)
 
 ## References
 
-- Goal doc — `docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md`
-- Decomposition — `docs/decompositions/2026-08-28-npm-lite-bundling.md` § Control objects + Test list
-- ADR — `docs/adrs/ADR-007-npm-lite-substrate-bundling.md` § Decision + Traceability
-- Plan doc — `docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md`
-- Convention citation — `.claude/rules/compounding-sequence-fresh-analysis.md` L246
-- Evolution ticket — sunj-labs/bassclef-upstream#1420
-- Anchor luminaries — `.claude/luminaries/john-ousterhout.md`, `.claude/luminaries/david-parnas.md`, `.claude/luminaries/michael-nygard.md`
+- Goal doc — `docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md` (amended v3)
+- ADR-007 — `docs/adrs/ADR-007-npm-lite-substrate-bundling.md` (amended v3)
+- RFC-0001 — `docs/rfcs/RFC-0001-npm-lite-substrate-bundling-review.md` (accepted 2026-08-29)
+- Scope-e plan — `docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md` (session-end output)
+- Sister /promote — sunj-labs/bassclef-upstream#1420 (dogfooding this ledger pattern)

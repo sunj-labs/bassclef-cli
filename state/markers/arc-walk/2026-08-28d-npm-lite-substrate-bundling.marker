@@ -1,0 +1,13 @@
+# Thread-walk marker — goal 2026-08-28d amendment for RFC-0001 disposition
+- date: 2026-08-29
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- parent-goal walk (recursive; performed at Step 0 + reconfirmed pre-amendment):
+  - active: docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md (this file being amended for scope-b1)
+  - parent_goal: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md (read L1-80 at Step 0; time budget 300-500 turns; primary luminaries alan-cooper + john-ousterhout + saltzer-schroeder)
+  - parent_goal of 2026-08-06b: null (walk terminates)
+  - parent_roadmap of 2026-08-06b: bassclef-upstream/docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md (ACTIVE; 5-iteration market entry)
+- drivers + open acceptance from parent goal:
+  - Sam demo (WU-8) — awaits live 0.0.2 (SHIPPED per whereami L67); now blocked on 0.1.0 which this goal ships
+  - Adam Sharpe security PRs (WU-7) — deferred; must land before 0.1.0
+  - Iteration i install harness (SHIPPED 2026-08-27) — verifies 0.1.0 install path
+- scope amendment context: RFC-0001 accepted; migration moves to scope-e (next /longrun)

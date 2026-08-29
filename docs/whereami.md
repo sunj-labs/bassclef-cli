@@ -14,20 +14,22 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-iteration_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
-iteration_started: 2026-08-06
-iteration_phase: WU-1 through WU-5 + iteration e (v0.0.2 live) + iteration i (install harness) SHIPPED. Iteration i landed 7 commits under feat/iteration-i-npm-install-harness — full OOAD chain (domain + UC + GRASP + ADR-006 + R-NPM-014 registry + harness code + CI workflow). WU-6 (upstream harness check class), WU-7 (Adam Sharpe security PRs, deferred), WU-8 (Sam demo), WU-9 (first tagged 0.1.0) remain.
+iteration_bet: docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md (scope-b1)
+iteration_started: 2026-08-28
+iteration_phase: Steps 0-3.5 SHIPPED plus RFC-0001 council review + revised B disposition. Steps 4-8 land in next /longrun session as scope-b1 (bundle + init copy + sync 149-entry walk; migration deferred to scope-e). Parent goal 2026-08-06b remains in flight; scope-b1 is a step under it.
 
 ## Operator recap
 
-2026-08-28 short session — operator dispatched /longrun prep for the npm-native lite substrate bundling plan, then waved off. The prompt belonged in bassclef-web, not bassclef-cli. Compressed prep did read the plan doc + whereami + parent goal frontmatter and drafted Option b (combined Phase 1 + Phase 2) scope, but no goal doc was created and no commits landed. Plan doc at docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md is still current for the next bassclef-cli /longrun that picks up npm-native lite bundling.
+2026-08-29 session — /longrun prep + Steps 0-3.5 landed for goal 2026-08-28d (npm-lite substrate bundling). 5 commits pushed on branch docs/2026-08-28-npm-lite-substrate-bundling-plan. Artifacts: goal doc + fully-dressed UC + decomposition with @pattern calls + ADR-007 + risk ledger v3. Mid-session finding — decomp mislabeled 2 existing modules (`write-safely.ts` and `manifest-io.ts`) as new; corrected via preflight commit 5f1155e. Operator asked for /architect-review + fresh /pre-mortem with council of luminaries outside authoring set — RFC-0001 written (5 outside luminaries: linus + hyrum + brooks + saltzer-schroeder + norman); 16 findings surfaced across HIGH/MEDIUM/LOW. Operator picked revised B — scope-b1 (bundle + init copy + sync 149-walk; migration deferred to scope-e). Ledger v3 + goal amendment + ADR-007 amendment + scope-e plan all landed. 2 /promote tickets filed at bassclef-upstream — #1420 (evolution: pre-mortem-to-compensator mapping as first-class /longrun output; this goal dogfoods) and #1421 (substrate-defect: hook section extractor false-positive on cross-reference; observed 3× this session). PR #36 rebased green. Next /longrun starts fresh session and picks up Steps 4-8 (scope-b1) with plan doc at docs/iteration-bets/2026-08-28d + ledger v3.
+
+previous_recap: 2026-08-28 short session — operator dispatched /longrun prep for the npm-native lite substrate bundling plan, then waved off. The prompt belonged in bassclef-web, not bassclef-cli. Compressed prep did read the plan doc + whereami + parent goal frontmatter and drafted Option b (combined Phase 1 + Phase 2) scope, but no goal doc was created and no commits landed. Plan doc at docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md is still current for the next bassclef-cli /longrun that picks up npm-native lite bundling.
 
 previous_recap: 2026-08-27 session shipped iteration i — install harness for @thebassclef/core with full OOAD ceremony per operator direction. 7 commits on feat/iteration-i-npm-install-harness. 11 tests pass at 735ms local; 1 test skipped by design (published-fetch scenario env-gated). Two /loop iterations both RED → GREEN in one cycle each (npm -g flag defect at Step 6a; stale walking-skeleton assertion at Step 6b). Feathers lead lens signed off; Cockburn + Cooper + Nygard + Prater + Ousterhout supporting. 3 pre-mortem light runs (Step 0, Step 6b, Step 7); 27 total risks named + strongest folded per step. Step 8 pattern-annotation pass surfaced substrate gap — 3 bassclef-upstream catalog entries missing (fowler test-fixture, gof command, gof template-method); false annotations removed per pattern-annotation.md rule; follow-on candidate named in session log. Step 9 workflow verify deferred to post-merge (feature branch can't dispatch workflow_dispatch until file lands on default). PR awaits operator review.
 
 previous_recap: Short 2026-08-18 followup session. Filed bassclef-upstream#1197 — meta-ticket for the OOAD-plus-traceability chain as a first-class bassclef offering, with a luminary consult ask on over-engineering guard + adopter tier boundary. Cross-commented on umbrella #1171. Closed stale PR #10 without merge (path b). No code shipped.
 
 previous_bet: —
-next_bet: —
+next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md)
 
 ## Shipped (across session history)
 
@@ -68,6 +70,8 @@ next_bet: —
 
 ## In flight
 
+- Goal 2026-08-28d — npm-lite substrate bundling (scope-b1). Steps 0-3.5 shipped this session; RFC-0001 accepted; Steps 4-8 next session. PR #36 on branch docs/2026-08-28-npm-lite-substrate-bundling-plan.
+- Scope-e (migration + follow-ons) — planned at docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md. New /longrun after scope-b1 ships.
 - Iteration i — install harness SHIPPED 2026-08-27; PR on feat/iteration-i-npm-install-harness awaits operator review + merge.
 - PR #10 — pre-existing stale session-close PR from 2026-08-08. Merge-conflict-dirty. Operator disposition pending (path a rebase / b close / c leave).
 - bassclef-cli #25 — Model C reader implementation. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
@@ -79,6 +83,8 @@ next_bet: —
 
 - bassclef-upstream #1182 — Traceability Subsystem umbrella promote. Filed 2026-08-12. Awaits triage.
 - bassclef-upstream #1184 comment 5265798011 — confirmation of (A) for lite tier extraction. Waits on upstream `/longrun` schedule.
+- bassclef-upstream #1420 — pre-mortem-to-compensator mapping as first-class /longrun output. Filed 2026-08-29 (this session). Adopter-source: bassclef-cli goal 2026-08-28d dogfoods the pattern.
+- bassclef-upstream #1421 — hook section extractor false-positive on cross-reference. Filed 2026-08-29 (this session). Observed 3× during /longrun prep compounding-axis check.
 
 ## Active agents
 
@@ -156,8 +162,11 @@ next_bet: —
 
 ## Last updated
 
+2026-08-29T14:00:00Z — session-end (goal 2026-08-28d scope-b1 Steps 0-3.5 shipped + RFC-0001 council review accepted with revised B disposition; Steps 4-8 next /longrun; scope-e planned)
+session: docs/session-logs/2026-08-29-longrun-npm-lite-steps-0-through-3.5-plus-rfc-0001.md
+
 2026-08-28T15:02:36Z — session-end (short session; /longrun prep waved off; wrong repo; no code changed)
-session: docs/session-logs/2026-08-28-longrun-prep-waved-off.md
+prior_session: docs/session-logs/2026-08-28-longrun-prep-waved-off.md
 
 ## Configuration
 

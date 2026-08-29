@@ -3,7 +3,9 @@ rfc: 0001
 title: Council review — npm-lite substrate bundling (Steps 4-6 pre-code)
 authored: 2026-08-29
 authored_by: agent
-status: under-review
+status: accepted
+accepted: 2026-08-29
+disposition: revised-B (scope-b1 + selective HIGH cures + defer migration to scope-e)
 review_type: /architect-review + fresh /pre-mortem
 reviews: goal 2026-08-28d Steps 4-6 (tests + Phase 1 source + Phase 2 source)
 authoring_set: [john-ousterhout, david-parnas, michael-nygard, michael-feathers, kent-beck, alan-cooper]
@@ -16,7 +18,50 @@ rfc_template_source: https://medium.com/juans-and-zeroes/a-thorough-team-guide-t
 
 ## Status
 
-`under-review` — waiting on operator disposition of council findings before Step 4 test writing resumes.
+`accepted` on 2026-08-29 with disposition **revised B (scope-b1)**.
+
+## Disposition — what the operator picked
+
+Operator chose revised Recommendation B after context-saturation weighing (52% at decision time; original A/C would push past compaction ceiling with re-read cost).
+
+**Absorbed in scope-b1 (this goal, 2026-08-28d):**
+
+| Finding | Cure landed at |
+|---|---|
+| L2 sync output shape | ADR-007 D5-cure amendment |
+| H1 manifest schema evolution | ADR-007 new invariant section |
+| N1 progress signal | Step 6 code contract in ADR-007 D4 |
+| N2 error messages name the fix | Step 6 code contract in ADR-007 D4 |
+| H2 count parameterization | Test list correction in decomp + ledger v3 R9 |
+| H3 bundle path lock | ADR-007 D1 invariant addition |
+| B3 drop RemoteFetchStrategy | ADR-007 D2 REMOVED; sibling-only |
+| S1 remote fetch integrity | Moot — no remote path in scope-b1 |
+
+**Deferred to scope-e (next /longrun; migration goal 2026-08-29+):**
+
+| Finding | Reason |
+|---|---|
+| L1 no-manifest case (0.0.1 adopters) | Needs migration path infrastructure — scope-e ships that |
+| B1 sync migration split | Scope-e IS the migration goal |
+| S2 require.resolve refinement | Medium risk; migration touches init.ts anyway |
+| L3 CHANGELOG semver note | Land with 0.1.0 release commit (Step 8 of scope-b1) |
+
+**Deferred to 0.1.x follow-on (post-scope-e):**
+
+| Finding | Reason |
+|---|---|
+| N3 sync output rewording | Only fires after migration ships (scope-e) |
+| N4 substrate folder git guidance | Nice-to-have; migration doc covers this |
+
+## What scope-b1 ships (revised)
+
+`@thebassclef/core@0.1.0` bundles 146 substrate files + `bassclef init` copies them + `bassclef sync` walks the 149-entry manifest for updates. No migration path from 0.0.2. No remote fetch. Sibling checkout is the only manifest source.
+
+Adopters on 0.0.2 who want 0.1.0 substrate run `bassclef init --force` in their project until scope-e ships proper migration.
+
+## References
+
+Original RFC body (motivation + design + council critiques + all findings) preserved below for audit trail.
 
 ## Summary
 

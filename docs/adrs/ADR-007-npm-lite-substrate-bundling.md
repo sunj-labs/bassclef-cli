@@ -46,6 +46,25 @@ Alternatives considered:
 4. **Include manifest at publish time but not source files** (adopter fetches source per-file on first sync). Rejected — same network dependency problem as (2); split contract adds a failure mode.
 5. **Symlink substrate from a global npm-installed cache dir.** Rejected — cross-platform symlink semantics differ; adopter edits break silently; Sam expects real files under her tree.
 
+## Amendment 2026-08-29 — RFC-0001 disposition (scope-b1)
+
+RFC-0001 council review (5 outside luminaries) accepted 2026-08-29 with disposition revised B. Impact on this ADR:
+
+**REMOVED:**
+- **Decision 2** (Strategy pattern for manifest source) — per RFC finding B3 (YAGNI). Prepublish uses sibling checkout only. `BASSCLEF_MANIFEST_URL` env var not supported in 0.1.0. RemoteFetchStrategy restoration deferred to scope-e when CI need surfaces + with S1 signature verification.
+- **Decision 5** (sync migration semantics — Path A) — per RFC finding B1 (second-system effect). Migration ships as scope-e (next /longrun; possibly a `bassclef migrate` subcommand). 0.0.2 adopters run `bassclef init --force` until scope-e ships.
+
+**AMENDED:**
+- **Decision 1** — bundle path `substrate/<path>` becomes explicitly semver-locked (H3 cure). Additive changes OK; rearrangements are MAJOR.
+- **Decision 3** — Prepublish safety envelope loses the "strategy selection" step. Sibling manifest missing is the only failure mode; still fails fast (R7).
+- **Decision 4** — Init copy adds two behaviors — per-directory progress line as each directory completes (N1 cure) + error messages that name the fix not the cause (N2 cure).
+
+**ADDED:**
+- **Decision 5-cure** (sync output shape) — per L2. Default output is per-directory summary. `--verbose` shows per-file. Preserves adopter scripts binding to 0.0.2 output shape.
+- **Decision 7** (manifest schema evolution) — per H1. Init manifest schema is semver-locked. Add-only; never remove fields. Schema version bumps at MINOR when fields added; MAJOR when fields removed OR types change.
+
+Original decisions D2 and D5 below preserved for audit trail. Both marked `SUPERSEDED (scope-b1)` inline. Refer to RFC-0001 disposition table for the full mapping of RFC findings to cure locations.
+
 ## Decision
 
 The npm-lite substrate bundling contract for `@thebassclef/core@0.1.0` and every subsequent iteration.
@@ -60,7 +79,9 @@ Bundling runs via `package.json` `scripts.prepublishOnly` — hook fires on `npm
 
 Rationale — Ousterhout deep module. Sam's install path stays two commands. Bundle mechanism hides inside prepublish. R1 compensator lives at `src/lib/copy-substrate.ts` (one public method).
 
-### Decision 2 — Manifest source discovery via Strategy pattern
+### Decision 2 — Manifest source discovery via Strategy pattern (SUPERSEDED scope-b1 per RFC B3)
+
+**Note (2026-08-29):** SUPERSEDED. Sibling checkout is sole manifest source in 0.1.0. See Amendment section at top for rationale. Text below preserved for audit trail.
 
 Prepublish script picks manifest source at runtime via Strategy:
 
@@ -102,7 +123,9 @@ All writes go through `writeSafely()` from existing `src/lib/write-safely.ts` (R
 
 Rationale — reuse existing safety contract. Adopter sees consistent semantics whether copying config or substrate. No new safety surface to reason about.
 
-### Decision 5 — `bassclef sync` migration semantics
+### Decision 5 — `bassclef sync` migration semantics (SUPERSEDED scope-b1 per RFC B1)
+
+**Note (2026-08-29):** SUPERSEDED. Migration Path A deferred to scope-e (next /longrun). 0.1.0 sync walks the 149-entry manifest with existing classifier only; no legacy detection; no migration. See Amendment section at top. Text below preserved for audit trail.
 
 `bassclef sync` at v0.1.0 detects legacy manifest via `detectLegacyManifest()` — new function added to existing `src/lib/manifest-io.ts` module (not a new file; extends the module that already handles read/write per WU-2 init work). Two paths:
 

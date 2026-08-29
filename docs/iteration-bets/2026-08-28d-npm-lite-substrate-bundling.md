@@ -70,6 +70,24 @@ Per @luminary david-parnas — the manifest is the interface. Bundle layout is i
 
 Per @luminary michael-nygard — every publish path fails fast. Missing manifest → `npm pack` exits nonzero with a clear message. Adopter migration ships as a minor bump (0.1.0) with a documented upgrade path.
 
+## Scope amendment 2026-08-29 (RFC-0001 disposition)
+
+Council review at RFC-0001 (5 outside luminaries) surfaced 16 findings. Operator picked revised B — scope-b1. This goal now ships bundle + init copy + sync 149-entry walk only. Migration Path A moves to scope-e (next /longrun). RemoteFetchStrategy dropped per RFC B3 (YAGNI); sibling checkout is sole manifest source.
+
+**In scope for 2026-08-28d (scope-b1):**
+- Bundle 146 files in npm package via prepublishOnly
+- `bassclef init` copies substrate after config files land
+- `bassclef sync` walks 149-entry manifest (no migration path)
+- HIGH cures absorbed: L2 sync output shape + H1 manifest schema evolution + H2 count parameterization + H3 bundle path lock + N1 progress signal + N2 user-model error messages
+
+**Deferred to scope-e (next /longrun; see `docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md`):**
+- Migration Path A (adopter 0.0.2 → 0.1.0 upgrade)
+- L1 no-manifest case (0.0.1 adopters)
+- RemoteFetchStrategy restoration when CI needs it (with S1 signature verification)
+- S2 require.resolve refinement
+
+**Adopter path in the interim:** existing 0.0.2 adopters who want 0.1.0 substrate run `bassclef init --force` in their project.
+
 ## Evidence
 
 - **Source** — plan doc `docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md`; parent PR `bassclef-upstream#1418` (MERGED SHA `5e39053b`); canvas amendment L292-296
@@ -95,17 +113,22 @@ Per @luminary michael-nygard — every publish path fails fast. Missing manifest
 | **2** decompose | `docs/decompositions/2026-08-28-npm-lite-bundling.md` with `@pattern` calls + inline `@risk: R#` cites | UC | 40 turns | 🟡 |
 | **3** ADR | `docs/adrs/ADR-007-npm-lite-substrate-bundling.md` — pins Shape A layered under Shape D | decomposition | 20 turns | 🟢 |
 | **3.5** ledger v2 | risk ledger extended — compensator + build target + verification + status columns per row | ADR-007 + decomposition | 20 turns | 🟢 |
-| **4** Tier 0 tests | `tests/harness/prepublish-bundle.test.ts` + `tests/harness/copy-substrate.test.ts` (Beck RED) with `// @risk: R#` comments | ledger v2 | 60-100 turns | 🟡 |
-| **5** Phase 1 source | `scripts/prepublish-bundle-substrate.mjs` + `package.json` extensions + `.gitignore` (commits carry `[risk: R#]`) | Step 4 RED → GREEN | 50-80 turns | 🟡 |
-| **6** Phase 2 source | `src/lib/copy-substrate.ts` + `init.ts` + `sync.ts` extensions + `docs/migrations/0.1.0.md` (commits carry `[risk: R#]`) | Step 5 GREEN + Step 4 RED tests | 100-150 turns | 🔴 |
+| **4** Tier 0 tests | 22 tests across 5 harness files (Beck RED); each carries `// @risk: R#` OR `// @rfc: <ID>` per ledger v3 | ledger v3 | 45-70 turns | 🟡 |
+| **5** Phase 1 source | `scripts/prepublish-bundle-substrate.mjs` (sibling-only per RFC B3) + `package.json` extensions + `.gitignore` (commits carry `[risk: R#]`) | Step 4 RED → GREEN | 35-55 turns | 🟡 |
+| **6** Phase 2 source | `src/lib/copy-substrate.ts` (with N1 progress + N2 error messages) + `init.ts` extension + `sync.ts` extension (149-entry walk; no migration) + ADR-007 amendments (L2 + H1 + H3) (commits carry `[risk: R#]` OR `[rfc: <ID>]`) | Step 5 GREEN + Step 4 RED tests | 60-90 turns | 🟡 |
 | **7** signoff | Ousterhout signoff marker + grep audit (`grep -r "@risk:" tests/` + `git log --grep "\[risk:"` cross-check ledger) + PR body | Steps 4-6 evidence | 25 turns | 🟢 |
 | **8** closeout | session log + whereami flip + PR opened for review | signoff | 20 turns | 🟢 |
 
-## Acceptance
+## Acceptance (revised for scope-b1)
 
-- [ ] `npm pack` produces a package with `substrate/` at expected paths (146 files matching manifest)
-- [ ] Fresh temp dir + `npm install <package> + bassclef init` writes 146 files to `.claude/` without touching sibling checkout
-- [ ] `bassclef sync` walks extended manifest with existing classifier (Current / NeedsUpdate / Edited / Deleted per file)
+- [ ] `npm pack` produces a package with `substrate/` at expected paths (file count matches manifest.entries.length; not hard-coded per H2)
+- [ ] Fresh temp dir + `npm install <package> + bassclef init` writes substrate files to `.claude/` without touching sibling checkout
+- [ ] Init emits per-directory progress line as each directory completes (per N1)
+- [ ] Copy errors name the fix, not the cause (per N2)
+- [ ] `bassclef sync` walks extended manifest with existing classifier (Current / NeedsUpdate / Edited / Deleted per file) — no migration path this scope
+- [ ] Sync default output shape is per-directory summary; `--verbose` gives per-file (per L2)
+- [ ] Init manifest schema evolution documented in ADR-007 (per H1)
+- [ ] Bundle path `substrate/<path>` documented as semver-locked in ADR-007 D1 (per H3)
 - [ ] Tier 0 tests GREEN in bassclef-cli CI
 - [ ] ADR-007 committed with @luminary ousterhout + parnas + nygard signoff
 - [ ] Adopter migration doc drafted at `docs/migrations/0.1.0.md` (existing 3-file init adopters upgrade cleanly)
