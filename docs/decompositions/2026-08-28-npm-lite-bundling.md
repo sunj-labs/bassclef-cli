@@ -117,34 +117,33 @@ The public method is `copySubstrate(targetDir: string, options: CopyOptions): Pr
 - No direct `fs.writeFileSync` (R3 compensator — routes through `writeSafely`)
 - No literal `'substrate/'` string outside this file (R5 compensator)
 
-### `src/lib/init-manifest.ts` (Step 6)
+### `src/lib/manifest-io.ts` (Step 6 — EXTENDED; existing module)
 
 @risk: R4 (typed module wrapping raw JSON reads)
 @pattern `../bassclef-upstream/patterns/code/gof/adapter.md` — wraps raw JSON into typed interface
-@pattern `../bassclef-upstream/patterns/code/fowler-poeaa/repository.md` — provides read/write access to init manifest as a collection
+@pattern `../bassclef-upstream/patterns/code/fowler-poeaa/repository.md` — provides read/write access to manifest as a collection
 
-Wraps read + write of `.bassclef/init.manifest.json`. Returns typed objects; hides JSON parsing behind the interface.
+**Preflight correction (Step 4):** `src/lib/manifest-io.ts` already exists from WU-2 init work — confirmed via `ls src/lib/` and `tests/manifest-io.test.ts` L18-23 (imports `readManifest`, `writeManifest`, `ManifestReadError`, `MANIFEST_SCHEMA_VERSION`). Extend the existing module rather than create `init-manifest.ts` (original decomp mislabel).
 
-Public API:
-- `readInitManifest(targetDir: string): InitManifest`
-- `writeInitManifest(targetDir: string, manifest: InitManifest): void`
-- `type InitManifest = { schema_version: string, entries: InitManifestEntry[] }`
-- `type InitManifestEntry = { path: string, template_version: string, content_hash: string }`
-- `detectLegacyManifest(manifest: InitManifest): boolean` — R8 migration path detection
+Extension deltas at Step 6 (~20 LOC):
+- Add `detectLegacyManifest(manifest: Manifest): boolean` — returns true when `entries.length === 3` (legacy shape) OR `manifest_schema_version < "0.2.0"` (bumping schema alongside package version)
+- Extend `Manifest` type (in `src/lib/manifest-types.ts`) to support 149-entry shape — no field additions needed; entry array grows
+- Add `computeConfigHashes(targetDir: string, entries: string[]): Record<string, string>` — computes SHA-256 for existing 3 config files during migration (Q4 from ledger v2 R8)
 
-- ≤ 80 lines
-- No `JSON.parse` outside this file (R4 compensator; `grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0)
-- Migration detection returns true when `schema_version < "0.1.0"` OR entries count = 3
+Contract preserved from existing module:
+- No `JSON.parse` outside this file (R4 compensator; `grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0 remains true)
+- Every manifest touch flows through this module per ADR-002 complete-mediation
 
-### `src/lib/write-safely.ts` (Step 6 — extracted from init.ts)
+### `src/lib/write-safely.ts` (Step 6 — EXISTING; no changes needed)
 
-@risk: R3 (shared helper both init + copy-substrate call)
+@risk: R3 (`copySubstrate` imports the existing helper; no re-implementation)
 
-Extracted from the existing `writeSafely()` in `src/commands/init.ts` (UC-init step 8). No behavior change; same atomic-open contract per ADR-002.
+**Preflight correction (Step 4):** `src/lib/write-safely.ts` already exists from WU-2 init work — confirmed via `ls src/lib/` and `tests/write-safely.test.ts` L26 (imports `writeSafely`, `WriteError`). Original decomp said "extract from init.ts (new file)" — wrong; helper already shipped. No extraction needed.
 
-- Preserves existing safety envelope: `O_CREAT | O_EXCL | O_NOFOLLOW`
+R3 compensator becomes: `copySubstrate` imports `writeSafely` from the existing module and never calls `fs.writeFileSync` directly. Contract preserved from WU-2:
+- Atomic-open safety envelope: `O_CREAT | O_EXCL | O_NOFOLLOW`
 - Symlink refusal unconditional (even under `--force`)
-- Only `writeFileSync` call in the codebase after extraction (R3 verification: `grep -rc "writeFileSync" src/` = 1)
+- Only `writeFileSync` call in the codebase (R3 verification: `grep -rc "writeFileSync" src/` = 1 stays true after Step 6 lands)
 
 ### `src/lib/paths.ts` (Step 6)
 
@@ -160,7 +159,7 @@ Every path derived from these. R6 verification: `grep -rE "\.claude/(hooks|skill
 
 ### `src/commands/init.ts` (Step 6 — amended)
 
-@risk: R3 (routes through extracted `writeSafely` helper)
+@risk: R3 (already routes through existing `writeSafely` helper; `copySubstrate` dispatch also uses it)
 
 Amendment at UC-init step 9 — after config files land, dispatch `copySubstrate(targetDir, options)`. Report per-directory summary; sum into total count.
 
@@ -322,13 +321,13 @@ Full list drives Step 4 RED implementation. Tests written before source per `.cl
 - [ ] `// @risk: R7 fallback` — bundle source hash differs from manifest entry hash → errored; specific file named in error
 - [ ] symlink at target path → refused unconditionally (even with `--force`); result reports `errored: 1` (symlink)
 
-### `tests/harness/init-manifest.test.ts` (Step 4c)
+### `tests/harness/manifest-io-legacy.test.ts` (Step 4c) — extends existing `src/lib/manifest-io.ts`
 
-- [ ] `// @risk: R4` — `src/lib/init-manifest.ts` wraps JSON parse; no `JSON.parse.*manifest` outside module (`grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0)
-- [ ] `readInitManifest` on missing file → returns null (not throws)
-- [ ] `readInitManifest` on legacy 3-entry manifest → returns typed InitManifest object
-- [ ] `writeInitManifest` round-trips a 149-entry object without data loss
-- [ ] `detectLegacyManifest` returns true for 3-entry manifest; false for 149-entry manifest
+- [ ] `// @risk: R4` — existing `src/lib/manifest-io.ts` wraps JSON parse; no `JSON.parse.*manifest` outside module (`grep -rc "JSON.parse.*manifest" src/ --exclude-dir=lib` = 0 stays true after extension)
+- [ ] `readManifest` on legacy 3-entry manifest returns typed `Manifest` object (existing behavior preserved)
+- [ ] `writeManifest` round-trips a 149-entry object without data loss (extended shape support)
+- [ ] `detectLegacyManifest` returns true for 3-entry manifest; false for 149-entry manifest (new function)
+- [ ] `computeConfigHashes` returns SHA-256 map for existing 3 config file paths (R8 migration support)
 
 ### `tests/harness/sync-migration.test.ts` (Step 4d, for R8)
 
@@ -365,12 +364,13 @@ Follow-on — file at bassclef-upstream via `/agent-research-spawn` after this g
 
 **Q4 — Adopter edit detection for existing config files during migration.** R8 migration path preserves the 3 config files. Do we compute their hashes at migration time and record in the new 149-entry manifest? Recommendation: yes — otherwise sync classifier loses ground on those 3 files. Small extra work; big correctness win.
 
-## What Step 6 must produce (revised file list)
+## What Step 6 must produce (revised file list — Step 4 preflight correction)
 
 - [ ] `src/lib/paths.ts` — constants (new)
-- [ ] `src/lib/write-safely.ts` — extracted from init.ts (new file; init.ts imports it)
-- [ ] `src/lib/init-manifest.ts` — typed manifest module (new)
 - [ ] `src/lib/copy-substrate.ts` — copy public method (new)
+- [ ] `src/lib/manifest-io.ts` — EXTENDED (~20 LOC delta) with `detectLegacyManifest` + `computeConfigHashes` — module already exists from WU-2
+- [ ] `src/lib/manifest-types.ts` — EXTENDED with `LegacyDetection` type
+- [ ] `src/lib/write-safely.ts` — UNCHANGED (module already exists from WU-2; `copySubstrate` imports it)
 - [ ] `src/commands/init.ts` — amended to dispatch copySubstrate (delta ~20 lines)
 - [ ] `src/commands/sync.ts` — amended with migration path (delta ~40 lines)
 - [ ] `docs/migrations/0.1.0.md` — migration doc (new)
@@ -385,15 +385,15 @@ Follow-on — file at bassclef-upstream via `/agent-research-spawn` after this g
 
 ## What Step 4 must produce
 
-- [ ] `tests/harness/prepublish-bundle.test.ts` (8 tests)
+- [ ] `tests/harness/prepublish-bundle.test.ts` (10 tests — 8 from decomp + 2 for R10 rate limit + auth per ledger v2)
 - [ ] `tests/harness/copy-substrate.test.ts` (9 tests)
-- [ ] `tests/harness/init-manifest.test.ts` (5 tests)
+- [ ] `tests/harness/manifest-io-legacy.test.ts` (5 tests) — tests existing `src/lib/manifest-io.ts` extensions per Step 4 preflight correction
 - [ ] `tests/harness/sync-migration.test.ts` (3 tests)
 - [ ] `tests/harness/paths.test.ts` (2 tests)
 - [ ] Fixture: `tests/fixtures/lite-manifest-mini.json` — 3-entry manifest for copy-substrate tests
 - [ ] Fixture: `tests/fixtures/v0.0.2-init-manifest.json` — legacy shape for migration tests
 
-Total: 27 tests + 2 fixtures. RED first (Beck). Green after Step 5-6 lands.
+Total: 29 tests + 2 fixtures. RED first (Beck). Green after Step 5-6 lands.
 
 ## Traceability summary
 
@@ -402,8 +402,8 @@ Total: 27 tests + 2 fixtures. RED first (Beck). Green after Step 5-6 lands.
 | Strategy for manifest source discovery | Q0 above + Step 5 code | R7 (fail-fast on missing) |
 | One public copySubstrate method | § Control objects — copy-substrate.ts | R1 |
 | Pure-Node prepublish script | § Control objects — prepublish script | R2 |
-| Shared writeSafely helper | § Control objects — write-safely.ts | R3 |
-| Typed init-manifest module (Adapter + Repository) | § Control objects — init-manifest.ts | R4 |
+| Import existing writeSafely helper (no re-implementation) | § Control objects — write-safely.ts EXISTING | R3 |
+| Extend existing manifest-io module (Adapter + Repository) with legacy detection | § Control objects — manifest-io.ts EXTENDED | R4 |
 | Consumer walks manifest not filesystem | § Control objects — copy-substrate.ts | R5 |
 | Constants module for paths | § Control objects — paths.ts | R6 |
 | Adopter migration path via legacy detection | § Control objects — sync.ts | R8 |

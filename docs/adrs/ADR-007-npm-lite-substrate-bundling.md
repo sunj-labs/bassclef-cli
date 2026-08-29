@@ -98,13 +98,13 @@ Rationale — Nygard bulkhead (R7 + R9 compensators). Fail fast at publish beats
 - **Bundle hash verification** — each source file's SHA-256 is verified against the bundled manifest entry BEFORE writing. Mismatch aborts that file with `errored` status (R7 fallback).
 - **Dry-run supported** — `--dry-run` at init prints per-directory `would copy: N` counts without writing.
 
-All writes go through `writeSafely()` from `src/lib/write-safely.ts` (R3 compensator; extracted from init.ts). ADR-002 safety envelope preserved end-to-end.
+All writes go through `writeSafely()` from existing `src/lib/write-safely.ts` (R3 compensator; helper already exists from WU-2 init work — `copySubstrate` imports it, not re-implements). ADR-002 safety envelope preserved end-to-end.
 
 Rationale — reuse existing safety contract. Adopter sees consistent semantics whether copying config or substrate. No new safety surface to reason about.
 
 ### Decision 5 — `bassclef sync` migration semantics
 
-`bassclef sync` at v0.1.0 detects legacy manifest via `detectLegacyManifest()` (per decomposition § Control objects). Two paths:
+`bassclef sync` at v0.1.0 detects legacy manifest via `detectLegacyManifest()` — new function added to existing `src/lib/manifest-io.ts` module (not a new file; extends the module that already handles read/write per WU-2 init work). Two paths:
 
 **Path A — legacy manifest present (adopter upgrading from 0.0.2 to 0.1.0):**
 
@@ -212,7 +212,9 @@ Every decision above pins to at least one risk ledger row. Every ledger row has 
 | D5 — Sync migration semantics | R8 (adopter migration path) |
 | D6 — Version bump + release cadence | R8 (documented upgrade doc) |
 
-R2 (no execSync in prepublish) + R4 (typed init-manifest module) + R6 (path constants module) live in decomposition § Control objects; not ADR-level decisions because they're code shape rather than adopter contract.
+R2 (no execSync in prepublish) + R4 (extended manifest-io module with legacy detection) + R6 (path constants module) live in decomposition § Control objects; not ADR-level decisions because they're code shape rather than adopter contract.
+
+**Correction landed at Step 4 preflight** — R3 and R4 build targets amended in ledger v2 to reference EXISTING `src/lib/write-safely.ts` and EXISTING `src/lib/manifest-io.ts` (both shipped by WU-2 init work per `tests/write-safely.test.ts` L26 + `tests/manifest-io.test.ts` L18-23). Original decomposition text mislabeled both as "new file"; extension approach preserves the ADR-002 complete-mediation invariant already established by those modules.
 
 ## References
 
