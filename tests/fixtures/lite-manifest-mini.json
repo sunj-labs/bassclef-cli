@@ -1,0 +1,27 @@
+{
+  "manifest_version": "1.2.19-mini",
+  "tier": "lite",
+  "entries": [
+    {
+      "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": ".claude/skills/example/SKILL.md",
+      "slug": "example-skill",
+      "tier": "lite",
+      "type": "skill"
+    },
+    {
+      "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": ".claude/rules/example.md",
+      "slug": "example-rule",
+      "tier": "lite",
+      "type": "rule"
+    },
+    {
+      "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": ".claude/hooks/example.sh",
+      "slug": "example-hook",
+      "tier": "lite",
+      "type": "hook"
+    }
+  ]
+}

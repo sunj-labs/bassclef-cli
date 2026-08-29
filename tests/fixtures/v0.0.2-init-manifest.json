@@ -1,0 +1,33 @@
+{
+  "$bassclef": {
+    "template": "init.manifest.json",
+    "manifest_schema_version": "0.0.2",
+    "generated_by": "@thebassclef/core",
+    "generated_by_version": "0.0.2"
+  },
+  "created_at": "2026-08-13T00:00:00.000Z",
+  "target_dir": "/fixture/legacy/adopter",
+  "files": [
+    {
+      "path": ".claude/settings.json",
+      "template": "settings.json",
+      "template_version": "0.0.2",
+      "content_hash_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "outcome": "created"
+    },
+    {
+      "path": "substrate.config.md",
+      "template": "substrate.config.md",
+      "template_version": "0.0.2",
+      "content_hash_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "outcome": "created"
+    },
+    {
+      "path": "substrate.secrets.md",
+      "template": "substrate.secrets.md",
+      "template_version": "0.0.2",
+      "content_hash_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "outcome": "created"
+    }
+  ]
+}

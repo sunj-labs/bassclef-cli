@@ -1,0 +1,8 @@
+# Temperance marker — branch docs/2026-08-28-npm-lite-substrate-bundling-plan (Step 4 pass 2)
+
+- date: 2026-08-29
+- scope: 22 Tier 0 tests + 2 fixtures across 5 harness files (Beck RED first for scope-b1 Step 4)
+- right thing: land tests before source per Beck TDD + ledger v3 L101-110 test list
+- right way: import future modules; import failure IS the RED signal per Beck
+- drift trigger: pause at 70 turns spent OR any test that reshapes the Phase 1/2 module contract
+- see also: state/markers/temperance/docs-2026-08-28-npm-lite-substrate-bundling-plan-step4.marker (Step 4 detail)

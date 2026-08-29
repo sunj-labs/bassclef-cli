@@ -1,0 +1,10 @@
+# Luminary marker — 2026-08-28d Step 4
+
+- date: 2026-08-29
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- primary lens: @luminary michael-feathers — characterization tests pin real behavior before source lands (Beck RED here IS characterization for the shape scope-b1 will produce)
+- primary lens: @luminary kent-beck — test-list-as-planning-artifact (ledger v3 IS the test list; test-list-discipline rule)
+- supporting: @luminary john-ousterhout (R1 one-export deep-module check)
+- supporting: @luminary david-parnas (R4 typed-module + R6 constants + R5 no-substrate-literal — information hiding checks)
+- supporting: @luminary michael-nygard (R7 fail-fast + R9 size-cap — stability patterns)
+- supporting: @luminary don-norman (N1 progress + N2 error names fix — user-model)
