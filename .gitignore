@@ -22,6 +22,10 @@ npm-debug.log*
 .env
 .env.local
 
+# Substrate bundle — populated by prepublishOnly at publish time; never committed.
+# Per ADR-007 D1 (bundle path lock at substrate/<path>).
+substrate/
+
 # Bassclef SDLC + runtime marker directories (per-session, not content)
 docs/sdlc-traces/
 state/markers/verify/
