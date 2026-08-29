@@ -1,0 +1,7 @@
+# Temperance marker — goal 2026-08-28d-npm-lite-substrate-bundling Step 0
+- date: 2026-08-28
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- scope-decision:
+  - right thing: Ship Option b (combined Phase 1 + Phase 2) so `npm install -g @thebassclef/core && bassclef init` writes 146 substrate files. Closes the gap between the bootstrap installer today and a working bassclef.
+  - right way: Manifest-driven with fail-fast. `bassclef-upstream/lite-manifest.json` is the interface (Parnas); prepublish script fails fast if manifest missing (Nygard); copy path is one deep module (Ousterhout).
+  - drift trigger: Session exceeds 500 turns OR ADR count grows past ADR-007 OR scope expands into Phase 3 runtime smoke (bassclef-upstream#1257 territory).
