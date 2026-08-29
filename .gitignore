@@ -229,3 +229,11 @@ state/markers/turn-prose-flags/
 lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# The sync-managed block above ignores a bare `lib` pattern that also
+# matches src/lib/ and harness/lib/. Un-ignore those trees AFTER the
+# managed block — later rules win in .gitignore.
+!src/lib
+!src/lib/**
+!harness
+!harness/**
