@@ -16,11 +16,13 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md (scope-b1)
 iteration_started: 2026-08-28
-iteration_phase: Steps 0-3.5 SHIPPED plus RFC-0001 council review + revised B disposition. Steps 4-8 land in next /longrun session as scope-b1 (bundle + init copy + sync 149-entry walk; migration deferred to scope-e). Parent goal 2026-08-06b remains in flight; scope-b1 is a step under it.
+iteration_phase: Steps 0-5 SHIPPED (Steps 0-3.5 doc + RFC-0001 last session; Steps 4-5 code this session). Step 4 landed 22 Tier 0 tests + 2 fixtures (Beck RED); Step 5 landed the prepublish bundle script (Beck GREEN for R2 R7 R9). Steps 6-8 remain — copy-substrate + init/sync amendments + signoff + PR. Parent goal 2026-08-06b still in flight; scope-b1 is a step under it.
 
 ## Operator recap
 
-2026-08-29 session — /longrun prep + Steps 0-3.5 landed for goal 2026-08-28d (npm-lite substrate bundling). 5 commits pushed on branch docs/2026-08-28-npm-lite-substrate-bundling-plan. Artifacts: goal doc + fully-dressed UC + decomposition with @pattern calls + ADR-007 + risk ledger v3. Mid-session finding — decomp mislabeled 2 existing modules (`write-safely.ts` and `manifest-io.ts`) as new; corrected via preflight commit 5f1155e. Operator asked for /architect-review + fresh /pre-mortem with council of luminaries outside authoring set — RFC-0001 written (5 outside luminaries: linus + hyrum + brooks + saltzer-schroeder + norman); 16 findings surfaced across HIGH/MEDIUM/LOW. Operator picked revised B — scope-b1 (bundle + init copy + sync 149-walk; migration deferred to scope-e). Ledger v3 + goal amendment + ADR-007 amendment + scope-e plan all landed. 2 /promote tickets filed at bassclef-upstream — #1420 (evolution: pre-mortem-to-compensator mapping as first-class /longrun output; this goal dogfoods) and #1421 (substrate-defect: hook section extractor false-positive on cross-reference; observed 3× this session). PR #36 rebased green. Next /longrun starts fresh session and picks up Steps 4-8 (scope-b1) with plan doc at docs/iteration-bets/2026-08-28d + ledger v3.
+2026-08-29 second session — /longrun prep + Steps 4-5 of scope-b1 landed for goal 2026-08-28d. Operator said "go step 4, orchestrator-gated" then went to gym. Compressed prep fired per SKILL Step 0.85 (plan doc under 24h). Step 4 shipped 6 commits — 2 fixtures (lite-manifest-mini + v0.0.2-init-manifest) plus 5 harness test files with 22 Tier 0 tests carrying @risk R# / @rfc <ID> comments per bassclef-upstream#1420 build wiring. Beck RED confirmed: 5 new files failed / 18 existing passed; 8 tests counted RED (14 more counted after Step 6 lands source imports). Step 5 shipped scripts/prepublish-bundle-substrate.mjs (~120 lines pure Node), package.json extension (files array + prepublishOnly + engines guard), .gitignore extension (substrate/ never committed). Vitest after Step 5: 19 files pass / 4 fail; 165 tests pass / 3 fail; prepublish-bundle.test.ts flipped all 6 tests GREEN. Local smoke ran the script end-to-end against the real sibling checkout — bundled 146 files exit 0. Total turns: ~50 of the 200 revised budget. Paused at Step 5 → Step 6 boundary for operator return (Step 6 lands copy-substrate + init/sync amendments — largest step at 60-90 turns; higher blast radius than tests + script; better with operator eyes when the interface design commits).
+
+previous_recap: 2026-08-29 first session — /longrun prep + Steps 0-3.5 landed for goal 2026-08-28d (npm-lite substrate bundling). 5 commits pushed on branch docs/2026-08-28-npm-lite-substrate-bundling-plan. Artifacts: goal doc + fully-dressed UC + decomposition with @pattern calls + ADR-007 + risk ledger v3. Mid-session finding — decomp mislabeled 2 existing modules (`write-safely.ts` and `manifest-io.ts`) as new; corrected via preflight commit 5f1155e. Operator asked for /architect-review + fresh /pre-mortem with council of luminaries outside authoring set — RFC-0001 written (5 outside luminaries: linus + hyrum + brooks + saltzer-schroeder + norman); 16 findings surfaced across HIGH/MEDIUM/LOW. Operator picked revised B — scope-b1 (bundle + init copy + sync 149-walk; migration deferred to scope-e). Ledger v3 + goal amendment + ADR-007 amendment + scope-e plan all landed. 2 /promote tickets filed at bassclef-upstream — #1420 (evolution: pre-mortem-to-compensator mapping as first-class /longrun output; this goal dogfoods) and #1421 (substrate-defect: hook section extractor false-positive on cross-reference; observed 3× this session). PR #36 rebased green.
 
 previous_recap: 2026-08-28 short session — operator dispatched /longrun prep for the npm-native lite substrate bundling plan, then waved off. The prompt belonged in bassclef-web, not bassclef-cli. Compressed prep did read the plan doc + whereami + parent goal frontmatter and drafted Option b (combined Phase 1 + Phase 2) scope, but no goal doc was created and no commits landed. Plan doc at docs/next-longrun-prep-2026-08-28-npm-lite-substrate-bundling.md is still current for the next bassclef-cli /longrun that picks up npm-native lite bundling.
 
@@ -70,7 +72,7 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## In flight
 
-- Goal 2026-08-28d — npm-lite substrate bundling (scope-b1). Steps 0-3.5 shipped this session; RFC-0001 accepted; Steps 4-8 next session. PR #36 on branch docs/2026-08-28-npm-lite-substrate-bundling-plan.
+- Goal 2026-08-28d — npm-lite substrate bundling (scope-b1). Steps 0-5 SHIPPED; Step 6 (copy-substrate + init/sync amendments) + Steps 7-8 (signoff + PR) remain. Test state: 19 files pass, 4 fail (R1 R3 R5 R7-fallback + R6 + H1 + L2 + N1 N2 — all Step 6 targets). PR #36 on branch docs/2026-08-28-npm-lite-substrate-bundling-plan; CLEAN + MERGEABLE.
 - Scope-e (migration + follow-ons) — planned at docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md. New /longrun after scope-b1 ships.
 - Iteration i — install harness SHIPPED 2026-08-27; PR on feat/iteration-i-npm-install-harness awaits operator review + merge.
 - PR #10 — pre-existing stale session-close PR from 2026-08-08. Merge-conflict-dirty. Operator disposition pending (path a rebase / b close / c leave).
@@ -162,8 +164,11 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## Last updated
 
+2026-08-29T20:50:00Z — session-pause (goal 2026-08-28d scope-b1 Steps 4-5 shipped this session; Beck RED harness + prepublish bundle script both landed; paused at Step 5 → Step 6 boundary for operator return)
+session: docs/session-logs/2026-08-29-longrun-npm-lite-steps-4-5-beck-red-and-prepublish-source.md (to be authored at closeout)
+
 2026-08-29T14:00:00Z — session-end (goal 2026-08-28d scope-b1 Steps 0-3.5 shipped + RFC-0001 council review accepted with revised B disposition; Steps 4-8 next /longrun; scope-e planned)
-session: docs/session-logs/2026-08-29-longrun-npm-lite-steps-0-through-3.5-plus-rfc-0001.md
+prior_session: docs/session-logs/2026-08-29-longrun-npm-lite-steps-0-through-3.5-plus-rfc-0001.md
 
 2026-08-28T15:02:36Z — session-end (short session; /longrun prep waved off; wrong repo; no code changed)
 prior_session: docs/session-logs/2026-08-28-longrun-prep-waved-off.md
