@@ -219,3 +219,9 @@ state/markers/turn-prose-flags/
 lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# Un-ignore harness/ tree AFTER the sync-managed `lib` pattern above —
+# rule order matters (later wins). The bare `lib` in the managed block
+# would otherwise re-ignore harness/lib. Iteration i (2026-08-27) added.
+!harness
+!harness/**
