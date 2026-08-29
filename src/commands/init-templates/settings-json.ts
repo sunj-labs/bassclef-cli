@@ -6,9 +6,10 @@
 // writes a valid empty settings.json with a marker block so `bassclef
 // sync` can identify what it wrote and upgrade in place.
 //
-// Do NOT assume `../bassclef` sibling checkout here. Do NOT reference
-// `$HOME/.claude/hooks/bassclef-sync.sh` here. Both were WU-2's
-// architect-review ship-blocker: cold-start adopters have neither.
+// Do NOT assume a sibling bassclef checkout here. Do NOT reference
+// the user-scope sync hook path here. Both were WU-2's architect-review
+// ship blockers: cold-start adopters have neither. Per R6 in the
+// scope-b1 risk ledger, path literals live only in src/lib/paths.ts.
 
 export const SETTINGS_TEMPLATE_VERSION = '0.0.1' as const;
 
