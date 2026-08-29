@@ -22,7 +22,7 @@ import { join, resolve, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const REPO_ROOT = resolve(__dirname, '..', '..');
-const CLI_PATH = join(REPO_ROOT, 'dist', 'bassclef.js');
+const CLI_PATH = join(REPO_ROOT, 'dist', 'cli.js');
 
 interface FileEntry {
   path: string;
