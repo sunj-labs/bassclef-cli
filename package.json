@@ -32,6 +32,7 @@
     "dist/*.js",
     "dist/*.cjs",
     "dist/*.d.ts",
+    "substrate/**",
     "README.md",
     "LICENSE"
   ],
@@ -44,7 +45,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "bump": "node scripts/bump-version.mjs",
-    "harness:npm-install": "vitest run --config vitest.harness.config.ts"
+    "harness:npm-install": "vitest run --config vitest.harness.config.ts",
+    "prepublishOnly": "node scripts/prepublish-bundle-substrate.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

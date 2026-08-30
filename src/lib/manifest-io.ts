@@ -96,6 +96,30 @@ export function writeManifest(targetDir: string, manifest: Manifest): void {
   writeSafely(path, body, { force: true });
 }
 
+// Detect a legacy init manifest — the v0.0.2 shape that carries only
+// the 3 config-file entries. Returns true when the manifest was written
+// by @thebassclef/core before 0.1.0 introduced the extended substrate
+// bundling contract.
+//
+// @risk R4 — typed module owns manifest inspection; consumers never
+// reach into JSON directly.
+// @rfc  H1 — schema evolution: v0.0.2 stays readable under this
+// discipline; v0.1.0+ manifests read cleanly too because the check
+// is additive (files.length AND schema_version, both signals).
+//
+// Two conditions mark a manifest as legacy:
+// 1. files array has 3 entries — the greenfield v0.0.2 init shape
+// 2. manifest_schema_version is older than 0.1.0 (the bundling bump)
+//
+// Either condition alone flips true. Both false means the manifest
+// carries the extended shape.
+export function detectLegacyManifest(manifest: Manifest): boolean {
+  if (manifest.files.length === 3) return true;
+  const declaredVersion = manifest.$bassclef.manifest_schema_version;
+  if (compareSchemaVersion(declaredVersion, '0.1.0') < 0) return true;
+  return false;
+}
+
 // Compare semver-shaped strings (major.minor.patch). Returns
 // negative / zero / positive like a comparator.
 export function compareSchemaVersion(a: string, b: string): number {

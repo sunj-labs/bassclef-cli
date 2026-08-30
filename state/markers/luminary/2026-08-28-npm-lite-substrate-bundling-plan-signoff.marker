@@ -1,0 +1,16 @@
+# Ousterhout + Parnas signoff — scope-b1 Step 7
+
+- date: 2026-08-29
+- goal: 2026-08-28d-npm-lite-substrate-bundling (scope-b1)
+- signoff-by: john-ousterhout (deep modules) + david-parnas (information hiding)
+- lead-lens: john-ousterhout
+- steps-shipped: 4-7 in this session (Beck RED harness + Phase 1 script + Phase 2 source + signoff)
+- test-evidence: 23 test files GREEN / 179 tests pass; 22 new harness tests GREEN
+- grep-audit: 13 unique @risk/@rfc refs in tests/harness/ match 13 unique refs in commit trailers
+- ledger-v4: docs/pre-mortem-mappings/2026-08-28-npm-lite-bundling.md — every row flipped to `verified`
+- adr-007: pinned bundle path + fail-fast + init copy + sync output shape (accepted at Step 3; amended for RFC-0001 revised B)
+- rfc-0001: accepted with disposition revised B; HIGH cures L2 + H1 + H2 + H3 + N1 + N2 absorbed inline
+- ousterhout-verdict: R1 verified via grep — one export from copy-substrate.ts; walk + hash + write hide inside
+- parnas-verdict: R4 verified via grep — manifest-io.ts owns JSON parsing; R6 verified — path constants isolated to paths.ts
+- ready-for: operator merge review of PR #36
+- deferred-to-scope-e: R8 (migration) + R10 (remote fetch) + S2 + L1 + N3 + N4 + L3 per plan doc L83-89

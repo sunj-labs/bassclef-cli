@@ -30,6 +30,7 @@ import {
 import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH } from '../lib/manifest-io.js';
+import { copySubstrate } from '../lib/copy-substrate.js';
 
 interface FilePlan {
   label: string;
@@ -125,7 +126,50 @@ export function runInit(argv: readonly string[]): number {
     return runDryRun(plans);
   }
 
-  return runReal(plans, args.force, args.verbose, targetDir);
+  const exitCode = runReal(plans, args.force, args.verbose, targetDir);
+  if (exitCode === 0) {
+    dispatchSubstrateCopy(targetDir, args.force, args.verbose);
+  }
+  return exitCode;
+}
+
+// Dispatch the substrate copy step after config files land.
+// Silently skips when the bundle is not available (dev workspace with
+// no self-install, or a partial package install). Failures inside the
+// copy path are reported per file but do not change init's exit code —
+// the 3-file config init still stands.
+function dispatchSubstrateCopy(targetDir: string, force: boolean, verbose: boolean): void {
+  let result;
+  try {
+    result = copySubstrate(targetDir, { force });
+  } catch {
+    // Bundle not available (dev workspace or partial install). Skip
+    // silently — the 3-file config init already succeeded and stands.
+    return;
+  }
+  if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
+    return;
+  }
+  // Group copied files by top-level directory for the summary line.
+  const groupCounts = new Map<string, number>();
+  for (const path of result.copied) {
+    const parts = path.split('/');
+    const top = parts.length >= 2 ? parts.slice(0, 2).join('/') : parts[0] ?? '';
+    groupCounts.set(top, (groupCounts.get(top) ?? 0) + 1);
+  }
+  for (const [directory, count] of groupCounts) {
+    process.stdout.write(`  ${directory}: ${count} files copied\n`);
+  }
+  const parts: string[] = [];
+  if (result.copied.length > 0) parts.push(`${result.copied.length} substrate files copied`);
+  if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
+  if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
+  process.stdout.write(`bassclef init: ${parts.join(', ')}.\n`);
+  if (verbose && result.erroredMessages) {
+    for (const msg of result.erroredMessages) {
+      process.stderr.write(`  substrate: ${msg}\n`);
+    }
+  }
 }
 
 function runDryRun(plans: readonly FilePlan[]): number {

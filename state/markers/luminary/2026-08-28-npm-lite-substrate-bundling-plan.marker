@@ -1,0 +1,12 @@
+# Luminary marker — goal 2026-08-28d-npm-lite-substrate-bundling Step 0
+- date: 2026-08-28
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- primary lenses:
+  - john-ousterhout (lead) — Deep modules. `copy-substrate.ts` hides walk + writeSafely + hash-check behind one public method. Prepublish script is pure Node, not a chain of shell-outs.
+  - david-parnas — Information hiding. Adopter init manifest wrapped in typed module `src/lib/init-manifest.ts`; raw JSON reads outside module = 0. Bundle layout is implementation, not interface; consumer walks the manifest.
+- supporting lenses:
+  - michael-nygard — Stability patterns. Every publish fails fast on missing manifest. Adopter migration ships as 0.1.0 minor bump + migration doc.
+  - michael-feathers — Characterization tests. Tier 0 tests pin behavior via HOME_OVERRIDE fixtures before source lands (Beck RED).
+  - kent-beck — TDD rhythm. Step 4 RED tests before Step 5-6 source; each `// @risk: R#` comment ties assertion to ledger row.
+  - alan-cooper — Sam's first-touch experience. Two commands. 5 minutes. No jargon at install.
+- signoff surface: Step 7 requires Ousterhout signoff marker on module depth + Parnas signoff on interface hiding; other lenses inform without gating.

@@ -1,0 +1,9 @@
+# Temperance marker — 2026-08-28d Step 4
+
+- date: 2026-08-29
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- scope: 22 Tier 0 tests + 2 fixtures across 5 harness files (Beck RED first)
+- source: ledger v3 L101-110 authoritative over decomposition test list (which predates RFC scope-b1)
+- right thing: land tests before source per Beck TDD; every test cites @risk R# or @rfc <ID> per bassclef-upstream#1420
+- right way: import future modules (copy-substrate, paths, prepublish script) — import failure IS the RED signal
+- drift trigger: pause at 70 turns spent OR any test that requires Phase 1/2 source shape amendment

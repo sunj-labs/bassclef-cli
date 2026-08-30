@@ -1,0 +1,15 @@
+# Orientation-gate marker — goal 2026-08-28d-npm-lite-substrate-bundling Step 0
+- date: 2026-08-28
+- branch: docs/2026-08-28-npm-lite-substrate-bundling-plan
+- parent-goal walk (recursive):
+  - active goal: docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md (just authored)
+  - parent_goal: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md (read L1-80; time budget 300-500; primary lenses alan-cooper + john-ousterhout + saltzer-schroeder; drivers include Adam Sharpe security PRs + Sam demo)
+  - parent_goal of 2026-08-06b: null (walk terminates)
+  - parent_roadmap of 2026-08-06b: docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md (references sibling at bassclef-upstream; verified sibling exists with ACTIVE status)
+- open items surfaced at Step 0.65 lookback:
+  - PR #36 CONFLICTING → resolved this session (merge origin/main + force-with-lease)
+  - Iteration i (2026-08-27) PR awaits operator merge — separate from this goal; not in scope
+  - PR #10 stale (2026-08-08) — operator disposition pending; not in scope
+  - bassclef-cli #25 waits on bassclef-upstream #1184 — no action this session
+- roadmap-reconcile: not fired (tier=lite per whereami L2 → step skipped per SKILL Step 0.5 tier gate)
+- release pipeline: no bassclef-cli release PRs open; last publish 0.0.2 on 2026-08-13 workflow run 31688236246 (whereami L67)

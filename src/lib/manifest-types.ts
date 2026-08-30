@@ -6,7 +6,11 @@
 // src/lib/manifest-io.ts to reach across the layer boundary. That
 // direction is a layering defect. Types live here now.
 
-export const MANIFEST_SCHEMA_VERSION = '0.0.2' as const;
+// Bumped to 0.1.0 alongside @thebassclef/core 0.1.0 per H1 discipline —
+// the extended manifest shape (149-entry substrate bundle) is additive
+// over the 0.0.2 3-entry init shape. detectLegacyManifest reads this
+// constant to decide when a manifest predates the bundling contract.
+export const MANIFEST_SCHEMA_VERSION = '0.1.0' as const;
 
 export interface ManifestEntry {
   path: string;

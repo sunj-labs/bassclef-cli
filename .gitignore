@@ -22,6 +22,10 @@ npm-debug.log*
 .env
 .env.local
 
+# Substrate bundle — populated by prepublishOnly at publish time; never committed.
+# Per ADR-007 D1 (bundle path lock at substrate/<path>).
+substrate/
+
 # Bassclef SDLC + runtime marker directories (per-session, not content)
 docs/sdlc-traces/
 state/markers/verify/
@@ -35,6 +39,18 @@ state/markers/turn-prose-flags/
 # Bassclef-sync managed symlinks — subdirectories the top block missed
 # (session-reflection.d gets populated by user-scope sync too)
 .claude/hooks/session-reflection.d/
+
+# Un-ignore harness/ tree AFTER the sync-managed `lib` pattern above —
+# rule order matters (later wins). The bare `lib` in the managed block
+# would otherwise re-ignore harness/lib. Iteration i (2026-08-27) added.
+!harness
+!harness/**
+
+# Un-ignore harness/ tree AFTER the sync-managed `lib` pattern above —
+# rule order matters (later wins). The bare `lib` in the managed block
+# would otherwise re-ignore harness/lib. Iteration i (2026-08-27) added.
+!harness
+!harness/**
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 .claude/skills/agent-research-spawn
 .claude/skills/architect-review
@@ -120,6 +136,7 @@ state/markers/turn-prose-flags/
 .claude/skills/temperance
 .claude/skills/test-integration
 .claude/skills/ticket
+.claude/skills/tier-dependency-audit
 .claude/skills/triage-public
 .claude/skills/use-case
 .claude/skills/user-stories
@@ -163,6 +180,7 @@ state/markers/turn-prose-flags/
 .claude/hooks/out-of-repo-symlink-gate.sh
 .claude/hooks/pattern-annotation-validate.sh
 .claude/hooks/plain-english-steering.sh
+.claude/hooks/post-git-push-clean-artifacts.sh
 .claude/hooks/post-skill-friction-check.sh
 .claude/hooks/post-skill-telemetry.sh
 .claude/hooks/post-write-trace.sh
@@ -212,8 +230,10 @@ lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
 
-# Un-ignore harness/ tree AFTER the sync-managed `lib` pattern above —
-# rule order matters (later wins). The bare `lib` in the managed block
-# would otherwise re-ignore harness/lib. Iteration i (2026-08-27) added.
+# The sync-managed block above ignores a bare `lib` pattern that also
+# matches src/lib/ and harness/lib/. Un-ignore those trees AFTER the
+# managed block — later rules win in .gitignore.
+!src/lib
+!src/lib/**
 !harness
 !harness/**

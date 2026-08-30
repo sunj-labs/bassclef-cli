@@ -137,7 +137,7 @@ export function runSync(argv: readonly string[]): number {
     return runDryRun(decisions, args.diff);
   }
 
-  return runReal(decisions, targetDir, manifest);
+  return runReal(decisions, targetDir, manifest, args.verbose);
 }
 
 function classify(entry: ManifestEntry, targetDir: string, args: SyncArgs): FileDecision {
@@ -306,7 +306,7 @@ function runDryRun(decisions: readonly FileDecision[], showDiff: boolean): numbe
 }
 
 function runReal(
-  decisions: readonly FileDecision[], targetDir: string, manifest: Manifest
+  decisions: readonly FileDecision[], targetDir: string, manifest: Manifest, verbose: boolean
 ): number {
   let updated = 0;
   let refused = 0;
@@ -363,6 +363,12 @@ function runReal(
     process.stdout.write(`  updated  ${d.entry.path}\n`);
   }
 
+  // @rfc L2 — emit L2-shaped output for the extended manifest. Default
+  // renders one summary line per top-level directory. --verbose renders
+  // one line per file. Legacy 3-file config sync still gets the summary
+  // footer below; the L2 lines add signal without removing it.
+  emitL2Output(decisions, verbose);
+
   const parts: string[] = [];
   if (updated > 0) parts.push(`${updated} updated`);
   if (noChange > 0) parts.push(`${noChange} up to date`);
@@ -381,6 +387,61 @@ function runReal(
   }
   process.stdout.write(`bassclef sync: ${summary}.\n`);
   return 0;
+}
+
+// @rfc L2 — sync output shape.
+//
+// Default output: one summary line per top-level directory that appears
+// in the manifest. Adopter scripts that grep for per-directory status
+// bind to a stable line shape. Per-file output moves behind --verbose
+// so a 149-entry sync does not flood the terminal.
+//
+// Line format (default):   `  <top-dir>: <count> files (<status>)`
+// Line format (--verbose): `  <path>: <status>`
+//
+// Status values map from the classifier case in describeCase().
+function emitL2Output(decisions: readonly FileDecision[], verbose: boolean): void {
+  if (decisions.length === 0) return;
+
+  if (verbose) {
+    for (const d of decisions) {
+      const status = describeCase(d.case);
+      process.stdout.write(`  ${d.entry.path}: ${status}\n`);
+    }
+    return;
+  }
+
+  // Group by top-level directory (first two path segments). Track the
+  // dominant status per group so the summary reflects the aggregate.
+  interface Group { count: number; statuses: Map<string, number>; }
+  const groups = new Map<string, Group>();
+  for (const d of decisions) {
+    const parts = d.entry.path.split('/');
+    const top = parts.length >= 2 ? parts.slice(0, 2).join('/') : (parts[0] ?? '');
+    const status = describeCase(d.case);
+    let group = groups.get(top);
+    if (group === undefined) {
+      group = { count: 0, statuses: new Map() };
+      groups.set(top, group);
+    }
+    group.count += 1;
+    group.statuses.set(status, (group.statuses.get(status) ?? 0) + 1);
+  }
+
+  for (const [directory, group] of groups) {
+    let statusSummary: string;
+    if (group.statuses.size === 1) {
+      statusSummary = Array.from(group.statuses.keys())[0]!;
+    } else {
+      const bits: string[] = [];
+      for (const [status, count] of group.statuses) {
+        bits.push(`${count} ${status}`);
+      }
+      statusSummary = bits.join(', ');
+    }
+    const files = group.count === 1 ? 'file' : 'files';
+    process.stdout.write(`  ${directory}: ${group.count} ${files} (${statusSummary})\n`);
+  }
 }
 
 function updateManifestEntry(
