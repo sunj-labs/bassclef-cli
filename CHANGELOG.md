@@ -9,12 +9,25 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
-### Added
+### Added — scope-b1 (npm-lite substrate bundling; PR #36)
+
+- npm-lite substrate bundling — `@thebassclef/core` now ships 149 substrate files (skills + rules + hooks + luminaries + agents + standards + ADRs + libs + templates) alongside the CLI. Adopters get a working bassclef install from `npm install -g @thebassclef/core && bassclef init`. Prior 0.0.2 wrote only 3 config files and stopped.
+- `scripts/prepublish-bundle-substrate.mjs` — pure Node prepublish script that reads the sibling `bassclef-upstream/lite-manifest.json` and writes `substrate/` under the package root at publish time. Three fail-fast checks (manifest load + source existence preflight + count + size postflight). 5MB size ceiling.
+- `src/lib/copy-substrate.ts` — one public `copySubstrate` function that walks the bundled 149-entry manifest, verifies each source's SHA-256 against the manifest hash, and dispatches through `writeSafely` with per-directory progress signals and fix-oriented error messages.
+- `src/lib/paths.ts` — `SUBSTRATE_ROOT` + `CLAUDE_TARGET_ROOT` constants (single source of truth per R6 discipline).
+- `detectLegacyManifest` in `src/lib/manifest-io.ts` — reads two signals (files.length === 3 OR schema_version < 0.1.0) to identify the v0.0.2 shape adopters upgrading from.
+- `bassclef sync` extension — walks the 149-entry manifest with L2 output shape (per-directory summary default; `--verbose` shows per-file lines).
+- `MANIFEST_SCHEMA_VERSION` bumped from 0.0.2 to 0.1.0 (H1 schema evolution discipline).
+- ADR-007 — pins the substrate bundling contract (bundle mechanism + prepublish safety envelope + init copy semantics + sync output shape + manifest schema evolution).
+- Full RFC-0001 council review (linus + hyrum + brooks + saltzer-schroeder + norman) — 16 findings; scope trimmed to scope-b1 with migration Path A + RemoteFetchStrategy + 4 minor RFC cures deferred to scope-e.
+
+### Added — scope-e (bassclef migrate subcommand; PR #39)
 
 - `bassclef migrate` subcommand — upgrades adopters from 0.0.x install shapes to the current 149-file substrate without losing config edits. Two paths auto-selected via `detectAdopterState`: Path A upgrades a 0.0.2 install with 3-file legacy manifest (adds 146 substrate files; preserves 3 config files via SHA-256 hash comparison); Path B dispatches full init for 0.0.1 name-reservation state. Interactive prompt confirms the shape before writes; `--yes` bypasses for CI. Full contract in ADR-008 + UC-migrate + `docs/migrations/0.1.0.md`.
 - `computeConfigHashes` in `src/lib/manifest-io.ts` — computes SHA-256 for named config files under a target directory; LF-normalized per ADR-003 N1 (Windows adopter parity).
 - `src/lib/prompt.ts` — thin Node `readline/promises` wrapper with `ttyOverride` injection for test isolation.
 - `CONFIG_FILES` + `CURRENT_ENTRY_COUNT` constants in `src/lib/paths.ts` — single source of truth per R6 discipline.
+- ADR-008 — pins the migrate subcommand contract (two-path branch + interactive prompt + config hash preservation + failure catalog).
 
 ### Changed
 

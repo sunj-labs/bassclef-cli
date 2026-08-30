@@ -16,7 +16,7 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md (scope-e — bassclef migrate; Option b picked)
 iteration_started: 2026-08-30
-iteration_phase: Steps 1-8 SHIPPED — PR #39 open for operator review. Full test suite GREEN (29 files / 210 tests). Grep audit shows 11 unique refs (R1-R7 + L3 + N3 + N4 + S2) match ledger ↔ commit trailers. Luminary signoff by Linus + Ousterhout landed at Step 7. On merge, tag + publish `@thebassclef/core@0.1.1` (or 0.2.0 per operator judgment; ADR-008 D6 amendment note). 0.1.0 not yet on npm; publish gated on operator dispatch of existing workflow per ADR-004.
+iteration_phase: **SHIPPED via PR #39 merge 277f149 (2026-08-30T17:24:15Z).** Full test suite GREEN (29 files / 210 tests per session log). Grep audit clean per ledger v2. Post-merge queue — version bump decision (0.1.0 vs 0.2.0) + tag + publish. 0.1.0 not yet on npm; publish gated on operator dispatch of existing workflow per ADR-004.
 
 ## Operator recap
 

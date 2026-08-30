@@ -1,0 +1,11 @@
+# Temperance marker — main branch (post-scope-e-merge bump)
+- date: 2026-08-30
+- branch: main
+- goal: prepare v0.1.0 tag + publish per operator Option A pick
+- scope-decision:
+  - right-thing: single MINOR 0.1.0 bump combining scope-b1 (PR #36) + scope-e (PR #39)
+    per RFC L3 precedent (adopter migration ships MINOR) + operator confirmation
+  - right-way: manual CHANGELOG merge → npm run bump minor → tag v0.1.0 → push tag →
+    operator dispatches publish workflow (per ADR-004 + guardrails)
+  - drift-trigger: touching src/ code OR modifying prior CHANGELOG entries
+    OR dispatching publish workflow autonomously (all disallowed)
