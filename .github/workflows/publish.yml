@@ -99,6 +99,31 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Checkout sibling bassclef-upstream (for substrate source)
+        # Prepublish reads lite-manifest.json + source files from a
+        # sibling checkout of sunj-labs/bassclef-upstream. On the CI
+        # runner the sibling does not exist by default — we clone it
+        # into ../bassclef-upstream (relative to $GITHUB_WORKSPACE) so
+        # scripts/prepublish-bundle-substrate.mjs resolves it via
+        # default heuristic. Requires BASSCLEF_UPSTREAM_TOKEN secret
+        # (PAT with read scope on sunj-labs/bassclef-upstream) — the
+        # sibling repo is private per operator setup.
+        uses: actions/checkout@v4
+        with:
+          repository: sunj-labs/bassclef-upstream
+          token: ${{ secrets.BASSCLEF_UPSTREAM_TOKEN }}
+          path: ../bassclef-upstream
+          fetch-depth: 1
+
+      - name: Bundle substrate via prepublish script
+        # Explicit invocation — the `prepublishOnly` lifecycle hook does
+        # NOT fire under `npm publish --ignore-scripts` (npm docs). ADR-007
+        # §D3 originally assumed the hook would fire; scope-b1 ship gap
+        # #40 caught the miss during pre-launch architect-review. Running
+        # the script here (as an ordinary node process, not a lifecycle
+        # hook) populates substrate/ before pack + publish see it.
+        run: node scripts/prepublish-bundle-substrate.mjs
+
       - name: Pack (dry run) to get the exact shipped file list
         run: npm pack --dry-run --json > /tmp/pack.json
 
@@ -107,6 +132,18 @@ jobs:
 
       - name: Tier filter refuses tier=upstream frontmatter
         run: node scripts/tier-filter.mjs /tmp/pack.json
+
+      - name: Assert substrate/ present in tarball
+        # Saltzer-Schroeder complete-mediation fix for defect class filed
+        # at #40 — assert substrate/ file count >= 100 so any future
+        # regression fails fast at checks time.
+        run: |
+          COUNT=$(node -e "const p=require('/tmp/pack.json'); console.log(p[0].files.filter(f=>f.path.startsWith('substrate/')).length)")
+          echo "substrate/ file count: $COUNT"
+          if [ "$COUNT" -lt 100 ]; then
+            echo "::error::substrate/ file count $COUNT is under the 100-file floor. Tarball would ship without the bundle. See issue #40."
+            exit 1
+          fi
 
   publish:
     name: Publish to npm
@@ -156,6 +193,24 @@ jobs:
         # publish job self-contained (no artifact sharing with the checks
         # job) at a cost of ~30s of duplicated work.
         run: npm run build
+
+      - name: Checkout sibling bassclef-upstream (for substrate source)
+        # Sibling clone required for the prepublish script per issue #40
+        # cure. Requires BASSCLEF_UPSTREAM_TOKEN secret (same as checks
+        # job).
+        uses: actions/checkout@v4
+        with:
+          repository: sunj-labs/bassclef-upstream
+          token: ${{ secrets.BASSCLEF_UPSTREAM_TOKEN }}
+          path: ../bassclef-upstream
+          fetch-depth: 1
+
+      - name: Bundle substrate via prepublish script
+        # Explicit invocation before `npm publish --ignore-scripts`. Per
+        # #40 diagnose — `--ignore-scripts` blocks the prepublishOnly
+        # lifecycle hook, so the bundling must run as a plain workflow
+        # step here. ADR-007 §D3 amendment records this.
+        run: node scripts/prepublish-bundle-substrate.mjs
 
       - name: Publish to npm
         # ADR-004 §Ordered steps 12:

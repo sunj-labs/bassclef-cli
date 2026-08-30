@@ -1,0 +1,11 @@
+# ADR-deviation marker — fix/publish-workflow-substrate-bundling
+- date: 2026-08-30
+- branch: fix/publish-workflow-substrate-bundling
+- adr_governing: ADR-004 (publish pipeline safety) + ADR-007 (substrate bundling)
+- outcome: ADR-honored
+- rationale: |
+    ADR-004 §D3 belt-and-suspenders on --ignore-scripts stays intact.
+    ADR-007 §D3 amendment records the mechanism change: bundling runs
+    as an explicit workflow step, not via prepublishOnly hook (the hook
+    is silently skipped by --ignore-scripts per npm docs).
+    Same safety intent; different mechanism.
