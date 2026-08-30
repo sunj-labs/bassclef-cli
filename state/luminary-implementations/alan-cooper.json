@@ -1,8 +1,7 @@
 {
-  "luminary_slug": "michael-nygard",
+  "luminary_slug": "alan-cooper",
   "schema_version": 1,
   "referenced_by_files": [
-    "docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md",
     "docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md"
   ],
   "last_scanned": "2026-08-30T13:29:37Z",
