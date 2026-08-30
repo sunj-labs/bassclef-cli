@@ -14,13 +14,19 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-iteration_bet: docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md (scope-b1 SHIPPED)
-iteration_started: 2026-08-28
-iteration_phase: scope-b1 code complete. Steps 0-7 SHIPPED across three /longrun sessions. Step 4 = 22 Tier 0 tests + 2 fixtures. Step 5 = prepublish bundle script. Step 6 = copy-substrate + paths + manifest-io extension + init/sync amendments. Step 7 = ledger v4 (all rows verified) + Ousterhout signoff marker + PR body update. Step 8 = session log + this whereami update. PR #36 CLEAN + MERGEABLE + ready for operator merge review. After merge, tag + publish @thebassclef/core@0.1.0 via existing publish workflow, then start scope-e (migration + follow-ons).
+iteration_bet: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md (scope-e — bassclef migrate; Option b picked)
+iteration_started: 2026-08-30
+iteration_phase: Steps 1-8 SHIPPED — PR #39 open for operator review. Full test suite GREEN (29 files / 210 tests). Grep audit shows 11 unique refs (R1-R7 + L3 + N3 + N4 + S2) match ledger ↔ commit trailers. Luminary signoff by Linus + Ousterhout landed at Step 7. On merge, tag + publish `@thebassclef/core@0.1.1` (or 0.2.0 per operator judgment; ADR-008 D6 amendment note). 0.1.0 not yet on npm; publish gated on operator dispatch of existing workflow per ADR-004.
 
 ## Operator recap
 
-2026-08-29 third session — /longrun prep + Steps 4-7 of scope-b1 landed autonomously for goal 2026-08-28d. Operator said "go step 4, orchestrator-gated" then went to gym; interpretation B fired (continue through Step 4-8 sequence per orchestrator-gated mode + prep-confirmed Option a scope). Compressed prep fired per SKILL Step 0.85 (plan doc under 24h). 15 commits landed on branch. Step 4 shipped 6 commits — 2 fixtures plus 5 harness test files with 22 Tier 0 tests. Step 5 shipped scripts/prepublish-bundle-substrate.mjs + package.json + .gitignore. Step 6 shipped 5 commits — src/lib/paths.ts + src/lib/copy-substrate.ts + manifest-io.ts extension + manifest-types.ts bump (0.0.2 → 0.1.0) + init.ts amendment + sync.ts amendment. Step 6 rescue commit e94951e landed 2 src/lib files that the sync-managed `.gitignore` `lib` pattern initially blocked. Step 7 shipped 1 commit — ledger v4 (every row `verified`) + Ousterhout + Parnas signoff marker. Grep audit: 13 unique @risk/@rfc refs in tests match 13 unique refs in commit trailers; H2 + H3 correctly absent per doctrine. Vitest final: 23 test files GREEN / 179 tests pass. PR #36 CLEAN + MERGEABLE. Total this session: ~135 turns of 200-turn revised budget. Across all three /longrun sessions for goal 2026-08-28d: ~385 turns total, within the 390-495 goal doc budget. Next: operator reviews + merges PR #36; publish 0.1.0; start scope-e.
+2026-08-30 fifth session — /longrun scope-e migrate Option c (full ship Steps 1-8) landed autonomously per orchestrator-gated dispatch. 7 atomic commits shipped in order (UC-migrate → decomposition → ADR-008 + risk ledger v1 → Tier 0 RED harness + Step 3.5 corrections → Phase 1 argv reducer → Phase 2 full migrate + RFC N3/N4/S2/L3 refinements → Step 7 signoff). PR #39 open. Full Beck GREEN — 29 files / 210 tests pass. New surface: `bassclef migrate` subcommand with Path A (0.0.2 → 0.1.0 preserving 3 config files via SHA-256) + Path B (0.0.1 → full init dispatch via runInit reuse). Interactive prompt via readline/promises + ttyOverride injection. RFC refinements — N4 folder guidance in init + migrate final lines; S2 import.meta.url refactor with createRequire fallback; L3 CHANGELOG precedent note pinning "adopter migration ships as MINOR". Two preflight corrections landed at Step 4 — detectLegacyManifest is boolean (not enum; composed inside migrate.ts as detectAdopterState); 3rd config file is substrate.secrets.md (not CLAUDE.md; per v0.0.2 fixture). One friction — R3 test initially failed because fixture used fake bundle hashes; real SHA-256 in fixture unblocked. Retro skipped per lite tier gate; two-line note in session log covers what worked + what did not.
+
+previous_recap: 2026-08-30 fourth session — PR #36 merged 2026-08-30T05:52:48Z (scope-b1 shipped). Operator asked "file the follow-on ticket to bassclef-upstream and proceed" — I initially filed the two /promote tickets directly at upstream (#1430 gitignore lib pattern + #1431 RFC-as-skill), which bypassed the /promote workflow (files at adopter repo; upstream pulls via /triage-public). Operator caught the process error; I refiled locally at bassclef-cli#37 (gitignore lib pattern) + bassclef-cli#38 (RFC-as-skill outside-luminary council), added cross-ref comments + closed the two upstream tickets. Then operator picked scope-e Option b (`bassclef migrate` subcommand) over Option a (0.1.1 sync auto-migrate) for adopter-agency reasons per Cooper lens. Started scope-e branch feat/scope-e-migrate; Step 0 landing this turn — goal doc + markers.
+
+previous_recap: 2026-08-29 third session — /longrun prep + Steps 4-7 of scope-b1 landed autonomously for goal 2026-08-28d. Operator said "go step 4, orchestrator-gated" then went to gym; interpretation B fired (continue through Step 4-8 sequence per orchestrator-gated mode + prep-confirmed Option a scope). 15 commits landed. Grep audit: 13 unique @risk/@rfc refs in tests match 13 unique refs in commit trailers. Vitest final: 23 test files GREEN / 179 tests pass. PR #36 CLEAN + MERGEABLE + subsequently merged 2026-08-30T05:52:48Z (commit ae8ac31).
+
+next_bet: post-merge — tag + publish @thebassclef/core@0.1.1 (or 0.2.0 per operator judgment); update whereami subsystem row; scope-e follow-ons (RemoteFetchStrategy restoration + S1 signature verification) available for a future goal
 
 previous_recap: 2026-08-29 second session — /longrun prep + Steps 4-5 of scope-b1 landed for goal 2026-08-28d. Operator said "go step 4, orchestrator-gated" then went to gym. Compressed prep fired per SKILL Step 0.85. Step 4 shipped 6 commits with 22 Tier 0 tests carrying @risk R# / @rfc <ID> comments per bassclef-upstream#1420 build wiring. Beck RED confirmed. Step 5 shipped scripts/prepublish-bundle-substrate.mjs + package.json extension + .gitignore extension. Vitest after Step 5: 19 files pass / 4 fail. Total turns: ~50. Paused at Step 5 → Step 6 boundary for operator return.
 
@@ -74,8 +80,8 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## In flight
 
-- Goal 2026-08-28d — npm-lite substrate bundling (scope-b1). Steps 0-7 SHIPPED. Test state: 23 files GREEN / 179 tests pass; every ledger v4 row verified. PR #36 CLEAN + MERGEABLE + awaits operator merge review. On merge, tag + publish @thebassclef/core@0.1.0 via existing publish workflow.
-- Scope-e (migration + follow-ons) — planned at docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md. New /longrun after scope-b1 ships.
+- **Goal 2026-08-30a — scope-e bassclef migrate SHIPPED via PR #39.** 7 atomic commits on feat/scope-e-migrate. Test state: 29 files GREEN / 210 tests pass; ledger v2 all 11 rows verified. Awaits operator merge review. On merge, tag + publish @thebassclef/core@0.1.1 (or 0.2.0 per ADR-008 D6 amendment) via existing publish workflow.
+- Goal 2026-08-28d — npm-lite substrate bundling (scope-b1) SHIPPED via PR #36 merge ae8ac31. 0.1.0 not yet on npm; publish gated on operator dispatch of existing workflow per ADR-004.
 - Iteration i — install harness SHIPPED 2026-08-27; PR on feat/iteration-i-npm-install-harness awaits operator review + merge.
 - PR #10 — pre-existing stale session-close PR from 2026-08-08. Merge-conflict-dirty. Operator disposition pending (path a rebase / b close / c leave).
 - bassclef-cli #25 — Model C reader implementation. Waits on bassclef-upstream #1184 shipping `scripts/build-lite-bundle.sh` + `dist/lite/` tree.
@@ -166,8 +172,11 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## Last updated
 
-2026-08-29T23:20:00Z — session-end (goal 2026-08-28d scope-b1 code phase complete — Steps 4-7 shipped autonomously per orchestrator-gated dispatch; 23 test files GREEN / 179 tests pass; ledger v4 all rows verified; PR #36 CLEAN + MERGEABLE + ready for operator merge review)
-session: docs/session-logs/2026-08-29-longrun-npm-lite-steps-4-through-7.md
+2026-08-30T14:00:00Z — session-end (goal 2026-08-30a scope-e migrate SHIPPED — Steps 1-8 landed autonomously per orchestrator-gated dispatch full-ship Option c; 29 test files GREEN / 210 tests pass; ledger v2 all 11 rows verified; PR #39 open for operator review)
+session: docs/session-logs/2026-08-30-longrun-scope-e-migrate-full-ship.md
+
+prior_session: 2026-08-29T23:20:00Z — session-end (goal 2026-08-28d scope-b1 code phase complete)
+prior_session_log: docs/session-logs/2026-08-29-longrun-npm-lite-steps-4-through-7.md
 
 2026-08-29T20:50:00Z — session-pause (goal 2026-08-28d scope-b1 Steps 4-5 shipped; Beck RED harness + prepublish bundle script both landed; paused at Step 5 → Step 6 boundary)
 prior_session: (subsumed by 2026-08-29T23:20:00Z session log above)

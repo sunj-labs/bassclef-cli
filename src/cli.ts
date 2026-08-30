@@ -15,23 +15,26 @@
 import { version } from './index.js';
 import { runInit, usage as initUsage } from './commands/init.js';
 import { runSync, usage as syncUsage } from './commands/sync.js';
+import { runMigrate, usage as migrateUsage } from './commands/migrate.js';
 
 const USAGE = `bassclef — install and upgrade bassclef in your project
 
 Usage:
-  bassclef init [options] Write bassclef config into a project directory
-  bassclef sync [options] Update bassclef-managed files in place
-  bassclef --version      Print the running version
-  bassclef --help         Print this message
+  bassclef init [options]    Write bassclef config into a project directory
+  bassclef sync [options]    Update bassclef-managed files in place
+  bassclef migrate [options] Upgrade adopter substrate to the current shape
+  bassclef --version         Print the running version
+  bassclef --help            Print this message
 
 Run \`bassclef init --help\` for init options + the safety defaults.
 Run \`bassclef sync --help\` for sync options + the update semantics.
+Run \`bassclef migrate --help\` for migrate options + the upgrade paths.
 
 Version: ${version}
 Docs:    https://github.com/sunj-labs/bassclef-cli
 `;
 
-function main(argv: readonly string[]): number {
+async function main(argv: readonly string[]): Promise<number> {
   const first = argv[0];
 
   if (first === undefined || first === '--help' || first === '-h' || first === 'help') {
@@ -63,6 +66,15 @@ function main(argv: readonly string[]): number {
     return runSync(rest);
   }
 
+  if (first === 'migrate') {
+    const rest = argv.slice(1);
+    if (rest.includes('--help') || rest.includes('-h')) {
+      process.stdout.write(migrateUsage());
+      return 0;
+    }
+    return await runMigrate(rest);
+  }
+
   process.stderr.write(
     `bassclef: unknown command '${first}'\n\n` + USAGE
   );
@@ -74,5 +86,9 @@ function main(argv: readonly string[]): number {
   return 3;
 }
 
-const exitCode = main(process.argv.slice(2));
-process.exit(exitCode);
+main(process.argv.slice(2))
+  .then((exitCode) => process.exit(exitCode))
+  .catch((err) => {
+    process.stderr.write(`bassclef: ${(err as Error).message ?? String(err)}\n`);
+    process.exit(1);
+  });

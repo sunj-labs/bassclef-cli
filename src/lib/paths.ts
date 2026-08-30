@@ -18,3 +18,26 @@
 
 export const SUBSTRATE_ROOT = 'substrate' as const;
 export const CLAUDE_TARGET_ROOT = '.claude' as const;
+
+// The three config files an adopter edits between init and migrate.
+// Path A migration preserves these via SHA-256 hash comparison per
+// ADR-008 D3. List sourced from tests/fixtures/v0.0.2-init-manifest.json
+// (v0.0.2 legacy shape). Adding a file here is a MINOR bump; removing
+// one is MAJOR (breaks adopter contract).
+//
+// @risk R2 — one source of truth for the config-file list; every
+// consumer imports from here.
+export const CONFIG_FILES = [
+  '.claude/settings.json',
+  'substrate.config.md',
+  'substrate.secrets.md',
+] as const;
+
+// The expected file count for a current-shape init manifest. Used by
+// detectAdopterState to distinguish current from unknown shapes. Value
+// tracks the bundled substrate size shipped by scope-b1 (146 substrate
+// files + 3 config files = 149).
+//
+// @risk R4 — a manifest with neither 3 entries (legacy) nor
+// CURRENT_ENTRY_COUNT entries triggers the Nygard exit-5 branch.
+export const CURRENT_ENTRY_COUNT = 149;

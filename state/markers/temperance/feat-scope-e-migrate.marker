@@ -1,0 +1,8 @@
+# Temperance marker — feat/scope-e-migrate (Option c full ship Steps 1-8)
+- date: 2026-08-30
+- branch: feat/scope-e-migrate
+- goal: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md
+- scope-decision:
+  - right-thing: ship bassclef migrate subcommand end-to-end (Steps 1-8; 200-250 turn budget)
+  - right-way: Beck RED-then-GREEN; ADR-008 signoff before PR; Linus adopter-contract lens leads
+  - drift-trigger: any step exceeds its budget × 1.5; or scope creeps into scope-e Option a (sync auto-migrate), RemoteFetchStrategy restoration, or Adam Sharpe security PRs (all deferred per goal doc L116 + whereami L139)

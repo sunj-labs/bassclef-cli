@@ -1,0 +1,27 @@
+# Luminary signoff marker — feat/scope-e-migrate Step 7
+
+- date: 2026-08-30
+- goal: 2026-08-30a-npm-lite-migrate-subcommand
+- signoff_by: [linus-torvalds, john-ousterhout]
+- supporting_lenses: [david-parnas, michael-nygard, alan-cooper, michael-feathers]
+- lead_lens: linus-torvalds
+- ledger: docs/pre-mortem-mappings/2026-08-30-migrate.md v2 (all rows verified)
+- test_evidence: 29 test files / 210 tests GREEN
+- grep_audit: 11 unique refs (R1-R7 + L3 + N3 + N4 + S2) match ledger ↔ commits
+- commits_this_goal:
+  - 1cb9671 docs(step-1) UC-migrate
+  - 327ed60 docs(step-2) decomposition
+  - 60e5793 docs(step-3) ADR-008 + risk ledger v1
+  - 234419c test(step-4) Tier 0 RED + Step 3.5 corrections
+  - 895cd40 feat(step-5) argv reducer + cli dispatch
+  - 8dae6eb feat(step-6) Phase 2 source + refinements
+- linus_signoff: |
+    We don't break userspace. Adopter-edited config files
+    (.claude/settings.json + substrate.config.md + substrate.secrets.md)
+    survive Path A migration byte-for-byte, verified by test.
+    Every failure path names its cure per the Nygard catalog (ADR-008 D4).
+- ousterhout_signoff: |
+    One CLI verb (bassclef migrate) hides two paths behind detection.
+    Deep module discipline holds — migrate.ts is ~230 LOC with ONE
+    public function per export. Path B reuses runInit; no
+    re-implementation of the init flow.

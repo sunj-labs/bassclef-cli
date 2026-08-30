@@ -133,6 +133,35 @@ export function compareSchemaVersion(a: string, b: string): number {
   return 0;
 }
 
+// Compute SHA-256 for each named config file that exists under
+// targetDir. Absent files are skipped silently (caller decides what
+// to do). LF-normalized per ADR-003 N1 discipline so Windows adopters
+// hash identically to POSIX adopters.
+//
+// @risk R2 — Linus adopter-contract: the returned hash map is what
+// Path A records in the new 149-entry manifest to preserve
+// classification ground on the adopter-edited config files.
+export async function computeConfigHashes(
+  targetDir: string,
+  paths: readonly string[]
+): Promise<Record<string, string>> {
+  const { readFileSync: read } = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const { existsSync } = await import('node:fs');
+
+  const out: Record<string, string> = {};
+  for (const rel of paths) {
+    const abs = join(targetDir, rel);
+    if (!existsSync(abs)) continue;
+    const raw = read(abs, 'utf8');
+    // Normalize CRLF → LF before hashing so Windows adopters hash
+    // identically to POSIX adopters (per ADR-003 N1).
+    const normalized = raw.replace(/\r\n/g, '\n');
+    out[rel] = createHash('sha256').update(normalized, 'utf8').digest('hex');
+  }
+  return out;
+}
+
 // Re-exports so callers do not need to import from the templates dir.
 export { MANIFEST_SCHEMA_VERSION };
 export type { ManifestEntry, Manifest };

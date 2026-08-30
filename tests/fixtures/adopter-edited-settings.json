@@ -1,0 +1,10 @@
+{
+  "$note": "Adopter-edited settings.json fixture for R2 preservation test. Every byte here MUST survive migration untouched.",
+  "$comment_from_adopter": "I added this comment because I like customizing things",
+  "customCommands": [
+    "npm test",
+    "npm run build"
+  ],
+  "customTheme": "dark-plus",
+  "extraKey": "adopter-specific-value"
+}

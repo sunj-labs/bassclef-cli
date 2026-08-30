@@ -291,10 +291,20 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     process.stdout.write(
       `bassclef init: ${created} created, ${unchanged} unchanged. Pass --force to overwrite.\n`
     );
+    // RFC N4 — folder guidance final line so Sam knows what to commit.
+    process.stdout.write(
+      `bassclef init: your substrate lives under .claude/. ` +
+        `Add .claude/ to .gitignore if you have not.\n`
+    );
     return 0;
   }
 
   process.stdout.write(`bassclef init: ${created} created, ${unchanged} unchanged.\n`);
+  // RFC N4 — folder guidance final line so Sam knows what to commit.
+  process.stdout.write(
+    `bassclef init: your substrate lives under .claude/. ` +
+      `Add .claude/ to .gitignore if you have not.\n`
+  );
   return 0;
 }
 

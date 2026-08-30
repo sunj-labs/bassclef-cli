@@ -185,8 +185,29 @@ function loadBundledManifest(bundleRoot: string): BundledManifest {
 
 function resolveBundleRoot(explicit: string | undefined): string {
   if (explicit && explicit.length > 0) return resolve(explicit);
-  // Default: resolve the package.json path from this module, walk to
-  // the package root, then append the substrate/ tree.
+  // Default resolution (RFC S2 refinement) — use import.meta.url +
+  // relative walk-up-to-package.json. Prior shape used createRequire
+  // which coupled resolution to Node's CommonJS emulation layer;
+  // import.meta.url is idiomatic ESM.
+  //
+  // Runtime layout: <pkgRoot>/dist/cli.js → walk up 1 → pkgRoot
+  // Test layout:    <pkgRoot>/src/lib/copy-substrate.ts → walk up 2 → pkgRoot
+  //
+  // Both share the same shape — walk up until package.json exists.
+  const thisFile = fileURLToPath(import.meta.url);
+  let dir = dirname(thisFile);
+  for (let i = 0; i < 5; i += 1) {
+    try {
+      readFileSync(join(dir, 'package.json'), 'utf8');
+      return join(dir, SUBSTRATE_ROOT);
+    } catch {
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+  // Fallback — the prior createRequire path in case package.json
+  // is not reachable via walk-up (rare; likely a broken install).
   const require = createRequire(import.meta.url);
   const pkgJsonPath = require.resolve('@thebassclef/core/package.json');
   const pkgRoot = dirname(pkgJsonPath);
