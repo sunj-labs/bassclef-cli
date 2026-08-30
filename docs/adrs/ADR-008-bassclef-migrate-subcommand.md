@@ -55,17 +55,20 @@ Alternatives considered:
 
 The `bassclef migrate` contract for `@thebassclef/core@0.1.1` and every subsequent iteration.
 
-### Decision 1 — Two-path branch via detectLegacyManifest
+### Decision 1 — Two-path branch via detectAdopterState
 
-Migrate calls `detectLegacyManifest(manifest)` from existing `src/lib/manifest-io.ts`. The function returns a three-value result:
+Migrate calls `detectAdopterState(targetDir)` — a new composed function in `src/lib/migrate.ts` that wraps existing `readManifest` (from `src/lib/manifest-io.ts`) and existing boolean `detectLegacyManifest` (also from `manifest-io.ts`). The composed function returns a four-value discriminated shape:
 
-- **`current`** — 149 entries at 0.1.0 shape. Migrate prints "Already at 0.1.0 shape. Nothing to migrate." Exits 0.
-- **`legacy-3-entry`** — 3 entries at 0.0.2 shape. Migrate dispatches Path A.
-- **`no-manifest`** — no `.bassclef/init.manifest.json` present. Migrate dispatches Path B.
+- **`current`** — manifest present at 0.1.0 shape (files.length !== 3 AND schema_version >= 0.1.0). Migrate prints "Already at 0.1.0 shape. Nothing to migrate." Exits 0.
+- **`legacy-3-entry`** — manifest present at 0.0.2 shape (files.length === 3 OR schema_version < 0.1.0). Migrate dispatches Path A.
+- **`no-manifest`** — `readManifest` throws `ManifestReadError` with kind `'Missing'`. Migrate dispatches Path B.
+- **`{ kind: 'error', message }`** — `readManifest` throws with kind `'Malformed'` or `'SchemaTooNew'`. Migrate refuses with exit code matching the failure catalog (D4).
 
-Any other shape (`entries.length` not 3 and not 149; OR `manifest_schema_version` unknown) exits 5 with the Nygard message: "Adopter state does not match 0.0.x or 0.1.0. Reinstall `@thebassclef/core` then rerun."
+Unknown shapes that pass basic manifest structure but do not match legacy or current heuristics (e.g., 5-entry v0.1.0 manifest) trigger the Nygard exit-5 branch: "Adopter state does not match 0.0.x or 0.1.0. Reinstall `@thebassclef/core` then rerun."
 
-Rationale — Ousterhout deep-module discipline. Sam types one verb; Migrate hides the branch. R4 compensator (unknown state → fail-fast) lives at this decision.
+Rationale — Ousterhout deep-module discipline. Sam types one verb; Migrate hides the branch. R4 compensator (unknown state → fail-fast) lives at this decision. `detectLegacyManifest` stays a pure boolean in manifest-io.ts (preserves the scope-b1 shape shipped in commit c84fa84); the composition lives in migrate.ts where the four-value shape is needed.
+
+**Step 3.5 amendment (2026-08-30):** Decision 1 originally phrased `detectLegacyManifest` as returning the three-value enum. Reading `src/lib/manifest-io.ts` L116-121 confirmed it returns boolean. The four-value shape moved to the new `detectAdopterState` in `src/lib/migrate.ts`. The `no-manifest` path now catches the existing `ManifestReadError kind: 'Missing'` per `manifest-io.ts` L34-40. No change to adopter-visible behavior.
 
 ### Decision 2 — Interactive prompt via readline/promises + tiny module
 
@@ -88,7 +91,9 @@ Path A calls `computeConfigHashes(targetDir, CONFIG_FILES)` before any write. Th
 
 - `.claude/settings.json`
 - `substrate.config.md`
-- `CLAUDE.md`
+- `substrate.secrets.md`
+
+**Step 3.5 amendment (2026-08-30):** The third config file is `substrate.secrets.md`, NOT `CLAUDE.md`. Confirmed by reading `tests/fixtures/v0.0.2-init-manifest.json` L26-30 — the v0.0.2 legacy manifest carries exactly these three files. `CLAUDE.md` in the original draft was a factual error. Corrected here + in the risk ledger + in the decomposition.
 
 For each hash, Migrate records the current SHA-256 in the new 149-entry manifest. Any file whose hash differs from the template default (adopter edited it) stays untouched on disk — the write path only fires for files classified as `add`. The manifest records the current hash so `bassclef sync` classifier operates correctly on the next run.
 
@@ -186,7 +191,7 @@ Interactive prompt:
 - Default answer is No. Changing the default is MAJOR (adopter safety regression).
 
 Config file hash preservation:
-- Three named files hashed per Path A: `.claude/settings.json`, `substrate.config.md`, `CLAUDE.md`. Adding a file to the list is MINOR. Removing one is MAJOR.
+- Three named files hashed per Path A: `.claude/settings.json`, `substrate.config.md`, `substrate.secrets.md`. Adding a file to the list is MINOR. Removing one is MAJOR.
 - LF normalization before hashing. Removing normalization breaks Windows adopters.
 
 Failure catalog:
