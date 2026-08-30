@@ -1,9 +1,8 @@
-# Temperance marker — branch feat/scope-e-migrate (Step 0)
-
+# Temperance marker — feat/scope-e-migrate (Option c full ship Steps 1-8)
 - date: 2026-08-30
-- goal: 2026-08-30a-npm-lite-migrate-subcommand
-- scope: bassclef migrate subcommand (scope-e Option b — RFC-0001 deferral landing)
-- source: docs/next-longrun-prep-2026-08-29-npm-lite-scope-e.md L59-73 + operator pick 2026-08-30
-- right thing: ship the adopter-explicit migration path so 0.0.x → 0.1.0 upgrades preserve config edits (Cooper lens on adopter agency)
-- right way: extend existing detectLegacyManifest (from scope-b1); reuse writeSafely + manifest-io; add one new CLI verb + one new lib module; ADR-008 pins the safety envelope
-- drift trigger: pause at 250 turns spent OR ADR count past ADR-008 OR any Step 6 amendment that widens scope past migrate + N3 + N4 + S2 + L3
+- branch: feat/scope-e-migrate
+- goal: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md
+- scope-decision:
+  - right-thing: ship bassclef migrate subcommand end-to-end (Steps 1-8; 200-250 turn budget)
+  - right-way: Beck RED-then-GREEN; ADR-008 signoff before PR; Linus adopter-contract lens leads
+  - drift-trigger: any step exceeds its budget × 1.5; or scope creeps into scope-e Option a (sync auto-migrate), RemoteFetchStrategy restoration, or Adam Sharpe security PRs (all deferred per goal doc L116 + whereami L139)

@@ -1,0 +1,12 @@
+# ADR-deviation marker — feat/scope-e-migrate
+- date: 2026-08-30
+- branch: feat/scope-e-migrate
+- adr_governing: ADR-002 (init safety) + ADR-003 (sync safety) + ADR-007 (bundle contract); ADR-008 to author at Step 3
+- outcome: ADR-honored
+- rationale: |
+    UC-migrate borrows ADR-002's atomic-write + symlink-refuse envelope for Path B init dispatch.
+    UC-migrate borrows ADR-003's four-case classifier + hash-preservation discipline for Path A migration.
+    UC-migrate reads the bundled 149-entry manifest per ADR-007 bundle contract.
+    ADR-008 (TO AUTHOR at Step 3) pins the new discipline this UC introduces:
+    interactive prompt shape (Cooper lens) + Path A/B branch logic.
+    No prior ADR is deviated from; new ground is captured in ADR-008.
