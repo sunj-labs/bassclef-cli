@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/core",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": ["bassclef", "claude-code", "cli", "scaffolding"],
   "homepage": "https://github.com/sunj-labs/bassclef-cli",

@@ -9,6 +9,15 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Notes
+
+## [0.1.0] - 2026-08-30
 ### Added — scope-b1 (npm-lite substrate bundling; PR #36)
 
 - npm-lite substrate bundling — `@thebassclef/core` now ships 149 substrate files (skills + rules + hooks + luminaries + agents + standards + ADRs + libs + templates) alongside the CLI. Adopters get a working bassclef install from `npm install -g @thebassclef/core && bassclef init`. Prior 0.0.2 wrote only 3 config files and stopped.
