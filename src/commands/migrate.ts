@@ -1,19 +1,16 @@
-// bassclef migrate command — Phase 1 shell (Step 5).
+// bassclef migrate command — Phase 2 body per ADR-008 (Step 6).
 //
-// Step 5 ships the argv-parse-and-dispatch shell. Full detection +
-// Path A + Path B orchestration lands at Step 6 per ADR-008.
+// Parses argv, runs root check, detects adopter state via
+// detectAdopterState, dispatches Path A or Path B, surfaces exit code.
 //
-// Contract this stub honors today:
-// - parseMigrateArgs errors → exit 1 with stderr message (R1)
-// - --help prints usage; exits 0
-// - unknown state (currently: every non-error path) → exit 99 with
-//   "not yet implemented" message; Step 6 replaces this with the
-//   D1 four-value detection branch
-//
-// @risk: R1 — argv parse errors surface with the offending token
-// named on stderr; caller sees exit 1 with actionable message.
+// @risk R1 — argv parse errors surface with the offending token named
+// on stderr; caller sees exit 1 with actionable message.
+// @risk R4 — unknown adopter state → exit 5 with Nygard cure message.
 
 import { parseMigrateArgs, ArgvError } from './migrate-argv.js';
+import { detectAdopterState, runPathA, runPathB } from '../lib/migrate.js';
+import { readManifest } from '../lib/manifest-io.js';
+import { shouldRefuseRoot } from './init.js';
 
 export function usage(): string {
   return `bassclef migrate — upgrade adopter substrate to the current shape
@@ -44,8 +41,7 @@ Exit codes:
 `;
 }
 
-export function runMigrate(argv: readonly string[]): number {
-  // Step 5 (this file today): argv parse only. Step 6 fills the body.
+export async function runMigrate(argv: readonly string[]): Promise<number> {
   let args;
   try {
     args = parseMigrateArgs(argv);
@@ -57,14 +53,56 @@ export function runMigrate(argv: readonly string[]): number {
     throw e;
   }
 
-  // Silence unused-var TypeScript lint while the body is a stub.
-  // Step 6 replaces this block with the D1 detection branch +
-  // Path A / Path B dispatch.
-  void args;
+  // Root check — same discipline as init/sync per ADR-002.
+  const uid = typeof process.getuid === 'function' ? process.getuid() : undefined;
+  if (shouldRefuseRoot(uid, args.allowRoot)) {
+    process.stderr.write(
+      `bassclef migrate: refusing to run as root. Pass --allow-root to override, ` +
+        `or run as the project owner.\n`
+    );
+    return 1;
+  }
 
-  process.stderr.write(
-    `bassclef migrate: not yet implemented — Step 6 of goal ` +
-      `2026-08-30a-npm-lite-migrate-subcommand ships the body\n`
-  );
-  return 99;
+  const targetDir = args.dir ?? process.cwd();
+  const state = await detectAdopterState(targetDir);
+
+  // Current shape — nothing to migrate.
+  if (state === 'current') {
+    process.stdout.write('bassclef migrate: already at 0.1.0 shape. Nothing to migrate.\n');
+    return 0;
+  }
+
+  // No manifest — Path B full init dispatch.
+  if (state === 'no-manifest') {
+    const result = await runPathB(targetDir, args);
+    return result.exitCode;
+  }
+
+  // Legacy 3-entry — Path A migration.
+  if (state === 'legacy-3-entry') {
+    const manifest = readManifest(targetDir);
+    const result = await runPathA(targetDir, manifest, args);
+    return result.exitCode;
+  }
+
+  // Object shape — unknown or error kind.
+  if (state.kind === 'unknown') {
+    process.stderr.write(
+      `bassclef migrate: adopter state does not match 0.0.x or 0.1.0. ` +
+        `Reinstall @thebassclef/core then rerun. (${state.message})\n`
+    );
+    return 5;
+  }
+
+  if (state.kind === 'error') {
+    process.stderr.write(`bassclef migrate: ${state.message}\n`);
+    // Distinguish SchemaTooNew (exit 4) from Malformed (exit 1) via
+    // message content since ManifestReadError has already been mapped
+    // into a plain message here.
+    if (state.message.includes('newer than this package')) return 4;
+    return 1;
+  }
+
+  // Exhaustiveness — should never reach here.
+  return 1;
 }

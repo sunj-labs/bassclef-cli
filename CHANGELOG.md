@@ -11,11 +11,23 @@ bet 2026-08-06b.
 
 ### Added
 
+- `bassclef migrate` subcommand — upgrades adopters from 0.0.x install shapes to the current 149-file substrate without losing config edits. Two paths auto-selected via `detectAdopterState`: Path A upgrades a 0.0.2 install with 3-file legacy manifest (adds 146 substrate files; preserves 3 config files via SHA-256 hash comparison); Path B dispatches full init for 0.0.1 name-reservation state. Interactive prompt confirms the shape before writes; `--yes` bypasses for CI. Full contract in ADR-008 + UC-migrate + `docs/migrations/0.1.0.md`.
+- `computeConfigHashes` in `src/lib/manifest-io.ts` — computes SHA-256 for named config files under a target directory; LF-normalized per ADR-003 N1 (Windows adopter parity).
+- `src/lib/prompt.ts` — thin Node `readline/promises` wrapper with `ttyOverride` injection for test isolation.
+- `CONFIG_FILES` + `CURRENT_ENTRY_COUNT` constants in `src/lib/paths.ts` — single source of truth per R6 discipline.
+
 ### Changed
+
+- `bassclef init` final line now names the `.claude/` folder + suggests `.gitignore` addition (RFC N4 refinement — Sam sees what to commit).
+- `src/lib/copy-substrate.ts` — bundle path resolution uses `import.meta.url` + relative walk-up-to-package.json instead of `createRequire` (RFC S2 refinement — idiomatic ESM; falls back to the prior path if package.json is unreachable).
 
 ### Fixed
 
 ### Notes
+
+**Adopter migration ships as MINOR** is the precedent this release documents (RFC L3 refinement). Future migrations that touch adopter-visible state MUST bump MINOR at minimum. PATCH releases stay reserved for bug fixes that require no adopter action.
+
+**Version bump for migrate:** operator judgment picks between PATCH (0.1.1 — new additive command; adopters not running migrate see no change) or MINOR (0.2.0 — signals "new capability worth reading the CHANGELOG for"). Decision pinned at release time per ADR-008 D6.
 
 ## [0.0.2] - 2026-08-13
 ### Changed — ADR-005 second amendment (Model C contract accepted)

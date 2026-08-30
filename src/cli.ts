@@ -34,7 +34,7 @@ Version: ${version}
 Docs:    https://github.com/sunj-labs/bassclef-cli
 `;
 
-function main(argv: readonly string[]): number {
+async function main(argv: readonly string[]): Promise<number> {
   const first = argv[0];
 
   if (first === undefined || first === '--help' || first === '-h' || first === 'help') {
@@ -72,7 +72,7 @@ function main(argv: readonly string[]): number {
       process.stdout.write(migrateUsage());
       return 0;
     }
-    return runMigrate(rest);
+    return await runMigrate(rest);
   }
 
   process.stderr.write(
@@ -86,5 +86,9 @@ function main(argv: readonly string[]): number {
   return 3;
 }
 
-const exitCode = main(process.argv.slice(2));
-process.exit(exitCode);
+main(process.argv.slice(2))
+  .then((exitCode) => process.exit(exitCode))
+  .catch((err) => {
+    process.stderr.write(`bassclef: ${(err as Error).message ?? String(err)}\n`);
+    process.exit(1);
+  });
