@@ -1,0 +1,10 @@
+# Luminary marker — branch feat/scope-e-migrate (Step 0)
+
+- date: 2026-08-30
+- goal: 2026-08-30a-npm-lite-migrate-subcommand
+- primary lens: @luminary linus-torvalds — adopter contract; "we don't break userspace" applied per-config-file
+- primary lens: @luminary john-ousterhout — one CLI verb; deep migrate module
+- supporting: @luminary david-parnas — manifest as the interface; migrate walks it, not the filesystem
+- supporting: @luminary michael-nygard — every failure path names a fix
+- supporting: @luminary alan-cooper — Sam runs migrate deliberately; interactive prompt shape
+- supporting: @luminary michael-feathers — characterization tests pin the migrate contract before source lands

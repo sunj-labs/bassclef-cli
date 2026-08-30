@@ -1,0 +1,18 @@
+# Thread walk marker — goal 2026-08-30a-npm-lite-migrate-subcommand
+
+- date: 2026-08-30
+- branch: feat/scope-e-migrate
+- chain walked (leaf to root):
+  1. 2026-08-30a-npm-lite-migrate-subcommand (this goal; scope-e Option b)
+  2. 2026-08-28d-npm-lite-substrate-bundling (parent; scope-b1 SHIPPED via PR #36 merge ae8ac31)
+  3. 2026-08-06b-launch-npm-thebassclef-core (grandparent; still in flight — this goal advances it)
+  4. (no further parent)
+- parent_roadmap read: bassclef-upstream/docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md (ACTIVE)
+- drivers from parent chain:
+  - 5 existing adopters + 9 signups waiting (roadmap parent_drivers) — this goal serves the upgrade path they need
+  - solo operator bandwidth (roadmap parent_drivers) — Option b shape keeps scope tight (200-250 turns)
+  - scope-b1 shipped bundle contract per ADR-007 (parent goal) — this goal builds on the extended manifest shape
+  - RFC-0001 revised B deferred 6 items to scope-e (parent goal L83-89) — this goal absorbs them
+- open acceptance from parent (2026-08-28d) — all rows verified at Step 7 signoff; nothing carried forward
+- out_of_scope from parent (2026-08-28d) — migration Path A + RemoteFetchStrategy + S1/S2/L1/N3/N4/L3 refinements; Option b picks up B1+L1+S2+N3+N4+L3; S1+RemoteFetchStrategy remain deferred
+- grandparent 2026-08-06b acceptance still open — @thebassclef/core on npm as usable adopter install; scope-b1 + scope-e together advance this
