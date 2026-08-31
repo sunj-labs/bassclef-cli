@@ -16,7 +16,7 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md (scope-e — bassclef migrate; Option b picked)
 iteration_started: 2026-08-30
-iteration_phase: **SHIPPED via PR #39 merge 277f149 (2026-08-30T17:24:15Z).** Full test suite GREEN (29 files / 210 tests per session log). Grep audit clean per ledger v2. Post-merge queue — version bump decision (0.1.0 vs 0.2.0) + tag + publish. 0.1.0 not yet on npm; publish gated on operator dispatch of existing workflow per ADR-004.
+iteration_phase: **SHIPPED via PR #39 merge 277f149 (2026-08-30T17:24:15Z).** Post-merge state: v0.1.0 tag on main (28db935); publish workflow run 33325706136 CANCELLED after pre-launch /architect-review W5 flagged empty-tarball defect (--ignore-scripts blocks prepublishOnly). Filed #40 (defect class) + opened PR #41 (workflow fix). Second-pass /architect-review on PR #41 surfaced B1/B2/W1/W3; all 4 cured at commit e05bc58; W2 deferred to #42. Local install harness GREEN — 11/12 tests, 838ms, verifies pack + install + init + sync end-to-end. Publish blocked on operator: (1) add BASSCLEF_UPSTREAM_TOKEN secret, (2) merge PR #41, (3) re-dispatch workflow on v0.1.0 tag.
 
 ## Operator recap
 
