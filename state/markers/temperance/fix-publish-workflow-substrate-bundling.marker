@@ -1,0 +1,10 @@
+# Temperance marker — fix/publish-workflow-substrate-bundling
+- date: 2026-08-30
+- branch: fix/publish-workflow-substrate-bundling
+- scope-decision:
+  - right-thing: fix the workflow to bundle substrate/ before publish; add checks-job assertion
+  - right-way: /diagnose done (5 whys landed); explicit bundle step in publish job;
+    checks-job assertion on substrate/ presence; ADR-007 §D3 amendment recording
+    that bundling runs as an explicit workflow step, not via prepublishOnly hook
+  - drift-trigger: any change beyond publish.yml + ADR-007 amendment + ticket body
+    OR relaxing --ignore-scripts (breaks ADR-004 §D3)

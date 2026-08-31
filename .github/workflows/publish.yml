@@ -99,6 +99,46 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Checkout sibling bassclef (for substrate source)
+        # Prepublish reads lite-manifest.json + source files from a
+        # checkout of sunj-labs/bassclef (the public downstream —
+        # more stable than the R&D upstream). On the CI runner we
+        # clone it into $GITHUB_WORKSPACE/bassclef (child path;
+        # actions/checkout requires path stays under the workspace)
+        # and pass the absolute path via env var to the prepublish
+        # script.
+        #
+        # Requires BASSCLEF_SOURCE_TOKEN secret — a fine-grained
+        # PAT with `Contents: Read` on sunj-labs/bassclef (Metadata:
+        # Read is auto-included). The repo is private per operator
+        # setup.
+        #
+        # Design note: we source from public bassclef, not
+        # bassclef-upstream (R&D), so npm publishes ship the last
+        # stable release surface. See ADR-005 §Amendment 2026-08-12
+        # + ADR-007 §Amendment 2026-08-30 for the release flow.
+        uses: actions/checkout@v4
+        with:
+          repository: sunj-labs/bassclef
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
+          fetch-depth: 1
+
+      - name: Bundle substrate via prepublish script
+        # Explicit invocation — the `prepublishOnly` lifecycle hook does
+        # NOT fire under `npm publish --ignore-scripts` (npm docs). ADR-007
+        # §D3 originally assumed the hook would fire; scope-b1 ship gap
+        # #40 caught the miss during pre-launch architect-review. Running
+        # the script here (as an ordinary node process, not a lifecycle
+        # hook) populates substrate/ before pack + publish see it.
+        #
+        # BASSCLEF_SIBLING_ROOT points at the in-workspace clone from
+        # the prior step — script reads env var first per
+        # scripts/prepublish-bundle-substrate.mjs L33.
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
+        run: node scripts/prepublish-bundle-substrate.mjs
+
       - name: Pack (dry run) to get the exact shipped file list
         run: npm pack --dry-run --json > /tmp/pack.json
 
@@ -107,6 +147,29 @@ jobs:
 
       - name: Tier filter refuses tier=upstream frontmatter
         run: node scripts/tier-filter.mjs /tmp/pack.json
+
+      - name: Assert substrate/ present in tarball
+        # Saltzer-Schroeder complete-mediation fix for defect class filed
+        # at #40 — assert substrate/ file count >= 100 so any future
+        # regression fails fast at checks time.
+        #
+        # Defensive parse: guards against a future npm major shifting
+        # the pack --json output shape (per architect-review W1). If
+        # the shape does not match, exits nonzero with a clear message.
+        run: |
+          COUNT=$(node -e "
+            const p = require('/tmp/pack.json');
+            if (!Array.isArray(p) || !p[0] || !Array.isArray(p[0].files)) {
+              process.stderr.write('npm pack --json output shape unexpected — expected [{files:[{path}]}], got: ' + JSON.stringify(p).slice(0, 200) + '\n');
+              process.exit(2);
+            }
+            process.stdout.write(String(p[0].files.filter(f => f.path.startsWith('substrate/')).length));
+          ")
+          echo "substrate/ file count: $COUNT"
+          if [ "$COUNT" -lt 100 ]; then
+            echo "::error::substrate/ file count $COUNT is under the 100-file floor. Tarball would ship without substrate/. Fix: verify the 'Checkout sibling bassclef-upstream' step succeeded and BASSCLEF_UPSTREAM_TOKEN is valid. See issue #40 for diagnosis."
+            exit 1
+          fi
 
   publish:
     name: Publish to npm
@@ -156,6 +219,29 @@ jobs:
         # publish job self-contained (no artifact sharing with the checks
         # job) at a cost of ~30s of duplicated work.
         run: npm run build
+
+      - name: Checkout sibling bassclef (for substrate source)
+        # Sibling clone required for the prepublish script per issue
+        # #40 cure. Requires BASSCLEF_SOURCE_TOKEN secret (same as
+        # checks job). Source is sunj-labs/bassclef (public downstream)
+        # so publishes ship the stable release surface, not R&D upstream.
+        uses: actions/checkout@v4
+        with:
+          repository: sunj-labs/bassclef
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
+          fetch-depth: 1
+
+      - name: Bundle substrate via prepublish script
+        # Explicit invocation before `npm publish --ignore-scripts`. Per
+        # #40 diagnose — `--ignore-scripts` blocks the prepublishOnly
+        # lifecycle hook, so the bundling must run as a plain workflow
+        # step here. ADR-007 §D3 amendment records this.
+        #
+        # BASSCLEF_SIBLING_ROOT points at the in-workspace clone.
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
+        run: node scripts/prepublish-bundle-substrate.mjs
 
       - name: Publish to npm
         # ADR-004 §Ordered steps 12:

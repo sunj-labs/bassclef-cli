@@ -109,6 +109,24 @@ Any check failing exits the script nonzero. `npm publish` aborts. No partial sub
 
 Rationale — Nygard bulkhead (R7 + R9 compensators). Fail fast at publish beats debugging silent-empty tarball later.
 
+### Amendment 2026-08-30 — mechanism change (issue #40 cure)
+
+The original D1 text and this D3 text both said "Bundling runs via `package.json` `scripts.prepublishOnly` — hook fires on `npm publish` before `npm pack` collects files." That claim is **wrong** and pre-launch /architect-review caught it (issue #40).
+
+Per npm docs, `npm publish --ignore-scripts` skips ALL lifecycle scripts including `pre*` hooks. ADR-004 §D3 mandates `--ignore-scripts` on publish (belt-and-suspenders against arbitrary script execution from transitive deps). The two ADRs contradicted each other silently: adopters would install `@thebassclef/core@0.1.0+` and get an empty 8-file tarball with no `substrate/`.
+
+**New mechanism (post-#40):** Bundling runs as an **explicit workflow step** in `.github/workflows/publish.yml` — `node scripts/prepublish-bundle-substrate.mjs` runs as an ordinary node process, not as a lifecycle hook. Both `checks` and `publish` jobs run the step before pack + publish see the tarball.
+
+**Additional safety (Saltzer-Schroeder complete mediation):** the checks job now asserts `substrate/` file count ≥ 100 in the pack dry-run output. Any future regression fails at checks time, before the environment approval fires.
+
+The 3 preflight/postflight checks inside `prepublish-bundle-substrate.mjs` are unchanged and still fire under the new mechanism.
+
+**Prerequisite for the new mechanism:** the workflow clones `sunj-labs/bassclef` (the public downstream, more stable than the R&D upstream) as a sibling at `$GITHUB_WORKSPACE/bassclef` and passes the absolute path to the script via `BASSCLEF_SIBLING_ROOT` env var. This requires a `BASSCLEF_SOURCE_TOKEN` repo secret — a fine-grained PAT with `Contents: Read` on `sunj-labs/bassclef` (Metadata: Read auto-included). Operator setup is one-time.
+
+**Design choice — source from public bassclef, not R&D upstream (2026-08-30 operator decision):** the workflow pulls from `sunj-labs/bassclef` rather than `sunj-labs/bassclef-upstream`. Rationale: publish should ship the stable release surface, not R&D work-in-progress. Public bassclef lags upstream by one `/release` cycle per bassclef-upstream #1184 release flow. `prepublish-bundle-substrate.mjs` L33-35 default (`../bassclef-upstream`) is unchanged in this amendment (still matches local dev where the operator has upstream checked out); the workflow override via env var is authoritative for CI publishes.
+
+The `prepublishOnly` entry in `package.json` L49 is retained for the local-publish path (developer running `npm publish` from their machine without `--ignore-scripts`) but is no longer load-bearing for the CI publish.
+
 ### Decision 4 — `bassclef init` copy semantics
 
 `bassclef init` at v0.1.0 dispatches `copySubstrate(targetDir, options)` after config files land. Copy semantics inherit from UC-init:
