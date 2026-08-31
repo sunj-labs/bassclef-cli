@@ -99,23 +99,29 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Checkout sibling bassclef-upstream (for substrate source)
+      - name: Checkout sibling bassclef (for substrate source)
         # Prepublish reads lite-manifest.json + source files from a
-        # checkout of sunj-labs/bassclef-upstream. On the CI runner
-        # we clone it into $GITHUB_WORKSPACE/bassclef-upstream (child
-        # path — actions/checkout requires path stays under the
-        # workspace) and pass the absolute path via env var to the
-        # prepublish script.
+        # checkout of sunj-labs/bassclef (the public downstream —
+        # more stable than the R&D upstream). On the CI runner we
+        # clone it into $GITHUB_WORKSPACE/bassclef (child path;
+        # actions/checkout requires path stays under the workspace)
+        # and pass the absolute path via env var to the prepublish
+        # script.
         #
-        # Requires BASSCLEF_UPSTREAM_TOKEN secret — a fine-grained
-        # PAT with `Contents: Read` on sunj-labs/bassclef-upstream
-        # (Metadata: Read is auto-included). The sibling repo is
-        # private per operator setup.
+        # Requires BASSCLEF_SOURCE_TOKEN secret — a fine-grained
+        # PAT with `Contents: Read` on sunj-labs/bassclef (Metadata:
+        # Read is auto-included). The repo is private per operator
+        # setup.
+        #
+        # Design note: we source from public bassclef, not
+        # bassclef-upstream (R&D), so npm publishes ship the last
+        # stable release surface. See ADR-005 §Amendment 2026-08-12
+        # + ADR-007 §Amendment 2026-08-30 for the release flow.
         uses: actions/checkout@v4
         with:
-          repository: sunj-labs/bassclef-upstream
-          token: ${{ secrets.BASSCLEF_UPSTREAM_TOKEN }}
-          path: bassclef-upstream
+          repository: sunj-labs/bassclef
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
           fetch-depth: 1
 
       - name: Bundle substrate via prepublish script
@@ -130,7 +136,7 @@ jobs:
         # the prior step — script reads env var first per
         # scripts/prepublish-bundle-substrate.mjs L33.
         env:
-          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef-upstream
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
         run: node scripts/prepublish-bundle-substrate.mjs
 
       - name: Pack (dry run) to get the exact shipped file list
@@ -214,16 +220,16 @@ jobs:
         # job) at a cost of ~30s of duplicated work.
         run: npm run build
 
-      - name: Checkout sibling bassclef-upstream (for substrate source)
-        # Sibling clone required for the prepublish script per issue #40
-        # cure. Requires BASSCLEF_UPSTREAM_TOKEN secret — a fine-grained
-        # PAT with `Contents: Read` on sunj-labs/bassclef-upstream (same
-        # as checks job).
+      - name: Checkout sibling bassclef (for substrate source)
+        # Sibling clone required for the prepublish script per issue
+        # #40 cure. Requires BASSCLEF_SOURCE_TOKEN secret (same as
+        # checks job). Source is sunj-labs/bassclef (public downstream)
+        # so publishes ship the stable release surface, not R&D upstream.
         uses: actions/checkout@v4
         with:
-          repository: sunj-labs/bassclef-upstream
-          token: ${{ secrets.BASSCLEF_UPSTREAM_TOKEN }}
-          path: bassclef-upstream
+          repository: sunj-labs/bassclef
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
           fetch-depth: 1
 
       - name: Bundle substrate via prepublish script
@@ -234,7 +240,7 @@ jobs:
         #
         # BASSCLEF_SIBLING_ROOT points at the in-workspace clone.
         env:
-          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef-upstream
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
         run: node scripts/prepublish-bundle-substrate.mjs
 
       - name: Publish to npm

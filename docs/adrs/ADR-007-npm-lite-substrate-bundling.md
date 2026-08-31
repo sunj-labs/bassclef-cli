@@ -121,7 +121,9 @@ Per npm docs, `npm publish --ignore-scripts` skips ALL lifecycle scripts includi
 
 The 3 preflight/postflight checks inside `prepublish-bundle-substrate.mjs` are unchanged and still fire under the new mechanism.
 
-**Prerequisite for the new mechanism:** the workflow clones `sunj-labs/bassclef-upstream` as a sibling (`../bassclef-upstream`) so the script resolves it via default heuristic. This requires a `BASSCLEF_UPSTREAM_TOKEN` repo secret (PAT with read scope on the private upstream repo). Operator setup is one-time.
+**Prerequisite for the new mechanism:** the workflow clones `sunj-labs/bassclef` (the public downstream, more stable than the R&D upstream) as a sibling at `$GITHUB_WORKSPACE/bassclef` and passes the absolute path to the script via `BASSCLEF_SIBLING_ROOT` env var. This requires a `BASSCLEF_SOURCE_TOKEN` repo secret — a fine-grained PAT with `Contents: Read` on `sunj-labs/bassclef` (Metadata: Read auto-included). Operator setup is one-time.
+
+**Design choice — source from public bassclef, not R&D upstream (2026-08-30 operator decision):** the workflow pulls from `sunj-labs/bassclef` rather than `sunj-labs/bassclef-upstream`. Rationale: publish should ship the stable release surface, not R&D work-in-progress. Public bassclef lags upstream by one `/release` cycle per bassclef-upstream #1184 release flow. `prepublish-bundle-substrate.mjs` L33-35 default (`../bassclef-upstream`) is unchanged in this amendment (still matches local dev where the operator has upstream checked out); the workflow override via env var is authoritative for CI publishes.
 
 The `prepublishOnly` entry in `package.json` L49 is retained for the local-publish path (developer running `npm publish` from their machine without `--ignore-scripts`) but is no longer load-bearing for the CI publish.
 
