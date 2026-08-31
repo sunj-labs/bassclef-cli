@@ -93,12 +93,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm test
-
-      - name: Typecheck
-        run: npm run typecheck
-
       - name: Checkout sibling bassclef (for substrate source)
         # Prepublish reads lite-manifest.json + source files from a
         # checkout of sunj-labs/bassclef (the public downstream —
@@ -132,12 +126,24 @@ jobs:
         # the script here (as an ordinary node process, not a lifecycle
         # hook) populates substrate/ before pack + publish see it.
         #
+        # Runs BEFORE `npm test` so init.test.ts's end-to-end tests
+        # exercise a populated substrate/. Per issue #45 cure, init
+        # now fails loud when the bundle is missing; tests that dispatch
+        # runInit require the bundle to be present. Without this ordering
+        # the init happy-path tests would fail with exit 2.
+        #
         # BASSCLEF_SIBLING_ROOT points at the in-workspace clone from
         # the prior step — script reads env var first per
         # scripts/prepublish-bundle-substrate.mjs L33.
         env:
           BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
         run: node scripts/prepublish-bundle-substrate.mjs
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Pack (dry run) to get the exact shipped file list
         run: npm pack --dry-run --json > /tmp/pack.json
