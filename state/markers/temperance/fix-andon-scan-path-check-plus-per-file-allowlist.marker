@@ -1,0 +1,15 @@
+# Temperance marker — fix/andon-scan-path-check-plus-per-file-allowlist
+- date: 2026-08-31
+- branch: fix/andon-scan-path-check-plus-per-file-allowlist
+- scope-decision:
+  - right-thing: cure 14-hit false-positive in andon-scan via
+    path-check for docs/operator-private/ + per-file allowlist for
+    public contact emails; extends Beck test list from 3 (my draft)
+    to 8 (reviewer's ask); amends ADR-004 §D3
+  - right-way: apply reviewer BLOCKs 1-3 in the code (no global email
+    allowlist; characterization tests read first; substrate placeholder
+    grep confirmed empty); code changes stay inside scripts/andon-scan.mjs
+    + tests/andon-scan.test.ts + ADR-004 amendment
+  - drift-trigger: changes beyond those 3 files OR weakening any other
+    scan behavior (absolute-path check, per-file allowlist mechanism,
+    header-based allow, exit code semantics)

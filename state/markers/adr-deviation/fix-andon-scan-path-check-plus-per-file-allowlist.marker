@@ -1,0 +1,16 @@
+# ADR-deviation marker — fix/andon-scan-path-check-plus-per-file-allowlist
+- date: 2026-08-31
+- branch: fix/andon-scan-path-check-plus-per-file-allowlist
+- adr_governing: ADR-004 (publish pipeline safety) + ADR-005 (npm dist)
+- outcome: ADR-honored via §D3 amendment
+- rationale: |
+    ADR-004 §D3 andon-scan discipline preserved on absolute paths + emails
+    (except two named public contacts) + LICENSE/package.json existing
+    allowlist. Shift: docs/operator-private/ scan moves from content-only
+    to shipped-file-path. Same Saltzer complete-mediation intent; sharper
+    Hoare postcondition (hits imply leaks).
+
+    Accepted-risk note: content-mention of docs/operator-private/ path
+    strings in prose no longer fires. PR review catches the rare
+    content-pasting leak. Explicit per pre-code architect-review
+    2026-08-31 Focus Area 5.

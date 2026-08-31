@@ -1,0 +1,46 @@
+# Diagnose marker — fix/andon-scan-path-check-plus-per-file-allowlist
+- date: 2026-08-31
+- branch: fix/andon-scan-path-check-plus-per-file-allowlist
+- full /diagnose ceremony landed in prior turn (this session):
+
+## Step 0 — Repro
+`gh workflow run publish.yml -f tag=v0.1.0` (run 33346136435) →
+checks fail at `Andon scan for operator-private terms` step.
+14 hits (12 docs/operator-private/ mentions in prose + 2 emails).
+Reproducible 100%. Local `npm publish --dry-run --provenance
+--ignore-scripts` after `node scripts/prepublish-bundle-substrate.mjs`
+reproduces same 14 hits.
+
+## Step 1 — Is / Is Not
+- IS: fires on descriptive prose in substrate/**/*.md files bundled
+  from public bassclef; fires on public contact emails in
+  substrate/CODE_OF_CONDUCT.md + substrate/.claude/skills/promote/SKILL.md
+- IS NOT: does not fire on actual private content (no
+  substrate/docs/operator-private/ files exist per jq on
+  ~/src/sunj-labs/bassclef/lite-manifest.json); does not fire on
+  bassclef-cli's own src/ or docs/
+
+## Step 2 — Five Whys
+1. Why fail? Scan found 14 hits.
+2. Why hits? Public bassclef ships ADRs + skills + docs describing
+   operator-private discipline; strings appear in prose.
+3. Why does the scan flag prose? Regex matches string anywhere in
+   content, no discrimination between path-as-file vs path-as-reference.
+4. Why no discrimination? Scan design predates scope-b1 (which added
+   substrate/ as new artifact class); scan wasn't updated for the
+   new class.
+5. Why not updated? Same defect class as #40 — scan integration miss
+   when a new artifact class landed.
+
+## Step 3 — Hypothesis
+Moving docs/operator-private/ from content-scan to path-scan +
+adding per-file allowlist for two public-contact emails cures both
+the false-positive class + the sister email false-positive class.
+
+Falsification test: after code lands, run
+`npm pack --dry-run --json` on repo with substrate/ populated + run
+andon-scan.mjs on it. Should exit 0. Verified locally before push.
+
+## Root cause class
+Workflow-integration defect — scan design didn't anticipate
+substrate/ as a new artifact class shipped by scope-b1.
