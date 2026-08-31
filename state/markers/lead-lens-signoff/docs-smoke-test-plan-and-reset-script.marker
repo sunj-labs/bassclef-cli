@@ -1,0 +1,19 @@
+# Lead-lens sign-off marker — docs/smoke-test-plan-and-reset-script
+
+- date: 2026-08-31
+- branch: docs/smoke-test-plan-and-reset-script
+- lead-lens: @luminary saltzer-schroeder
+
+## Sign-off
+
+The final script matches the primary lens.
+
+- Least privilege: reset only touches `$HOME/tmp/bassclef-smoke-test` (hard-coded) and the global `@thebassclef/core` npm entry (named by string). Nothing else.
+- Fail-safe defaults: `set -euo pipefail`; `--dry-run` flag previews; verify step at end confirms the reset actually landed and exits nonzero if not.
+- Complete mediation: every side-effecting step wraps through `do_or_dry` so the dry-run path is guaranteed to skip writes.
+
+Supporting lens (Nygard fail-fast) satisfied: verify step names specific FAIL lines (surviving PATH entry, surviving work dir) so the operator gets a cure path, not silence.
+
+## Iteration count
+
+1 — dry-run test on the fresh clone passed cleanly. No RED cycle.
