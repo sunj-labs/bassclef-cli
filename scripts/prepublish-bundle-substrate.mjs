@@ -89,7 +89,10 @@ function copyEntry(siblingRoot, bundleRoot, entry) {
 }
 
 function postflightChecks(bundleRoot, manifest, totalBytes) {
-  const expectedCount = manifest.entries.length;
+  // Expected count = manifest.entries.length + 1 (the bundled manifest
+  // itself lives at substrate/.bassclef/lite-manifest.json and counts).
+  // Per #45 cure — the runtime needs the manifest in the tarball.
+  const expectedCount = manifest.entries.length + 1;
   // Count files bundled under substrate/ recursively.
   function walk(dir) {
     const names = readdirSync(dir);
@@ -105,7 +108,8 @@ function postflightChecks(bundleRoot, manifest, totalBytes) {
   const actualCount = walk(bundleRoot);
   if (actualCount !== expectedCount) {
     fail(
-      `postflight count mismatch: bundled ${actualCount} files but manifest declared ${expectedCount}. ` +
+      `postflight count mismatch: bundled ${actualCount} files but expected ${expectedCount} ` +
+        `(${manifest.entries.length} manifest entries + 1 bundled manifest). ` +
         `Re-run the script; investigate if the mismatch persists.`
     );
   }
@@ -114,6 +118,54 @@ function postflightChecks(bundleRoot, manifest, totalBytes) {
     fail(
       `bundled size ${mb}MB is over the 5MB ceiling. ` +
         `Trim the manifest at bassclef-upstream or raise the ceiling in ADR-007 D3.`
+    );
+  }
+}
+
+// Write the bundled manifest into <bundleRoot>/.bassclef/lite-manifest.json.
+// copy-substrate.ts reads this file at runtime to know which entries to
+// walk. Before #45 the manifest was never bundled — runtime threw + init
+// silent-catch hid the failure — adopter got 2 files instead of 149.
+// Per issue #45 diagnose + ADR-007 §D3 Amendment part 2 (2026-08-31).
+//
+// @risk R7 — postflight assert verifies the file lives at the expected
+// path with the expected shape (entries[] present + length matches
+// manifest.entries).
+function writeBundledManifest(bundleRoot, manifest) {
+  const targetDir = join(bundleRoot, '.bassclef');
+  mkdirSync(targetDir, { recursive: true, mode: 0o755 });
+  const targetPath = join(targetDir, 'lite-manifest.json');
+  const body = JSON.stringify(manifest, null, 2) + '\n';
+  writeFileSync(targetPath, body, { mode: 0o644 });
+  return targetPath;
+}
+
+// Postflight assert per Saltzer-Schroeder complete mediation — verify
+// the bundled manifest lives at the exact runtime path copy-substrate.ts
+// L174 expects, with entries[] preserved through the round-trip.
+function assertBundledManifestPresent(bundleRoot, expectedEntryCount) {
+  const targetPath = join(bundleRoot, '.bassclef', 'lite-manifest.json');
+  if (!existsSync(targetPath)) {
+    fail(
+      `bundled manifest missing at ${targetPath}. ` +
+        `writeBundledManifest did not run OR the write silently failed. ` +
+        `Re-run the script; if the miss persists, investigate the mkdir + write path.`
+    );
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(targetPath, 'utf8'));
+  } catch (err) {
+    fail(
+      `bundled manifest at ${targetPath} is not valid JSON: ${err.message}. ` +
+        `The write likely corrupted the file. Re-run the script.`
+    );
+  }
+  if (!Array.isArray(parsed.entries) || parsed.entries.length !== expectedEntryCount) {
+    const actual = Array.isArray(parsed.entries) ? parsed.entries.length : 'not-an-array';
+    fail(
+      `bundled manifest entries[] shape wrong at ${targetPath}: got ${actual}, ` +
+        `expected ${expectedEntryCount}. Re-run the script.`
     );
   }
 }
@@ -132,10 +184,18 @@ function main() {
     totalBytes += copyEntry(siblingRoot, bundleRoot, entry);
   }
 
+  // Write the manifest itself into the bundle for runtime to walk.
+  // #45 cure. See ADR-007 §D3 Amendment part 2.
+  const bundledManifestPath = writeBundledManifest(bundleRoot, manifest);
+  assertBundledManifestPresent(bundleRoot, manifest.entries.length);
+
   postflightChecks(bundleRoot, manifest, totalBytes);
 
   process.stdout.write(
     `bundled ${manifest.entries.length} files from ${manifestPath} into ${bundleRoot}\n`
+  );
+  process.stdout.write(
+    `bundled manifest written to ${bundledManifestPath}\n`
   );
   process.exit(0);
 }

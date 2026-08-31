@@ -1,0 +1,16 @@
+# Temperance marker — fix/prepublish-write-bundled-manifest
+- date: 2026-08-31
+- branch: fix/prepublish-write-bundled-manifest
+- scope-decision:
+  - right-thing: cure #45 broken-adopter-install class via primary +
+    secondary fixes. Primary: prepublish writes bundled manifest into
+    substrate/.bassclef/lite-manifest.json. Secondary: init.ts removes
+    silent-catch (W3 architect-review); surfaces Nygard fail-with-fix.
+    Harness gains file-count assertion so class fails LOUDLY next time.
+  - right-way: fix branch stays scoped to: prepublish script + init.ts
+    + copy-substrate (postflight assert if needed) + prepublish-bundle
+    test extension + harness test extension + ADR-002/ADR-007 amendments.
+    Ships as 0.1.1 patch.
+  - drift-trigger: changes beyond these files OR skipping the file-count
+    assertion in harness (that's the whole point — Feathers characterization
+    of the shipped artifact)

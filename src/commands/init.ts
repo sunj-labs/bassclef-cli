@@ -134,18 +134,29 @@ export function runInit(argv: readonly string[]): number {
 }
 
 // Dispatch the substrate copy step after config files land.
-// Silently skips when the bundle is not available (dev workspace with
-// no self-install, or a partial package install). Failures inside the
-// copy path are reported per file but do not change init's exit code —
-// the 3-file config init still stands.
+// Per issue #45: when the bundled substrate is missing (packaged
+// tarball shipped without the runtime manifest — the exact class the
+// prepublish script now guards against), we FAIL LOUD with cure
+// instructions. Silent skip masked the failure; adopters got a 2-file
+// config with no substrate and nothing told them.
+//
+// Nygard fail-with-fix: the error message names the cause + the cure
+// (reinstall or file an issue). Exit 2 so `bassclef init` reports
+// nonzero to the shell and the adopter sees the message.
 function dispatchSubstrateCopy(targetDir: string, force: boolean, verbose: boolean): void {
   let result;
   try {
     result = copySubstrate(targetDir, { force });
-  } catch {
-    // Bundle not available (dev workspace or partial install). Skip
-    // silently — the 3-file config init already succeeded and stands.
-    return;
+  } catch (e) {
+    const err = e as Error;
+    process.stderr.write(
+      `bassclef init: substrate copy failed — ${err.message}\n` +
+        `  cause: the installed @thebassclef/core package is missing the bundled substrate manifest.\n` +
+        `  fix: reinstall with \`npm install -g @thebassclef/core@latest --force\`.\n` +
+        `       If the reinstall does not help, file an issue at\n` +
+        `       https://github.com/sunj-labs/bassclef-cli/issues with your package version.\n`
+    );
+    process.exit(2);
   }
   if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
     return;

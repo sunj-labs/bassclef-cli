@@ -1,16 +1,21 @@
 // Prepublish bundle harness — Tier 0 tests per ledger v3 L105.
 //
-// Six tests covering R2 (pure Node), R7 (fail-fast at 3 checkpoints),
-// R9 (size ceiling). H2 count parameterization is enforced inline —
-// every assertion reads manifest.entries.length, never a literal.
+// Nine tests covering R2 (pure Node), R7 (fail-fast at 3 checkpoints),
+// R9 (size ceiling), + #45 cure (bundled manifest at
+// substrate/.bassclef/lite-manifest.json). H2 count parameterization
+// is enforced inline — every assertion reads manifest.entries.length,
+// never a literal.
 //
 // test-list (Beck):
-// [ ] R7: sibling manifest missing → exit nonzero + stderr names path
-// [ ] R7: manifest present + one source file missing → exit nonzero + names missing path
-// [ ] R2: script contains zero execSync|spawn|spawnSync calls
-// [ ] happy: sibling manifest + all sources present → exit 0 + substrate/ populated
-// [ ] R9: total bundled size over 5MB → exit nonzero + size in stderr
-// [ ] postflight: file count != manifest.entries.length → exit nonzero
+// [x] R7: sibling manifest missing → exit nonzero + stderr names path
+// [x] R7: manifest present + one source file missing → exit nonzero + names missing path
+// [x] R2: script contains zero execSync|spawn|spawnSync calls
+// [x] happy: sibling manifest + all sources present → exit 0 + substrate/ populated
+// [x] R9: total bundled size over 5MB → exit nonzero + size in stderr
+// [x] postflight: file count != manifest.entries.length + 1 → exit nonzero
+// [x] #45: happy path writes bundled manifest at substrate/.bassclef/lite-manifest.json
+// [x] #45: bundled manifest entries[] length matches source manifest
+// [x] #45: bundled manifest is valid JSON
 //
 // RED signal — scripts/prepublish-bundle-substrate.mjs does not exist
 // at Step 4. Node exits 1 with MODULE_NOT_FOUND. Tests fail on the
@@ -115,14 +120,51 @@ describe('prepublish-bundle — happy path', () => {
     expect(result.status).toBe(0);
     const bundled = join(bundleDir, 'substrate');
     expect(existsSync(bundled)).toBe(true);
-    // Count files under substrate/ recursively; assert against manifest length.
+    // Count files under substrate/ recursively. Expect manifest entries
+    // + 1 for the bundled manifest at substrate/.bassclef/lite-manifest.json.
     function walk(dir: string): string[] {
       return readdirSync(dir).flatMap((name) => {
         const p = join(dir, name);
         return statSync(p).isDirectory() ? walk(p) : [p];
       });
     }
-    expect(walk(bundled).length).toBe(manifest.entries.length);
+    expect(walk(bundled).length).toBe(manifest.entries.length + 1);
+  });
+});
+
+describe('prepublish-bundle — #45 bundled manifest cure', () => {
+  it('writes a bundled manifest at substrate/.bassclef/lite-manifest.json', () => {
+    const manifest = loadMini();
+    seedSiblingManifest(manifest);
+    seedSourceFiles(manifest, '');
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const bundledManifestPath = join(bundleDir, 'substrate', '.bassclef', 'lite-manifest.json');
+    expect(existsSync(bundledManifestPath)).toBe(true);
+  });
+
+  it('bundled manifest entries[] length matches the source manifest', () => {
+    const manifest = loadMini();
+    seedSiblingManifest(manifest);
+    seedSourceFiles(manifest, '');
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const bundledManifestPath = join(bundleDir, 'substrate', '.bassclef', 'lite-manifest.json');
+    const parsed = JSON.parse(readFileSync(bundledManifestPath, 'utf8')) as { entries: unknown[] };
+    expect(Array.isArray(parsed.entries)).toBe(true);
+    expect(parsed.entries.length).toBe(manifest.entries.length);
+  });
+
+  it('bundled manifest is valid JSON with a trailing newline', () => {
+    const manifest = loadMini();
+    seedSiblingManifest(manifest);
+    seedSourceFiles(manifest, '');
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const bundledManifestPath = join(bundleDir, 'substrate', '.bassclef', 'lite-manifest.json');
+    const body = readFileSync(bundledManifestPath, 'utf8');
+    expect(() => JSON.parse(body)).not.toThrow();
+    expect(body.endsWith('\n')).toBe(true);
   });
 });
 
