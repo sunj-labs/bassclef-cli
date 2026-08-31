@@ -1,0 +1,10 @@
+{
+  "luminary_slug": "saltzer-schroeder",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "state/markers/luminary/docs-smoke-test-plan-and-reset-script.marker",
+    "state/markers/lead-lens-signoff/docs-smoke-test-plan-and-reset-script.marker"
+  ],
+  "last_scanned": "2026-08-31T14:05:41Z",
+  "scanner_version": "1.0"
+}
