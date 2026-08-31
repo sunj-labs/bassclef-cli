@@ -1,0 +1,19 @@
+# Pre-mortem marker — docs/smoke-test-plan-and-reset-script
+
+- date: 2026-08-31
+- branch: docs/smoke-test-plan-and-reset-script
+- change: scripts/smoke-reset.sh + docs/test-plans/2026-08-31-cold-adopter-smoke-0.1.1.md
+
+## What could go wrong
+
+1. **Reset script deletes something it should not.** rm -rf on the wrong path. Mitigation: hard-coded target is `$HOME/tmp/bassclef-smoke-test` — a specific subdir the smoke test creates. Never touches `~/.claude/`, `~/`, or other repos. Carries a `--dry-run` flag for preview.
+2. **npm uninstall fails silently and leaves state.** Verify step at end runs `command -v bassclef` and exits 1 with a FAIL line if the binary is still on PATH after uninstall.
+3. **Script fires on a machine where the smoke test never ran.** Idempotent by design: each step checks for state existence before acting, prints "nothing to remove" otherwise.
+4. **Test plan sends an operator down a macOS-only path.** Plan explicitly names macOS in the title and the "What this test does NOT cover" section calls out Linux + Windows as separate scope.
+5. **Operator runs the reset while a real smoke test is in-flight.** The reset is between test cycles, not during. Naming the work dir uniquely (`bassclef-smoke-test`, not `bassclef` or `tmp`) reduces collision surface.
+
+## What could go right
+
+- Repeatable smoke testing without manual cleanup between runs
+- Cold-adopter perspective catches the same class of defect as issue #45 (stale local substrate hid the missing runtime manifest)
+- Script and test plan compose — script sets the stage; plan runs the play

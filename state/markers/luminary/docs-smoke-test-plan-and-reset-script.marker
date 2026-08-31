@@ -1,0 +1,20 @@
+# Luminary marker — docs/smoke-test-plan-and-reset-script
+
+- date: 2026-08-31
+- branch: docs/smoke-test-plan-and-reset-script
+
+- lead: saltzer-schroeder
+- supporting: michael-nygard
+
+## Primary lens
+
+**@luminary saltzer-schroeder** — least privilege + fail-safe defaults. Reset script only touches what it explicitly names. Any state it does not know about survives. Verify step confirms the reset before returning success; a partial reset exits nonzero with named FAIL lines.
+
+## Supporting lens
+
+**@luminary michael-nygard** — fail fast + fail with fix. If the uninstall step misses state, verify catches it and prints a specific FAIL line that names the surviving path so the operator knows where to look.
+
+## One-line rationale per lens
+
+- Saltzer-Schroeder: the script's blast radius is bounded by a hard-coded work dir path and the specific npm package name; nothing else can be touched.
+- Nygard: the verify step turns silent-partial-cleanup into loud-with-remediation.
