@@ -167,16 +167,52 @@ that job 2 carries `environment: npm-publish` and job 1 does not.
 **andon-scan.mjs:**
 
 - Reads the `--dry-run --json` pack output.
-- For each file listed as shipped, scans content against a term
-  list.
-- Term list starts narrow: absolute POSIX home paths (`/Users/*`,
-  `/home/*`), operator-private path references
-  (`docs/operator-private/`), and email addresses (except in
-  LICENSE + `package.json` `author` field).
+- For each file listed as shipped, runs two checks:
+  1. **PATH check** (`scanPath`) — the file's own shipped path must
+     not match `docs/operator-private/` (see Amendment 2026-08-31
+     below).
+  2. **CONTENT check** (`scanContent`) — file content is scanned
+     against a term list.
+- Content term list: absolute POSIX home paths (`/Users/*`,
+  `/home/*`) and email addresses (except in LICENSE, `package.json`
+  `author`, or per-file allowlist entries).
+- Per-file allowlist for shipped substrate:
+  - `CODE_OF_CONDUCT.md` allows `conduct@bassclef.dev`
+  - `.claude/skills/promote/SKILL.md` allows `hello@bassclef.dev`
+  - Both are public contact addresses that legitimately ship.
 - Per-file override via `# andon-allow: <regex>` header — matches
   bassclef's own release pipeline pattern.
 - List grows on incident. Quarterly review prunes terms unused for
   six months.
+
+**Amendment 2026-08-31 — discrimination shift for `docs/operator-private/` (issue #40 follow-on):**
+
+Before this amendment, `docs/operator-private/` was on the content
+term list. When scope-b1 added `substrate/` as a shipped artifact
+class, the scan started firing on every substrate file that describes
+the operator-private discipline in prose (ADRs, skills, README,
+CONTRIBUTING). All 14 initial hits were false positives; none were
+actual leaks. Publish workflow run 33346136435 failed on this exact
+class.
+
+Per pre-code architect-review 2026-08-31, `docs/operator-private/`
+moved from content scan to path scan. The real leak signal is a
+shipped file whose PATH matches the operator-private location.
+Content mentions of the path string in prose are legitimate
+documentation and pass.
+
+**Accepted risk (documented per Popper falsifiability):** content
+mention of a specific operator-private FILENAME in prose is no longer
+scanned. PR review is the mitigation. Alternative was tightening the
+regex to `docs/operator-private/[^\s"'\`]+\.md` but the shape is
+error-prone and blocks the common false-positive class first without
+solving the rare content-pasting leak. Explicit test 14 in
+`tests/andon-scan.test.ts` pins the intentional gap.
+
+**Same-class prevention:** the checks-job assertion added at PR #41
+covers the sister class — silent-empty tarball. Together, both cures
+close the two failure classes that surfaced during the 0.1.0 launch
+attempt.
 
 **tier-filter.mjs:**
 
