@@ -17,6 +17,24 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [0.1.1] - 2026-08-31
+### Added
+
+- `scripts/prepublish-bundle-substrate.mjs` now writes the runtime manifest to `substrate/.bassclef/lite-manifest.json` after copying entries. `assertBundledManifestPresent` postflight verifies the file lives at the expected path with the expected shape (entries[] present + length matches source manifest). Postflight file count check updated to expect `entries.length + 1` for the bundled manifest.
+- Three new Tier 0 tests in `tests/harness/prepublish-bundle.test.ts` pin the cure — bundled manifest exists at the runtime path, entries[] length matches source, body is valid JSON with trailing newline.
+
+### Changed
+
+- `dispatchSubstrateCopy` in `src/commands/init.ts` no longer silent-catches `copySubstrate` failures. When the bundled substrate is missing (packaged tarball shipped without the runtime manifest), init now fails loud with cure instructions — Nygard fail-with-fix pattern. Exits 2 with a stderr message naming the cause (missing bundle) and the fix (reinstall from npm or file an issue).
+
+### Fixed
+
+- **Critical — issue #45**: 0.1.0 tarball shipped without `substrate/.bassclef/lite-manifest.json`. Adopters running `npm install -g @thebassclef/core && bassclef init` got only 2 config files instead of the promised 149. Root cause: prepublish script never wrote the runtime manifest into the bundle; `copySubstrate` threw at runtime; `dispatchSubstrateCopy` silent-catch hid the failure. Two-part cure: prepublish writes the manifest into the bundle (with postflight assertion); init removes the silent-catch and fails loud with cure instructions.
+
+### Notes
+
+- Live smoke test on published 0.1.0 revealed the bug — install-then-init produced 2 files, not 149. 0.1.0 unpublished from npm; 0.1.1 ships the cure.
+
 ## [0.1.0] - 2026-08-30
 ### Added — scope-b1 (npm-lite substrate bundling; PR #36)
 

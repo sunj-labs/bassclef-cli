@@ -1,0 +1,15 @@
+# ADR-deviation marker — fix/prepublish-write-bundled-manifest
+- date: 2026-08-31
+- branch: fix/prepublish-write-bundled-manifest
+- adr_governing: ADR-002 (init safety) + ADR-007 (npm-lite bundling)
+- outcome: ADR-honored via amendments
+- rationale: |
+    ADR-007 §D3 Amendment part 2 records the prepublish manifest-write
+    contract (previously implicit; now explicit). Same Saltzer complete-
+    mediation intent; adds Hoare postcondition that bundle carries the
+    manifest.
+    ADR-002 amendment records the removal of silent-catch on bundle-load
+    failure. Same safety-envelope intent; sharper Nygard fail-with-fix
+    discipline (per architect-review W3 finding).
+    Both changes ADR-honored; no deviation from Saltzer / Linus / Cooper
+    contracts.

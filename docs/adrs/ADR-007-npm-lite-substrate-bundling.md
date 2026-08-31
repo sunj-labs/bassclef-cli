@@ -127,6 +127,22 @@ The 3 preflight/postflight checks inside `prepublish-bundle-substrate.mjs` are u
 
 The `prepublishOnly` entry in `package.json` L49 is retained for the local-publish path (developer running `npm publish` from their machine without `--ignore-scripts`) but is no longer load-bearing for the CI publish.
 
+### Amendment 2026-08-31 — bundled manifest cure (issue #45)
+
+The 0.1.0 tarball shipped **without** `substrate/.bassclef/lite-manifest.json`. Live smoke test caught the bug: adopters running `npm install -g @thebassclef/core@0.1.0 && bassclef init` got 2 config files instead of 149. The prepublish script populated `substrate/` with source files but never wrote the runtime manifest that `copy-substrate.ts` L174 (`loadBundledManifest`) reads at init time.
+
+Root cause: three-layer failure. The prepublish script's contract said "populate `substrate/`" but did not include the manifest in that scope. `copy-substrate.ts` reads `<bundleRoot>/.bassclef/lite-manifest.json` at runtime; the file's absence throws `ENOENT`. `dispatchSubstrateCopy` in `init.ts` had a bare `catch {}` that swallowed the error and returned silently — init reported "2 created" and exited 0 with no signal that substrate copy failed.
+
+**New mechanism (post-#45):** two-part cure.
+
+1. **Prepublish writes the runtime manifest.** `scripts/prepublish-bundle-substrate.mjs` calls `writeBundledManifest(bundleRoot, manifest)` after the entry copy loop, writing the source manifest to `substrate/.bassclef/lite-manifest.json` with pretty-print + trailing newline. `assertBundledManifestPresent(bundleRoot, expectedEntryCount)` runs immediately after as a Saltzer-Schroeder complete-mediation check — verifies file exists at the exact runtime path, body parses as valid JSON, `entries[]` array present with matching length. Any failure exits nonzero.
+
+2. **Init fails loud when the bundle is missing.** `dispatchSubstrateCopy` in `src/commands/init.ts` no longer silent-catches. When `copySubstrate` throws (missing bundle, corrupt manifest, hash mismatch), init emits a Nygard fail-with-fix stderr message naming the cause (missing bundled substrate manifest) plus the cure (reinstall from npm or file an issue) and exits 2. Adopters see the failure at first run instead of discovering it downstream.
+
+**Postflight count check updated.** The script's `postflightChecks` now expects `manifest.entries.length + 1` files under `substrate/` — the +1 accounts for `.bassclef/lite-manifest.json`. Tests at `tests/harness/prepublish-bundle.test.ts` updated accordingly and three new tests pin the cure (manifest exists at runtime path, entries[] length matches source, body is valid JSON with trailing newline).
+
+Ships in 0.1.1. 0.1.0 unpublished from npm per the two-part cure discipline — the broken tarball cannot self-repair; adopters that installed 0.1.0 must reinstall.
+
 ### Decision 4 — `bassclef init` copy semantics
 
 `bassclef init` at v0.1.0 dispatches `copySubstrate(targetDir, options)` after config files land. Copy semantics inherit from UC-init:
