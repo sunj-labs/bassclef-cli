@@ -16,9 +16,15 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 iteration_bet: docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md (scope-e — bassclef migrate; Option b picked)
 iteration_started: 2026-08-30
-last_updated: 2026-08-31T21:38:38Z
+last_updated: 2026-09-01T00:16:14Z
 session: docs/session-logs/2026-08-31-emergency-cure-0.1.1-ship-plus-smoke-infrastructure.md
 iteration_phase: **SHIPPED + LIVE — @thebassclef/core@0.1.1 published to npm 2026-08-31 via publish workflow run 33396847872.** Combined 0.1.0 arc: PR #36 (scope-b1) + PR #39 (scope-e migrate) landed at v0.1.0 tag 28db935. v0.1.0 shipped BROKEN — smoke revealed tarball missing `substrate/.bassclef/lite-manifest.json`; adopters got 2 files instead of 149. Issue #45 filed via /diagnose. Cure PR #47 (prepublish writes manifest + init fail-loud) + PR #48 (CI workflow reorder — prepublish before test) shipped as 0.1.1. 0.1.0 unpublished from npm; 0.1.1 live and verified end-to-end via live registry install (150 files land). Test infrastructure PR #50 shipped (docs/test-plans/2026-08-31-cold-adopter-smoke-0.1.1.md + scripts/smoke-reset.sh). /promote issue #49 filed for cross-repo auto-trigger design.
+
+open_threads:
+  - Cold-adopter smoke test on second macOS profile — blocked on operator resetting the second profile's password. Test plan at docs/test-plans/2026-08-31-cold-adopter-smoke-0.1.1.md; reset helper at scripts/smoke-reset.sh. Pick up when password is reset.
+  - Journal drafts written to docs/operator-private/journals/2026-08-31.md (4 posts across 2 moments, 2 audiences). Google Doc push skipped — no `journal_doc_id` configured in substrate.config.md yet. Operator picks a target doc when ready, then re-runs `/journal --push` OR pastes manually.
+  - Issue #49 (/promote — cross-repo auto-trigger design) awaiting bassclef triage.
+  - Issue #46 (/promote — architect-review static-comprehension limitation) awaiting bassclef triage.
 
 ## Operator recap
 
