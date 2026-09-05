@@ -5,6 +5,9 @@
     "generated_by": "@thebassclef/core",
     "generated_by_version": "0.0.2"
   },
+  "env": {
+    "SKIP_TIER_TAG_REQUIRED": "1"
+  },
   "permissions": {
     "additionalDirectories": []
   },
@@ -151,6 +154,11 @@
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/out-of-repo-symlink-gate.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-identifier-leak-scrub.sh",
+            "timeout": 10
           }
         ]
       },
@@ -281,6 +289,11 @@
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/substrate-registration-canary.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/lite-skill-key-gate-check.sh",
+            "timeout": 10
           }
         ]
       }

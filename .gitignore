@@ -60,9 +60,5 @@ state/markers/turn-prose-flags/
 !harness
 !harness/**
 # >>> bassclef-sync managed symlinks (do not edit) >>>
-.claude/luminaries
-.claude/agents
-.claude/bassclef-orientation.md
-lib
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
