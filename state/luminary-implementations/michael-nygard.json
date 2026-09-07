@@ -4,8 +4,9 @@
   "referenced_by_files": [
     "docs/iteration-bets/2026-08-28d-npm-lite-substrate-bundling.md",
     "docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md",
-    "state/markers/luminary/docs-smoke-test-plan-and-reset-script.marker"
+    "state/markers/luminary/docs-smoke-test-plan-and-reset-script.marker",
+    "docs/adrs/ADR-004-publish-pipeline-safety-contract.md"
   ],
-  "last_scanned": "2026-08-31T14:05:41Z",
+  "last_scanned": "2026-09-07T07:08:24Z",
   "scanner_version": "1.0"
 }
