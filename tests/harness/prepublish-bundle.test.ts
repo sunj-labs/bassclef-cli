@@ -16,6 +16,7 @@
 // [x] #45: happy path writes bundled manifest at substrate/.bassclef/lite-manifest.json
 // [x] #45: bundled manifest entries[] length matches source manifest
 // [x] #45: bundled manifest is valid JSON
+// [x] tarball-audit: npm pack --dry-run bundles zero operator-private paths
 //
 // RED signal — scripts/prepublish-bundle-substrate.mjs does not exist
 // at Step 4. Node exits 1 with MODULE_NOT_FOUND. Tests fail on the
@@ -192,5 +193,78 @@ describe('prepublish-bundle — postflight count check', () => {
     );
     const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
     expect(result.status).not.toBe(0);
+  });
+});
+
+describe('prepublish-bundle — tarball audit (no operator-private path leaks)', () => {
+  // Locks Saltzer #1 from the 2026-09-07 pre-mortem ledger:
+  // `files: substrate/**` in package.json is broad. If any operator-private
+  // path (chronicles, journals, session logs, state markers, risk ledgers,
+  // iteration goal docs) ever ends up under substrate/, `npm pack` will
+  // silently bundle it into the public tarball. This test asserts that
+  // the tarball manifest contains zero paths matching the leak shapes.
+  //
+  // Runs against the real substrate/ bundle in the repo — requires
+  // prepublish-bundle-substrate.mjs to have run against the sibling
+  // manifest. Skips cleanly if npm is unavailable in the test env.
+  it('// @risk: Saltzer #1 — npm pack --dry-run leaks zero operator-private paths', () => {
+    const npmCheck = spawnSync('npm', ['--version'], { encoding: 'utf8' });
+    if (npmCheck.status !== 0) return; // npm not on PATH — skip
+    const substrateExists = existsSync(join(REPO_ROOT, 'substrate', '.bassclef', 'lite-manifest.json'));
+    if (!substrateExists) return; // substrate not bundled yet — skip (publish pipeline populates it)
+    const result = spawnSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      timeout: 30_000,
+    });
+    expect(result.status).toBe(0);
+    const parsed = JSON.parse(result.stdout);
+    expect(Array.isArray(parsed)).toBe(true);
+    const files = parsed[0]?.files ?? [];
+    expect(Array.isArray(files)).toBe(true);
+    expect(files.length).toBeGreaterThan(0);
+
+    // Leak shapes — never allowed in a published tarball.
+    // These are content dirs (session logs, ledgers, markers), not skill
+    // definitions. Adopter-facing skills like /session-log carry their
+    // SKILL.md; that IS meant to ship. The regex matches content paths.
+    const leakRe = new RegExp(
+      [
+        '(^|/)docs/operator-private/',
+        '(^|/)chronicle/',
+        '(^|/)docs/chronicle/',
+        '(^|/)docs/session-logs/',
+        '(^|/)state/markers/',
+        '(^|/)docs/risk-ledgers/',
+        '(^|/)docs/iteration-bets/',
+        '(^|/)docs/canvases/',
+        '(^|/)docs/decompositions/',
+        '(^|/)docs/journals/',
+        '(^|/)docs/deferred-actions/',
+      ].join('|'),
+    );
+    const leaks = files.map((f: { path: string }) => f.path).filter((p: string) => leakRe.test(p));
+    expect(leaks).toEqual([]);
+  });
+
+  it('// @risk: Saltzer #1 — tarball top-level dirs match the strict allowlist', () => {
+    const npmCheck = spawnSync('npm', ['--version'], { encoding: 'utf8' });
+    if (npmCheck.status !== 0) return;
+    const substrateExists = existsSync(join(REPO_ROOT, 'substrate', '.bassclef', 'lite-manifest.json'));
+    if (!substrateExists) return;
+    const result = spawnSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      timeout: 30_000,
+    });
+    expect(result.status).toBe(0);
+    const parsed = JSON.parse(result.stdout);
+    const files: Array<{ path: string }> = parsed[0]?.files ?? [];
+    const topLevel = new Set(files.map((f) => f.path.split('/')[0]));
+    // Allowlist per package.json `files` field + the always-included set
+    // (LICENSE, README.md, package.json ship regardless of `files`).
+    const allowed = new Set(['dist', 'substrate', 'LICENSE', 'README.md', 'package.json']);
+    const extras = [...topLevel].filter((d) => !allowed.has(d));
+    expect(extras).toEqual([]);
   });
 });
