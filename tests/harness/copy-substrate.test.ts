@@ -15,6 +15,7 @@
 // [ ] R7-fallback: bundle content hash mismatch → errored + file named
 // [ ] N2: error message names the fix ('rerun ... --force' or equivalent)
 // [ ] N1: per-directory progress line fires once per directory
+// [x] v1.5.0 shape: manifest without upstream_commit + additive problem/value per entry → all entries copied
 //
 // RED signal — src/lib/copy-substrate.ts does not exist at Step 4.
 // Vitest parse fails at the import statement. Every test in this file
@@ -206,6 +207,47 @@ describe('copySubstrate — N2 error message names the fix', () => {
     // not just "SHA256 mismatch". Ledger v3 L57 pins the pattern.
     const errorText = result.erroredMessages?.join(' ') ?? '';
     expect(errorText).toMatch(/rerun|reinstall|report|repair|--force/i);
+  });
+});
+
+describe('copySubstrate — manifest-shape backward-compat (v1.5.0 shape)', () => {
+  it('// @risk: peer bassclef-web crash class — consumers handle absent upstream_commit + additive fields', async () => {
+    // Locks the manifest-shape contract against upstream #1508 (upstream_commit removed)
+    // and upstream #1480 (problem + value added per entry) shipped in bassclef v1.5.0.
+    // Per bassclef-web heads-up 2026-09-07: their consumer scripts crashed with
+    // TypeError: Cannot read properties of undefined (reading 'slice') on
+    // manifest.upstream_commit. bassclef-cli's src/lib/copy-substrate.ts does not
+    // read upstream_commit; this test pins that contract so future refactors do
+    // not regress into reading a field the upstream schema no longer ships.
+    const entries: MiniEntry[] = [
+      { path: '.claude/rules/example.md', content_hash: sha256('r'), slug: 'ex-rule', tier: 'lite', type: 'rule' },
+      { path: '.claude/skills/example/SKILL.md', content_hash: sha256('s'), slug: 'ex-skill', tier: 'lite', type: 'skill' },
+    ];
+    // v1.5.0 shape — no upstream_commit; additive problem/value per entry.
+    const v15Manifest = {
+      tier: 'lite',
+      manifest_version: '1.5.0',
+      generated_at: '2026-09-06T12:00:00Z',
+      // upstream_commit deliberately absent per upstream #1508
+      entries: entries.map((e) => ({
+        ...e,
+        problem: 'sample adopter problem this entry solves',
+        value: 'sample value prop for this entry',
+      })),
+    };
+    const manifestPath = join(bundleRoot, '.bassclef', 'lite-manifest.json');
+    mkdirSync(dirname(manifestPath), { recursive: true, mode: 0o755 });
+    writeFileSync(manifestPath, JSON.stringify(v15Manifest, null, 2));
+    for (const entry of entries) {
+      const p = join(bundleRoot, entry.path);
+      mkdirSync(dirname(p), { recursive: true, mode: 0o755 });
+      writeFileSync(p, entry.path.endsWith('.md') && entry.type === 'rule' ? 'r' : 's');
+    }
+    const result = await copySubstrate(targetDir, { bundleRoot });
+    expect(result.copied.length).toBe(entries.length);
+    expect(result.errored.length).toBe(0);
+    expect(readFileSync(join(targetDir, '.claude/rules/example.md'), 'utf8')).toBe('r');
+    expect(readFileSync(join(targetDir, '.claude/skills/example/SKILL.md'), 'utf8')).toBe('s');
   });
 });
 
