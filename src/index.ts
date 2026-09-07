@@ -1,4 +1,4 @@
-// @thebassclef/core — programmatic API surface.
+// @thebassclef/lite — programmatic API surface.
 //
 // @requirement R-NPM-007
 //
@@ -13,4 +13,4 @@
 // ADR-031 (we-don't-break-adopters). Add exports only when a real
 // consumer needs them — no speculative surface.
 
-export const version = '0.1.1' as const;
+export const version = '0.1.0' as const;

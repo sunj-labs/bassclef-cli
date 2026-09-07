@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to `@thebassclef/core` land here.
+All notable changes to `@thebassclef/lite` land here.
+
+**Package rename note.** Versions up to and including `0.1.1` shipped as
+`@thebassclef/core`. From `0.1.0` of `@thebassclef/lite` onward, the
+free-tier package name is `@thebassclef/lite`. `@thebassclef/core@0.1.1`
+stays live on npm until a later unpublish session; new adopters land on
+lite via `npm install -g @thebassclef/lite`. Per coord ticket #51 Q1;
+memory `project_lite_is_free_tier_package.md`; ADR-004 Amendment 2026-09-07.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -16,6 +23,44 @@ bet 2026-08-06b.
 ### Fixed
 
 ### Notes
+
+## [0.1.0] - 2026-09-07 — `@thebassclef/lite` first substantive release
+
+### Changed
+
+- Package name renamed from `@thebassclef/core` to `@thebassclef/lite`.
+  Adopters install with `npm install -g @thebassclef/lite`. Existing
+  `@thebassclef/core@0.1.1` installs stay working; migration is
+  additive — `npm uninstall -g @thebassclef/core && npm install -g @thebassclef/lite`.
+- Bundled substrate refreshed from bassclef v1.2.19 → v1.5.0. New
+  `problem` + `value` fields per manifest entry (upstream #1480).
+  `upstream_commit` removed from bundled manifest (upstream #1508).
+  `/build` skill promoted to lite (upstream #1462); 4 skills retagged
+  (upstream #1478); 14 luminaries flipped to lite (upstream #1459).
+- Publish pipeline (`.github/workflows/publish.yml`) targets
+  `@thebassclef/lite`. ADR-004 Amendment 2026-09-07 documents the
+  target rename; the safety contract itself is unchanged.
+
+### Added
+
+- Tier 0 test at `tests/harness/copy-substrate.test.ts` asserts the
+  bundled-manifest consumer tolerates the v1.5.0 shape (absent
+  `upstream_commit`; additive per-entry fields). Pins the contract
+  against future schema shifts. Shipped in PR #52.
+- Tier 0 tests at `tests/harness/prepublish-bundle.test.ts` assert
+  `npm pack --dry-run` bundles zero operator-private paths and the
+  tarball top-level dirs match a strict allowlist. Pre-mortem Saltzer #1
+  cure. Shipped in PR #53.
+
+### Notes
+
+- Operator sets the npm trusted-publisher entry for `@thebassclef/lite`
+  at `npmjs.com/settings/<user>/packages/@thebassclef/lite` once,
+  pointing at `sunj-labs/bassclef-cli` + `.github/workflows/publish.yml`.
+  Without this the first `@thebassclef/lite` publish fails.
+- Refs: coord ticket #51 (Q1 rename+sync goal); goal doc
+  `docs/iteration-bets/2026-09-07-lite-rename-sync-publish.md`;
+  pre-mortem `docs/risk-ledgers/2026-09-07-lite-rename-sync.md`.
 
 ## [0.1.1] - 2026-08-31
 ### Added

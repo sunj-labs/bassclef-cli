@@ -12,6 +12,41 @@ superseded_by: null
 
 # ADR-004 — Pin the safety contract for the publish pipeline
 
+## Amendment 2026-09-07 — target renamed `@thebassclef/core` → `@thebassclef/lite`
+
+The published package name changes from `@thebassclef/core` to `@thebassclef/lite`
+per operator direction 2026-09-05 (session log `docs/session-logs/2026-09-05-longrun-prep-lite-rename-sync-scoped.md`)
+and coordination ticket #51 Q1. Rationale:
+
+- `@thebassclef/lite` is the shipping name for the free tier going forward
+  (memory `project_lite_is_free_tier_package.md`).
+- `@thebassclef/core` stays live on npm at 0.1.1 until a later unpublish
+  session; new adopters land on lite.
+- Name reservations at `@thebassclef/lite@0.0.1`, `@thebassclef/standard@0.0.1`,
+  `@thebassclef/ultra@0.0.1` are already published (2026-09-03 by kingofrock).
+
+The safety contract itself does not change. Trusted publisher + tag validator +
+andon scan + tier filter + fixed workflow path all stand. What changes:
+
+- Every ADR-004 reference to `@thebassclef/core` reads through to `@thebassclef/lite`.
+- The npm trusted-publisher entry moves from
+  `npmjs.com/settings/<user>/packages/@thebassclef/core` to
+  `npmjs.com/settings/<user>/packages/@thebassclef/lite`. Operator makes this
+  change once at npmjs.com before the first `@thebassclef/lite` publish.
+- The workflow file path `.github/workflows/publish.yml` stays. Semver-lock
+  per the workflow header holds — no file rename.
+
+This amendment is additive per @luminary michael-nygard ADR lifecycle. The
+original prose stays intact for adopter compatibility with any external
+tooling that reads the ADR text (per `.claude/rules/we-dont-break-adopters.md`).
+Read the original body below as "the safety contract that governs the publish
+of `@thebassclef/{core|lite}`" — package name is the variable; contract is
+the invariant.
+
+Refs: coord ticket #51 Q1; goal doc `docs/iteration-bets/2026-09-07-lite-rename-sync-publish.md`;
+pre-mortem `docs/risk-ledgers/2026-09-07-lite-rename-sync.md`; PR that ships
+the code changes.
+
 ## Context
 
 WU-4 of iteration bet
