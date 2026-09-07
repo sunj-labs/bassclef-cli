@@ -1,11 +1,14 @@
-# Temperance marker — main branch (post-scope-e-merge bump)
-- date: 2026-08-30
+# Temperance marker — 2026-09-07 /longrun for @thebassclef/lite@0.1.0
+
+- date: 2026-09-07
 - branch: main
-- goal: prepare v0.1.0 tag + publish per operator Option A pick
+- goal: rename + sync + validate + publish @thebassclef/lite@0.1.0; sync target v1.5.0; add manifest backward-compat test
 - scope-decision:
-  - right-thing: single MINOR 0.1.0 bump combining scope-b1 (PR #36) + scope-e (PR #39)
-    per RFC L3 precedent (adopter migration ships MINOR) + operator confirmation
-  - right-way: manual CHANGELOG merge → npm run bump minor → tag v0.1.0 → push tag →
-    operator dispatches publish workflow (per ADR-004 + guardrails)
-  - drift-trigger: touching src/ code OR modifying prior CHANGELOG entries
-    OR dispatching publish workflow autonomously (all disallowed)
+  - Right thing: ship @thebassclef/lite@0.1.0 in one goal — closes coord #51 Q1; honors 2026-09-05 operator direction
+  - Right way: rename + sync + validate ride in the same PR chain (per memory feedback_rename_must_ride_with_manifest_sync); backward-compat test added first as defense-in-depth per peer bassclef-web heads-up
+  - Not now: Q2 slice (#25 dist/lite/ consumer, #49 auto-trigger); UX/mock-gallery work per operator direction "avoiding any unnecessary UX-related design work"
+- drift-trigger:
+  - Substrate sync 1.2.19 → 1.5.0 surfaces schema break requiring upstream fix → PAUSE + reshape
+  - npm 2FA Touch ID takes >2 retries → PAUSE + /diagnose per memory feedback_npm_11_required_for_trusted_publisher
+  - Downstream packaging fails smoke → ABORT per operator gate
+- operator-config: orchestrator-gated; auto-merge PRs within scope; operator on hard ceilings (schema/auth/security/prod-deploy) + npm 2FA
