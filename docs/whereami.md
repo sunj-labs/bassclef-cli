@@ -14,10 +14,10 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-iteration_bet: docs/iteration-bets/2026-09-11-zero-state-nudge-plus-straplines.md (PR #56 open; awaits operator merge)
+iteration_bet: docs/iteration-bets/2026-09-11-zero-state-nudge-plus-straplines.md (SHIPPED as @thebassclef/lite@0.1.2 on 2026-09-11)
 iteration_started: 2026-09-11
 session: docs/session-logs/2026-09-11-cold-adopter-nudge-plus-taglines.md
-iteration_phase: **PR #56 OPEN — cold-adopter `--help` first-run hint + 4 tagline proposal drafts.** Reconciled ticket #55 scope against ADR-008 D2 at Step 1 (migrate no-manifest stays as Path B per ADR; only `--help` output changes). One-line `USAGE` addition in `src/cli.ts` — `Start here: bassclef init (first-run verb...)`. 5 new Tier 0 tests (2 Beck RED→GREEN + 3 characterization pins for sync no-manifest nudge + migrate Path B opener + init happy path). Suite 227/227 GREEN. Tagline drafts for /riff /launch /build /howdoi ship as single artifact `docs/tagline-proposals/2026-09-11-brownfield-adopter-lens.md`; operator files at their pace via /promote (bassclef-evolution + adopter-source).
+iteration_phase: **SHIPPED + LIVE — @thebassclef/lite@0.1.2 published to npm 2026-09-11 via manual `npm publish` from operator MacBook (trusted publisher still 404s per open thread).** Full session shipped 3 PRs + 1 tagline artifact + 1 substrate refresh: PR #56 (`bassclef --help` first-run hint, 3cb2224) + PR #58 (sync v1.5.1 → v1.5.7, 5873cf3) + PR #59 (skip 0.1.1 for lite; bump to 0.1.2, 339fb99). Tarball 997.4 kB / 289 files; shasum 7d797f7422775db38276e8f0841198a066c21e20. Registry: [0.0.1, 0.1.0, 0.1.2]. Publish path — CI attempt 404'd at registry PUT (trusted publisher gap); manual publish also 404'd on stale auth token (`npm whoami` returned 401); cure: `npm login` → Touch ID → publish landed clean. Tagline drafts for /riff /launch /build /howdoi at `docs/tagline-proposals/2026-09-11-brownfield-adopter-lens.md`; operator files via /promote at their pace.
 
 open_threads:
   - **#57 — sync bundled substrate to v1.5.7 + republish** (filed 2026-09-11; blocked on upstream #1603). Bundled is v1.5.1 with 173 entries; target v1.5.7 with 252 entries + 15 rehashed. Peer bassclef-web heads-up confirms shape unchanged. Plan: rebuild + republish as PATCH 0.1.1 after peer pings that #1603 merged.
