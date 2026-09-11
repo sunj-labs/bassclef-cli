@@ -80,9 +80,14 @@ No missed /promote candidates surfaced this session beyond the four already draf
 ## Next session
 
 - Merge PR #56 (operator review; auto-merge disabled for security-adjacent guard per prior session pattern)
+- **Watch for peer ping on upstream #1603 merge → then #57 sync + republish (v1.5.1 → v1.5.7, 252 entries, PATCH 0.1.1)**
 - File the four /promote tickets from `docs/tagline-proposals/2026-09-11-...` at bassclef-cli with bassclef-evolution + adopter-source labels
 - Optional — file follow-on for interactive Path B prompt on cold adopters
-- Return to open threads: trusted publisher config for lite, Cooper #1 silent-install hook (upstream), whereami schema drift folded into this session's whereami update
+- Return to open threads: trusted publisher config for lite, Cooper #1 silent-install hook (upstream)
+
+## Post-session heads-up (2026-09-11 late)
+
+Peer bassclef-web flagged upstream #1603 will bump lite-manifest v1.5.5 → v1.5.7. Shape unchanged; +79 new entries (rules + standards + skills from tier-alignment cure batch 6 + arc); 15 already-present entries get fresh content_hash. PR #1603 still OPEN at time of this session close. Bundled bassclef-cli manifest is at v1.5.1 (173 entries) per `substrate/.bassclef/lite-manifest.json`. Filed follow-on ticket #57 tracking the sync + republish plan; blocks on peer ping that #1603 merged. See #57 body for the 10-step plan.
 
 ## Refs
 
