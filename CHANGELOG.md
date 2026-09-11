@@ -24,6 +24,18 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [0.1.2] - 2026-09-11
+### Notes
+
+- Version 0.1.1 skipped for `@thebassclef/lite`. Git tag `v0.1.1` was
+  already in use for the deprecated `@thebassclef/core@0.1.1` release
+  from 2026-08-31 (commit `ef84d60d` — issue #45 cure). Moving the tag
+  would break the audit trail for that release. Chose non-destructive
+  path — bumped straight from `0.1.0` to `0.1.2` for lite. The `[0.1.1]`
+  entry below stayed in the changelog for content history; there is no
+  `@thebassclef/lite@0.1.1` on npm and no git tag `v0.1.1` on lite's
+  commit line.
+
 ## [0.1.1] - 2026-09-11
 ### Changed
 
