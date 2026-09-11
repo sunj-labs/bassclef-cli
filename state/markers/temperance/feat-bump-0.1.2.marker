@@ -1,0 +1,7 @@
+# Temperance marker — feat/bump-0.1.2
+- date: 2026-09-11
+- branch: feat/bump-0.1.2
+- scope-decision: skip 0.1.1 for lite; bump to 0.1.2 to avoid git tag conflict with deprecated core@0.1.1 (ef84d60d, 2026-08-31)
+- right-thing: yes — non-destructive git; preserves audit trail for core@0.1.1
+- right-way: run bump-version.mjs patch on top of current main state (0.1.1 → 0.1.2); one CHANGELOG note explaining the skip
+- drift-trigger: pause if suite breaks; pause if bump script refuses
