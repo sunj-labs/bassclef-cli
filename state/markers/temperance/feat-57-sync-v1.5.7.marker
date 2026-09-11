@@ -1,0 +1,8 @@
+# Temperance marker — feat/57-sync-v1.5.7
+- date: 2026-09-11
+- branch: feat/57-sync-v1.5.7
+- goal: docs/iteration-bets/2026-09-11-... (extension per #57)
+- scope-decision: sync bundled substrate v1.5.1 → v1.5.7 + fix chronicle regex false-positive + bump version 0.1.0 → 0.1.1 + open PR
+- right-thing: Yes. Peer heads-up confirms upstream #1603 merged; adopters lag 107 files behind.
+- right-way: Nuke substrate/ + re-run prepublish; tighten chronicle regex to match dated files only (not skill dir); PATCH bump per npm-versioning-and-changelog.md (shape unchanged).
+- drift-trigger: pause if regex fix reveals other false-positives; pause if suite reveals shape drift needing defensive tests.
