@@ -51,13 +51,15 @@ describe('bassclef --help first-run hint (Beck RED for #55 reconciled scope)', (
   it('names `bassclef init` as the first-run verb via a "Start here" line', () => {
     const r = runCli(['--help']);
     expect(r.status).toBe(0);
-    expect(r.stdout).toContain('Start here: `bassclef init`');
+    expect(r.stdout).toContain('Start here: cd to your project');
+    expect(r.stdout).toContain('`bassclef init`');
   });
 
   it('also fires on bare invocation (no args)', () => {
     const r = runCli([]);
     expect(r.status).toBe(0);
-    expect(r.stdout).toContain('Start here: `bassclef init`');
+    expect(r.stdout).toContain('Start here: cd to your project');
+    expect(r.stdout).toContain('`bassclef init`');
   });
 });
 
