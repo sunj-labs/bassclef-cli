@@ -14,11 +14,10 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-iteration_bet: docs/iteration-bets/2026-09-07-lite-rename-sync-publish.md (SHIPPED 0.1.0 as @thebassclef/lite on 2026-09-07)
-iteration_started: 2026-09-07
-last_updated: 2026-09-07T19:30:00Z
-session: docs/session-logs/2026-09-07-lite-rename-sync-publish-shipped.md
-iteration_phase: **SHIPPED + LIVE — @thebassclef/lite@0.1.0 published to npm 2026-09-07 via manual `npm publish` from operator MacBook (trusted publisher setup 404'd across mobile + desktop + two Macs — filed as follow-on).** Full 8-step chain done in one session. PR #52 (backward-compat test for v1.5.0 shape, be1673c) + PR #53 (tarball audit + top-level allowlist, eb97bf7) + PR #54 (rename core→lite + version 0.1.0 + ADR-004 Amendment + CHANGELOG, 14f8ac7) all merged. Tag v0.1.0 pushed + GitHub release live. @thebassclef/core deprecated across all 3 versions (0.0.1, 0.0.2, 0.1.1) with migration message. Coord ticket #51 Q1 comment posted (issuecomment-5574831975). Bundled substrate refreshed 1.2.19 → 1.5.0 (upstream v0.36.0). 222/222 tests green.
+iteration_bet: docs/iteration-bets/2026-09-11-zero-state-nudge-plus-straplines.md (PR #56 open; awaits operator merge)
+iteration_started: 2026-09-11
+session: docs/session-logs/2026-09-11-cold-adopter-nudge-plus-taglines.md
+iteration_phase: **PR #56 OPEN — cold-adopter `--help` first-run hint + 4 tagline proposal drafts.** Reconciled ticket #55 scope against ADR-008 D2 at Step 1 (migrate no-manifest stays as Path B per ADR; only `--help` output changes). One-line `USAGE` addition in `src/cli.ts` — `Start here: bassclef init (first-run verb...)`. 5 new Tier 0 tests (2 Beck RED→GREEN + 3 characterization pins for sync no-manifest nudge + migrate Path B opener + init happy path). Suite 227/227 GREEN. Tagline drafts for /riff /launch /build /howdoi ship as single artifact `docs/tagline-proposals/2026-09-11-brownfield-adopter-lens.md`; operator files at their pace via /promote (bassclef-evolution + adopter-source).
 
 open_threads:
   - Step 5 follow-on — trusted publisher config for @thebassclef/lite. npm's setup form returned 404 across every attempted path (iPhone mobile web, desktop web, second Mac, two request IDs). Operator has `write access via developers team`; may need admin/owner role on the org. First publish used classic `npm publish` with Touch ID — works but skips provenance attestation. Future ships benefit from trusted publisher once configured. May need npm support ticket with request IDs a37491cc5f080016_8998 + a3757ff9b88e63db_17d9 + a3757ff9b88e63db_17d9.
@@ -32,7 +31,9 @@ open_threads:
 
 ## Operator recap
 
-2026-09-07 /longrun executed the full 8-step chain and shipped `@thebassclef/lite@0.1.0` live to npm. Session ran ~130 turns end-to-end. Coordination ticket #51 Q1 closed. Peer bassclef-web session flagged a manifest-shape crash class mid-flight (upstream #1508 dropped `upstream_commit`); grep of bassclef-cli source returned zero reads, converted the heads-up into a Tier 0 test (PR #52). Pre-mortem light Saltzer #1 (tarball leak class) shipped as PR #53. Rename + version bump + ADR-004 Amendment + CHANGELOG landed as PR #54. Substrate sync surfaced 8 stale v1.2.19 files on first run; `rm -rf substrate/ && re-run` cleaned. Tag v0.1.0 moved from dangling core@0.1.0 attempt to the merge commit. GHA publish workflow failed with npm 404 (trusted publisher not attached to lite package); operator + I diagnosed persistent 404 across mobile web + desktop web + second Mac + two request IDs — filed as follow-on. Shipped via manual `npm publish` from operator's own Mac with Touch ID. @thebassclef/core deprecated across all 3 versions with migration message. Coord ticket #51 comment posted. All 222 tests green throughout.
+2026-09-11 /longrun shipped PR #56 — cold-adopter `--help` first-run hint + 4 tagline proposal drafts. Session ran ~90 turns. Reconciled ticket #55 scope against ADR-008 D2 at Step 1 by reading source before writing code. Original ticket asked for a uniform zero-state nudge on sync + migrate + bare `bassclef`. Reading `src/lib/manifest-io.ts` L34-40 showed sync already refuses with a Cooper-good message pointing at init. Reading `src/lib/migrate.ts` L86-105 showed migrate no-manifest dispatches Path B full-init per ADR-008 D2 (deliberate design; not a bug). The friend's actual pain (session log 2026-09-07 L48) was pre-run `--help` confusion, not post-run errors. Shipped a one-line `USAGE` addition + 5 Tier 0 tests. Suite 227/227 GREEN. Ticket #55 comment posted explaining reconciliation. Four tagline proposals for /riff /launch /build /howdoi drafted through brownfield-adopter lens (Cooper primary + Norman + Ousterhout supporting); operator files via /promote at their pace. Whereami schema drift caught this session — removed `last_updated:` from Active iteration section (not in schema per `standards/whereami-schema.md` §Section 2 Singleton); folded into this recap update.
+
+prior_operator_recap: 2026-09-07 /longrun executed the full 8-step chain and shipped `@thebassclef/lite@0.1.0` live to npm. Session ran ~130 turns end-to-end. Coordination ticket #51 Q1 closed. Peer bassclef-web session flagged a manifest-shape crash class mid-flight (upstream #1508 dropped `upstream_commit`); grep of bassclef-cli source returned zero reads, converted the heads-up into a Tier 0 test (PR #52). Pre-mortem light Saltzer #1 (tarball leak class) shipped as PR #53. Rename + version bump + ADR-004 Amendment + CHANGELOG landed as PR #54. Substrate sync surfaced 8 stale v1.2.19 files on first run; `rm -rf substrate/ && re-run` cleaned. Tag v0.1.0 moved from dangling core@0.1.0 attempt to the merge commit. GHA publish workflow failed with npm 404 (trusted publisher not attached to lite package); operator + I diagnosed persistent 404 across mobile web + desktop web + second Mac + two request IDs — filed as follow-on. Shipped via manual `npm publish` from operator's own Mac with Touch ID. @thebassclef/core deprecated across all 3 versions with migration message. Coord ticket #51 comment posted. All 222 tests green throughout.
 
 previous_recap: 2026-09-05/06 /longrun prep — scope discovery + option-shape iteration. Coordination ticket #51 was the anchor. Operator surfaced two shape changes mid-prep — (1) `@thebassclef/lite` is the new free-tier package name; `@thebassclef/core` is redundant. (2) Manifest sync belongs with the rename; upstream at `manifest_version: 1.4.1` vs bundled 1.2.19 drift. Landed on Option a-plus proposal (sync + validate + rename + publish `@thebassclef/lite@0.1.0`, ~70-120 turns). Scope not confirmed this session; goal proposed pending next-session dispatch. No code shipped.
 
@@ -190,7 +191,13 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## Last updated
 
-2026-08-30T14:00:00Z — session-end (goal 2026-08-30a scope-e migrate SHIPPED — Steps 1-8 landed autonomously per orchestrator-gated dispatch full-ship Option c; 29 test files GREEN / 210 tests pass; ledger v2 all 11 rows verified; PR #39 open for operator review)
+2026-09-11T14:15:00Z — session-end (goal 2026-09-11 cold-adopter --help hint + 4 tagline drafts; PR #56 open; suite 227/227 GREEN)
+session: docs/session-logs/2026-09-11-cold-adopter-nudge-plus-taglines.md
+
+prior_session: 2026-09-07T19:30:00Z — session-end (@thebassclef/lite@0.1.0 shipped live to npm; PRs #52 + #53 + #54 merged; tag v0.1.0 pushed; @thebassclef/core deprecated across 3 versions)
+prior_session_log: docs/session-logs/2026-09-07-lite-rename-sync-publish-shipped.md
+
+prior_session: 2026-08-30T14:00:00Z — session-end (goal 2026-08-30a scope-e migrate SHIPPED — Steps 1-8 landed autonomously per orchestrator-gated dispatch full-ship Option c; 29 test files GREEN / 210 tests pass; ledger v2 all 11 rows verified; PR #39 open for operator review)
 session: docs/session-logs/2026-08-30-longrun-scope-e-migrate-full-ship.md
 
 prior_session: 2026-08-29T23:20:00Z — session-end (goal 2026-08-28d scope-b1 code phase complete)
