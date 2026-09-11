@@ -24,6 +24,37 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [0.1.1] - 2026-09-11
+### Changed
+
+- Bundled substrate refreshed from bassclef lite-manifest v1.5.1 (173
+  entries) → v1.5.7 (280 entries). Delta covers 6 patch versions of the
+  upstream tier-alignment cure arc — batch 6 additions (upstream #1595)
+  plus PRs #1599 + #1600 + #1601 (73 flipped files + 1 promoted file
+  `.claude/rules/sibling-smoke-after-substrate-change.md`) plus #1603
+  (v1.5.6 → v1.5.7 ledger catchup). About 15 already-present entries
+  received a fresh `content_hash` after cleanup edits (README.md,
+  CONTRIBUTING.md, `.claude/rules/loop-discipline.md`, and others). No
+  schema change — `standards/lite-manifest.schema.json` unchanged since
+  v1.5.0. Consumers pinning `~1.5` stay green; consumers reading
+  `.entries[].content_hash` refresh the 15 files at next sync.
+
+### Fixed
+
+- Tarball audit test (`tests/harness/prepublish-bundle.test.ts`) false
+  positive. Regex `(^|/)chronicle/` matched the legit alias skill dir
+  `substrate/.claude/skills/chronicle/SKILL.md` (per ADR-040 D1 grace
+  window through 2026-10-31 — `chronicle` is an alias for `session-log`
+  that ships as a real skill). Tightened to `(^|/)chronicle/\d{4}-`
+  which matches dated chronicle content files without false-positive on
+  the skill dir. Same tightening applied to `docs/chronicle/`.
+
+### Notes
+
+- Refs: upstream `standards/lite-manifest-schema-changes.md` top entry
+  "Tier alignment cure batch 6 + arc"; upstream PRs #1595 + #1599 +
+  #1600 + #1601 + #1603; peer bassclef-web heads-up 2026-09-11.
+
 ## [0.1.0] - 2026-09-07 — `@thebassclef/lite` first substantive release
 
 ### Changed

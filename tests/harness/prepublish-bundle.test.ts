@@ -228,11 +228,16 @@ describe('prepublish-bundle — tarball audit (no operator-private path leaks)',
     // These are content dirs (session logs, ledgers, markers), not skill
     // definitions. Adopter-facing skills like /session-log carry their
     // SKILL.md; that IS meant to ship. The regex matches content paths.
+    //
+    // Chronicle patterns match DATED files (YYYY-MM-DD prefix), not skill
+    // dirs. `substrate/.claude/skills/chronicle/SKILL.md` is a legit alias
+    // skill per ADR-040 D1 grace window through 2026-10-31 (chronicle →
+    // session-log rename); the SKILL.md itself ships.
     const leakRe = new RegExp(
       [
         '(^|/)docs/operator-private/',
-        '(^|/)chronicle/',
-        '(^|/)docs/chronicle/',
+        '(^|/)chronicle/\\d{4}-',
+        '(^|/)docs/chronicle/\\d{4}-',
         '(^|/)docs/session-logs/',
         '(^|/)state/markers/',
         '(^|/)docs/risk-ledgers/',
