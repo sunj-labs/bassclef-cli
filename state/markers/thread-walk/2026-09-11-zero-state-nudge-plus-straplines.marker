@@ -1,0 +1,10 @@
+# Thread-walk marker — 2026-09-11-zero-state-nudge-plus-straplines
+- date: 2026-09-11
+- branch: feat/55-zero-state-nudge
+- goal: docs/iteration-bets/2026-09-11-zero-state-nudge-plus-straplines.md
+- parent_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md
+- parent_roadmap: docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md
+- walk-depth: 1 (parent has no parent_bet; roadmap is the ceiling)
+- drivers: npm distribution of @thebassclef/lite; cold-adopter UX quality; substrate inheritance via sync
+- open-acceptance: cold-adopter smoke on second macOS profile; trusted publisher for lite; Cooper #1 silent-install adopter path
+- out-of-scope: substrate-side session-start hooks (belong upstream); bin-name confusion; --help nudge on bare invocation

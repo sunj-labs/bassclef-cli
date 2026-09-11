@@ -1,0 +1,7 @@
+# Pre-mortem marker — feat/55-zero-state-nudge
+- date: 2026-09-11
+- branch: feat/55-zero-state-nudge
+- shape: pre-mortem-light
+- ledger: docs/risk-ledgers/2026-09-11-zero-state-nudge-plus-straplines.md
+- lenses: alan-cooper (primary) + jerome-saltzer-and-michael-schroeder + john-ousterhout
+- risks: 9 total (3 per lens); strongest R1 + R3 + R7 folded into Steps 2-3

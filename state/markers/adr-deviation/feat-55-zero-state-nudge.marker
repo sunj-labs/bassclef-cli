@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/55-zero-state-nudge
+- date: 2026-09-11
+- branch: feat/55-zero-state-nudge
+- adr_governing: ADR-002 (bassclef init safety contract — manifest path .bassclef/init.manifest.json)
+- outcome: ADR-honored
+- rationale: The zero-state nudge reads `.bassclef/init.manifest.json` (absent = nudge fires). This is the exact manifest path ADR-002 pins. No new architectural decision; no deviation. The `requireInit(verb)` helper reads via the existing manifest path; if ADR-002 amends the path, the helper reads whatever ADR-002 says. Sister UC-init has the same coupling.
