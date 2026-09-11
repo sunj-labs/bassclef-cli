@@ -19,6 +19,8 @@ import { runMigrate, usage as migrateUsage } from './commands/migrate.js';
 
 const USAGE = `bassclef — install and upgrade bassclef in your project
 
+Start here: \`bassclef init\` (first-run verb — sets up a project directory).
+
 Usage:
   bassclef init [options]    Write bassclef config into a project directory
   bassclef sync [options]    Update bassclef-managed files in place

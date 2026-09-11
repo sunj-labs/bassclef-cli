@@ -60,36 +60,41 @@ Per @luminary john-ousterhout — the detector lives as a small `requireInit(ver
 - `package.json` — name `@thebassclef/lite@0.1.0`; bin `bassclef` → `dist/cli.js`
 - ADR-002 (bassclef init safety contract) — `.bassclef/init.manifest.json` is the manifest path
 
+## Scope reconciled 2026-09-11 (Step 1 finding)
+
+Reading the source at Step 1 discovered ticket #55 conflicts with ADR-008 Decision 2 (migrate no-manifest → Path B full init, not nudge). Reconciled scope: polish `bassclef --help` to mark `init` as first-run + add characterization tests pinning current sync + migrate behavior. No behavior change on sync or migrate. No ADR amendment. See `docs/use-cases/UC-cold-adopter-init-nudge.md` § Reconciliation.
+
 ## Steps
 
 | Step | Problem + value | Produces | Consumes (from prior) | How builds on prior | Risk |
 |---|---|---|---|---|---|
-| **0** housekeeping | Session start; scope confirmed; markers absent | Goal doc + ledger + temperance/pre-mortem/luminary/thread-walk markers | session-start | baseline | 🟢 |
-| **1** brief use case | Adopter src/ extension needs Cockburn brief tier per oo-ad-entry-point matrix | `docs/use-cases/UC-cold-adopter-init-nudge.md` at brief tier | Step 0 goal doc | UC pins acceptance the tests check | 🟢 |
-| **2** Beck RED Tier 0 tests | Cannot ship src/ change without failing tests first | 4 Tier 0 tests in `tests/cli-init-nudge.test.ts` (sync no-manifest → nudge exit 1; migrate no-manifest → nudge exit 1; init no-manifest → works; sync --dry-run init'd → works) | Step 1 UC | Tests pin UC acceptance | 🟢 |
-| **3** source cure GREEN | Tests RED; need dispatcher preflight | `requireInit(verb)` helper in a small module; wire into sync + migrate dispatch in `src/cli.ts` after `--help` check; nudge string constant | Step 2 RED tests | Smallest cure that turns tests GREEN | 🟢 |
-| **4** full suite verify + PR | Cannot ship without full suite green | 222+ tests GREEN via vitest; PR body per pr-body-shape rule; auto-merge or hold-for-review per orchestrator merge mode | Step 3 GREEN | Full suite check + operator merge | 🟢 |
+| **0** housekeeping ✅ | Session start; scope confirmed; markers absent | Goal doc + ledger + temperance/pre-mortem/luminary/thread-walk markers | session-start | baseline | 🟢 |
+| **1** brief use case ✅ | Adopter surface change needs Cockburn brief tier | `docs/use-cases/UC-cold-adopter-init-nudge.md` at brief tier; scope reconciled per source reading | Step 0 goal doc | UC pins reconciled acceptance | 🟢 |
+| **2** Beck RED Tier 0 tests | Cannot ship src/ change without failing tests first | 4 Tier 0 tests in `tests/cli-init-nudge.test.ts`: (a) `--help` first-run hint present; (b) sync no-manifest nudge stays intact (characterization); (c) migrate no-manifest Path B opener stays intact (characterization); (d) init works today (regression pin) | Step 1 UC | Tests pin UC acceptance | 🟢 |
+| **3** source cure GREEN | Tests RED; need `--help` first-run hint | One-line addition to `USAGE` in `src/cli.ts` — `Start here: \`bassclef init\`` before the verb list | Step 2 RED tests | Smallest cure that turns tests GREEN; no behavior change to sync or migrate | 🟢 |
+| **4** full suite verify + PR | Cannot ship without full suite green | 222+ tests GREEN via vitest; PR body per pr-body-shape rule; ticket #55 comment explaining scope reconciliation | Step 3 GREEN | Full suite check + operator merge | 🟢 |
 | **5** strapline promote bodies | Second scope element; needs adopter-context grounding | 4 /promote issue body drafts at bassclef-upstream for /riff, /launch, /build, /howdoi via /extract-intent + /luminary chain | Step 4 PR merged (or approved) | brownfield input is this repo | 🟢 |
 | **6** closeout | Session end; whereami stale (4 days) | Session log; whereami frontmatter fix + recap update; /retro one-liner; markers cleaned | Union of Steps 0-5 | Chronicle discipline | 🟢 |
 
 ## Compounding value per step
 
-Every step is 🟢 low risk. Rate: per-adopter for the src/ change; per-adopter-forever for the substrate-side tagline changes. Prereq: none beyond session-start. Teaches: `requireInit(verb)` preflight helper as extension point for future verbs; adopter-brownfield lens for skill positioning. Half-done risk: low; adopter code is a small dispatcher branch, tagline promotes are drafts the operator files at their pace.
+Every step is 🟢 low risk. Rate: per-adopter for the `--help` polish; per-adopter-forever for the substrate-side tagline changes. Prereq: none beyond session-start. Teaches: characterization-test-first when reconciling ticket spec against ADR reality. Half-done risk: low; help text change is one line, characterization tests pin current behavior.
 
 ## Acceptance
 
-- 4 Tier 0 tests written before src/ change; suite GREEN after cure
-- Nudge string pinned in a constant + tested by literal match
-- `requireInit(verb)` helper documents extension point for future verbs
-- Ticket #55 out-of-scope section carries R3 (exit 1 breaks shell wrappers) note
+- 4 Tier 0 tests written before source change; suite GREEN after cure
+- `bassclef --help` output contains `Start here: bassclef init` line
+- Sync no-manifest characterization test pins current nudge string
+- Migrate no-manifest characterization test pins Path B opener
+- Ticket #55 comment posted explaining scope reconciliation (migrate no-manifest out of scope per ADR-008 D2)
 - 4 /promote issue body drafts at bassclef-upstream ready for operator to file
 - Session log written; whereami frontmatter compliant with schema; recap updated
 
 ## Out of scope
 
-- Bin-name confusion — user installs `@thebassclef/lite` but binary is `bassclef` (documented in ticket #55 out-of-scope)
-- Nudge on bare `bassclef` invocation without a verb — help text already covers first-run
-- Docs/README update for flow ordering — separate ticket if needed
+- Behavior change on migrate no-manifest — Path B stays per ADR-008 D2
+- Interactive Path B prompt for cold adopters — sister proposal for a future ticket
+- Bin-name confusion (user installs `@thebassclef/lite`, binary is `bassclef`) — documented in #55 out-of-scope
 - Cooper #1 silent-install deprecation hook — belongs upstream, not here
 
 ## Refs
