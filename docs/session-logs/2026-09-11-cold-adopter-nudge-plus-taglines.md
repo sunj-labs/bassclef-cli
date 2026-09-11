@@ -89,6 +89,44 @@ No missed /promote candidates surfaced this session beyond the four already draf
 
 Peer bassclef-web flagged upstream #1603 will bump lite-manifest v1.5.5 → v1.5.7. Shape unchanged; +79 new entries (rules + standards + skills from tier-alignment cure batch 6 + arc); 15 already-present entries get fresh content_hash. PR #1603 still OPEN at time of this session close. Bundled bassclef-cli manifest is at v1.5.1 (173 entries) per `substrate/.bassclef/lite-manifest.json`. Filed follow-on ticket #57 tracking the sync + republish plan; blocks on peer ping that #1603 merged. See #57 body for the 10-step plan.
 
+## Appendix — session continued 2026-09-11 evening → 2026-09-12
+
+Session did not end at the earlier close. Operator returned same evening with the peer ping — upstream #1603 merged 2026-09-11T08:12:44Z. Ran the sync + tagline updates + publish end-to-end on the same session context. `@thebassclef/lite@0.1.2` shipped live to npm at 2026-09-12.
+
+### Additional ships
+
+- **PR #58** (merged 5873cf3) — `chore(#57): sync bundled substrate v1.5.1 → v1.5.7 + bump 0.1.0 → 0.1.1`. Sibling upstream at 280 entries (27 more than peer's estimate; peer counted from v1.5.5, we synced from v1.5.1). Fixed a false positive in the tarball audit test — old regex `(^|/)chronicle/` matched the legit alias skill dir `substrate/.claude/skills/chronicle/SKILL.md`; tightened to `(^|/)chronicle/\d{4}-` for dated content only. Suite 222/222 GREEN.
+- **PR #59** (merged 339fb99) — `chore: bump 0.1.1 → 0.1.2 (skip 0.1.1 for lite — tag conflict cure)`. Post-merge of PR #58, `git tag v0.1.1` refused — tag already in use for deprecated `@thebassclef/core@0.1.1` (commit ef84d60d, 2026-08-31). Bumped straight to 0.1.2 instead of moving the tag. Non-destructive; preserves audit trail for core@0.1.1.
+- **Tag `v0.1.2` pushed** + GitHub release created.
+- **CI publish attempt** — GHA workflow run 34606181254; provenance signed to sigstore transparency log (logIndex 2797070580); PUT to registry failed with 404 (trusted publisher for lite still not attached; same as 09-07).
+- **Manual publish from operator's Mac** — also 404'd at first. Diag via `npm whoami` surfaced **401 Unauthorized** — auth token stale since 09-07 ship. `npm login` → browser + Touch ID → `npm publish` landed clean.
+- **npm registry state**: `@thebassclef/lite` versions `[0.0.1, 0.1.0, 0.1.2]`; latest 0.1.2; shasum `7d797f7422775db38276e8f0841198a066c21e20`; 289 files; 997.4 kB.
+- **Tagline artifact corrections** — operator flagged 3 taglines missed key capabilities. Updated: /riff now surfaces "live mocks + Anthropic baseline"; /launch surfaces "live mocks + Anthropic baseline + decompose chain (sequence + state, soon)"; /build surfaces "iterate to production". /howdoi unchanged.
+- **Ticket #57** auto-closed via PR #59's `Closes #57` keyword; ship confirmation comment posted.
+
+### Discoveries — session appendix
+
+- **npm 404 masks 401 auth failure on scoped-package PUT.** Cost roughly 1 hour of misdiagnosis this evening blaming trusted publisher (a real gap on 09-07) when the real cause was a stale token. `npm whoami` returned 401 plainly. Cure was `npm login`. Worth capturing as a memory so next session runs `npm whoami` as the FIRST diag step before assuming trusted-publisher config, not after.
+- **Git tag conflict across a package rename cycle.** Old `core@0.1.1` tag blocked `lite@0.1.1`. Skipping to 0.1.2 was the non-destructive cure. Same pattern will hit any future lite versions that overlap with prior core tags (core is at [0.0.1, 0.0.2, 0.1.1]; lite is currently at [0.0.1, 0.1.0, 0.1.2]). Numbering rule for post-rename ship cycles — check tag existence before bumping; skip forward past collisions.
+
+### Final open threads
+
+- Trusted publisher config for `@thebassclef/lite` — still 404s. Needs npm support ticket or account role change.
+- Unpublish `@thebassclef/core` after grace window (operator judgment; no specific date).
+- 4 tagline drafts at `docs/tagline-proposals/2026-09-11-brownfield-adopter-lens.md` ready for operator to file via /promote.
+- Cold-adopter smoke test on second macOS profile — still blocked on operator resetting the second profile's password.
+- Cooper #1 silent-install adopter deprecation notice — belongs upstream.
+
+### Session totals (final)
+
+- Turns: ~180 across the evening
+- PRs merged: 3 (#56 + #58 + #59)
+- npm publishes: 1 (@thebassclef/lite@0.1.2)
+- Tickets closed: 2 (#55 + #57)
+- New tickets filed: 1 (#57, filed + closed same session)
+- Substrate refresh: 173 → 280 entries (+107, 6 patch versions)
+- Suite: 227/227 GREEN throughout
+
 ## Refs
 
 - PR #56 (this session)

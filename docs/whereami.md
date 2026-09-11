@@ -192,8 +192,11 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## Last updated
 
-2026-09-11T14:15:00Z — session-end (goal 2026-09-11 cold-adopter --help hint + 4 tagline drafts; PR #56 open; suite 227/227 GREEN)
+2026-09-12T00:30:00Z — session-end (@thebassclef/lite@0.1.2 shipped live to npm; PRs #56 + #58 + #59 merged; tag v0.1.2 pushed; substrate refreshed v1.5.1 → v1.5.7; skipped 0.1.1 for lite due to core tag conflict)
 session: docs/session-logs/2026-09-11-cold-adopter-nudge-plus-taglines.md
+
+prior_session: 2026-09-11T14:15:00Z — session-end (mid-session close; PR #56 open at that point; work continued same evening into ship; see session log appendix for full shape)
+prior_session_log: docs/session-logs/2026-09-11-cold-adopter-nudge-plus-taglines.md
 
 prior_session: 2026-09-07T19:30:00Z — session-end (@thebassclef/lite@0.1.0 shipped live to npm; PRs #52 + #53 + #54 merged; tag v0.1.0 pushed; @thebassclef/core deprecated across 3 versions)
 prior_session_log: docs/session-logs/2026-09-07-lite-rename-sync-publish-shipped.md
