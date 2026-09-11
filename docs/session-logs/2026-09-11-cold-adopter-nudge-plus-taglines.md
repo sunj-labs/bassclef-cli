@@ -111,6 +111,7 @@ Session did not end at the earlier close. Operator returned same evening with th
 
 ### Final open threads
 
+- **Trusted-publisher follow-on ticket drafted this session but not filed.** Body ready at `/ticket` dispatch level — 465-char Problem opener + INVEST-checked body + acceptance list + 4-item acceptance checklist. Operator dispatched `/session-end` after the draft rather than confirming the file. Draft body preserved in this session's conversation history. Next session — either re-dispatch `/ticket "trusted publisher for @thebassclef/lite"` OR file the pre-drafted body directly via `gh issue create`.
 - Trusted publisher config for `@thebassclef/lite` — still 404s. Needs npm support ticket or account role change.
 - Unpublish `@thebassclef/core` after grace window (operator judgment; no specific date).
 - 4 tagline drafts at `docs/tagline-proposals/2026-09-11-brownfield-adopter-lens.md` ready for operator to file via /promote.
