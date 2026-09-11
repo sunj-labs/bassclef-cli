@@ -1,0 +1,6 @@
+# Luminary marker — feat/55-zero-state-nudge
+- date: 2026-09-11
+- branch: feat/55-zero-state-nudge
+- primary: alan-cooper
+- supporting: [jerome-saltzer-and-michael-schroeder, john-ousterhout]
+- rationale: Cooper anchors adopter UX (zero-state moment); Saltzer-Schroeder mediates every verb dispatch; Ousterhout keeps preflight as deep-module helper.

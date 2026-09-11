@@ -1,0 +1,8 @@
+# Temperance marker — feat/55-zero-state-nudge
+- date: 2026-09-11
+- branch: feat/55-zero-state-nudge
+- goal: docs/iteration-bets/2026-09-11-zero-state-nudge-plus-straplines.md
+- scope-decision: ship #55 zero-state nudge (Steps 0-4) + draft 4 tagline promote bodies (Step 5) + closeout (Step 6)
+- right-thing: Yes. Fresh 2026-09-07 cold-adopter signal; ticket body already scoped; strapline work rides as smaller follow-on.
+- right-way: Beck RED-first; small preflight extension per existing verb; brief use case per Cockburn tier; serial order.
+- drift-trigger: pause if any step exceeds 1.5x budget; pause if strapline chain grows past four skills or shifts to substrate work.
