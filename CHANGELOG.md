@@ -24,6 +24,36 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [0.1.3] - 2026-09-12
+### Added
+
+### Changed
+
+- `bassclef init` output — final summary now prints one grand-total line
+  (`N files total (2 config + N-2 substrate)`) so the number matches the
+  on-disk footprint. Prior counter (`N created, M unchanged`) referred to
+  config files only and confused readers who saw ~280 substrate copies
+  scroll by. Same counter also renamed `N config files created, M unchanged`
+  so its scope is explicit.
+- `bassclef init --help` — "Files written under <target>" now names the
+  bundled substrate tree (.claude/{agents,hooks,luminaries,rules,skills}/,
+  standards/, templates/, scripts/, lib/, presence/install/,
+  architecture/decisions/, plus top-level markdown files including
+  CLAUDE-lite.md). Prior text listed only the 3-file scaffold.
+
+### Fixed
+
+- `bassclef init --dry-run` now previews the full substrate copy step, not
+  just the 2 config files. Cold-adopter on 2026-09-12 ran the preview,
+  saw 2 files, then saw 283 files land on the real run — a ~140x
+  under-report of scope. Root cause: `runInit` returned after the config
+  dry-run and never invoked the substrate copy path, which already
+  accepted a `dryRun` option and just wasn't called with it. Regression
+  test in `tests/init.test.ts` asserts dry-run "would create" count
+  equals manifest entries + 2 config files. Closes #60.
+
+### Notes
+
 ## [0.1.2] - 2026-09-11
 ### Notes
 
