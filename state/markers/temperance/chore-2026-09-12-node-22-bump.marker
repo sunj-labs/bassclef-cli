@@ -1,0 +1,9 @@
+# Temperance marker — 2026-09-12b-node-bump
+- date: 2026-09-12
+- branch: chore/2026-09-12-node-22-bump
+- goal: 2026-09-12b-node-bump
+- scope-decision:
+  - Right thing: bump 3 Node 20 pins to 22 in GHA workflows; close deprecation warning.
+  - Right way: one PR, one commit, Tier 0 grep test to catch future drift.
+  - Drift trigger: pause if any Node 22 build produces different tarball output than Node 20 (per pre-mortem F1); pause if `npm test` fails on Node 22.
+- Out of scope declared: engines field, .nvmrc, runner OS, Actions dep bumps.

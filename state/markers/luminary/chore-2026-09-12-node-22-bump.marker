@@ -1,0 +1,10 @@
+# Luminary marker — 2026-09-12b-node-bump
+- date: 2026-09-12
+- goal: 2026-09-12b-node-bump
+- branch: chore/2026-09-12-node-22-bump
+- lead: linus-torvalds
+- supporting: [michael-feathers, michael-nygard]
+- rationale:
+  - Linus (lead) — adopter contract; the tarball adopters install must not silently change behavior on a workflow-only edit
+  - Feathers (supporting) — characterization; no test asserts build parity across Node versions today, so add the Tier 0 grep test and run local Node 22 build before merge
+  - Nygard (supporting) — stability pattern; operator environment gate on publish workflow is the existing circuit breaker

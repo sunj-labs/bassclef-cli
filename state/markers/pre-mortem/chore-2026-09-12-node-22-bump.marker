@@ -1,0 +1,9 @@
+# Pre-mortem marker — 2026-09-12b-node-bump
+- date: 2026-09-12
+- goal: 2026-09-12b-node-bump
+- branch: chore/2026-09-12-node-22-bump
+- mode: light
+- lenses: [linus-torvalds, michael-feathers, michael-nygard]
+- risks: 15 total (2 medium, 13 low)
+- ledger: docs/risk-ledgers/2026-09-12b-node-bump.md
+- folded-into-plan: F1 (Node 22 build parity check) + N1 (operator environment gate mitigates) added to Step 2 verify procedure
