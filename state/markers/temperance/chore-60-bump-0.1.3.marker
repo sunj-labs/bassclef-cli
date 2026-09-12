@@ -1,0 +1,11 @@
+# Temperance marker — 0.1.3 patch bump
+
+- date: 2026-09-12
+- branch: chore/60-bump-0.1.3
+- scope-decision:
+  - right thing: cut 0.1.3 to ship the #60 --dry-run fix (merged as 81c8ed6 on main); publish via trusted publisher (configured 2026-09-12); adopters get the fix on next npm install
+  - right way: standard bump-version.mjs patch flow — CHANGELOG entry naming #60 fix + counter rename + --help update, then bump patch, commit, PR, merge, tag v0.1.3, workflow fires
+  - drift trigger: scope creeps to a MINOR bump (not warranted — no new features, just fixes + doc/text updates), or the bump attempts to fold in other unshipped work
+- in-scope: CHANGELOG [Unreleased] entry + version bump 0.1.2 → 0.1.3 + PR
+- out-of-scope: Cooper #1 silent-install adopter notice (separate ticket); unpublish @thebassclef/core (deferred); v1.5.7 substrate refresh (already shipped as #57 → #58)
+- luminaries: linus-torvalds (don't break adopters — a patch bump is the right shape for a bug fix), kent-beck (test came first via #60 PR — verify passes on 0.1.3 tag before publish), michael-nygard (release pipeline discipline — publish only after CI green + operator approval at environment gate)
