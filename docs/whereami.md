@@ -28,7 +28,8 @@ open_threads:
   - Journal drafts still in `docs/operator-private/journals/` awaiting Google Doc push (no `journal_doc_id` configured).
   - Issue #42 — extract substrate-bundled assertion to scripts/ + Tier 0 test. Standalone bug, ~25-45 turns.
   - Issues #46 + #49 (/promote candidates) still awaiting bassclef triage.
-  - Whereami schema drift — `## Last updated` section format triggers `whereami exists but last_updated field unparseable — schema non-conformance` warning from SessionStart hook. Either fix section format to match `standards/whereami-schema.md §Last updated` or file bassclef-upstream ticket if schema is too strict. Non-blocking.
+  - **#70 — bassclef-evolution: bet-doc-gate.sh false-positive on parent_bet: null / parent_roadmap: null** (filed 2026-09-12b). Substrate hook reads YAML nulls as declared parents needing citation; workaround is dropping null keys entirely.
+  - **#71 — bassclef-evolution: whereami-schema §Last updated section drift** (filed 2026-09-12b). SessionStart hook warns on the observed adopter pattern (parenthetical summary + stacked prior_session entries); reconcile schema or hook message.
 
 next_bet: wait for upstream 12e merge notification, then file cli-side one-PR init fix (reads dist/<tier>/ + copies verbatim + mirror characterization test)
 
