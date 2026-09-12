@@ -17,6 +17,8 @@
 // [x] partial state — settings.json exists, other missing → creates other, reports counts, exit 0
 // [x] --dry-run always prints per-file plan (does not depend on --verbose)
 // [x] output contains no banned words from the jargon block list
+// [ ] #60: --dry-run count equals real-run substrate count + 2 configs
+// [ ] #60: --dry-run writes nothing to substrate paths
 //
 // Deferred: running as root (uid=0) refusal — requires a uid-0 fixture,
 //   verified manually. Deferred: symlink attack on the target path —
@@ -176,10 +178,45 @@ describe('bassclef init — partial state', () => {
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
     expect(existsSync(join(workDir, 'substrate.config.md'))).toBe(true);
-    expect(r.stdout + r.stderr).toMatch(/1 created.*1 unchanged/i);
+    expect(r.stdout + r.stderr).toMatch(/1 config files created.*1 unchanged/i);
     // settings.json content preserved.
     expect(readFileSync(join(workDir, '.claude/settings.json'), 'utf8'))
       .toBe('{"prior":true}');
+  });
+});
+
+describe('bassclef init — dry-run parity with real run (#60)', () => {
+  // Regression test for bassclef-cli#60. Cold-adopter reported that
+  // `bassclef init --dry-run` printed 2 lines while the real run wrote
+  // 283 files. Root cause at src/commands/init.ts:125-127 — dry-run
+  // returned early and never invoked dispatchSubstrateCopy. This test
+  // pins the invariant: the "would create" count in dry-run output
+  // equals the manifest entry count plus the 2 config files.
+  it('would-create count equals manifest entries + 2 config files', () => {
+    // Read the bundled manifest that ships with this repo's substrate.
+    const manifestPath = join(REPO_ROOT, 'substrate/.bassclef/lite-manifest.json');
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+      entries: Array<{ path: string }>;
+    };
+    const expectedCount = manifest.entries.length + 2; // + settings.json + substrate.config.md
+
+    const r = runCli(['--dry-run'], { cwd: workDir });
+    expect(r.status).toBe(0);
+
+    const wouldCreateLines = (r.stdout + r.stderr)
+      .split('\n')
+      .filter((line) => /would create/i.test(line));
+    expect(wouldCreateLines.length).toBe(expectedCount);
+  });
+
+  it('writes nothing to substrate paths under dry-run', () => {
+    const r = runCli(['--dry-run'], { cwd: workDir });
+    expect(r.status).toBe(0);
+    // No substrate directories should exist after dry-run.
+    expect(existsSync(join(workDir, '.claude/rules'))).toBe(false);
+    expect(existsSync(join(workDir, '.claude/hooks'))).toBe(false);
+    expect(existsSync(join(workDir, '.claude/skills'))).toBe(false);
+    expect(existsSync(join(workDir, 'standards'))).toBe(false);
   });
 });
 

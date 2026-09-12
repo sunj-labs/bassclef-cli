@@ -123,12 +123,17 @@ export function runInit(argv: readonly string[]): number {
   ];
 
   if (args.dryRun) {
-    return runDryRun(plans);
+    runDryRun(plans);
+    // Per bassclef-cli#60: dry-run must include the substrate copy step
+    // so its file count matches the real run. copySubstrate already
+    // supports dryRun; we just thread the flag through.
+    dispatchSubstrateCopy(targetDir, args.force, args.verbose, true);
+    return 0;
   }
 
   const exitCode = runReal(plans, args.force, args.verbose, targetDir);
   if (exitCode === 0) {
-    dispatchSubstrateCopy(targetDir, args.force, args.verbose);
+    dispatchSubstrateCopy(targetDir, args.force, args.verbose, false);
   }
   return exitCode;
 }
@@ -143,10 +148,15 @@ export function runInit(argv: readonly string[]): number {
 // Nygard fail-with-fix: the error message names the cause + the cure
 // (reinstall or file an issue). Exit 2 so `bassclef init` reports
 // nonzero to the shell and the adopter sees the message.
-function dispatchSubstrateCopy(targetDir: string, force: boolean, verbose: boolean): void {
+function dispatchSubstrateCopy(
+  targetDir: string,
+  force: boolean,
+  verbose: boolean,
+  dryRun: boolean
+): void {
   let result;
   try {
-    result = copySubstrate(targetDir, { force });
+    result = copySubstrate(targetDir, { force, dryRun });
   } catch (e) {
     const err = e as Error;
     process.stderr.write(
@@ -158,6 +168,23 @@ function dispatchSubstrateCopy(targetDir: string, force: boolean, verbose: boole
     );
     process.exit(2);
   }
+
+  // Dry-run branch — print "would create" per manifest entry so the
+  // preview matches the real footprint. Per bassclef-cli#60.
+  if (dryRun) {
+    const wouldCopy = result.wouldCopy ?? [];
+    for (const relativePath of wouldCopy) {
+      const targetPath = join(targetDir, relativePath);
+      process.stdout.write(`  ${'would create'.padEnd(14)} ${targetPath}\n`);
+    }
+    if (wouldCopy.length > 0) {
+      process.stdout.write(
+        `bassclef init: ${wouldCopy.length} substrate files would be copied.\n`
+      );
+    }
+    return;
+  }
+
   if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
     return;
   }
@@ -176,6 +203,12 @@ function dispatchSubstrateCopy(targetDir: string, force: boolean, verbose: boole
   if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
   if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
   process.stdout.write(`bassclef init: ${parts.join(', ')}.\n`);
+  // Per bassclef-cli#60: print the grand total so the reader sees one
+  // number that matches the on-disk footprint (config + substrate).
+  const grandTotal = 2 + result.copied.length; // + settings.json + substrate.config.md
+  process.stdout.write(
+    `bassclef init: ${grandTotal} files total (2 config + ${result.copied.length} substrate).\n`
+  );
   if (verbose && result.erroredMessages) {
     for (const msg of result.erroredMessages) {
       process.stderr.write(`  substrate: ${msg}\n`);
@@ -300,7 +333,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
 
   if (anyRefused && created > 0) {
     process.stdout.write(
-      `bassclef init: ${created} created, ${unchanged} unchanged. Pass --force to overwrite.\n`
+      `bassclef init: ${created} config files created, ${unchanged} unchanged. Pass --force to overwrite.\n`
     );
     // RFC N4 — folder guidance final line so Sam knows what to commit.
     process.stdout.write(
@@ -310,7 +343,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     return 0;
   }
 
-  process.stdout.write(`bassclef init: ${created} created, ${unchanged} unchanged.\n`);
+  process.stdout.write(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
   // RFC N4 — folder guidance final line so Sam knows what to commit.
   process.stdout.write(
     `bassclef init: your substrate lives under .claude/. ` +
@@ -384,6 +417,16 @@ export function usage(): string {
     '  .claude/settings.json          Claude Code settings (minimal, opt-in blocks)',
     '  substrate.config.md            Bassclef project manifest',
     '  .bassclef/init.manifest.json   Record of what init wrote (used by sync)',
+    '',
+    '  Plus the bundled substrate tree (~280 files):',
+    '  .claude/{agents,hooks,luminaries,rules,skills}/',
+    '  standards/, templates/, scripts/, lib/, presence/install/',
+    '  architecture/decisions/',
+    '  AGENTS.md, CLAUDE-lite.md, README.md, CONTRIBUTING.md,',
+    '  SECURITY.md, CODE_OF_CONDUCT.md',
+    '',
+    '  Run with --dry-run first to preview the full file list before',
+    '  writing anything to disk.',
     '',
   ].join('\n');
 }
