@@ -199,7 +199,12 @@ jobs:
           ref: ${{ needs.checks.outputs.tag }}
           fetch-depth: 0
 
-      - name: Setup Node 20 with npm provenance
+      - name: Setup Node 20 with npm registry
+        # `registry-url` tells setup-node to write .npmrc with
+        #   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+        # The publish step's env: NODE_AUTH_TOKEN then feeds npm CLI.
+        # Same shape whether the token comes from a classic NPM_TOKEN
+        # (today) or trusted publisher OIDC (once #62 clears).
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -252,15 +257,30 @@ jobs:
 
       - name: Publish to npm
         # ADR-004 §Ordered steps 12:
-        #   --provenance    generates the attestation from the OIDC token
         #   --ignore-scripts  belt-and-suspenders on top of ADR-001's
         #                     no-prepublishOnly + no-postinstall discipline
-        # Trusted publisher config on npmjs.com replaces NPM_TOKEN entirely.
+        #
+        # NPM_TOKEN fallback path — per bassclef-cli#63.
+        # npm's trusted-publisher setup UI returns 404 for
+        # @thebassclef/lite (see #62 for diagnosis + npm support ticket
+        # template). Until #62 clears, publish auths via a classic
+        # fine-grained NPM_TOKEN (Publish permission on @thebassclef/lite).
+        # NODE_AUTH_TOKEN is the env var setup-node writes into .npmrc
+        # when registry-url is set on the setup-node step above.
+        #
+        # `--provenance` deliberately dropped here. Provenance attestation
+        # needs OIDC via trusted publisher. When #62 lands:
+        #   1. Restore --provenance on both branches below.
+        #   2. Drop the NODE_AUTH_TOKEN env block.
+        #   3. Delete the NPM_TOKEN GitHub Actions secret.
+        #   4. Revoke the npm token at npmjs.com/settings/kingofrock/tokens.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ "${{ needs.checks.outputs.prerelease }}" = "true" ]; then
-            npm publish --provenance --ignore-scripts --tag next
+            npm publish --ignore-scripts --tag next
           else
-            npm publish --provenance --ignore-scripts --tag latest
+            npm publish --ignore-scripts --tag latest
           fi
 
       - name: Post-publish confirmation

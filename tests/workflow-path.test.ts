@@ -75,6 +75,42 @@ describe('workflow path invariant (ADR-004)', () => {
     expect(publishBlock).toContain('environment: npm-publish');
     expect(checksBlock).not.toContain('environment:');
   });
+
+  // Per bassclef-cli#63 — NPM_TOKEN fallback while trusted publisher
+  // is blocked at npm's setup UI (see #62). These tests pin the exact
+  // shape of the auth path so a future refactor cannot silently drop
+  // NPM_TOKEN before trusted publisher is back. When #62 clears, all
+  // three assertions get reversed and provenance restored.
+
+  it('#63: the publish step reads NODE_AUTH_TOKEN from NPM_TOKEN secret', () => {
+    const yaml = readFileSync(WORKFLOW_PATH, 'utf8');
+    // Match on the exact env binding — no whitespace tolerance in the
+    // secret name so a typo like NPMTOKEN would fail here.
+    expect(yaml).toContain('NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}');
+  });
+
+  it('#63: --provenance is off in publish commands until trusted publisher clears', () => {
+    // Provenance needs OIDC via trusted publisher. Adding it back before
+    // #62 clears sends the publish to a 404. The comment block in the
+    // workflow explains the reversal steps for the day #62 lands.
+    const yaml = readFileSync(WORKFLOW_PATH, 'utf8');
+    const publishBlock = extractJobBlock(yaml, 'publish');
+    // Extract just the executable lines (strip comments) so the reversal
+    // steps documented in comments do not false-trip the guard.
+    const executable = publishBlock
+      .split('\n')
+      .filter((line) => !/^\s*#/.test(line))
+      .join('\n');
+    expect(executable).not.toContain('--provenance');
+  });
+
+  it('#63: the deferred-provenance state cites the diagnosis ticket', () => {
+    // A future reader must see WHY provenance is off. The comment must
+    // reference #62 so the reversal path is discoverable from the
+    // workflow file alone.
+    const yaml = readFileSync(WORKFLOW_PATH, 'utf8');
+    expect(yaml).toMatch(/#62/);
+  });
 });
 
 function extractPermissionsBlock(yaml: string): string {
