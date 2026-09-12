@@ -75,17 +75,17 @@ jobs:
           ref: ${{ steps.resolve.outputs.tag }}
           fetch-depth: 1
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Upgrade npm to 11
-        # Iteration e cure — Node 20 ships npm 10.x which silently omits
-        # trusted publisher headers. Publish workflow pins npm 11 for the
-        # same reason. Harness mirrors that pin so subprocess behavior
-        # matches shipped release conditions.
+        # Iteration e cure — the runner's bundled npm may be older than
+        # 11.5.1, which trusted publisher OIDC needs. Publish workflow
+        # pins npm 11 for the same reason. Harness mirrors that pin so
+        # subprocess behavior matches shipped release conditions.
         run: npm install -g npm@11
 
       - name: Install dependencies

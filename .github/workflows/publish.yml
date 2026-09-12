@@ -77,10 +77,10 @@ jobs:
           # Fetch full history so the ancestor check in validate-tag works.
           fetch-depth: 0
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install with --ignore-scripts
@@ -199,22 +199,28 @@ jobs:
           ref: ${{ needs.checks.outputs.tag }}
           fetch-depth: 0
 
-      - name: Setup Node 20 with npm provenance
+      - name: Setup Node 22 with npm provenance
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Upgrade npm for trusted publisher support
-        # Node 20 ships with npm 10.x. Trusted publishers via OIDC need
-        # npm 11.5.1+. Without this, the OIDC token mints cleanly (sigstore
-        # accepts the signing request) but registry.npmjs.org returns 404
-        # on the PUT because the older CLI does not send the trusted
+        # Trusted publishers via OIDC need npm 11.5.1+. The runner's
+        # bundled npm may be older. Without this upgrade, the OIDC token
+        # mints cleanly (sigstore accepts the signing request) but
+        # registry.npmjs.org returns 404 on the PUT because the older
+        # CLI does not send the trusted
         # publisher headers. Five v0.0.2 attempts confirmed the pattern.
         #
-        # Pinned to npm@11 (not @latest) — npm@12 requires node >= 22.22.2,
-        # incompatible with the node 20 this workflow runs. Run 31687663177
-        # hit EBADENGINE trying to install npm@12.0.2 on node@v20.20.2.
+        # Pinned to npm@11 (not @latest) — known-good since iteration e.
+        # npm@11.5.1+ carries the OIDC trusted-publisher headers. Moving
+        # to @latest or npm@12 is a separate concern; keep the pin stable
+        # across the Node 20 → 22 bump so the Node bump is the only
+        # variable in this PR. Run 31687663177 originally forced this
+        # pin (EBADENGINE on npm@12.0.2 vs node@v20.20.2 under old Node
+        # 20 runner); Node 22 removes that specific constraint but the
+        # pin still serves reproducibility.
         run: npm install -g npm@11
 
       - name: Install with --ignore-scripts
