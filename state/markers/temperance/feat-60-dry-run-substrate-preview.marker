@@ -1,0 +1,11 @@
+# Temperance marker — bassclef-cli#60 fix
+
+- date: 2026-09-12
+- branch: feat/60-dry-run-substrate-preview
+- scope-decision:
+  - right thing: fix --dry-run to match real-run footprint (ticket #60 primary)
+  - right way: thread dryRun through dispatchSubstrateCopy; use existing copySubstrate dryRun path
+  - drift trigger: scope creeps beyond ticket #60 to Option C (split init/substrate install), or grows a new module
+- in-scope: primary (dry-run wiring) + secondary (unified counter) + tertiary (--help text)
+- out-of-scope: Option C command split; Option E shadow-write; init.manifest.json swallow-catch (no defect); Cooper #1 silent-install adopter notice (separate ticket)
+- luminaries: Ousterhout (deep module — one code path for both dry-run and real) + Feathers (characterization test pins dry-run count = real-run count) + Cooper (weekend adopter trusts --dry-run before real run)
