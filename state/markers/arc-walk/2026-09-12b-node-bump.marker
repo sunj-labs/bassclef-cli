@@ -1,0 +1,9 @@
+# Thread-walk marker — 2026-09-12b-node-bump
+- date: 2026-09-12
+- goal: 2026-09-12b-node-bump
+- branch: chore/2026-09-12-node-22-bump
+- parent_bet: null (standalone maintenance item)
+- ancestors_read: none — no parent chain to walk
+- drivers surfaced from whereami L26 open thread + GHA deprecation warning on v0.1.3 publish run
+- no acceptance items open in ancestor threads (none exist)
+- no out_of_scope conflicts with ancestor scope (none exist)
