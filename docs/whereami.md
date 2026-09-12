@@ -30,6 +30,7 @@ open_threads:
   - Issues #46 + #49 (/promote candidates) still awaiting bassclef triage.
   - **#70 — bassclef-evolution: bet-doc-gate.sh false-positive on parent_bet: null / parent_roadmap: null** (filed 2026-09-12b). Substrate hook reads YAML nulls as declared parents needing citation; workaround is dropping null keys entirely.
   - **#71 — bassclef-evolution: whereami-schema §Last updated section drift** (filed 2026-09-12b). SessionStart hook warns on the observed adopter pattern (parenthetical summary + stacked prior_session entries); reconcile schema or hook message.
+  - **#72 — bassclef-evolution: /promote ingest hook misses bassclef-cli** (filed 2026-09-12b; mirrored at bassclef-upstream#1612). Two-part gap — bassclef-cli not in child_repos list AND hook repo-name check fails on bassclef-upstream sessions. Motivated by 8 open bassclef-cli promote tickets sitting 13+ days with zero triaged.
 
 next_bet: wait for upstream 12e merge notification, then file cli-side one-PR init fix (reads dist/<tier>/ + copies verbatim + mirror characterization test)
 
