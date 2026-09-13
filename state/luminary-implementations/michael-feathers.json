@@ -4,8 +4,9 @@
   "referenced_by_files": [
     "docs/promotes/2026-08-11-traceability-subsystem.md",
     "docs/iteration-bets/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md",
-    "docs/risk-ledgers/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md"
+    "docs/risk-ledgers/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md",
+    "docs/next-session-plan-2026-09-13-phase-3-init-walker.md"
   ],
-  "last_scanned": "2026-09-13T00:53:57Z",
+  "last_scanned": "2026-09-13T01:11:53Z",
   "scanner_version": "1.0"
 }
