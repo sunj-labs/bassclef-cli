@@ -79,6 +79,40 @@ Four commits on `feat/cli-73-phase-3-init-walker`:
 
 **Publish 1.0.0 dispatch** — waits on operator morning greenlight. Cold-adopter-1 profile smoke verifies end-to-end before dispatch.
 
+## Addendum — Phase 4 findings + 1.0.0 blocked (2026-09-13T12:15Z)
+
+Session extended past initial closeout. Phase 4-agent tarball smoke passed clean. Operator dispatched 1.0.0 publish to npm — release cut as `v1.0.0` at `059105e`, checks GREEN in 17s, publish job approved via environment gate, live on npm at latest tag.
+
+**Phase 4-operator cold-adopter smoke revealed the upstream gap.** Fresh cold-adopter-1 profile, `npm install -g @thebassclef/lite`, `bassclef init` (banner PASS), opened Claude Code — 24 hook-not-found errors per prompt. Cold-adopter's own diagnose surfaced 6 findings:
+
+1. Primary — dist/lite/ ships wiring but not the 24 wired hook binaries. Root cause: `scripts/build-adopter-tree.sh` at v0.39.0 is self-documented MVP; full substrate copy deferred to a follow-on.
+2. Tier drift across 3 sources (.bassclef-source.json = lite, wiring manifest = standard, env = standard)
+3. `@.claude/bassclef-orientation.md` import target absent from dist/lite/
+4. whereami path mismatch (template refs `docs/whereami.md`, init writes `./whereami.md`)
+5. `init.manifest.json` records only substrate.config.md — walker files unrecorded (cli-side choice, Step 6.5)
+6. settings.json `$schema` points at wiring-manifest schema (wrong target)
+
+**Luminary POV** on the cure decision (via `/luminary` skill, signal scoring):
+
+- Primary: @luminary linus-torvalds (adopter contract broken), @luminary hyrum-wright (observables now essential), @luminary michael-nygard (fail-loud + deprecate-with-fix-forward)
+- Complementary: @luminary john-ousterhout (deepen upstream module, not widen cli), @luminary david-parnas (tier drift = information-hiding violation), @luminary vaughn-vernon (dissent: anticorruption layer — softens under zero-adopter cost)
+- Converged verdict: **all upstream, no cli-side ACL**
+
+**Actions this session:**
+
+- Filed `bassclef-upstream#1619` — 6 findings, primary + 5 coherence gaps, evidence pasted from cold-adopter session
+- Filed `bassclef-cli#78` — 1.0.0 disposition + 1.0.1 follow-on tracker
+- Filed `bassclef-cli#77` earlier (placeholder-shape drift) — cli 1.0.0 already regex-covers both shapes as stopgap
+- Committed `059105e` (regex extension for `[Repo name]` + `<tier>` variants) — Phase 4 blocker cure before publish
+- Committed `4ac956d` (whereami flip — next_bet points at upstream wait + deprecate step)
+- Prepared prompt for bassclef-upstream session to process #1619 + 6 open bassclef-web promotes (#325, #328, #337, #339, #346, #347)
+
+**Pending operator step:** `npm deprecate '@thebassclef/lite@1.0.0' '<msg>'` (Touch ID required)
+
+**Next pickup:** wait on bassclef-upstream#1619. When upstream v0.40 (or the tag that lands the cure) ships, cli 1.0.1 = pin new upstream tag + re-run Phase 4-operator smoke + publish.
+
+**Final session totals:** 5 substantive commits on main (Phase 3 goal doc + RED test + walker + substrate/ drop + fix), 1 PR (#76) merged as `c974f33`, 1 npm publish (1.0.0), 3 tickets filed (cli#77, cli#78, upstream#1619). Session ran ~120 turns end-to-end.
+
 ## Refs
 
 - Closes bassclef-cli#73 (Phase 3 code + Phase 4 tarball smoke)
