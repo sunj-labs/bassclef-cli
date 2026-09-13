@@ -23,7 +23,7 @@
 //   4 — wiring manifest missing (ADR-055 D4)
 //   5 — wiring manifest schema major incompatible (ADR-055 D4)
 
-import { existsSync, lstatSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
@@ -38,6 +38,7 @@ import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH } from '../lib/manifest-io.js';
 import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
+import { HOOKS_SUBPATH } from '../lib/paths.js';
 
 // Static tier for @thebassclef/lite. When standard + ultra packages
 // ship, this resolves from the installed package.json `name` field
@@ -110,10 +111,20 @@ export function runInit(argv: readonly string[]): number {
     throw e;
   }
 
+  // cli 1.0.1 upgrade advisory per RFC-0002 L1 fold. Fires when a
+  // 1.0.0-shaped manifest exists (no schema_version field OR < 2).
+  // If the adopter confirms (or passes --yes), init proceeds as though
+  // --force was set — the confirmation IS the consent to overwrite.
+  const advisoryOutcome = maybeEmitUpgradeAdvisory(targetDir, args.yes);
+  if (advisoryOutcome === 'refused') return 1;
+  const upgradeApproved = advisoryOutcome === 'upgrade-approved';
+
   // Manifest-exists refusal per ADR-003. Init refuses to re-baseline
   // a project that already has a manifest unless --force. Sync is the
   // path for updates; init is the path for greenfield bootstrap.
-  if (!args.force && !args.dryRun) {
+  // The upgrade path from cli 1.0.0 → 1.0.1 (advisory confirmed) also
+  // bypasses this refusal — the confirmation IS the consent.
+  if (!args.force && !args.dryRun && !upgradeApproved) {
     const manifestPath = join(targetDir, MANIFEST_RELATIVE_PATH);
     if (existsSync(manifestPath)) {
       process.stderr.write(
@@ -140,13 +151,63 @@ export function runInit(argv: readonly string[]): number {
 
   if (args.dryRun) {
     runDryRun(plans);
-    return dispatchSubstrateCopy(targetDir, args.force, args.verbose, true);
+    return dispatchSubstrateCopy(targetDir, args.force || upgradeApproved, args.verbose, true, args.allowRoot, args.json);
   }
 
   // runReal writes the cli-composed plans (substrate.config.md) then
   // dispatches the walker for dist/lite/. Manifest is written last with
   // the union of both results so `bassclef sync` sees every managed file.
-  return runReal(plans, args.force, args.verbose, targetDir);
+  return runReal(plans, args.force || upgradeApproved, args.verbose, targetDir, args.allowRoot, args.json);
+}
+
+/**
+ * Emit the cli 1.0.1 upgrade advisory when a 1.0.0-shaped manifest is
+ * present at the target. Returns 'ok' when init should proceed, 'refused'
+ * when the adopter said no.
+ *
+ * Cli 1.0.0 wrote nothing to the HOOKS_SUBPATH under home. Cli 1.0.1 does. Adopters
+ * upgrading in place see new files at user scope. Torvalds L1 fold —
+ * name the behavior change explicitly + wait for confirm.
+ *
+ * Non-interactive path: --yes passes silently. Interactive path: prints
+ * the advisory + reads one line from stdin. Empty or 'y' → proceed.
+ * Any other line → refuse (exit 1).
+ */
+function maybeEmitUpgradeAdvisory(targetDir: string, yes: boolean): 'ok' | 'refused' | 'upgrade-approved' {
+  const manifestPath = join(targetDir, MANIFEST_RELATIVE_PATH);
+  if (!existsSync(manifestPath)) return 'ok';
+  let manifest: { schema_version?: unknown };
+  try {
+    manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  } catch {
+    return 'ok';
+  }
+  // Manifest already at v2 (or later) — no upgrade to announce.
+  if (typeof manifest.schema_version === 'number' && manifest.schema_version >= 2) {
+    return 'ok';
+  }
+  process.stdout.write(
+    'bassclef init: cli 1.0.1 introduces user-scope hook installation at ' +
+      `~/${HOOKS_SUBPATH}. cli 1.0.0 did not write there.\n`
+  );
+  if (yes) return 'upgrade-approved';
+  process.stdout.write('bassclef init: continue? (y/N) ');
+  const answer = readOneLineFromStdin();
+  if (answer === '' || answer === 'y' || answer === 'Y') return 'upgrade-approved';
+  process.stdout.write('bassclef init: aborted by adopter.\n');
+  return 'refused';
+}
+
+function readOneLineFromStdin(): string {
+  // Minimal read — one syscall, no full readline dependency. Returns
+  // empty string on EOF (piped input closed) so CI paths default to 'ok'.
+  try {
+    const buf = Buffer.alloc(256);
+    const n = require('node:fs').readSync(0, buf, 0, 256, null);
+    return n > 0 ? buf.slice(0, n).toString('utf8').trim() : '';
+  } catch {
+    return '';
+  }
 }
 
 
@@ -158,7 +219,9 @@ function dispatchSubstrateCopy(
   targetDir: string,
   force: boolean,
   verbose: boolean,
-  dryRun: boolean
+  dryRun: boolean,
+  allowRoot: boolean,
+  json: boolean
 ): number {
   const substitute = makePlaceholderTransform(targetDir);
   let result;
@@ -167,6 +230,7 @@ function dispatchSubstrateCopy(
       force,
       dryRun,
       transform: substitute,
+      allowRoot,
     });
   } catch (e) {
     if (e instanceof CopyFailure) {
@@ -227,15 +291,49 @@ function dispatchSubstrateCopy(
   process.stdout.write(
     `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
   );
-  // ADR-055 D5 hook-count banner — grade-8 message per Cooper.
-  process.stdout.write(
-    `bassclef init: ${result.hookCount} hooks armed (${RESOLVED_TIER} tier).\n`
+  // Norman N1 fold — banner names installed HOOK count + per-scope breakdown.
+  // The declared count comes from settings.json (result.hookCount).
+  // The copied count must be counted from HOOK files only, not total
+  // copied files (which include settings.json + templates + manifest).
+  const copiedHookEntries = result.copiedEntries.filter(
+    (e) => e.path.startsWith(HOOKS_SUBPATH) && e.path.endsWith('.sh')
   );
+  const copiedCount = copiedHookEntries.length;
+  const declaredCount = result.hookCount;
+  const failedCount = result.refused.length + result.errored.length;
+  const userScope = copiedHookEntries.filter((e) => e.scope === 'user').length;
+  const projectScope = copiedHookEntries.filter((e) => e.scope === 'project').length;
+  const scopeSuffix = userScope + projectScope > 0
+    ? ` ${projectScope} in <repo>/${HOOKS_SUBPATH.replace(/\/$/, '')}, ${userScope} in ~/${HOOKS_SUBPATH.replace(/\/$/, '')}.`
+    : '';
+  if (failedCount > 0) {
+    process.stdout.write(
+      `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix} ` +
+        `${failedCount} failed — see errors above. Rerun bassclef init to retry.\n`
+    );
+  } else {
+    process.stdout.write(
+      `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix}\n`
+    );
+  }
+  // H1 fold — --json emits structured stderr line adopter tooling can parse.
+  if (json) {
+    const report = {
+      copied: copiedCount,
+      declared: declaredCount,
+      failed: failedCount,
+      scope_counts: { user: userScope, project: projectScope },
+      tier: RESOLVED_TIER,
+    };
+    process.stderr.write(JSON.stringify(report) + '\n');
+  }
   if (verbose && result.erroredMessages) {
     for (const msg of result.erroredMessages) {
       process.stderr.write(`  substrate: ${msg}\n`);
     }
   }
+  // N5 fold — return non-zero on count mismatch so scripts detect it.
+  if (copiedCount !== declaredCount) return 2;
   return result.errored.length > 0 ? 2 : 0;
 }
 
@@ -292,7 +390,7 @@ function runDryRun(plans: readonly FilePlan[]): number {
   return 0;
 }
 
-function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string): number {
+function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string, allowRoot: boolean, json: boolean): number {
   const results: FileResult[] = [];
   let anyRefused = false;
   let anyError = false;
@@ -387,7 +485,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   // files stay OUT of the init manifest — sync manages cli-composed
   // templates (currently substrate.config.md); walker files refresh via
   // `bassclef init --force`.
-  const walkerExit = dispatchSubstrateCopy(targetDir, force, verbose, false);
+  const walkerExit = dispatchSubstrateCopy(targetDir, force, verbose, false, allowRoot, json);
 
   // Manifest reflects cli-composed writes only. Walker success or
   // failure does not change this.

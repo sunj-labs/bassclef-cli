@@ -14,6 +14,17 @@ export interface InitArgs {
   allowRoot: boolean;
   allowAnyDir: boolean;
   dir: string | undefined;
+  /**
+   * Skip the 1.0.0 → 1.0.1 upgrade advisory prompt. Non-interactive
+   * shells + CI runners set this. Added cli 1.0.1 per RFC-0002 L1 fold.
+   */
+  yes: boolean;
+  /**
+   * Emit a machine-readable JSON summary line on stderr alongside the
+   * human banner. Adopter tooling parses this stable shape instead of
+   * screen-scraping the prose. Added cli 1.0.1 per RFC-0002 H1 fold.
+   */
+  json: boolean;
 }
 
 const DEFAULTS: InitArgs = {
@@ -23,6 +34,8 @@ const DEFAULTS: InitArgs = {
   allowRoot: false,
   allowAnyDir: false,
   dir: undefined,
+  yes: false,
+  json: false,
 };
 
 export class ArgvError extends Error {
@@ -56,6 +69,16 @@ export function parseInitArgs(argv: readonly string[]): InitArgs {
     }
     if (token === '--allow-any-dir') {
       out.allowAnyDir = true;
+      i += 1;
+      continue;
+    }
+    if (token === '--yes') {
+      out.yes = true;
+      i += 1;
+      continue;
+    }
+    if (token === '--json') {
+      out.json = true;
       i += 1;
       continue;
     }

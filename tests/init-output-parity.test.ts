@@ -16,7 +16,7 @@
 // [x] adopter whereami.md exists (placeholders substituted)
 // [x] adopter .bassclef-source.json exists (placeholders substituted)
 // [x] adopter .gitignore exists (verbatim)
-// [x] hook-count banner appears in stdout with shape "N hooks armed (lite tier)"
+// [x] hook-count banner appears in stdout with shape "Installed N of M hooks (lite tier)" (RFC-0002 N1 fold — Norman shape)
 // [x] N in banner matches hook count in copied settings.json
 // [x] adopter dir mirrors dist/lite/ shape — no extra dist/lite paths missing
 //
@@ -112,10 +112,10 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     expect(existsSync(join(workDir, '.gitignore'))).toBe(true);
   });
 
-  it('prints hook-count banner in shape "N hooks armed (lite tier)" per ADR-055 D5', () => {
+  it('prints hook-count banner in shape "Installed N of M hooks (lite tier)" per RFC-0002 N1 fold', () => {
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
-    expect(r.stdout).toMatch(/\d+ hooks armed \(lite tier\)/);
+    expect(r.stdout).toMatch(/Installed \d+ of \d+ hooks \(lite tier\)/);
   });
 
   it('banner N matches hook count across all events in copied settings.json', () => {
@@ -123,7 +123,7 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     expect(r.status).toBe(0);
 
     // Extract N from the banner.
-    const match = r.stdout.match(/(\d+) hooks armed \(lite tier\)/);
+    const match = r.stdout.match(/Installed (\d+) of (\d+) hooks \(lite tier\)/);
     expect(match).not.toBeNull();
     const banneredN = parseInt(match![1], 10);
 

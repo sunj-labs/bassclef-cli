@@ -384,6 +384,10 @@ function copyOne(
       }
       if (e.kind === 'SymlinkRefused') {
         result.refused.push(adopterRelPath);
+        // Surface the readlink target on stderr per N2 fold so the
+        // adopter can decide (delete symlink vs preserve). The message
+        // carries the "points to: X" clause per write-safely.ts.
+        process.stderr.write(`bassclef init: ${e.message}\n`);
         return 'refused';
       }
       const message =

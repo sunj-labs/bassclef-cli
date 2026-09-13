@@ -86,7 +86,7 @@ describe('init banner — Norman shape (N1 council fold)', () => {
 
 describe('init manifest — schema v2 (L2 + F6 fold)', () => {
   it('writes manifest with schema_version=2 at top level', () => {
-    runCli(['--dir', workDir]);
+    runCli(['--dir', workDir, '--allow-any-dir']);
     const manifest = JSON.parse(
       readFileSync(join(workDir, '.bassclef/init.manifest.json'), 'utf8')
     );
@@ -94,7 +94,7 @@ describe('init manifest — schema v2 (L2 + F6 fold)', () => {
   });
 
   it('writes per-entry scope field on hook entries', () => {
-    runCli(['--dir', workDir]);
+    runCli(['--dir', workDir, '--allow-any-dir']);
     const manifest = JSON.parse(
       readFileSync(join(workDir, '.bassclef/init.manifest.json'), 'utf8')
     );
