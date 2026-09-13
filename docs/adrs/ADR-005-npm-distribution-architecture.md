@@ -8,6 +8,15 @@ accepted: 2026-08-08
 accepted_via: shipped across PRs #1, #3, #4, #5, #7. This ADR pins the arc-level shape those PRs implement.
 supersedes: null
 superseded_by: null
+extended_by: [ADR-009]
+partial_supersedes: null
+amendments:
+  - date: 2026-08-12
+    scope: pass 1 — pivot to Model C direction
+  - date: 2026-08-12
+    scope: pass 2 — Model C extraction contract confirmed via bassclef-upstream ADR-051
+  - date: 2026-09-13
+    scope: goal 2026-09-13 cli#68 Phase 1 Step 3 — Sam demo acceptance criterion rewritten per ADR-055 D5 hook-count banner; two-road split preserved
 authoring_luminaries:
   primary: [john-ousterhout, linus-torvalds]
   supporting: [alan-cooper, saltzer-schroeder, vaughn-vernon]
@@ -208,6 +217,64 @@ The prompt sent to upstream lives in `docs/promotes/2026-08-11-traceability-subs
 - bassclef-upstream #1143 — tier manifest as contract for all tiers (open epic; anchors Vernon + Hoare + Parnas)
 - bassclef-upstream #873 sub-cure 1 — status line version tag accountability (rides #1184)
 - bassclef-cli #25 — follow-on ticket tracking the bassclef-cli-side reader changes
+
+## Amendment 2026-09-13 — Sam demo acceptance rewritten per ADR-055 D5
+
+**Scope.** The prior Sam demo acceptance criterion at `## Consequences` §Harder L99 said:
+
+> "Discovery: an adopter who installs from npm but never sets up the sync hook gets a working CLI with no substrate. That is a failure mode WU-9 acceptance testing must catch (Sam demo per bet L128)."
+
+That criterion assumed the two-road shape from the original ADR-005 Decision. Under the Model C pivot (2026-08-12 amendment pass 2 above), `@thebassclef/core` ships bundled lite substrate — Road 2 no longer applies to lite-tier adopters. The prior criterion no longer describes the shipped state.
+
+Bassclef-upstream 12e (shipped at v0.39.0 with tag `6cdff4a4`) shipped ADR-055 D5 which pins a new Sam demo acceptance criterion.
+
+**Previous acceptance criterion (kept for historical context per Torvalds L2 pre-mortem catch):**
+
+- Sam installs `@thebassclef/core` via npm; expected postcondition: "confirm sync hook set up" (WU-9 acceptance)
+- Applied to the two-road shape where Road 2 delivered substrate content separately
+
+**New acceptance criterion per ADR-055 D5:**
+
+Sam installs `@thebassclef/<tier>` via npm, runs `bassclef init`, sees the hook-count banner printed by cli init after `.claude/settings.json` writes:
+
+```
+N hooks armed (<tier> tier)
+```
+
+Where `N` is the count of hook entries in the manifest for the installed tier. `<tier>` names which tier the installed package resolved to (`lite`, `standard`, `ultra`).
+
+Sam reads the banner + sees the delta immediately. If N is 0, Sam sees N is 0 explicitly. Silent success (empty hooks + no banner) reproduces the failure this class of goals cures — the cold-adopter empty-hooks class since `@thebassclef/lite@0.1.0`.
+
+Per bassclef-upstream ADR-055 D5 + Cooper Sam persona (Sam sees the delta on the first install; no manual `.claude/settings.json` inspection required).
+
+**How the new criterion tests.**
+
+Cold-adopter smoke test per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` §Cold-adopter smoke test:
+
+```
+mkdir /tmp/cold-adopter-test
+cd /tmp/cold-adopter-test
+git init
+npm install @thebassclef/lite@<new-version>
+npx bassclef init
+# Expected: banner prints "N hooks armed (lite tier)" where N > 0
+# Expected: .claude/settings.json present + non-empty (lite-tagged hooks)
+# Expected: opens Claude Code, hooks fire at session-start
+```
+
+Feathers parity test at bassclef-upstream `.claude/hooks/tests/init-output-parity.test.sh` runs the same shape automated. Cli-side parity test lands at Phase 3 of goal 2026-09-13 cli#68.
+
+**Two-road split preserved.** The 2-road framing (Road 1 = CLI + templates via npm; Road 2 = substrate via user-scope sync hook) stays for adopters who prefer git-clone + user-scope sync. Model C adds a third path — bundled `dist/<tier>/` inside the npm package for lite / standard / ultra adopters who want one-command install. All three paths coexist per pass 2 amendment.
+
+**What this amendment does NOT change.**
+
+- Two-road split framing at `## Decision` L32-51 — Road 1 + Road 2 stay
+- Semver discipline on Road 1 — every bump deliberate
+- Publish gate at `.github/workflows/publish.yml` — trusted publisher + tag validator + andon scan
+- Namespace reservation for `@thebassclef/lite` + `@thebassclef/standard-pro` + `@thebassclef/ultra-pro`
+- Every safety invariant listed in ADR-002 + ADR-003 + ADR-004
+
+**Semver.** New acceptance criterion is additive — cli behavior gains a banner; no existing adopter behavior changes. No adopter contract breaks under this amendment. The banner ships at Phase 3 code work; this amendment names the criterion the code satisfies.
 
 ## Relationship to sibling ADRs
 
