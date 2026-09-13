@@ -8,6 +8,11 @@ accepted: 2026-08-08
 accepted_via: PR #3 merged — WU-1 scaffold shipped the decisions this ADR pins
 supersedes: null
 superseded_by: null
+amendments:
+  - date: 2026-08-11
+    scope: iteration b — no-source-shipped invariant amended for source-map exclusion at write-time
+  - date: 2026-09-13
+    scope: goal 2026-09-13b cli#25 Phase 2 Step 4 — invariant "no source shipped" extended to allow bassclef-upstream substrate content bundled at dist/<tier>/ per ADR-055 D1 and substrate/ per ADR-007 D1
 ---
 
 # ADR-001 — Pin build toolchain for @thebassclef/core — Vite (library mode) + TypeScript + Vitest
@@ -118,12 +123,22 @@ body with the frontmatter (this PR). No supersession pending.
 
 - No `prepublishOnly` script that auto-builds. Publish and build are
   separate steps (bet L98; Evil Martians 2026 guide).
-- No source shipped to npm. Only `dist/*.js`, `dist/*.cjs`,
-  `dist/*.d.ts`, `README.md`, and `LICENSE` (package.json `files`
-  explicit whitelist — no directory-bulk entries). This shape blocks
-  source-map files (`*.map`) from riding along with the dist bundle
-  even when the build emits them. Amended 2026-08-11 per
-  feat/iter-a-source-map-safety.
+- No cli source shipped to npm. Only `dist/*.js`, `dist/*.cjs`,
+  `dist/*.d.ts`, `README.md`, `LICENSE`, `substrate/**`, and
+  `dist/lite/**` (package.json `files` explicit whitelist — no
+  directory-bulk entries beyond the tightly-scoped substrate + dist/lite
+  trees). This shape blocks source-map files (`*.map`) from riding
+  along with the dist bundle even when the build emits them.
+  Amended 2026-08-11 per feat/iter-a-source-map-safety. Amended
+  2026-09-13 per goal 2026-09-13b (Phase 2) — the invariant extends to
+  allow bassclef substrate content bundled at two paths: `substrate/**`
+  (149-file walk per ADR-007 D1; Phase 1 shape) and `dist/lite/**`
+  (5-file tree per ADR-055 D1 + ADR-007 D1 amendment). Both paths
+  populate at publish time via `scripts/prepublish-bundle-substrate.mjs`
+  from a pinned sibling clone of `sunj-labs/bassclef` (public
+  downstream). Cli source under `src/` never ships. Phase 3 drops
+  `substrate/` under a MAJOR bump; `dist/lite/` becomes the sole
+  bundled substrate path.
 - Node 20 floor pinned in `engines`; refuse install below.
 - **Source-map exclusion (semver-locked from 0.0.2).** Vite `sourcemap`
   MUST be `false`, `'hidden'`, or omitted. `sourcemap: true` is
