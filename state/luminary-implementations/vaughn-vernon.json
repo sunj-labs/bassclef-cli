@@ -1,8 +1,7 @@
 {
-  "luminary_slug": "linus-torvalds",
+  "luminary_slug": "vaughn-vernon",
   "schema_version": 1,
   "referenced_by_files": [
-    "docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md",
     "docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md",
     "docs/risk-ledgers/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md"
   ],

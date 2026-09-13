@@ -1,0 +1,9 @@
+{
+  "luminary_slug": "alistair-cockburn",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md"
+  ],
+  "last_scanned": "2026-09-13T00:29:47Z",
+  "scanner_version": "1.0"
+}

@@ -4,7 +4,15 @@ name: npm install harness — Jacobson objectory-decompose (domain)
 slug: npm-install-harness-domain
 authored: 2026-08-27
 authored_by: agent
+amended: 2026-09-13
+amended_scope: |
+  Goal 2026-09-13 cli#68 Phase 1 Step 6 — add AdopterSessionSimulator object
+  (7th entity) per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md`
+  §Jacobson BCE + §GRASP verbatim. V3 pre-mortem catch: quote source verbatim; no
+  paraphrasing. Simulates Sam's post-init session-start; verb "verify hooks fire
+  post-init"; BCE class Boundary; GRASP role Indirection.
 bet: docs/iteration-bets/2026-08-27-iteration-i-npm-install-harness.md
+goal: docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md
 step: 1
 prep_source: docs/next-longrun-prep-2026-08-13-npm-install-harness.md
 luminaries:
@@ -16,6 +24,8 @@ luminaries:
     Steps 2-3 (fully-dressed UC + walking skeleton) but Prater owns Step 1's
     object shape. Jacobson supports because this IS his method — the whole
     /objectory-decompose skill honors *Object-Oriented Software Engineering* (1992).
+    2026-09-13 amendment inherits the same lens set; Jacobson supports the
+    AdopterSessionSimulator BCE + GRASP classification per coord doc.
 ---
 
 # npm install harness — Jacobson objectory-decompose (domain)
@@ -124,6 +134,33 @@ Non-responsibilities:
 - Does NOT own multiple scenarios (the test file spins up two HarnessRun instances)
 - Does NOT clean up (Fixture owns; HarnessRun delegates)
 
+### 7. AdopterSessionSimulator (added 2026-09-13 per coord doc)
+
+New object added at Phase 1 Step 6 of goal 2026-09-13 cli#68. Per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` §Jacobson BCE (verbatim):
+
+> **New object per cli#68 body:** `AdopterSessionSimulator` — verb: `verify hooks fire post-init`. BCE class: Boundary (simulates the harness from Feathers' end).
+
+Simulates Sam's post-init session-start behavior. Given a Fixture with a completed `bassclef init` run, spins up a Claude Code session context (mock or real per test-scenario budget) and verifies that hooks named in the just-written `.claude/settings.json` fire at session-start.
+
+Bridge between the harness's install verification (Steps 1-6 existing objects) and the ADR-055 D5 hook-count banner acceptance criterion. Without this object, the harness verifies "cli install ran + `bassclef init` exited 0"; with this object, the harness verifies "hooks armed by init actually fire at session-start" — the postcondition Sam cares about per Cooper Sam persona.
+
+Responsibilities:
+
+- Read the just-written `.claude/settings.json` from Fixture's temp dir
+- Simulate Claude Code SessionStart event; invoke each PreToolUse / PostToolUse / SessionStart / Stop / UserPromptSubmit hook listed in settings
+- Capture per-hook fire outcome (fired / errored / silent)
+- Verify hook count matches the ADR-055 D5 banner value cli printed
+- Report per-hook detail + aggregate outcome to VerificationResult
+
+Non-responsibilities:
+
+- Does NOT install (delegates to InstallScope)
+- Does NOT invoke bassclef init (delegates to CliInvocation)
+- Does NOT own the temp dir (Fixture owns)
+- Does NOT judge overall run pass / fail (delegates to VerificationResult; produces per-hook detail as input)
+
+Ships at Phase 3 when the init walker code lands. Phase 1 (this decomposition amendment) names the object; Phase 3 authors the code + tests.
+
 ## Actors (verb subjects)
 
 Per Jacobson, actors are agents outside the system that trigger use cases.
@@ -169,8 +206,26 @@ Per Jacobson's *Object-Oriented Software Engineering* (1992). Each object gets o
 | CliInvocation | **Boundary** | — | Boundary to the installed CLI process. Pure boundary object. |
 | VerificationResult | **Entity** | — | Pure data + rule application; no external interaction. |
 | HarnessRun | **Control** | — | Orchestrates the pipeline; owns sequencing and error propagation. No direct external interaction (delegates to boundary objects). |
+| **AdopterSessionSimulator** | **Boundary** | — | Boundary to the simulated Claude Code session-start event; verb "verify hooks fire post-init" (added 2026-09-13 per coord doc §Jacobson BCE verbatim). |
 
-Pattern reading — 4 boundary objects + 1 control + 1 entity. High boundary count matches the harness's job (verifying interaction with external systems: npm, filesystem, subprocess). Control-to-boundary ratio 1:4 is expected for characterization-test infrastructure per Feathers *Working Effectively with Legacy Code* Ch 13 (test seams).
+Pattern reading — 5 boundary objects + 1 control + 1 entity. High boundary count matches the harness's job (verifying interaction with external systems: npm, filesystem, subprocess). Control-to-boundary ratio 1:4 is expected for characterization-test infrastructure per Feathers *Working Effectively with Legacy Code* Ch 13 (test seams).
+
+## GRASP roles (amended 2026-09-13)
+
+Per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` §GRASP (verbatim):
+
+| Object | GRASP role | Why |
+|---|---|---|
+| `WiringManifest` | Information Expert | Owns the tier-classification data cli needs |
+| `WiringWalker` | Controller | Coordinates read-manifest + walk-tree + call-writer |
+| `SettingsWriter` | Creator | Instantiates `.claude/settings.json` from filtered entries |
+| `AdopterFileCopier` | Pure Fabrication | Atomic write concern factored out of walker |
+| `BannerPrinter` | Low Coupling | Isolates stdout side-effect from control flow |
+| **`AdopterSessionSimulator`** | **Indirection** | **Between init postcondition and Feathers parity test** |
+
+Note — the coord doc's GRASP table names 6 objects. The first 5 (WiringManifest + WiringWalker + SettingsWriter + AdopterFileCopier + BannerPrinter) are Phase 3 cli init objects that this harness decomposition does NOT own; they live in `docs/decompositions/wu-2-init.md` or a new decomposition Phase 3 authors. This decomposition owns only the 6th — `AdopterSessionSimulator` — because it lives on the harness side per §Domain narrative above.
+
+Bassclef-upstream coord doc §Patterns instantiated section names patterns for Phase 3 (Facade, Strategy, Repository, Anticorruption Layer). Those pattern annotations land at Phase 3 code ship, not in this decomposition.
 
 ## Candidate patterns for Step 3 (GRASP + GoF/Fowler)
 
