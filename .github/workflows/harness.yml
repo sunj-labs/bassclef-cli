@@ -1,4 +1,4 @@
-# Install harness for @thebassclef/core (iteration i).
+# Install harness for @thebassclef/lite (iteration i).
 #
 # @requirement R-NPM-014
 #
@@ -104,14 +104,14 @@ jobs:
           VERSION="${{ steps.resolve.outputs.version }}"
           MAX_ATTEMPTS=18
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            if npm view "@thebassclef/core@${VERSION}" version >/dev/null 2>&1; then
-              echo "npm registry has @thebassclef/core@${VERSION} (attempt $i)"
+            if npm view "@thebassclef/lite@${VERSION}" version >/dev/null 2>&1; then
+              echo "npm registry has @thebassclef/lite@${VERSION} (attempt $i)"
               exit 0
             fi
-            echo "attempt $i: @thebassclef/core@${VERSION} not yet on registry; sleeping 10s"
+            echo "attempt $i: @thebassclef/lite@${VERSION} not yet on registry; sleeping 10s"
             sleep 10
           done
-          echo "ERROR: @thebassclef/core@${VERSION} did not appear on registry within 3 minutes"
+          echo "ERROR: @thebassclef/lite@${VERSION} did not appear on registry within 3 minutes"
           exit 1
 
       - name: Run install harness
