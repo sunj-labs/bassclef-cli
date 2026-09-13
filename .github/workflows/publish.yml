@@ -94,7 +94,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Checkout sibling bassclef (for substrate source)
+      - name: Checkout sibling bassclef at pinned tag (for substrate source)
         # Prepublish reads lite-manifest.json + source files from a
         # checkout of sunj-labs/bassclef (the public downstream —
         # more stable than the R&D upstream). On the CI runner we
@@ -108,6 +108,13 @@ jobs:
         # Read is auto-included). The repo is private per operator
         # setup.
         #
+        # Phase 2 (goal 2026-09-13b): tag pinned to v0.39.0 per
+        # bassclef-upstream ADR-055 (accepted 2026-09-13). The pinned
+        # tag ships standards/bassclef-wiring-manifest.json schema
+        # major 2.x + presence/dist-templates/ which the extended
+        # prepublish script reads to build dist/lite/. See ADR-007
+        # §Acceptance delta 2026-09-13 for the pivot record.
+        #
         # Design note: we source from public bassclef, not
         # bassclef-upstream (R&D), so npm publishes ship the last
         # stable release surface. See ADR-005 §Amendment 2026-08-12
@@ -115,9 +122,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
+          ref: v0.39.0
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
+
+      - name: Assert pinned bassclef tag resolves
+        # Nygard N1 pre-mortem catch (goal 2026-09-13b) — verify the
+        # checkout landed the expected tag SHA. If the tag disappeared
+        # or was force-pushed since pin time, this step fails loud
+        # with a specific remediation.
+        run: |
+          cd bassclef
+          RESOLVED_SHA=$(git rev-parse HEAD)
+          RESOLVED_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "UNKNOWN")
+          echo "Resolved: $RESOLVED_TAG at $RESOLVED_SHA"
+          if [ "$RESOLVED_TAG" != "v0.39.0" ]; then
+            echo "::error::Expected pinned tag v0.39.0 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
+            exit 1
+          fi
 
       - name: Bundle substrate via prepublish script
         # Explicit invocation — the `prepublishOnly` lifecycle hook does
@@ -178,6 +201,34 @@ jobs:
             exit 1
           fi
 
+      - name: Assert dist/lite/ present in tarball
+        # Phase 2 (goal 2026-09-13b) Feathers F3 pre-mortem catch —
+        # extend the existing substrate/ assertion to ALSO cover
+        # dist/lite/. Expected count: 5 files at dist/lite/ root
+        # (.claude/settings.json + CLAUDE.md + whereami.md +
+        # .bassclef-source.json + .gitignore).
+        #
+        # No overlap with substrate/ assertion — different path prefix.
+        # If dist/lite/ is missing, the pack step succeeded but the
+        # prepublish script's dist/lite/ build path silently skipped
+        # (env var mis-set) OR the build failed after fail-fast fired
+        # (should never reach here). Exit 1 with a specific
+        # remediation.
+        run: |
+          COUNT=$(node -e "
+            const p = require('/tmp/pack.json');
+            if (!Array.isArray(p) || !p[0] || !Array.isArray(p[0].files)) {
+              process.stderr.write('npm pack --json output shape unexpected — expected [{files:[{path}]}], got: ' + JSON.stringify(p).slice(0, 200) + '\n');
+              process.exit(2);
+            }
+            process.stdout.write(String(p[0].files.filter(f => f.path.startsWith('dist/lite/')).length));
+          ")
+          echo "dist/lite/ file count: $COUNT"
+          if [ "$COUNT" -lt 5 ]; then
+            echo "::error::dist/lite/ file count $COUNT is under the 5-file floor. Tarball would ship without dist/lite/. Fix: verify BASSCLEF_BUILD_DIST_LITE env is not set to 0 AND the prepublish script's dist/lite/ build path fired without silent skip. See docs/adrs/ADR-007-npm-lite-substrate-bundling.md §Acceptance delta for the contract."
+            exit 1
+          fi
+
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
@@ -233,14 +284,19 @@ jobs:
         # job) at a cost of ~30s of duplicated work.
         run: npm run build
 
-      - name: Checkout sibling bassclef (for substrate source)
+      - name: Checkout sibling bassclef at pinned tag (for substrate source)
         # Sibling clone required for the prepublish script per issue
         # #40 cure. Requires BASSCLEF_SOURCE_TOKEN secret (same as
         # checks job). Source is sunj-labs/bassclef (public downstream)
         # so publishes ship the stable release surface, not R&D upstream.
+        #
+        # Phase 2 (goal 2026-09-13b): tag pinned to v0.39.0 per
+        # bassclef-upstream ADR-055 (accepted 2026-09-13). Matches the
+        # checks job's pin so both jobs bundle the same source revision.
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
+          ref: v0.39.0
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
