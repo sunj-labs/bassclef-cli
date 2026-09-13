@@ -58,9 +58,12 @@ afterEach(() => {
 });
 
 function runScript(env: Record<string, string> = {}, cwd = bundleDir): ReturnType<typeof spawnSync> {
+  // Legacy tests characterize substrate/ path only; dist/lite/ build is
+  // opt-out per BASSCLEF_BUILD_DIST_LITE=0. Phase 2 tests (Step 6) opt
+  // back in and seed the wiring manifest + templates in their own fixtures.
   return spawnSync('node', [SCRIPT_PATH], {
     cwd,
-    env: { ...process.env, ...env },
+    env: { BASSCLEF_BUILD_DIST_LITE: '0', ...process.env, ...env },
     encoding: 'utf8',
   });
 }
