@@ -1,0 +1,8 @@
+# Pre-mortem light marker — 2026-09-13b cli#25 Phase 2
+- date: 2026-09-13
+- branch: feat/cli-25-phase-2-publish-workflow-dist-lite
+- mode: light
+- lenses: [michael-nygard, michael-feathers, linus-torvalds]
+- risks-per-lens: 3
+- ledger: docs/risk-ledgers/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md
+- folded-into-plan: N2 (Step 1 hook count check) + F1 (Step 1 dual-write preserves substrate/) + L1 (Step 3 MINOR bump + Step 5 additive D1 amendment) + N1 (Step 2 tag-existence check)

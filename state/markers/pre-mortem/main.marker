@@ -1,0 +1,23 @@
+# Pre-mortem marker — 2026-09-07 /longrun for @thebassclef/lite@0.1.0
+
+- date: 2026-09-07
+- branch: main
+- ledger: docs/risk-ledgers/2026-09-07-lite-rename-sync.md
+- mode: light (3 lenses × 5-8 risks)
+- lenses: alan-cooper, saltzer-schroeder, john-ousterhout
+- always_fire_matched: partial (Saltzer domain #8 deploy-pipeline; not full-mode escalation because publish path reused as-is from 0.1.1)
+
+Top-3 severity risks:
+1. Saltzer #1 — operator-private paths in tarball (HIGH × medium)
+   Mitigation: npm publish --dry-run + grep tarball for operator-private/, chronicle/, journals/
+2. Ousterhout #1 — content-hash mismatch on renamed files in v1.5.0 (HIGH × medium)
+   Mitigation: copy-substrate --dry-run on fresh clone; verify every entry.path resolves
+3. Saltzer #2 — prepublishOnly script execution risk (HIGH × low)
+   Mitigation: audit sync source against upstream v1.5.0 git tag SHA before publish
+
+Scope changes recommended:
+- NEW Step 2.5 — pre-publish tarball audit (~5-10 turns)
+- EXTEND Step 3 — copy-substrate dry-run on fresh clone (~10-15 turns)
+- NEW Step 3.5 — trusted-publisher config verification (~5-10 turns)
+
+Revised time budget: 90-155 turns (was 70-120).

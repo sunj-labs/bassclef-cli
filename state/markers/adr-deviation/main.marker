@@ -1,0 +1,14 @@
+# ADR-deviation marker — main 2026-09-07 lite rename+sync goal artifacts
+
+- date: 2026-09-07
+- branch: main
+- adr_governing: ADR-002 (init safety) + ADR-003 (sync safety) + ADR-005 (npm packaging strategy) + ADR-031 (we-don't-break-adopters)
+- outcome: ADR-honored
+
+Rationale: Goal artifacts (goal doc + use case + spec + decomposition + migration plan) DO NOT deviate from any pinned ADR. Each ADR is honored:
+- ADR-002 init safety — rename does not change init behavior
+- ADR-003 sync safety — sync uses proven contract; no schema change
+- ADR-005 npm packaging strategy — extends the strategy to second package; same trusted-publisher path
+- ADR-031 we-don't-break-adopters — @thebassclef/core stays live + deprecated with migration notice; migration path documented
+
+No new ADR needed. Change is a package rename plus substrate sync within existing decision envelope.

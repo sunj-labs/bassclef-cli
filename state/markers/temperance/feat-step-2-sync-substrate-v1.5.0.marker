@@ -1,0 +1,9 @@
+# Temperance marker — feat/step-2-sync-substrate-v1.5.0
+
+- date: 2026-09-07
+- branch: feat/step-2-sync-substrate-v1.5.0
+- scope-decision:
+  - Right thing: land Step 2 sync verification + Step 4 tarball audit Tier 0 test on this branch — coverage for the v1.5.0 pre-publish pipeline
+  - Right way: add ONE test to tests/harness/prepublish-bundle.test.ts that runs `npm pack --dry-run --json` and asserts zero operator-private-path leaks (cures pre-mortem Saltzer #1)
+  - Not now: rename package.json (Step 6); trusted-publisher config check (Step 5); deprecate old (Step 7)
+- drift-trigger: modifying prepublish-bundle-substrate.mjs source; adding test that changes existing test semantics

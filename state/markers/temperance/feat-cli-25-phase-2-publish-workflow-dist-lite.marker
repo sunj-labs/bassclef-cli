@@ -1,0 +1,7 @@
+# Temperance marker — 2026-09-13b cli#25 Phase 2
+- date: 2026-09-13
+- branch: feat/cli-25-phase-2-publish-workflow-dist-lite
+- scope-decision: Ship Phase 2 dual-write — publish workflow pins public bassclef v0.39.0 + prepublish script builds dist/lite/ inline + dual-writes substrate/ (backward compat) + dist/lite/ (new). MINOR bump 0.1.3 → 0.2.0.
+- right-thing: Adopter contract preserved via dual-write per Torvalds L1; version bump matches additive shape.
+- right-way: agent-merges-within-scope per operator; hard ceilings (auth/schema/security/prod-deploy) stay operator-gated.
+- drift-trigger: Phase 3 reader code work OR src/lib/copy-substrate.ts edits OR removing substrate/ from tarball — pause + re-anchor.

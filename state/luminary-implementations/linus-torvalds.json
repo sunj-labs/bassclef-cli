@@ -5,8 +5,10 @@
     "docs/iteration-bets/2026-08-30a-npm-lite-migrate-subcommand.md",
     "docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md",
     "docs/risk-ledgers/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md",
-    "docs/adrs/ADR-009-manifest-as-init-contract-source.md"
+    "docs/adrs/ADR-009-manifest-as-init-contract-source.md",
+    "docs/iteration-bets/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md",
+    "docs/risk-ledgers/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md"
   ],
-  "last_scanned": "2026-09-13T00:31:43Z",
+  "last_scanned": "2026-09-13T00:53:57Z",
   "scanner_version": "1.0"
 }
