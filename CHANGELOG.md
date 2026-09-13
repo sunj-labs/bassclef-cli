@@ -24,6 +24,72 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.0.1] - 2026-09-13
+### Added
+
+- **Walker routes hook binaries per settings.json prefix** — new
+  `ScopeRouter` (Strategy + Chain of Responsibility) classifies each
+  hook file the walker copies. Commands starting `$HOME/` land in
+  `~/.claude/hooks/`; commands starting `$CLAUDE_PROJECT_DIR/` land
+  in `<repo>/.claude/hooks/`. Third prefixes throw `UnknownScopePrefix`.
+- **Executable bit preserved** — new `ExecutableBitEnforcer` sets
+  mode 0755 on every copied `.sh`. Windows skips chmod with an INFO
+  stderr note.
+- **`--yes` flag** — non-interactive confirm for the 1.0.0 → 1.0.1
+  upgrade advisory. CI + scripts pass `--yes`.
+- **`--json` flag** — emits a structured stderr line
+  `{copied, declared, failed, scope_counts, tier}` alongside the human
+  banner so adopter tooling parses a stable machine shape.
+- **Manifest schema v2** — top-level `schema_version: 2` marker + per-
+  entry `scope: 'user' | 'project'` field. Old readers ignoring new
+  fields keep working.
+- **Prepublish copies hook binaries** — `scripts/prepublish-bundle-substrate.mjs`
+  now copies every hook binary from sibling public bassclef into
+  `dist/lite/.claude/hooks/`. Postflight asserts copied count equals
+  declared count so the cli 1.0.0 empty-hooks class cannot recur.
+
+### Changed
+
+- **Banner shape** — was `N hooks armed (lite tier)`. Now
+  `Installed N of M hooks (lite tier). N in <repo>/.claude/hooks,
+  M in ~/.claude/hooks.` (Norman shape per RFC-0002 N1 fold).
+- **Symlink error message** — includes the readlink target so adopters
+  know what the pre-existing symlink points to.
+- **Upgrade advisory** — first-run on a 1.0.0-installed target prints
+  `cli 1.0.1 introduces user-scope hook installation at ~/.claude/hooks/`
+  and waits for confirmation. `--yes` skips the prompt.
+
+### Fixed
+
+- **`@thebassclef/lite@1.0.0` cold-adopter regression** — cli 1.0.0
+  shipped with settings.json referencing 24 hooks that were never in
+  the tarball. Cold adopters hit 24 hook-not-found errors per Claude
+  Code prompt. Cure ships the hook binaries in the bundle and routes
+  each per settings.json prefix. Closes bassclef-cli#79. See
+  bassclef-cli#80 for the retro `/diagnose` on the miss.
+- **`.claude` literals extracted** — new `HOOKS_SUBPATH` +
+  `SETTINGS_SUBPATH` constants in `src/lib/paths.ts` keep the R6
+  single-source-of-truth rule clean.
+- **Test isolation** — every test that spawns the CLI now sets
+  `HOME=fakeHome` so user-scope hook writes land in a temp dir, not
+  the operator's real `~/.claude/hooks/`.
+
+### Notes
+
+- Pins bassclef-upstream `v0.40.0` (tag cut 2026-09-13T20:40:20Z).
+- Retires the placeholder regex stopgap from cli 1.0.0 — upstream
+  dist-templates now use canonical `[REPO_NAME]` + `[TIER]` shapes
+  only (closes bassclef-cli#77).
+- 51 files changed +3310 / -114 vs `main` at merge time. Full OOAD
+  chain (10 steps) shipped alongside the code — see
+  `docs/iteration-bets/2026-09-13d-cli-1.0.1-hook-routing.md`.
+
+## [1.0.0] - 2026-09-13
+
+### Notes
+
+- Deprecation-owed on npm — see 1.0.1 above.
+
 ## [0.1.3] - 2026-09-12
 ### Added
 
