@@ -68,7 +68,7 @@ afterEach(() => {
 
 describe('init banner — Norman shape (N1 council fold)', () => {
   it('emits "Installed N of M hooks (lite tier)" on happy path', () => {
-    const r = runCli(['--dir', workDir]);
+    const r = runCli(['--dir', workDir, '--allow-any-dir']);
     expect(r.stdout).toMatch(/Installed \d+ of \d+ hooks \(lite tier\)/);
   });
 
@@ -78,7 +78,7 @@ describe('init banner — Norman shape (N1 council fold)', () => {
     const decoy = join(fakeHome, '.claude/hooks/decoy');
     writeFileSync(decoy, 'sentinel');
     symlinkSync(decoy, join(fakeHome, '.claude/hooks/bassclef-sync.sh'));
-    const r = runCli(['--dir', workDir]);
+    const r = runCli(['--dir', workDir, '--allow-any-dir']);
     expect(r.stdout).toMatch(/failed/);
     expect(r.stdout).toMatch(/Rerun bassclef init/);
   });
@@ -115,7 +115,7 @@ describe('init upgrade path from 1.0.0 (L1 council fold)', () => {
       join(workDir, '.bassclef/init.manifest.json'),
       JSON.stringify({ files: [{ path: 'substrate.config.md', outcome: 'created' }] })
     );
-    const r = runCli(['--dir', workDir, '--yes']);
+    const r = runCli(['--dir', workDir, '--allow-any-dir', '--yes']);
     // Advisory expected in output — pass --yes to non-interactively confirm
     expect(r.stdout).toMatch(/user-scope hook installation/);
     expect(r.stdout).toMatch(/1.0.1/);
@@ -127,7 +127,7 @@ describe('init upgrade path from 1.0.0 (L1 council fold)', () => {
       join(workDir, '.bassclef/init.manifest.json'),
       JSON.stringify({ files: [] })
     );
-    const r = runCli(['--dir', workDir, '--yes']);
+    const r = runCli(['--dir', workDir, '--allow-any-dir', '--yes']);
     // Should not hang on stdin
     expect(r.status).not.toBeNull();
   });
@@ -135,7 +135,7 @@ describe('init upgrade path from 1.0.0 (L1 council fold)', () => {
 
 describe('init --json flag (H1 council fold)', () => {
   it('emits structured stderr line when --json passed', () => {
-    const r = runCli(['--dir', workDir, '--json']);
+    const r = runCli(['--dir', workDir, '--allow-any-dir', '--json']);
     const jsonLine = r.stderr.split('\n').find((l) => l.trim().startsWith('{'));
     expect(jsonLine).toBeDefined();
     const parsed = JSON.parse(jsonLine!);
@@ -147,7 +147,7 @@ describe('init --json flag (H1 council fold)', () => {
   });
 
   it('omits structured line when --json omitted', () => {
-    const r = runCli(['--dir', workDir]);
+    const r = runCli(['--dir', workDir, '--allow-any-dir']);
     const jsonLine = r.stderr.split('\n').find((l) => l.trim().startsWith('{'));
     expect(jsonLine).toBeUndefined();
   });
@@ -169,7 +169,7 @@ describe('symlink error message (N2 council fold)', () => {
     const decoy = join(fakeHome, '.claude/hooks/decoy-somewhere-else');
     writeFileSync(decoy, 'x');
     symlinkSync(decoy, join(fakeHome, '.claude/hooks/bassclef-sync.sh'));
-    const r = runCli(['--dir', workDir]);
+    const r = runCli(['--dir', workDir, '--allow-any-dir']);
     expect(r.stderr).toContain('decoy-somewhere-else');
   });
 });

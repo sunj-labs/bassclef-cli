@@ -3,7 +3,7 @@
 // Types + schema-version live in src/lib/manifest-types.ts so this
 // module has one job: turn a Manifest into a JSON string.
 
-import { Manifest, MANIFEST_SCHEMA_VERSION, type ManifestEntry } from '../../lib/manifest-types.js';
+import { Manifest, MANIFEST_SCHEMA_VERSION, MANIFEST_SHAPE_VERSION, type ManifestEntry } from '../../lib/manifest-types.js';
 
 export function manifestTemplate(input: {
   pkgVersion: string;
@@ -11,6 +11,7 @@ export function manifestTemplate(input: {
   files: ManifestEntry[];
 }): string {
   const value: Manifest = {
+    schema_version: MANIFEST_SHAPE_VERSION,
     $bassclef: {
       template: 'init.manifest.json',
       manifest_schema_version: MANIFEST_SCHEMA_VERSION,
