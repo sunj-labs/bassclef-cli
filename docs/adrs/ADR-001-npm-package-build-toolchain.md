@@ -13,6 +13,8 @@ amendments:
     scope: iteration b — no-source-shipped invariant amended for source-map exclusion at write-time
   - date: 2026-09-13
     scope: goal 2026-09-13b cli#25 Phase 2 Step 4 — invariant "no source shipped" extended to allow bassclef-upstream substrate content bundled at dist/<tier>/ per ADR-055 D1 and substrate/ per ADR-007 D1
+  - date: 2026-09-13c
+    scope: goal 2026-09-13c cli#73 Phase 3 Step 6.5 — MAJOR 1.0.0. substrate/ bundle path retired; "no source shipped" allows only dist/<tier>/** (currently dist/lite/**). Zero npm adopters at bump time (operator confirmed 2026-09-13); no compat-shim owed per ADR-031 threshold.
 ---
 
 # ADR-001 — Pin build toolchain for @thebassclef/core — Vite (library mode) + TypeScript + Vitest
@@ -124,21 +126,22 @@ body with the frontmatter (this PR). No supersession pending.
 - No `prepublishOnly` script that auto-builds. Publish and build are
   separate steps (bet L98; Evil Martians 2026 guide).
 - No cli source shipped to npm. Only `dist/*.js`, `dist/*.cjs`,
-  `dist/*.d.ts`, `README.md`, `LICENSE`, `substrate/**`, and
-  `dist/lite/**` (package.json `files` explicit whitelist — no
-  directory-bulk entries beyond the tightly-scoped substrate + dist/lite
-  trees). This shape blocks source-map files (`*.map`) from riding
-  along with the dist bundle even when the build emits them.
+  `dist/*.d.ts`, `README.md`, `LICENSE`, and `dist/lite/**`
+  (package.json `files` explicit whitelist — no directory-bulk entries
+  beyond the tightly-scoped dist/lite tree). This shape blocks
+  source-map files (`*.map`) from riding along with the dist bundle
+  even when the build emits them.
   Amended 2026-08-11 per feat/iter-a-source-map-safety. Amended
-  2026-09-13 per goal 2026-09-13b (Phase 2) — the invariant extends to
+  2026-09-13 per goal 2026-09-13b (Phase 2) — the invariant extended to
   allow bassclef substrate content bundled at two paths: `substrate/**`
   (149-file walk per ADR-007 D1; Phase 1 shape) and `dist/lite/**`
-  (5-file tree per ADR-055 D1 + ADR-007 D1 amendment). Both paths
-  populate at publish time via `scripts/prepublish-bundle-substrate.mjs`
-  from a pinned sibling clone of `sunj-labs/bassclef` (public
-  downstream). Cli source under `src/` never ships. Phase 3 drops
-  `substrate/` under a MAJOR bump; `dist/lite/` becomes the sole
-  bundled substrate path.
+  (5-file tree per ADR-055 D1 + ADR-007 D1 amendment). Amended
+  2026-09-13c per goal 2026-09-13c (Phase 3 MAJOR 1.0.0) — `substrate/`
+  retired; `dist/lite/**` is the sole bundled substrate path (6-file
+  tree: settings.json + 4 templates + wiring manifest). Populates at
+  publish time via `scripts/prepublish-bundle-substrate.mjs` from a
+  pinned sibling clone of `sunj-labs/bassclef`. Cli source under `src/`
+  never ships.
 - Node 20 floor pinned in `engines`; refuse install below.
 - **Source-map exclusion (semver-locked from 0.0.2).** Vite `sourcemap`
   MUST be `false`, `'hidden'`, or omitted. `sourcemap: true` is

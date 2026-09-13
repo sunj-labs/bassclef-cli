@@ -1,45 +1,46 @@
 #!/usr/bin/env node
 // scripts/prepublish-bundle-substrate.mjs
 //
-// Copies substrate files from the sibling bassclef checkout into two
-// bundle trees so npm pack includes them in the tarball.
+// Copies substrate files from the sibling bassclef checkout into
+// dist/lite/ so npm pack includes them in the tarball.
 //
-// Post-Phase 2 dual-write shape (goal 2026-09-13b cli#25):
+// Post-Phase 3 shape (goal 2026-09-13c cli#73 — MAJOR 1.0.0):
 //
-//   substrate/            — legacy bundle path per ADR-007 D1 (Phase 1)
-//                           149 files from lite-manifest.json + bundled
-//                           manifest at substrate/.bassclef/lite-manifest.json
-//   dist/lite/            — new bundle path per ADR-055 D1 + ADR-007 D1
-//                           amendment (Phase 2 shipped this)
-//                           5 files: .claude/settings.json + 4 templates
+//   dist/lite/            — sole bundle path per ADR-055 D1 + ADR-007
+//                           D1 amendment 2026-09-13c
+//                           6 files: .claude/settings.json + 4 templates
+//                           + standards/bassclef-wiring-manifest.json
 //                           built inline from standards/bassclef-wiring-manifest.json
 //                           + presence/dist-templates/
 //
+// substrate/ bundle path retired 2026-09-13c under MAJOR 1.0.0 per
+// operator directive (zero npm adopters at bump time; compat-shim not
+// owed per ADR-031 threshold logic).
+//
 // Contract per docs/adrs/ADR-007-npm-lite-substrate-bundling.md Amendment
-// 2026-09-13 §Phase 2:
-//   - D1 — bundle path lock adds dist/<tier>/ as second accepted path;
-//          substrate/ preserved for Phase 3 drop
+// 2026-09-13c §Phase 3:
+//   - D1 — bundle path lock names dist/<tier>/ as sole accepted path;
+//          substrate/ retired
 //   - D3 — prepublish safety envelope fails fast on missing manifest,
-//          missing templates, empty settings, count mismatch
+//          missing templates, empty settings, missing wiring manifest
 //   - RFC B3 — sibling-only source (no RemoteFetchStrategy)
 //
-// Risk ledger v3 build wiring + goal 2026-09-13b Phase 2 folds:
+// Risk ledger folds:
 // @risk: R2 — pure Node; no execSync/spawn/spawnSync
 // @risk: R7 — fail-fast on every precondition + postcondition
-// @risk: R9 — reject when total bundled size passes 5MB (substrate/ only)
-// @risk: N1 (Phase 2) — tag-existence check happens in workflow (Step 2)
-// @risk: N2 (Phase 2) — dist/lite/ settings.json hook entry count >= 1
-// @risk: N3 (Phase 2) — 4 templates must exist at source before copy
+// @risk: N1 (Phase 3) — tag-existence check happens in workflow
+// @risk: N2 — dist/lite/ settings.json hook entry count >= 1
+// @risk: N3 — 4 templates must exist at source before copy
+// @risk: L4 (Phase 3 pre-mortem) — wiring manifest MUST land in
+//   dist/lite/standards/ so the reader schema check works
 //
 // Runs via package.json prepublishOnly. Reads sibling manifest via:
 //   1. env BASSCLEF_SIBLING_ROOT (test override / CI workflow)
-//   2. default ../bassclef relative to CWD (public downstream, not upstream)
+//   2. default ../bassclef-upstream relative to CWD
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-const SIZE_CEILING_BYTES = 5 * 1024 * 1024;
-const BUNDLE_DIR_NAME = 'substrate';
 const DIST_LITE_DIR = 'dist/lite';
 const WIRING_MANIFEST_REL = 'standards/bassclef-wiring-manifest.json';
 const DIST_TEMPLATES_REL = 'presence/dist-templates';
@@ -70,130 +71,7 @@ function resolveSiblingRoot() {
 }
 
 // ============================================================
-// substrate/ bundle (legacy — preserved for Phase 3 drop)
-// ============================================================
-
-function loadManifest(siblingRoot) {
-  const manifestPath = join(siblingRoot, 'lite-manifest.json');
-  if (!existsSync(manifestPath)) {
-    fail(
-      `manifest missing at ${manifestPath}. ` +
-        `Check out sunj-labs/bassclef as a sibling directory, ` +
-        `or set BASSCLEF_SIBLING_ROOT to point at the checkout.`
-    );
-  }
-  let raw;
-  try {
-    raw = readFileSync(manifestPath, 'utf8');
-  } catch (err) {
-    fail(`cannot read manifest at ${manifestPath}: ${err.code ?? err.message}`);
-  }
-  let manifest;
-  try {
-    manifest = JSON.parse(raw);
-  } catch (err) {
-    fail(`manifest at ${manifestPath} is not valid JSON: ${err.message}`);
-  }
-  if (!Array.isArray(manifest.entries) || manifest.entries.length === 0) {
-    fail(`manifest at ${manifestPath} has no entries[] array or the array is empty.`);
-  }
-  return { manifest, manifestPath };
-}
-
-function preflightSourcesExist(siblingRoot, manifest) {
-  const missing = [];
-  for (const entry of manifest.entries) {
-    const sourcePath = join(siblingRoot, entry.path);
-    if (!existsSync(sourcePath)) {
-      missing.push(sourcePath);
-    }
-  }
-  if (missing.length > 0) {
-    fail(
-      `source missing at ${missing[0]}` +
-        (missing.length > 1 ? ` (and ${missing.length - 1} more)` : '') +
-        `. Check the sibling checkout is current with the manifest.`
-    );
-  }
-}
-
-function copyEntry(siblingRoot, bundleRoot, entry) {
-  const sourcePath = join(siblingRoot, entry.path);
-  const targetPath = join(bundleRoot, entry.path);
-  mkdirSync(dirname(targetPath), { recursive: true, mode: 0o755 });
-  const content = readFileSync(sourcePath);
-  writeFileSync(targetPath, content);
-  return content.length;
-}
-
-function postflightChecks(bundleRoot, manifest, totalBytes) {
-  const expectedCount = manifest.entries.length + 1;
-  function walk(dir) {
-    const names = readdirSync(dir);
-    let count = 0;
-    for (const name of names) {
-      const p = join(dir, name);
-      const st = statSync(p);
-      if (st.isDirectory()) count += walk(p);
-      else count += 1;
-    }
-    return count;
-  }
-  const actualCount = walk(bundleRoot);
-  if (actualCount !== expectedCount) {
-    fail(
-      `postflight count mismatch: bundled ${actualCount} files but expected ${expectedCount} ` +
-        `(${manifest.entries.length} manifest entries + 1 bundled manifest). ` +
-        `Re-run the script; investigate if the mismatch persists.`
-    );
-  }
-  if (totalBytes > SIZE_CEILING_BYTES) {
-    const mb = (totalBytes / (1024 * 1024)).toFixed(2);
-    fail(
-      `bundled size ${mb}MB is over the 5MB ceiling. ` +
-        `Trim the manifest at sunj-labs/bassclef or raise the ceiling in ADR-007 D3.`
-    );
-  }
-}
-
-function writeBundledManifest(bundleRoot, manifest) {
-  const targetDir = join(bundleRoot, '.bassclef');
-  mkdirSync(targetDir, { recursive: true, mode: 0o755 });
-  const targetPath = join(targetDir, 'lite-manifest.json');
-  const body = JSON.stringify(manifest, null, 2) + '\n';
-  writeFileSync(targetPath, body, { mode: 0o644 });
-  return targetPath;
-}
-
-function assertBundledManifestPresent(bundleRoot, expectedEntryCount) {
-  const targetPath = join(bundleRoot, '.bassclef', 'lite-manifest.json');
-  if (!existsSync(targetPath)) {
-    fail(
-      `bundled manifest missing at ${targetPath}. ` +
-        `writeBundledManifest did not run OR the write silently failed. ` +
-        `Re-run the script; if the miss persists, investigate the mkdir + write path.`
-    );
-  }
-  let parsed;
-  try {
-    parsed = JSON.parse(readFileSync(targetPath, 'utf8'));
-  } catch (err) {
-    fail(
-      `bundled manifest at ${targetPath} is not valid JSON: ${err.message}. ` +
-        `The write likely corrupted the file. Re-run the script.`
-    );
-  }
-  if (!Array.isArray(parsed.entries) || parsed.entries.length !== expectedEntryCount) {
-    const actual = Array.isArray(parsed.entries) ? parsed.entries.length : 'not-an-array';
-    fail(
-      `bundled manifest entries[] shape wrong at ${targetPath}: got ${actual}, ` +
-        `expected ${expectedEntryCount}. Re-run the script.`
-    );
-  }
-}
-
-// ============================================================
-// dist/lite/ bundle (Phase 2 — new per ADR-055 D1)
+// dist/lite/ bundle (per ADR-055 D1; sole bundle path post-Phase 3)
 // ============================================================
 
 function loadWiringManifest(siblingRoot) {
@@ -399,47 +277,15 @@ function buildDistLiteTree(siblingRoot) {
 function main() {
   const siblingRoot = resolveSiblingRoot();
 
-  // Legacy substrate/ tree (backward compat for cli code through Phase 3).
-  const { manifest, manifestPath } = loadManifest(siblingRoot);
-  preflightSourcesExist(siblingRoot, manifest);
-
-  const bundleRoot = resolve(process.cwd(), BUNDLE_DIR_NAME);
-  mkdirSync(bundleRoot, { recursive: true, mode: 0o755 });
-
-  let totalBytes = 0;
-  for (const entry of manifest.entries) {
-    totalBytes += copyEntry(siblingRoot, bundleRoot, entry);
-  }
-
-  const bundledManifestPath = writeBundledManifest(bundleRoot, manifest);
-  assertBundledManifestPresent(bundleRoot, manifest.entries.length);
-  postflightChecks(bundleRoot, manifest, totalBytes);
+  // dist/lite/ tree per ADR-055 D1 — sole bundle path post-Phase 3.
+  const distLite = buildDistLiteTree(siblingRoot);
 
   process.stdout.write(
-    `bundled ${manifest.entries.length} files from ${manifestPath} into ${bundleRoot}\n`
+    `built dist/lite/ from ${distLite.wiringManifestPath} (schema v${distLite.wiringVersion})\n`
   );
   process.stdout.write(
-    `bundled manifest written to ${bundledManifestPath}\n`
+    `dist/lite/.claude/settings.json emitted ${distLite.hookCount} hook entries\n`
   );
-
-  // dist/lite/ tree (Phase 2 — new per ADR-055 D1).
-  // Env gate lets characterization tests keep the pre-Phase-2 shape.
-  // Default is on; tests that only seed the legacy lite-manifest.json set
-  // BASSCLEF_BUILD_DIST_LITE=0. Production CI leaves the env unset → build fires.
-  if (process.env.BASSCLEF_BUILD_DIST_LITE !== '0') {
-    const distLite = buildDistLiteTree(siblingRoot);
-
-    process.stdout.write(
-      `built dist/lite/ from ${distLite.wiringManifestPath} (schema v${distLite.wiringVersion})\n`
-    );
-    process.stdout.write(
-      `dist/lite/.claude/settings.json emitted ${distLite.hookCount} hook entries\n`
-    );
-  } else {
-    process.stdout.write(
-      `skipped dist/lite/ build (BASSCLEF_BUILD_DIST_LITE=0)\n`
-    );
-  }
 
   process.exit(0);
 }

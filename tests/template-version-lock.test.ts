@@ -1,24 +1,16 @@
 // Template-version lock test — per WU-3 decomp P6.
 //
 // The whole trust model of sync depends on template versions being
-// bumped when template output changes. If a future WU changes the
-// output of `settingsJsonTemplate` but forgets to change
-// `SETTINGS_TEMPLATE_VERSION`, sync will miss the update.
+// bumped when template output changes. If a future step changes the
+// output of a template but forgets to change its template version,
+// sync will miss the update.
 //
-// This test snapshots the hash of each template's output. Vitest
-// generates the snapshot on first run and fails on subsequent runs
-// when the output hash changes. When a template revision is
-// intentional, the developer:
-//   1. Bumps `_TEMPLATE_VERSION` in the source template.
-//   2. Reruns tests with `--update-snapshots` to accept the new hash.
-//   3. Commits the updated snapshot file alongside the source change.
+// Post-Phase 3 (cli#73 MAJOR 1.0.0): sync manages substrate.config.md
+// only. Settings.json moved to walker-owned dist/lite/ verbatim per
+// ADR-055 D1 — no cli-composed settings template anymore.
 
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import {
-  settingsJsonTemplate,
-  SETTINGS_TEMPLATE_VERSION,
-} from '../src/commands/init-templates/settings-json.js';
 import {
   substrateConfigMdTemplate,
   SUBSTRATE_CONFIG_TEMPLATE_VERSION,
@@ -29,12 +21,6 @@ function sha256(s: string): string {
 }
 
 describe('template-version lock (WU-3 P6)', () => {
-  it('settings.json output at v0.0.1 has a locked hash', () => {
-    const key = `settings.json@${SETTINGS_TEMPLATE_VERSION}`;
-    const hash = sha256(settingsJsonTemplate('0.0.1'));
-    expect({ key, hash }).toMatchSnapshot();
-  });
-
   it('substrate.config.md output at v0.0.1 has a locked hash', () => {
     const key = `substrate.config.md@${SUBSTRATE_CONFIG_TEMPLATE_VERSION}`;
     const hash = sha256(substrateConfigMdTemplate('0.0.1'));

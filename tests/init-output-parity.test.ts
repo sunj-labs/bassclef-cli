@@ -67,7 +67,7 @@ beforeAll(() => {
     ], {
       encoding: 'utf8',
       timeout: 30000,
-      env: { ...process.env, BASSCLEF_BUILD_DIST_LITE: '1' },
+      env: { ...process.env },
     });
     if (r.status !== 0) {
       throw new Error(
