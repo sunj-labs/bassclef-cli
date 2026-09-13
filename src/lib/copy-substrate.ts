@@ -214,6 +214,21 @@ function walkDistTree(bundleRoot: string): string[] {
   return results;
 }
 
+// npm-pack strips `.gitignore` files unconditionally (hard exclusion,
+// not overridable via .npmignore or `files`). The bundle ships the
+// template as `gitignore` (no dot). Walker renames back at write time
+// so adopters land a proper `.gitignore` in their repo.
+const GITIGNORE_BUNDLE_NAME = 'gitignore';
+const GITIGNORE_ADOPTER_NAME = '.gitignore';
+
+function mapAdopterPath(relPath: string): string {
+  // Only rename the top-level `gitignore` template. Any deeper file
+  // literally named `gitignore` passes through (defensive — dist/lite/
+  // only has this one).
+  if (relPath === GITIGNORE_BUNDLE_NAME) return GITIGNORE_ADOPTER_NAME;
+  return relPath;
+}
+
 function copyOne(
   relPath: string,
   bundleRoot: string,
@@ -222,7 +237,8 @@ function copyOne(
   result: CopyResult
 ): 'copied' | 'refused' | 'errored' | 'wouldCopy' | 'skipped' {
   const sourcePath = join(bundleRoot, relPath);
-  const targetPath = join(targetDir, relPath);
+  const adopterRelPath = mapAdopterPath(relPath);
+  const targetPath = join(targetDir, adopterRelPath);
 
   let content: string;
   try {
@@ -232,7 +248,7 @@ function copyOne(
     const message =
       `${relPath} — cannot read bundled source (${err.code ?? 'unknown'}). ` +
       `Reinstall @thebassclef/lite to restore the bundle.`;
-    result.errored.push(relPath);
+    result.errored.push(adopterRelPath);
     result.erroredMessages?.push(message);
     return 'errored';
   }
@@ -241,32 +257,34 @@ function copyOne(
   // for CLAUDE.md, whereami.md, .bassclef-source.json). The transform
   // runs BEFORE writeSafely so mediation still owns the write boundary.
   // settings.json's transform returns content unchanged per ADR-055 D1.
-  const outputContent = options.transform ? options.transform(relPath, content) : content;
+  // Transform sees the ADOPTER path so the PLACEHOLDER_FILES membership
+  // check in init.ts works for .gitignore (bundle: gitignore).
+  const outputContent = options.transform ? options.transform(adopterRelPath, content) : content;
 
   if (options.dryRun) {
-    result.wouldCopy?.push(relPath);
+    result.wouldCopy?.push(adopterRelPath);
     return 'wouldCopy';
   }
 
   try {
     mkdirSafely(dirname(targetPath));
     writeSafely(targetPath, outputContent, { force: options.force ?? false });
-    result.copied.push(relPath);
+    result.copied.push(adopterRelPath);
     return 'copied';
   } catch (e) {
     if (e instanceof WriteError) {
       if (e.kind === 'AlreadyExists') {
-        result.refused.push(relPath);
+        result.refused.push(adopterRelPath);
         return 'refused';
       }
       if (e.kind === 'SymlinkRefused') {
-        result.refused.push(relPath);
+        result.refused.push(adopterRelPath);
         return 'refused';
       }
       const message =
-        `${relPath} — write failed (${e.kind}): ${e.message}. ` +
+        `${adopterRelPath} — write failed (${e.kind}): ${e.message}. ` +
         `Check the target directory exists and is writable, then rerun.`;
-      result.errored.push(relPath);
+      result.errored.push(adopterRelPath);
       result.erroredMessages?.push(message);
       return 'errored';
     }

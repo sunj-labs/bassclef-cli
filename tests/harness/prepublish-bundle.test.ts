@@ -141,7 +141,9 @@ describe('prepublish-bundle — Phase 3 dist/lite/ happy path', () => {
     expect(existsSync(join(distLite, 'CLAUDE.md'))).toBe(true);
     expect(existsSync(join(distLite, 'whereami.md'))).toBe(true);
     expect(existsSync(join(distLite, '.bassclef-source.json'))).toBe(true);
-    expect(existsSync(join(distLite, '.gitignore'))).toBe(true);
+    // npm-pack strips .gitignore files; prepublish ships it as
+    // `gitignore` (no dot) in dist/lite/; walker renames back at write.
+    expect(existsSync(join(distLite, 'gitignore'))).toBe(true);
     // Phase 3 L4 pre-mortem fold — wiring manifest lands in dist/lite/
     // standards/ so the reader schema check works.
     expect(existsSync(join(distLite, 'standards', 'bassclef-wiring-manifest.json'))).toBe(true);

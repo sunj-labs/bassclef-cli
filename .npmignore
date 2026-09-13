@@ -1,0 +1,10 @@
+# Bassclef-cli .npmignore
+#
+# The published package.json `files` field is the primary allowlist.
+# This file exists to override npm's .gitignore-fallback behavior which
+# would otherwise filter out dist/lite/.gitignore (part of the walker's
+# template set — adopters need it).
+#
+# Left mostly empty on purpose. package.json files: [] is authoritative.
+
+# Explicitly nothing — files field controls what ships.

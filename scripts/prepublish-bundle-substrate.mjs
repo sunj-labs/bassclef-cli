@@ -213,9 +213,15 @@ function copyDistTemplates(siblingRoot, distRoot) {
         `. Expected sibling clone to carry all 4 templates.`
     );
   }
+  // npm-pack strips .gitignore files unconditionally (hard exclusion,
+  // not overridable via .npmignore or `files`). Ship .gitignore as
+  // `gitignore` in dist/lite/; the walker renames it back at write time
+  // per src/lib/copy-substrate.ts §GITIGNORE_RENAME.
+  const GITIGNORE_SPECIAL = '.gitignore';
   for (const name of DIST_TEMPLATE_FILES) {
     const src = join(templatesDir, name);
-    const dst = join(distRoot, name);
+    const dstName = name === GITIGNORE_SPECIAL ? 'gitignore' : name;
+    const dst = join(distRoot, dstName);
     const content = readFileSync(src);
     writeFileSync(dst, content, { mode: 0o644 });
   }
@@ -242,11 +248,12 @@ function postflightDistLite(distRoot, settingsObject) {
         `copyWiringManifestIntoDist did not run OR the write silently failed.`
     );
   }
-  // All 5 template + 1 settings.json + 1 wiring manifest = 7 expected files.
+  // 4 templates (with .gitignore renamed to gitignore) + settings.json
+  // + wiring manifest = 6 expected files.
   const expected = [
     join(distRoot, '.claude', 'settings.json'),
     join(distRoot, 'standards', 'bassclef-wiring-manifest.json'),
-    ...DIST_TEMPLATE_FILES.map((n) => join(distRoot, n)),
+    ...DIST_TEMPLATE_FILES.map((n) => join(distRoot, n === '.gitignore' ? 'gitignore' : n)),
   ];
   for (const p of expected) {
     if (!existsSync(p)) {
