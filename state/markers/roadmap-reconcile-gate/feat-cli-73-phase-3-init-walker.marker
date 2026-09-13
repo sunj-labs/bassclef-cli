@@ -1,0 +1,5 @@
+# Roadmap-reconcile-gate marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- reconcile-result: no drift detected — Phase 3 is the shipping-reality landing for the plan doc's recommended sequence; no canvas amendment needed
+- note: /roadmap-reconcile --dry-run not fired live this session — plan doc L54-59 already carries the operator-authored reconcile; drift check delegated to next session

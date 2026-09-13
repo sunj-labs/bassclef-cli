@@ -142,23 +142,19 @@ jobs:
             exit 1
           fi
 
-      - name: Bundle substrate via prepublish script
+      - name: Bundle dist/lite/ via prepublish script
         # Explicit invocation — the `prepublishOnly` lifecycle hook does
-        # NOT fire under `npm publish --ignore-scripts` (npm docs). ADR-007
-        # §D3 originally assumed the hook would fire; scope-b1 ship gap
-        # #40 caught the miss during pre-launch architect-review. Running
-        # the script here (as an ordinary node process, not a lifecycle
-        # hook) populates substrate/ before pack + publish see it.
+        # NOT fire under `npm publish --ignore-scripts` (npm docs). Runs
+        # here as an ordinary node process to populate dist/lite/ before
+        # pack + publish see it.
         #
-        # Runs BEFORE `npm test` so init.test.ts's end-to-end tests
-        # exercise a populated substrate/. Per issue #45 cure, init
-        # now fails loud when the bundle is missing; tests that dispatch
-        # runInit require the bundle to be present. Without this ordering
-        # the init happy-path tests would fail with exit 2.
+        # Runs BEFORE `npm test` so tests exercise a populated dist/lite/.
+        # Per Phase 3 (cli#73), init fails loud with exit 4 when the
+        # wiring manifest is missing; tests that dispatch runInit require
+        # the bundle to be present.
         #
         # BASSCLEF_SIBLING_ROOT points at the in-workspace clone from
-        # the prior step — script reads env var first per
-        # scripts/prepublish-bundle-substrate.mjs L33.
+        # the prior step.
         env:
           BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
         run: node scripts/prepublish-bundle-substrate.mjs
@@ -178,42 +174,15 @@ jobs:
       - name: Tier filter refuses tier=upstream frontmatter
         run: node scripts/tier-filter.mjs /tmp/pack.json
 
-      - name: Assert substrate/ present in tarball
-        # Saltzer-Schroeder complete-mediation fix for defect class filed
-        # at #40 — assert substrate/ file count >= 100 so any future
-        # regression fails fast at checks time.
-        #
-        # Defensive parse: guards against a future npm major shifting
-        # the pack --json output shape (per architect-review W1). If
-        # the shape does not match, exits nonzero with a clear message.
-        run: |
-          COUNT=$(node -e "
-            const p = require('/tmp/pack.json');
-            if (!Array.isArray(p) || !p[0] || !Array.isArray(p[0].files)) {
-              process.stderr.write('npm pack --json output shape unexpected — expected [{files:[{path}]}], got: ' + JSON.stringify(p).slice(0, 200) + '\n');
-              process.exit(2);
-            }
-            process.stdout.write(String(p[0].files.filter(f => f.path.startsWith('substrate/')).length));
-          ")
-          echo "substrate/ file count: $COUNT"
-          if [ "$COUNT" -lt 100 ]; then
-            echo "::error::substrate/ file count $COUNT is under the 100-file floor. Tarball would ship without substrate/. Fix: verify the 'Checkout sibling bassclef-upstream' step succeeded and BASSCLEF_UPSTREAM_TOKEN is valid. See issue #40 for diagnosis."
-            exit 1
-          fi
-
       - name: Assert dist/lite/ present in tarball
-        # Phase 2 (goal 2026-09-13b) Feathers F3 pre-mortem catch —
-        # extend the existing substrate/ assertion to ALSO cover
-        # dist/lite/. Expected count: 5 files at dist/lite/ root
-        # (.claude/settings.json + CLAUDE.md + whereami.md +
-        # .bassclef-source.json + .gitignore).
+        # Phase 3 (cli#73 MAJOR 1.0.0) — dist/lite/ is the sole bundle
+        # path. Expected 6 files: .claude/settings.json + 4 templates
+        # + standards/bassclef-wiring-manifest.json.
         #
-        # No overlap with substrate/ assertion — different path prefix.
-        # If dist/lite/ is missing, the pack step succeeded but the
-        # prepublish script's dist/lite/ build path silently skipped
-        # (env var mis-set) OR the build failed after fail-fast fired
-        # (should never reach here). Exit 1 with a specific
-        # remediation.
+        # If dist/lite/ is missing OR under-populated, the prepublish
+        # script's build path silently skipped OR the build failed
+        # (should never reach here — the script fails loud). Exit 1
+        # with a specific remediation.
         run: |
           COUNT=$(node -e "
             const p = require('/tmp/pack.json');
@@ -224,8 +193,8 @@ jobs:
             process.stdout.write(String(p[0].files.filter(f => f.path.startsWith('dist/lite/')).length));
           ")
           echo "dist/lite/ file count: $COUNT"
-          if [ "$COUNT" -lt 5 ]; then
-            echo "::error::dist/lite/ file count $COUNT is under the 5-file floor. Tarball would ship without dist/lite/. Fix: verify BASSCLEF_BUILD_DIST_LITE env is not set to 0 AND the prepublish script's dist/lite/ build path fired without silent skip. See docs/adrs/ADR-007-npm-lite-substrate-bundling.md §Acceptance delta for the contract."
+          if [ "$COUNT" -lt 6 ]; then
+            echo "::error::dist/lite/ file count $COUNT is under the 6-file floor. Tarball would ship without a complete dist/lite/. Fix: verify the prepublish script's dist/lite/ build fired and copied the wiring manifest into standards/. See docs/adrs/ADR-007-npm-lite-substrate-bundling.md §Amendment 2026-09-13c for the contract."
             exit 1
           fi
 

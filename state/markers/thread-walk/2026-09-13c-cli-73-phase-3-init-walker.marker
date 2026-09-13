@@ -1,0 +1,31 @@
+# Thread-walk marker — 2026-09-13c cli#73 Phase 3 init walker
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- goal_doc: docs/iteration-bets/2026-09-13c-cli-73-phase-3-init-walker.md
+
+## Chain walked
+
+1. 2026-09-13c-cli-73-phase-3-init-walker (this goal) → parent_bet 2026-08-06b
+2. 2026-08-06b-launch-npm-thebassclef-core → root (parent_roadmap: docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md; no further parent_bet)
+
+## Parent drivers surfaced
+
+From 2026-08-06b-launch-npm-thebassclef-core (parent, at ancestor L1-30):
+- Launch @thebassclef/core (renamed @thebassclef/lite) on npm — replaces tarball distribution path with `npm install` model
+- Primary luminaries: alan-cooper (Sam persona) + john-ousterhout (deep modules) + saltzer-schroeder (7 defensive disciplines on npm security surface)
+- Time budget: 300-500 turns; source: 8 substantive WUs × ~200t/WU per bet 27c mechanism-fidelity actuals
+- Tickets: 943, 944, 945, 946, 947, 948, 949, 950, 1055, 1110, 1143, 941, 3
+
+## Open acceptance from parent still pending
+
+- Sam magic demo — cold-start install path validation (ticket 941). This goal's Phase 4 tarball smoke closes agent-side; morning operator smoke closes end-to-end.
+- Publish pipeline consuming lite-manifest.json (ticket 947) — Phase 2 shipped; this goal's Phase 3 pivots to wiring manifest per ADR-055 D1.
+
+## Out of scope from parent
+
+- Full-content composer distribution (@thebassclef/standard, @thebassclef/ultra) — Phase 3 preserves this out-of-scope; ships only lite tier.
+- Windows support — POSIX-first per ADR-002.
+
+## Roadmap head
+
+- docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md — Phase 3 lands the last mile of the reader contract; publish 1.0.0 is the final ship gate.

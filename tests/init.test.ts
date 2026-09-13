@@ -105,13 +105,15 @@ describe('bassclef init — happy path', () => {
 describe('bassclef init — safety refusals', () => {
   it('preserves an existing settings.json when --force not passed', () => {
     // Per decomp P5: partial state runs to completion — the missing file
-    // gets created, the existing one is kept. Exit 0. Message names
-    // --force so Sam knows how to overwrite if she wants to.
+    // gets created, the existing one is kept. Exit 0. Original settings.json
+    // preserved via writeSafely refuse-overwrite in the dist/lite/ walker
+    // per ADR-055 D1 + ADR-002 Default 1.
     mkdirSync(join(workDir, '.claude'));
     writeFileSync(join(workDir, '.claude/settings.json'), '{"prior":true}');
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
-    expect(r.stdout + r.stderr).toContain('--force');
+    // Refused entry reported in walker output.
+    expect(r.stdout + r.stderr).toMatch(/refused/i);
     // Original content preserved.
     expect(readFileSync(join(workDir, '.claude/settings.json'), 'utf8'))
       .toBe('{"prior":true}');
@@ -171,34 +173,43 @@ describe('bassclef init — dry-run', () => {
 });
 
 describe('bassclef init — partial state', () => {
-  it('creates missing files and reports 1 created, 1 unchanged', () => {
+  it('creates missing config; walker refuses existing settings.json', () => {
     mkdirSync(join(workDir, '.claude'));
     writeFileSync(join(workDir, '.claude/settings.json'), '{"prior":true}');
-    // substrate.config.md missing.
+    // substrate.config.md missing; walker files (settings.json + 4 templates
+    // + wiring manifest) partially missing.
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
     expect(existsSync(join(workDir, 'substrate.config.md'))).toBe(true);
-    expect(r.stdout + r.stderr).toMatch(/1 config files created.*1 unchanged/i);
-    // settings.json content preserved.
+    // 1 cli-composed config created; walker reports substrate files copied
+    // and settings.json refused.
+    expect(r.stdout + r.stderr).toMatch(/1 config files created/i);
+    expect(r.stdout + r.stderr).toMatch(/refused/i);
+    // Original content preserved.
     expect(readFileSync(join(workDir, '.claude/settings.json'), 'utf8'))
       .toBe('{"prior":true}');
   });
 });
 
-describe('bassclef init — dry-run parity with real run (#60)', () => {
-  // Regression test for bassclef-cli#60. Cold-adopter reported that
-  // `bassclef init --dry-run` printed 2 lines while the real run wrote
-  // 283 files. Root cause at src/commands/init.ts:125-127 — dry-run
-  // returned early and never invoked dispatchSubstrateCopy. This test
-  // pins the invariant: the "would create" count in dry-run output
-  // equals the manifest entry count plus the 2 config files.
-  it('would-create count equals manifest entries + 2 config files', () => {
-    // Read the bundled manifest that ships with this repo's substrate.
-    const manifestPath = join(REPO_ROOT, 'substrate/.bassclef/lite-manifest.json');
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-      entries: Array<{ path: string }>;
-    };
-    const expectedCount = manifest.entries.length + 2; // + settings.json + substrate.config.md
+describe('bassclef init — dry-run parity with real run (#60 + ADR-055)', () => {
+  // Regression test for bassclef-cli#60. Extended for ADR-055 D1 in
+  // Phase 3: init now walks dist/lite/ (not substrate/). Invariant: the
+  // "would create" count matches the walker file count + the cli-composed
+  // config file (substrate.config.md).
+  it('would-create count equals dist/lite/ file count + 1 config file', () => {
+    // Walk dist/lite/ from this repo's prepublish output. Count all files.
+    const distLite = join(REPO_ROOT, 'dist/lite');
+    let walkerCount = 0;
+    function count(dir: string): void {
+      for (const name of require('node:fs').readdirSync(dir)) {
+        const full = join(dir, name);
+        const st = require('node:fs').statSync(full);
+        if (st.isDirectory()) count(full);
+        else walkerCount += 1;
+      }
+    }
+    count(distLite);
+    const expectedCount = walkerCount + 1; // + substrate.config.md
 
     const r = runCli(['--dry-run'], { cwd: workDir });
     expect(r.status).toBe(0);
@@ -209,14 +220,13 @@ describe('bassclef init — dry-run parity with real run (#60)', () => {
     expect(wouldCreateLines.length).toBe(expectedCount);
   });
 
-  it('writes nothing to substrate paths under dry-run', () => {
+  it('writes nothing under dry-run', () => {
     const r = runCli(['--dry-run'], { cwd: workDir });
     expect(r.status).toBe(0);
-    // No substrate directories should exist after dry-run.
-    expect(existsSync(join(workDir, '.claude/rules'))).toBe(false);
-    expect(existsSync(join(workDir, '.claude/hooks'))).toBe(false);
-    expect(existsSync(join(workDir, '.claude/skills'))).toBe(false);
-    expect(existsSync(join(workDir, 'standards'))).toBe(false);
+    // No walker output should land on disk in dry-run.
+    expect(existsSync(join(workDir, '.claude/settings.json'))).toBe(false);
+    expect(existsSync(join(workDir, 'CLAUDE.md'))).toBe(false);
+    expect(existsSync(join(workDir, 'standards/bassclef-wiring-manifest.json'))).toBe(false);
   });
 });
 

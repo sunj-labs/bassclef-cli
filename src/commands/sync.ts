@@ -29,10 +29,6 @@ import { hashContent } from '../lib/hash.js';
 import { shouldRefuseRoot } from './init.js';
 import { version as pkgVersion } from '../index.js';
 import {
-  settingsJsonTemplate,
-  SETTINGS_TEMPLATE_VERSION,
-} from './init-templates/settings-json.js';
-import {
   substrateConfigMdTemplate,
   SUBSTRATE_CONFIG_TEMPLATE_VERSION,
 } from './init-templates/substrate-config-md.js';
@@ -41,17 +37,15 @@ interface TemplateSpec {
   templateName: string;
   currentVersion: string;
   render: (pkgVersion: string) => string;
-  // Recognizer for the `$bassclef` marker in the file's content.
+  // Recognizer for the marker in the file's content.
   hasMarker: (content: string) => boolean;
 }
 
+// Post-Phase 3 (cli#73 MAJOR 1.0.0): sync manages cli-composed templates
+// only. Walker-owned files (dist/lite/ tree — settings.json, CLAUDE.md,
+// whereami.md, .bassclef-source.json, .gitignore) refresh via
+// `bassclef init --force` per ADR-055 D1 verbatim-copy invariant.
 const TEMPLATES: readonly TemplateSpec[] = [
-  {
-    templateName: 'settings.json',
-    currentVersion: SETTINGS_TEMPLATE_VERSION,
-    render: settingsJsonTemplate,
-    hasMarker: (c) => c.includes('"$bassclef"'),
-  },
   {
     templateName: 'substrate.config.md',
     currentVersion: SUBSTRATE_CONFIG_TEMPLATE_VERSION,
