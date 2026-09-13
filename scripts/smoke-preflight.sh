@@ -209,7 +209,7 @@ fi
 
 hdr "6. Running Claude Code sessions"
 
-RUNNING=$(pgrep -fl claude 2>/dev/null | grep -v -- 'pgrep' | grep -v -- 'smoke-preflight' || true)
+RUNNING=$(pgrep -u "$(id -u)" -fl claude 2>/dev/null | grep -v -- 'pgrep' | grep -v -- 'smoke-preflight' || true)
 if [ -n "${RUNNING}" ]; then
   note "found running processes:"
   echo "${RUNNING}" | sed 's/^/    /'
