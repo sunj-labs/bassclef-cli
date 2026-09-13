@@ -16,6 +16,7 @@
 
 import { readManifest, writeManifest, ManifestReadError, computeConfigHashes } from './manifest-io.js';
 import type { Manifest } from './manifest-types.js';
+import { MANIFEST_SHAPE_VERSION } from './manifest-types.js';
 import { copySubstrate } from './copy-substrate.js';
 import { confirm } from './prompt.js';
 import { CONFIG_FILES, CURRENT_ENTRY_COUNT } from './paths.js';
@@ -133,6 +134,7 @@ export async function runPathA(
   // Build new 149-entry manifest — 146 added substrate entries + 3
   // preserved config entries with adopter-edited hashes recorded.
   const newManifest: Manifest = {
+    schema_version: MANIFEST_SHAPE_VERSION,
     $bassclef: {
       template: 'init.manifest.json',
       manifest_schema_version: '0.1.0',
