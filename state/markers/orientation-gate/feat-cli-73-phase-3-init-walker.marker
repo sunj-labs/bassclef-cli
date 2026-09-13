@@ -1,0 +1,6 @@
+# Orientation-gate marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- whereami-read: docs/whereami.md read at prep via session summary + plan doc L54-59; iteration_bet: Phase 2 shipped; next_bet: Phase 3
+- parent-chain-walked: 2026-09-13c → 2026-08-06b (root)
+- open-acceptance-from-parent: Sam magic demo (ticket 941); publish pipeline consuming lite-manifest.json (ticket 947, superseded by wiring manifest per ADR-055)

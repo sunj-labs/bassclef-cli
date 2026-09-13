@@ -1,0 +1,6 @@
+# ADR-deviation marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- adr_governing: ADR-055 (upstream) + ADR-002 + ADR-001 + ADR-007 + ADR-009 (all cli-side)
+- outcome: ADR-honored
+- note: Phase 3 IS the ADR-055 landing at cli. ADR-002 amended in Step 4 (new exit codes 4+5); ADR-001 amended in Step 6.5 (files array). Both amendments in-place per Nygard lifecycle; no supersession.

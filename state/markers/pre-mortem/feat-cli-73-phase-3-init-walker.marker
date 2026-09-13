@@ -1,0 +1,14 @@
+# Pre-mortem marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- mode: light
+- ledger: docs/risk-ledgers/2026-09-13c-cli-73-phase-3-init-walker.md
+- lenses: michael-nygard (5 risks) + michael-feathers (4 risks) + linus-torvalds (4 risks) + cross-cutting (2 risks)
+- klein_shape: 3 lenses × 3-5 risks (30 min); satisfied
+- strongest-folds-into-plan:
+  - N1 + N2 → Step 4 fail-loud test coverage
+  - N3 → Cooper grade-8 message strings at Step 5 + Step 4
+  - F1 → Step 6.5 test enumeration before substrate/ delete
+  - F3 → Step 1 RED assertion on file list + byte-identity
+  - L4 → prepublish postflight asserts wiring manifest in dist/lite/standards/
+  - N4 → Phase 4 smoke gates publish dispatch

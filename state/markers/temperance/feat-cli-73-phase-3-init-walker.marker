@@ -1,0 +1,7 @@
+# Temperance marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- scope-decision: Bundle Phase 3 (init walker + fail-loud + banner + placeholders + substrate/ drop) + Phase 4-agent (tarball smoke on cold-adopter-1 profile). Publish dispatch waits on operator morning greenlight.
+- right-thing: init walker per ADR-055 D1-D7; MAJOR 1.0.0 because operator confirmed zero npm adopters
+- right-way: MECE steps; RED parity test before walker; per-step per-file writeSafely preserved; fail-loud with structured errors
+- drift-trigger: if any step exceeds 1.5x time budget OR walker requires >200-line addition, pause + reshape

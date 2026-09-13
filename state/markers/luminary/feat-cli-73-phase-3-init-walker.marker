@@ -1,0 +1,9 @@
+# Luminary marker — cli#73 Phase 3 + Phase 4
+- date: 2026-09-13
+- branch: feat/cli-73-phase-3-init-walker
+- lead: michael-nygard
+- lead-why: Phase 3's entire scope is fail-loud discipline per ADR-055 D4. Exit codes 4+5 are the load-bearing new behavior. Nygard's stability patterns govern.
+- supporting:
+  - michael-feathers — parity test as characterization; must fail RED before walker source lands (Step 1)
+  - linus-torvalds — every ADR-002 safety invariant preserved through the walker refactor
+  - alan-cooper — Sam persona at banner + errors; grade-8 messages; cure named in every failure path
