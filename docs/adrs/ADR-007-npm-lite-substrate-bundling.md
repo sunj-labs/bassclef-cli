@@ -8,6 +8,15 @@ accepted: 2026-08-28
 accepted_via: Step 3 of goal 2026-08-28d authors this ADR; Step 5-6 code ships the contract; Step 7 signoff runs grep audit against ledger.
 supersedes: null
 superseded_by: null
+partial_supersedes: [ADR-005]
+extended_by: [ADR-009]
+amendments:
+  - date: 2026-08-29
+    scope: RFC-0001 disposition (scope-b1) — D2 + D5 removed; D3 + D4 amended; D5-cure + D7 added
+  - date: 2026-08-30
+    scope: scope-e (ADR-008) — bassclef migrate subcommand ships the migration path D5 punted
+  - date: 2026-09-13
+    scope: goal 2026-09-13 cli#68 Phase 1 Step 4 — Acceptance delta section added citing ADR-055 D1-D7; partial_supersedes ADR-005 (Sam demo acceptance criterion superseded)
 authoring_luminaries:
   primary: [john-ousterhout, david-parnas]
   supporting: [michael-nygard, michael-feathers, kent-beck, alan-cooper]
@@ -22,6 +31,7 @@ references:
   - docs/adrs/ADR-002-bassclef-init-safety-contract.md
   - docs/adrs/ADR-003-bassclef-sync-safety-contract.md
   - docs/adrs/ADR-005-npm-distribution-architecture.md
+  - docs/adrs/ADR-009-manifest-as-init-contract-source.md
 ---
 
 # ADR-007 — Pin the npm-lite substrate bundling contract
@@ -272,6 +282,44 @@ Every decision above pins to at least one risk ledger row. Every ledger row has 
 R2 (no execSync in prepublish) + R4 (extended manifest-io module with legacy detection) + R6 (path constants module) live in decomposition § Control objects; not ADR-level decisions because they're code shape rather than adopter contract.
 
 **Correction landed at Step 4 preflight** — R3 and R4 build targets amended in ledger v2 to reference EXISTING `src/lib/write-safely.ts` and EXISTING `src/lib/manifest-io.ts` (both shipped by WU-2 init work per `tests/write-safely.test.ts` L26 + `tests/manifest-io.test.ts` L18-23). Original decomposition text mislabeled both as "new file"; extension approach preserves the ADR-002 complete-mediation invariant already established by those modules.
+
+## Acceptance delta 2026-09-13 — post-ADR-055 pivot
+
+**Scope.** Bassclef-upstream 12e shipped at v0.39.0 with tag `6cdff4a4` on 2026-09-13. Three upstream PRs (#1615 + #1616 + #1617) landed ADR-055 pinning the reader-side contract for cli init. This section names which acceptance criteria the pivot reshaped so future maintainers reading ADR-007 see the delta explicitly.
+
+**Which of ADR-007's decisions carry forward unchanged.**
+
+- **D1 (bundle mechanism)** — `substrate/<path>` bundle path stays the current shape until Phase 2 (cli#25) publish workflow lands. Phase 2 replaces `substrate/` with `dist/<tier>/` from bassclef-upstream's build step per ADR-055 D1. Until Phase 2 ships, D1's current bundle path is what the publish workflow writes.
+- **D3 (prepublish safety envelope)** — count + size + manifest-present checks stay. Phase 2 amends the checks to read `dist/<tier>/` from upstream tarball instead of building locally.
+- **D6 (version bump + release cadence)** — semver-lock invariants stay. `substrate/` path rename to `dist/<tier>/` is documented as MAJOR under the D1 lock; goal 2026-09-13 acknowledges this and stages Phase 2 to ship the rename.
+- **D7 (manifest schema evolution)** — add-only, semver-locked. bassclef-upstream extended the wiring manifest schema at v0.39.0 with per-entry tier tags; this is additive per D7's rules.
+
+**Which of ADR-007's decisions get superseded by ADR-055.**
+
+- **D4 (init copy semantics)** — post-Phase 3, init walks `dist/<tier>/` tree from bundled substrate, reads `dist/<tier>/.claude/settings.json` verbatim, prints `N hooks armed (<tier> tier)` banner. Prior D4 shape (walk `substrate/` per manifest entries; per-directory progress line; error messages that name the fix) preserves — banner adds; walk-target changes at Phase 2. Full new shape at ADR-055 D1 + D5. Cross-referenced in cli-side ADR-009 D1 + D5.
+
+**Which acceptance criteria from ADR-005 this ADR partial_supersedes.**
+
+- **ADR-005 §Consequences §Harder L99 Sam demo criterion** — "confirm sync hook set up" — superseded by ADR-055 D5 hook-count banner criterion. See ADR-005 §Amendment 2026-09-13 for the delta. This ADR-007 amendment names the supersession explicitly because ADR-007's `Sam sees substrate at init time` framing (D4 + D5 in the original decisions) was the intermediate step between ADR-005's two-road framing and ADR-055's manifest-as-contract framing.
+
+**What Phase 2 (cli#25) will change in ADR-007.**
+
+Phase 2 amends D1 to name `dist/<tier>/` as the bundle path (from `substrate/`). Phase 2 amends D3 prepublish envelope to read the upstream-built tree via `git clone` + `git checkout <tag>` at publish time (bassclef-upstream v0.39.0 tag is the current pin). Phase 2 amends the package.json `files` field to include `dist/<tier>/**`. This ADR-007 amendment names the Phase 2 scope; Phase 2 lands the amendment.
+
+**What Phase 3 (init walker) will do against ADR-007's contract.**
+
+Phase 3 implements the walker that reads `dist/<tier>/` per D4's updated shape. Phase 3 adds the hook-count banner per ADR-055 D5. Phase 3 adds fail-loud paths per ADR-055 D4. Phase 3 ships cli-side Feathers parity test as characterization for the init postcondition. This ADR-007 amendment names the Phase 3 scope; Phase 3 lands the code.
+
+**Sequencing.**
+
+1. Phase 1 (this goal) — ADR-002 + ADR-005 + ADR-007 amendments; new ADR-009; UC-init rewrite; decomposition extension. **Docs only.** Ships as the current PR.
+2. Phase 2 (cli#25) — publish workflow reads `dist/<tier>/` from bassclef-upstream v0.39.0 tarball; ADR-007 D1 amendment lands then.
+3. Phase 3 (init walker code) — cli init code reads `dist/<tier>/`; hook-count banner ships; fail-loud paths ship.
+4. Phase 4 (cold-adopter smoke) — end-to-end smoke test per bassclef-upstream coord doc §Cold-adopter smoke test.
+
+**Adopter invariants preserved across all phases.**
+
+Every safety invariant listed in ADR-002 §Invariants stays. Every safety invariant listed in ADR-003 (sync) stays. Every safety invariant listed in ADR-004 (publish) stays. The pivot extends the file-list and reshapes the acceptance criterion; it does not weaken any invariant.
 
 ## References
 
