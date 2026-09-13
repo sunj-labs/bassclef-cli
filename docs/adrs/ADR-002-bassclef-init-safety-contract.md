@@ -8,6 +8,12 @@ accepted: 2026-08-08
 accepted_via: PR #4 merged — WU-2 init command shipped the safety contract this ADR pins
 supersedes: null
 superseded_by: null
+extended_by: [ADR-009]
+amendments:
+  - date: 2026-08-11
+    scope: iteration b — align Status with frontmatter; fix files-count mismatch; extend complete-mediation to mkdir
+  - date: 2026-09-13
+    scope: goal 2026-09-13 cli#68 Phase 1 Step 2 — file-list contract extends from 3 named files to full dist/<tier>/ tree walk per ADR-009 D1 (which cross-cites ADR-055 D1); every safety invariant preserved unchanged
 ---
 
 # ADR-002 — Pin the safety contract for `bassclef init` — fail-safe defaults + atomic writes + path scoping
@@ -236,6 +242,76 @@ Exit codes:
 Any change to a listed default, file, matrix entry, or exit code is a
 MAJOR bump under semver.
 
+## Amendment 2026-09-13 — file-list extends to full dist/<tier>/ tree
+
+**What extends.** The `Files written` invariant list above named 3 files
+that init wrote in the 0.0.x → 0.1.x versions. Post-ADR-055 pivot per
+ADR-009 D1, cli init walks the full `dist/<tier>/` tree from the
+bundled substrate at `node_modules/@thebassclef/<tier>/dist/<tier>/`.
+
+The file-list becomes:
+
+- `dist/<tier>/.claude/settings.json` — copied verbatim from the tarball; upstream build step at `scripts/build-adopter-tree.sh` populated it with tier-filtered hook entries
+- `dist/<tier>/.claude/hooks/*.sh` — hooks matching the tier
+- `dist/<tier>/.claude/rules/*.md` — rules matching the tier
+- `dist/<tier>/.claude/skills/*/SKILL.md` — skills matching the tier
+- `dist/<tier>/standards/*.md` — standards matching the tier
+- `dist/<tier>/CLAUDE.md` — template with placeholders substituted at write time
+- `dist/<tier>/docs/whereami.md` — template
+- `dist/<tier>/.bassclef/init.manifest.json` — manifest for `bassclef sync`
+- `dist/<tier>/.bassclef-source.json` — template
+- `dist/<tier>/.gitignore` — template
+
+The full set matches the tier the installed package resolved to per
+ADR-055 D7 tier hierarchy. `@thebassclef/lite` reads `dist/lite/`.
+
+**What preserves unchanged.** Every safety invariant listed in the
+`Invariants established` section above stays exactly as written. Each
+file in the extended tree is subject to:
+
+- Refuse-overwrite by default (Default 1); `--force` disables per-file existence check
+- Refuse to run as root (Default 2)
+- Refuse to write outside `$HOME` (Default 3)
+- Refuse to write to a directory not owned by the current uid (Default 4)
+- Unconditional symlink refusal at write time (Default 5); no flag overrides
+- Atomic writes via `O_CREAT | O_EXCL | O_NOFOLLOW` per file
+- Complete mediation via `writeSafely` + `mkdirSafely` — no `fs.writeFileSync` outside the audited module
+- Refuse to re-initialize a project (manifest-exists refusal); `bassclef sync` is the update path
+- Escape-hatch matrix (`--force`, `--allow-root`, `--allow-any-dir`) — same semantics, applied per file
+- Dry-run — same shape; one line per file with `would create`, `would skip`, `would refuse`
+- Exit codes 0/1/2/3 — same semantics; failures during the tree walk accumulate per file with the same exit-code semantics
+
+**Placeholder substitution.** The template files at
+`dist/<tier>/CLAUDE.md`, `dist/<tier>/docs/whereami.md`, and
+`dist/<tier>/.bassclef-source.json` carry placeholders — `[REPO_NAME]`,
+`[ISO_TIMESTAMP]`, `[TIER]`. Cli init substitutes each placeholder at
+write time per the coord doc §UC-init Main success scenario step 5.
+Substitution is deterministic; the same substitution runs at every
+init call.
+
+**Verbatim copy for settings.json.** The `dist/<tier>/.claude/settings.json`
+file is copied byte-for-byte per ADR-009 D1. Cli init does NOT compose
+its own settings.json. Cli init does NOT filter entries by tier at
+runtime — upstream did that at build time via `scripts/build-adopter-tree.sh`.
+
+**Manifest handling.** The `.bassclef/init.manifest.json` file continues
+to record path + template + template version + outcome per file
+written. The manifest schema stays compatible; the file-count grows to
+match the extended tree.
+
+**Existing safety class this amendment closes.** The prior file-list
+of 3 named files reproduced the cold-adopter empty-hooks class since
+`@thebassclef/lite@0.1.0`. `bassclef init` wrote `.claude/settings.json`
+with an empty hooks block. No hook fired at session-start. Silent
+failure. Extending the file-list to the full `dist/<tier>/` tree cures
+the class at Phase 3 code ship per goal doc `docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md`.
+
+**Semver.** File-list extension is additive — new files added at
+init-time. Existing 0.1.x adopters may re-run `bassclef init` after
+upgrading `@thebassclef/lite` to receive the fix; refuse-overwrite
+invariant preserves their existing settings.json unless `--force` is
+passed. No adopter contract breaks under this amendment.
+
 ## References
 
 - Bet: `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md`
@@ -244,14 +320,24 @@ MAJOR bump under semver.
   consult + challenger pass + revised test list)
 - ADR-001 — build toolchain pin (invariants this ADR builds on:
   no source shipped, files whitelist)
+- ADR-009 — manifest as init contract source (extends this ADR;
+  ships with the 2026-09-13 amendment)
 - ADR-031 — we-don't-break-adopters (the reason default choices are
   semver-locked)
+- bassclef-upstream ADR-055 — reader-side contract; D1-D7 pin the
+  cli init contract this amendment brings ADR-002 into conformance with
+- bassclef-upstream ADR-051 Consumers section — cli MUST/MUST-NOT
+  rules
+- bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` —
+  Cockburn UC-init + Jacobson BCE + GRASP roles
 - Luminaries:
   - `saltzer-schroeder.md` — 8 principles; principles 2, 3, 5, 6, 8
     directly shape this contract
   - `alan-cooper.md` — Sam persona lens on install workflow
   - `john-ousterhout.md` — define errors out of existence; deep
     modules
+  - `michael-nygard.md` — ADR lifecycle across pivots; amendment
+    discipline
 - POSIX man pages: `open(2)` for `O_EXCL`, `O_NOFOLLOW` semantics
 - Prior art: `git init` (default refuses to reinit but warns),
   `npm init` (default overwrites), `create-react-app` (default
