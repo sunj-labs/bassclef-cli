@@ -1,16 +1,5 @@
-# Temperance marker — 2026-09-07 /longrun for @thebassclef/lite@0.1.0
-
-- date: 2026-09-07
+# Temperance marker — cli 1.0.1 hook routing
+- date: 2026-09-13
 - branch: main
-- goal: rename + sync + validate + publish @thebassclef/lite@0.1.0; sync target v1.5.0; add manifest backward-compat test
-- scope-decision:
-  - Right thing: ship @thebassclef/lite@0.1.0 in one goal — closes coord #51 Q1; honors 2026-09-05 operator direction
-  - Right way: rename + sync + validate ride in the same PR chain (per memory feedback_rename_must_ride_with_manifest_sync); backward-compat test shipped first as PR #52 (merged be1673c)
-  - Not now: Q2 slice (#25 dist/lite/ consumer, #49 auto-trigger); UX/mock-gallery work per operator direction "avoiding any unnecessary UX-related design work"
-- drift-trigger:
-  - Substrate sync 1.2.19 → 1.5.0 surfaces schema break requiring upstream fix → PAUSE + reshape
-  - npm 2FA Touch ID takes >2 retries → PAUSE + /diagnose per memory feedback_npm_11_required_for_trusted_publisher
-  - Downstream packaging fails smoke → ABORT per operator gate
-- operator-config: orchestrator-gated; auto-merge PRs within scope; operator on hard ceilings (schema/auth/security/prod-deploy) + npm 2FA
-- pre-mortem: docs/risk-ledgers/2026-09-07-lite-rename-sync.md (top-3 risks: Saltzer #1 tarball audit + Ousterhout #1 content-hash + Saltzer #2 prepublishOnly)
-- pr-52: backward-compat test merged 2026-09-07T06:13:18Z as be1673c
+- scope-decision: right thing — cli 1.0.1 pins v0.40.0 + routes hook binaries per settings.json prefix ($HOME vs $CLAUDE_PROJECT_DIR); right way — full OOAD chain (10 steps) + Tier 0 RED harness before code touch; drift trigger — any risk not folded into an engineering action by Step 9 → pause + escalate to operator
+- operator-confirmed at: session 2026-09-13d turn "yes that's fine and add an /rfc once plan is developed"
