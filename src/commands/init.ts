@@ -23,7 +23,7 @@
 //   4 — wiring manifest missing (ADR-055 D4)
 //   5 — wiring manifest schema major incompatible (ADR-055 D4)
 
-import { existsSync, lstatSync, readFileSync } from 'node:fs';
+import { existsSync, lstatSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
@@ -36,7 +36,7 @@ import {
 } from './init-templates/substrate-config-md.js';
 import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
-import { MANIFEST_RELATIVE_PATH } from '../lib/manifest-io.js';
+import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifest-io.js';
 import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
 import { HOOKS_SUBPATH } from '../lib/paths.js';
 
@@ -176,16 +176,12 @@ export function runInit(argv: readonly string[]): number {
 function maybeEmitUpgradeAdvisory(targetDir: string, yes: boolean): 'ok' | 'refused' | 'upgrade-approved' {
   const manifestPath = join(targetDir, MANIFEST_RELATIVE_PATH);
   if (!existsSync(manifestPath)) return 'ok';
-  let manifest: { schema_version?: unknown };
-  try {
-    manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  } catch {
-    return 'ok';
-  }
+  // Manifest read goes through the typed wrapper in src/lib/manifest-io.ts
+  // per R4 discipline. Wrapper returns null when the manifest is absent,
+  // unreadable, OR missing the schema_version field (1.0.0 shape).
+  const version = readManifestShapeVersion(targetDir);
   // Manifest already at v2 (or later) — no upgrade to announce.
-  if (typeof manifest.schema_version === 'number' && manifest.schema_version >= 2) {
-    return 'ok';
-  }
+  if (version !== null && version >= 2) return 'ok';
   process.stdout.write(
     'bassclef init: cli 1.0.1 introduces user-scope hook installation at ' +
       `~/${HOOKS_SUBPATH}. cli 1.0.0 did not write there.\n`
@@ -332,8 +328,10 @@ function dispatchSubstrateCopy(
       process.stderr.write(`  substrate: ${msg}\n`);
     }
   }
-  // N5 fold — return non-zero on count mismatch so scripts detect it.
-  if (copiedCount !== declaredCount) return 2;
+  // N5 fold — banner reads "N of M" on mismatch (informational). Exit
+  // code follows the existing refused/errored discipline so partial-
+  // copy scenarios where settings.json refused (adopter's existing
+  // file preserved) still exit 0 when no hook copy actually errored.
   return result.errored.length > 0 ? 2 : 0;
 }
 

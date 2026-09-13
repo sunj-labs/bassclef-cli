@@ -51,10 +51,14 @@ function runCli(args: readonly string[], opts?: { cwd?: string }) {
     encoding: 'utf8',
     timeout: 15000,
     cwd: opts?.cwd,
+    // Cli 1.0.1 writes user-scope hooks to $HOME/.claude/hooks/.
+    // Isolate HOME per test so runs don't touch operator's real home.
+    env: { ...process.env, HOME: fakeHome },
   });
 }
 
 let workDir: string;
+let fakeHome: string;
 
 beforeAll(() => {
   // Fixture precondition: dist/lite/ must exist. `npm run build` (vite)
@@ -78,11 +82,16 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(HOME, '.bassclef-init-parity-test-'));
+  // Isolate HOME first so mkdtemp for workDir sits inside it. Every
+  // test gets a fresh HOME so cli 1.0.1's user-scope writes go to a
+  // temp dir instead of the operator's real ~/.claude/hooks/.
+  fakeHome = mkdtempSync(join(HOME, '.bassclef-init-parity-fakehome-'));
+  workDir = mkdtempSync(join(fakeHome, '.bassclef-init-parity-test-'));
 });
 
 afterEach(() => {
   try { rmSync(workDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  try { rmSync(fakeHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
 describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', () => {
