@@ -1,0 +1,13 @@
+# Temperance marker — feat/step-6-rename-package-publish-lite-0.1.0
+
+- date: 2026-09-07
+- branch: feat/step-6-rename-package-publish-lite-0.1.0
+- scope-decision:
+  - Right thing: rename package.json name from @thebassclef/core to @thebassclef/lite; bump version 0.1.1 → 0.1.0 (lite version chain starts at 0.0.1 reserved; 0.1.0 is next MINOR); amend publish.yml + ADR-004 to reflect target rename (Path A per operator 2026-09-07)
+  - Right way: preserve ADR-004 original prose (adopter compatibility); add Amendment section per @luminary michael-nygard ADR lifecycle; single stacked-atomic PR
+  - Not now: npm trusted-publisher config change at npmjs.com (external; operator hands-on-keys); deprecate @thebassclef/core (Step 7); coord #51 comment (Step 8); publish itself (needs operator approval + Touch ID at GHA env gate)
+- drift-trigger:
+  - Touching src/ code (out of Step 6 scope)
+  - Modifying prior CHANGELOG entries (per prior temperance discipline preserved)
+  - Editing bump-version.mjs (out of scope; if version bump script needs update for lite, file follow-on)
+- pr-strategy: single atomic PR per operator direction "orchestrator-gated" + Path A

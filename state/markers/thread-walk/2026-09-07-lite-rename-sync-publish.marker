@@ -1,0 +1,14 @@
+# Thread walk marker — 2026-09-07-lite-rename-sync-publish
+
+- date: 2026-09-07
+- goal: 2026-09-07-lite-rename-sync-publish
+- parent_bet: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md (read in fork this turn)
+- parent chain walk:
+  - Level 0: 2026-09-07-lite-rename-sync-publish (this goal)
+  - Level 1: 2026-08-06b-launch-npm-thebassclef-core (parent — root of npm distribution thread; parent_roadmap: docs/roadmaps/2026-07-20-bassclef-lite-market-entry.md in bassclef-upstream)
+- inherited drivers: Cooper (Sam first-touch), Ousterhout (deep modules), Saltzer-Schroeder (npm security)
+- open acceptance from parent 08-06b:
+  - WU-1 through WU-5 shipped; WU-6 partial (cold-adopter harness gap); WU-7 Adam Sharpe deferred; WU-8 Sam demo pending live 0.1.x
+  - This goal ships the rename+sync as a follow-on refinement of WU-5 line (semver + adopter compat)
+- out_of_scope inherited: kilo runtime, MCP server, standard/ultra publish, unscoped bassclef transfer
+- coord ticket #51 Q1 slot: this goal fills it

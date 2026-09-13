@@ -1,0 +1,10 @@
+# Luminary marker — 2026-09-13b cli#25 Phase 2
+- date: 2026-09-13
+- branch: feat/cli-25-phase-2-publish-workflow-dist-lite
+- lead: john-ousterhout — deep module discipline; owns Step 1 inline build logic shape
+- supporting:
+  - michael-nygard — fail-fast at each build step (Steps 1 + 2)
+  - michael-feathers — characterization tests before source (Step 6)
+  - linus-torvalds — adopter invariant preservation (Steps 3 + 5)
+  - alan-cooper — Sam persona anchor (Sam sees no change at Phase 2)
+  - jerome-saltzer-and-michael-schroeder — complete mediation across build steps

@@ -1,0 +1,5 @@
+# luminary marker — 2026-09-13b cli#25 Phase 2
+- date: 2026-09-13
+- branch: feat/cli-25-phase-2-publish-workflow-dist-lite
+- goal: 2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite
+- gate: luminary
