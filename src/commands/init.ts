@@ -242,15 +242,28 @@ function dispatchSubstrateCopy(
 // Placeholder substitution per UC-init §Main step 5 + ADR-002 amendment.
 // Runs before writeSafely inside copySubstrate. settings.json passes
 // through unchanged — verbatim per ADR-055 D1.
+//
+// Canonical shapes per UC-init amendment 2026-09-13: [REPO_NAME],
+// [ISO_TIMESTAMP], [TIER]. bassclef-upstream v0.39.0 dist-templates
+// (CLAUDE.md at least) also use `[Repo name]` (mixed case, with space)
+// and `<tier>` (angle brackets) as historical variants. This transform
+// accepts both shapes so cold-adopter output shows real values, not
+// literal placeholders. Drop the historical variants after
+// bassclef-cli#77 lands the upstream template rewrite.
 function makePlaceholderTransform(targetDir: string): (relPath: string, content: string) => string {
   const repoName = basename(targetDir);
   const timestamp = new Date().toISOString();
   return (relPath, content) => {
     if (!PLACEHOLDER_FILES.has(relPath)) return content;
     return content
+      // Canonical shapes.
       .replace(/\[REPO_NAME\]/g, repoName)
       .replace(/\[ISO_TIMESTAMP\]/g, timestamp)
-      .replace(/\[TIER\]/g, RESOLVED_TIER);
+      .replace(/\[TIER\]/g, RESOLVED_TIER)
+      // Historical shapes shipped by bassclef-upstream v0.39.0 dist-templates.
+      // Follow-on: bassclef-cli#77 tracks the upstream cure.
+      .replace(/\[Repo name\]/g, repoName)
+      .replace(/<tier>/g, RESOLVED_TIER);
   };
 }
 

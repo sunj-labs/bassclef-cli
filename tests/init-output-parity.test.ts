@@ -146,10 +146,15 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
 
     for (const name of ['CLAUDE.md', 'whereami.md', '.bassclef-source.json']) {
       const content = readFileSync(join(workDir, name), 'utf8');
-      // Placeholders defined in ADR-002 amendment 2026-09-13.
+      // Canonical shapes per ADR-002 amendment 2026-09-13.
       expect(content).not.toMatch(/\[REPO_NAME\]/);
       expect(content).not.toMatch(/\[ISO_TIMESTAMP\]/);
       expect(content).not.toMatch(/\[TIER\]/);
+      // Historical shapes shipped by bassclef-upstream v0.39.0 dist-templates.
+      // Tracked at bassclef-cli#77 for upstream cure; cli transform accepts
+      // both shapes until then.
+      expect(content).not.toMatch(/\[Repo name\]/);
+      expect(content).not.toMatch(/<tier>/);
     }
   });
 
