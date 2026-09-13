@@ -302,6 +302,19 @@ function emitDistLiteSettings(distRoot, settingsObject) {
   return outPath;
 }
 
+// Phase 3 addition — copy the wiring manifest itself into dist/lite/
+// standards/ so the reader (bassclef init) can verify schema version
+// per ADR-055 D4. Without this the reader has no manifest to check
+// against and every init call exits 4 (ManifestMissing).
+function copyWiringManifestIntoDist(siblingRoot, distRoot) {
+  const src = join(siblingRoot, WIRING_MANIFEST_REL);
+  const dstDir = join(distRoot, 'standards');
+  mkdirSync(dstDir, { recursive: true, mode: 0o755 });
+  const dst = join(dstDir, 'bassclef-wiring-manifest.json');
+  const content = readFileSync(src);
+  writeFileSync(dst, content, { mode: 0o644 });
+}
+
 function copyDistTemplates(siblingRoot, distRoot) {
   const templatesDir = join(siblingRoot, DIST_TEMPLATES_REL);
   if (!existsSync(templatesDir)) {
@@ -339,9 +352,22 @@ function postflightDistLite(distRoot, settingsObject) {
         `settings.json. Silent-empty class guard per bassclef-upstream#1505.`
     );
   }
-  // All 5 expected files present.
+  // Phase 3 addition — assert wiring manifest present at
+  // dist/lite/standards/bassclef-wiring-manifest.json. Reader per ADR-055
+  // D4 fails with exit code 4 when this file is missing at init time.
+  // Post-flight catches the broken build before it ships.
+  const wiringManifestInDist = join(distRoot, 'standards', 'bassclef-wiring-manifest.json');
+  if (!existsSync(wiringManifestInDist)) {
+    fail(
+      `dist/lite/ postflight: wiring manifest missing at ${wiringManifestInDist}. ` +
+        `Reader would fail with exit code 4 at every init call. ` +
+        `copyWiringManifestIntoDist did not run OR the write silently failed.`
+    );
+  }
+  // All 5 template + 1 settings.json + 1 wiring manifest = 7 expected files.
   const expected = [
     join(distRoot, '.claude', 'settings.json'),
+    join(distRoot, 'standards', 'bassclef-wiring-manifest.json'),
     ...DIST_TEMPLATE_FILES.map((n) => join(distRoot, n)),
   ];
   for (const p of expected) {
@@ -359,6 +385,9 @@ function buildDistLiteTree(siblingRoot) {
   mkdirSync(distRoot, { recursive: true, mode: 0o755 });
   const settingsPath = emitDistLiteSettings(distRoot, filtered);
   copyDistTemplates(siblingRoot, distRoot);
+  // Phase 3 — put the wiring manifest at dist/lite/standards/ so the
+  // reader can verify schema version per ADR-055 D4.
+  copyWiringManifestIntoDist(siblingRoot, distRoot);
   const hookCount = postflightDistLite(distRoot, filtered);
   return { wiringManifestPath, settingsPath, hookCount, wiringVersion: wiringManifest.version };
 }

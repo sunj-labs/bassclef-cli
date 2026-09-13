@@ -1,28 +1,35 @@
 // `bassclef init` — writes bassclef config into a project directory.
 //
-// @requirement R-NPM-002
+// @requirement R-NPM-002 + R-NPM-lite-002 (walker) + R-NPM-lite-003 (verbatim
+// settings.json) + R-NPM-lite-004 (hook-count banner) + R-NPM-lite-005 (fail-loud)
 //
 // Contract: docs/adrs/ADR-002-bassclef-init-safety-contract.md.
-// Design: docs/decompositions/wu-2-init.md.
-// Registry: docs/requirements/2026-08-11-npm-distribution.md.
+// Reader contract: docs/adrs/ADR-009-manifest-as-init-contract-source.md +
+// bassclef-upstream ADR-055 D1-D7.
+// Design: docs/use-cases/UC-init.md (Phase 1 rewrite).
 //
 // Ousterhout deep-module: the command interface is
 //   bassclef init [--force] [--dry-run] [--dir <path>] [--allow-root]
 //                 [--allow-any-dir] [--verbose]
 // The implementation hides argv parsing, path resolution, existence
-// checks, atomic writes, per-file result reporting.
+// checks, wiring-manifest schema check, tree walk, atomic writes,
+// placeholder substitution, hook-count banner formatting.
+//
+// Exit codes per ADR-002 §Invariants (extended 2026-09-13):
+//   0 — success (all writes succeeded OR partial-success mix)
+//   1 — refused by policy (existing file without --force; root; outside HOME)
+//   2 — safety check failed at write (symlink; parent not writable; verify fail)
+//   3 — invalid args
+//   4 — wiring manifest missing (ADR-055 D4)
+//   5 — wiring manifest schema major incompatible (ADR-055 D4)
 
 import { existsSync, lstatSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
 import { writeSafely, mkdirSafely, WriteError } from '../lib/write-safely.js';
 import { hashContent } from '../lib/hash.js';
 import { version as pkgVersion } from '../index.js';
-import {
-  settingsJsonTemplate,
-  SETTINGS_TEMPLATE_VERSION,
-} from './init-templates/settings-json.js';
 import {
   substrateConfigMdTemplate,
   SUBSTRATE_CONFIG_TEMPLATE_VERSION,
@@ -30,7 +37,22 @@ import {
 import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH } from '../lib/manifest-io.js';
-import { copySubstrate } from '../lib/copy-substrate.js';
+import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
+
+// Static tier for @thebassclef/lite. When standard + ultra packages
+// ship, this resolves from the installed package.json `name` field
+// (see UC-init §"Technology + data variations").
+const RESOLVED_TIER = 'lite';
+
+// Files subject to placeholder substitution per UC-init §Main step 5 +
+// ADR-002 §Amendment 2026-09-13 §Placeholder substitution. settings.json
+// is deliberately excluded — verbatim per ADR-055 D1.
+const PLACEHOLDER_FILES = new Set([
+  'CLAUDE.md',
+  'docs/whereami.md',
+  'whereami.md',
+  '.bassclef-source.json',
+]);
 
 interface FilePlan {
   label: string;
@@ -102,16 +124,10 @@ export function runInit(argv: readonly string[]): number {
     }
   }
 
-  // Build the plan.
+  // Build the cli-composed plan (substrate.config.md only — settings.json
+  // now comes from dist/lite/ walker per ADR-055 D1). The walker fires
+  // after this composition step; both share the same writeSafely path.
   const plans: FilePlan[] = [
-    {
-      label: 'settings.json',
-      relativePath: '.claude/settings.json',
-      fullPath: join(targetDir, '.claude', 'settings.json'),
-      content: settingsJsonTemplate(pkgVersion),
-      templateName: 'settings.json',
-      templateVersion: SETTINGS_TEMPLATE_VERSION,
-    },
     {
       label: 'substrate.config.md',
       relativePath: 'substrate.config.md',
@@ -124,52 +140,49 @@ export function runInit(argv: readonly string[]): number {
 
   if (args.dryRun) {
     runDryRun(plans);
-    // Per bassclef-cli#60: dry-run must include the substrate copy step
-    // so its file count matches the real run. copySubstrate already
-    // supports dryRun; we just thread the flag through.
-    dispatchSubstrateCopy(targetDir, args.force, args.verbose, true);
-    return 0;
+    return dispatchSubstrateCopy(targetDir, args.force, args.verbose, true);
   }
 
-  const exitCode = runReal(plans, args.force, args.verbose, targetDir);
-  if (exitCode === 0) {
-    dispatchSubstrateCopy(targetDir, args.force, args.verbose, false);
-  }
-  return exitCode;
+  // runReal writes the cli-composed plans (substrate.config.md) then
+  // dispatches the walker for dist/lite/. Manifest is written last with
+  // the union of both results so `bassclef sync` sees every managed file.
+  return runReal(plans, args.force, args.verbose, targetDir);
 }
 
-// Dispatch the substrate copy step after config files land.
-// Per issue #45: when the bundled substrate is missing (packaged
-// tarball shipped without the runtime manifest — the exact class the
-// prepublish script now guards against), we FAIL LOUD with cure
-// instructions. Silent skip masked the failure; adopters got a 2-file
-// config with no substrate and nothing told them.
-//
-// Nygard fail-with-fix: the error message names the cause + the cure
-// (reinstall or file an issue). Exit 2 so `bassclef init` reports
-// nonzero to the shell and the adopter sees the message.
+
+// Dispatch the walker per bassclef-upstream ADR-055 D1-D7.
+// Fails loudly with exit codes 4 (manifest missing) + 5 (schema
+// incompatible) per ADR-055 D4. Prints hook-count banner per ADR-055 D5.
+// Returns the dispatch's exit code so runInit can propagate it.
 function dispatchSubstrateCopy(
   targetDir: string,
   force: boolean,
   verbose: boolean,
   dryRun: boolean
-): void {
+): number {
+  const substitute = makePlaceholderTransform(targetDir);
   let result;
   try {
-    result = copySubstrate(targetDir, { force, dryRun });
+    result = copySubstrate(targetDir, {
+      force,
+      dryRun,
+      transform: substitute,
+    });
   } catch (e) {
-    const err = e as Error;
-    process.stderr.write(
-      `bassclef init: substrate copy failed — ${err.message}\n` +
-        `  cause: the installed @thebassclef/core package is missing the bundled substrate manifest.\n` +
-        `  fix: reinstall with \`npm install -g @thebassclef/core@latest --force\`.\n` +
-        `       If the reinstall does not help, file an issue at\n` +
-        `       https://github.com/sunj-labs/bassclef-cli/issues with your package version.\n`
-    );
-    process.exit(2);
+    if (e instanceof CopyFailure) {
+      // Nygard fail-loud per ADR-055 D4. Exit codes 4 + 5 documented
+      // in ADR-002 §Amendment 2026-09-13.
+      process.stderr.write(`bassclef init: ${e.message}\n`);
+      if (e.kind === 'ManifestMissing') return 4;
+      if (e.kind === 'SchemaIncompatible') return 5;
+      // BundleMissing falls through — reinstall message already in the
+      // exception; treat as exit 2 (write-time class per ADR-002).
+      return 2;
+    }
+    throw e;
   }
 
-  // Dry-run branch — print "would create" per manifest entry so the
+  // Dry-run branch — print "would create" per walker entry so the
   // preview matches the real footprint. Per bassclef-cli#60.
   if (dryRun) {
     const wouldCopy = result.wouldCopy ?? [];
@@ -182,11 +195,15 @@ function dispatchSubstrateCopy(
         `bassclef init: ${wouldCopy.length} substrate files would be copied.\n`
       );
     }
-    return;
+    // Banner in dry-run too — reader sees the shape before committing.
+    process.stdout.write(
+      `bassclef init: ${result.hookCount} hooks armed (${RESOLVED_TIER} tier).\n`
+    );
+    return 0;
   }
 
   if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
-    return;
+    return 0;
   }
   // Group copied files by top-level directory for the summary line.
   const groupCounts = new Map<string, number>();
@@ -204,16 +221,37 @@ function dispatchSubstrateCopy(
   if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
   process.stdout.write(`bassclef init: ${parts.join(', ')}.\n`);
   // Per bassclef-cli#60: print the grand total so the reader sees one
-  // number that matches the on-disk footprint (config + substrate).
-  const grandTotal = 2 + result.copied.length; // + settings.json + substrate.config.md
+  // number that matches the on-disk footprint (1 config file — substrate.config.md
+  // — plus the walker output).
+  const grandTotal = 1 + result.copied.length;
   process.stdout.write(
-    `bassclef init: ${grandTotal} files total (2 config + ${result.copied.length} substrate).\n`
+    `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
+  );
+  // ADR-055 D5 hook-count banner — grade-8 message per Cooper.
+  process.stdout.write(
+    `bassclef init: ${result.hookCount} hooks armed (${RESOLVED_TIER} tier).\n`
   );
   if (verbose && result.erroredMessages) {
     for (const msg of result.erroredMessages) {
       process.stderr.write(`  substrate: ${msg}\n`);
     }
   }
+  return result.errored.length > 0 ? 2 : 0;
+}
+
+// Placeholder substitution per UC-init §Main step 5 + ADR-002 amendment.
+// Runs before writeSafely inside copySubstrate. settings.json passes
+// through unchanged — verbatim per ADR-055 D1.
+function makePlaceholderTransform(targetDir: string): (relPath: string, content: string) => string {
+  const repoName = basename(targetDir);
+  const timestamp = new Date().toISOString();
+  return (relPath, content) => {
+    if (!PLACEHOLDER_FILES.has(relPath)) return content;
+    return content
+      .replace(/\[REPO_NAME\]/g, repoName)
+      .replace(/\[ISO_TIMESTAMP\]/g, timestamp)
+      .replace(/\[TIER\]/g, RESOLVED_TIER);
+  };
 }
 
 function runDryRun(plans: readonly FilePlan[]): number {
@@ -291,7 +329,6 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   const created = results.filter((r) => r.outcome === 'created').length;
   const unchanged = results.filter((r) => r.outcome === 'unchanged').length;
   const errored = results.filter((r) => r.outcome === 'error');
-
   const refused = results.filter((r) => r.outcome === 'refused').length;
 
   if (verbose) {
@@ -309,13 +346,9 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     process.stderr.write(`bassclef init: ${tag}: ${r.message ?? 'write failed'}: ${r.plan.fullPath}\n`);
   }
 
-  // Write the manifest so a later sync command knows what init did.
-  // Manifest is best-effort: if it fails, the init above still stands.
-  // The sync fallback path handles a missing manifest by reading marker
-  // keys from each written file.
-  writeManifest(targetDir, results);
-
   if (anyError) {
+    // Manifest is written for whatever succeeded before the error.
+    writeManifest(targetDir, results);
     const parts: string[] = [];
     if (created > 0) parts.push(`${created} created`);
     if (unchanged > 0) parts.push(`${unchanged} unchanged`);
@@ -326,30 +359,36 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     return 2;
   }
 
-  if (created === 0 && unchanged === plans.length) {
-    process.stdout.write('bassclef init: already initialized. No changes.\n');
-    return 0;
-  }
-
   if (anyRefused && created > 0) {
     process.stdout.write(
       `bassclef init: ${created} config files created, ${unchanged} unchanged. Pass --force to overwrite.\n`
     );
-    // RFC N4 — folder guidance final line so Sam knows what to commit.
+  } else if (created === 0 && unchanged === plans.length) {
+    process.stdout.write('bassclef init: already initialized. No changes.\n');
+  } else {
+    process.stdout.write(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
+  }
+
+  // Walker fires now — per ADR-055 D1-D5. Fails loudly with structured
+  // errors + specific exit codes when the bundle is broken. Walker-owned
+  // files stay OUT of the init manifest — sync manages cli-composed
+  // templates (currently substrate.config.md); walker files refresh via
+  // `bassclef init --force`.
+  const walkerExit = dispatchSubstrateCopy(targetDir, force, verbose, false);
+
+  // Manifest reflects cli-composed writes only. Walker success or
+  // failure does not change this.
+  writeManifest(targetDir, results);
+
+  // RFC N4 — folder guidance line after walker (only on success).
+  if (walkerExit === 0) {
     process.stdout.write(
       `bassclef init: your substrate lives under .claude/. ` +
         `Add .claude/ to .gitignore if you have not.\n`
     );
-    return 0;
   }
 
-  process.stdout.write(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
-  // RFC N4 — folder guidance final line so Sam knows what to commit.
-  process.stdout.write(
-    `bassclef init: your substrate lives under .claude/. ` +
-      `Add .claude/ to .gitignore if you have not.\n`
-  );
-  return 0;
+  return walkerExit;
 }
 
 // Root-refusal predicate. Pure so it can be unit-tested without a
@@ -413,17 +452,22 @@ export function usage(): string {
     '  --allow-any-dir    Allow --dir outside your home directory. Default: refuse.',
     '  --verbose          Print per-file result.',
     '',
+    'Exit codes:',
+    '  0 — success',
+    '  1 — refused by policy (existing file; running as root; outside HOME)',
+    '  2 — safety check failed at write (symlink; parent not writable)',
+    '  3 — invalid args',
+    '  4 — wiring manifest missing from bundled substrate (reinstall @thebassclef/lite)',
+    '  5 — wiring manifest schema major version incompatible with this cli',
+    '',
     'Files written under <target>:',
-    '  .claude/settings.json          Claude Code settings (minimal, opt-in blocks)',
     '  substrate.config.md            Bassclef project manifest',
     '  .bassclef/init.manifest.json   Record of what init wrote (used by sync)',
     '',
-    '  Plus the bundled substrate tree (~280 files):',
-    '  .claude/{agents,hooks,luminaries,rules,skills}/',
-    '  standards/, templates/, scripts/, lib/, presence/install/',
-    '  architecture/decisions/',
-    '  AGENTS.md, CLAUDE-lite.md, README.md, CONTRIBUTING.md,',
-    '  SECURITY.md, CODE_OF_CONDUCT.md',
+    '  Plus the bundled substrate tree from dist/lite/:',
+    '  .claude/settings.json          Claude Code settings (verbatim from bundle)',
+    '  CLAUDE.md, whereami.md, .bassclef-source.json, .gitignore',
+    '                                 Templates with placeholders substituted',
     '',
     '  Run with --dry-run first to preview the full file list before',
     '  writing anything to disk.',

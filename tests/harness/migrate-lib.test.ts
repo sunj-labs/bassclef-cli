@@ -51,40 +51,43 @@ let bundleRoot: string;
 
 beforeEach(() => {
   workDir = mkdtempSync(join(homedir(), '.bassclef-migrate-lib-test-'));
-  // Construct a mini bundle for Path A tests. copySubstrate walks
-  // the bundle's manifest and reads each entry from disk. Tests need
-  // BOTH the manifest AND the referenced source files present under
-  // bundleRoot. The 3 config files match the v0.0.2 legacy shape so
-  // Path A's default-deny behavior surfaces them as "preserved".
-  bundleRoot = join(workDir, 'bundle', 'substrate');
-  mkdirSync(join(bundleRoot, '.bassclef'), { recursive: true, mode: 0o755 });
-  // Bundle entries with real SHA-256 hashes — copySubstrate verifies
-  // content_hash against actual content before writing (bundle-integrity
-  // check per copy-substrate.ts L134).
-  const entrySpecs = [
-    { path: '.claude/settings.json' },
-    { path: 'substrate.config.md' },
-    { path: 'substrate.secrets.md' },
-    { path: '.claude/hooks/example.sh' },
-    { path: '.claude/rules/example.md' },
-  ];
-  const bundledManifest = {
-    entries: entrySpecs.map((spec) => {
-      const body = `bundled content for ${spec.path}\n`;
-      const hash = createHash('sha256').update(body).digest('hex');
-      return { path: spec.path, content_hash: hash };
-    }),
+  // Construct a mini bundle for Path A tests. Post-Phase 3 (ADR-055 D1)
+  // the walker reads <bundleRoot>/standards/bassclef-wiring-manifest.json
+  // for schema verification and walks the rest of the tree file-by-file.
+  // Fixture seeds a minimal manifest (schema v2) + the substrate files
+  // Path A migrates.
+  bundleRoot = join(workDir, 'bundle', 'dist', 'lite');
+  mkdirSync(join(bundleRoot, 'standards'), { recursive: true, mode: 0o755 });
+  const wiringManifest = {
+    version: '2.0.0',
+    hooks: {
+      SessionStart: [{ matcher: '', hooks: [{ type: 'command', command: 'example.sh' }] }],
+    },
+    permissions: { allow: [], deny: [] },
+    env: {},
+    additionalDirectories: [],
   };
   writeFileSync(
-    join(bundleRoot, '.bassclef', 'lite-manifest.json'),
-    JSON.stringify(bundledManifest)
+    join(bundleRoot, 'standards', 'bassclef-wiring-manifest.json'),
+    JSON.stringify(wiringManifest, null, 2)
   );
-  // Seed source files with content matching the hash.
-  for (const entry of bundledManifest.entries) {
-    const src = join(bundleRoot, entry.path);
+  // Seed a small tree matching the shape init walker copies.
+  const files: Record<string, string> = {
+    '.claude/settings.json': JSON.stringify({ hooks: { SessionStart: [{ matcher: '', hooks: [{ type: 'command', command: 'example.sh' }] }] } }, null, 2) + '\n',
+    '.claude/hooks/example.sh': '#!/bin/bash\necho hi\n',
+    '.claude/rules/example.md': '# example rule\n',
+    'CLAUDE.md': '# CLAUDE\nBassclef substrate for [REPO_NAME].\n',
+    'whereami.md': '# whereami\ntier: [TIER]\n',
+    '.bassclef-source.json': '{"source":"test","tier":"[TIER]"}\n',
+    '.gitignore': 'dist/\n',
+  };
+  for (const [rel, body] of Object.entries(files)) {
+    const src = join(bundleRoot, rel);
     mkdirSync(dirname(src), { recursive: true, mode: 0o755 });
-    writeFileSync(src, `bundled content for ${entry.path}\n`);
+    writeFileSync(src, body);
   }
+  // Reference createHash so the import stays used through the fixture rewrite.
+  void createHash;
 });
 
 afterEach(() => {
