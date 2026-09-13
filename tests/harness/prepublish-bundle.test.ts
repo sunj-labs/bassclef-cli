@@ -199,6 +199,196 @@ describe('prepublish-bundle — postflight count check', () => {
   });
 });
 
+// ============================================================
+// Phase 2 (goal 2026-09-13b) — dist/lite/ build path tests
+// ============================================================
+//
+// Tier 0 tests per ledger F1 pre-mortem catch. These tests seed the
+// wiring manifest + templates + opt IN to dist/lite/ build via
+// BASSCLEF_BUILD_DIST_LITE=1. Fixture shape mirrors bassclef-upstream
+// v0.39.0 §standards/bassclef-wiring-manifest.json + presence/dist-templates/.
+//
+// test-list (Beck):
+// [x] Phase 2: happy path — wiring manifest + templates seeded → dist/lite/ has 5 files
+// [x] Phase 2: settings.json emitted with tier=lite hook entries only (no standard/ultra)
+// [x] Phase 2: wiring manifest missing → exit nonzero + stderr names path
+// [x] Phase 2: schema major mismatch (v1.x vs expected 2.x) → exit nonzero
+// [x] Phase 2: templates dir missing → exit nonzero + stderr names path
+// [x] Phase 2: empty hooks block → exit nonzero (silent-empty guard)
+
+interface WiringHookEntry {
+  type: string;
+  command: string;
+  timeout?: number;
+  tier: 'lite' | 'standard' | 'ultra';
+}
+interface WiringManifest {
+  $schema?: string;
+  version: string;
+  hooks: Record<string, Array<{ matcher: string; hooks: WiringHookEntry[] }>>;
+  permissions?: { allow: string[]; deny: string[] };
+  env?: Record<string, string>;
+  additionalDirectories?: string[];
+}
+
+function seedWiringManifest(manifest: WiringManifest): void {
+  const dir = join(fakeSibling, 'standards');
+  mkdirSync(dir, { recursive: true, mode: 0o755 });
+  writeFileSync(join(dir, 'bassclef-wiring-manifest.json'), JSON.stringify(manifest, null, 2));
+}
+
+function seedDistTemplates(): void {
+  const dir = join(fakeSibling, 'presence', 'dist-templates');
+  mkdirSync(dir, { recursive: true, mode: 0o755 });
+  writeFileSync(join(dir, 'CLAUDE.md'), '# CLAUDE.md template\n');
+  writeFileSync(join(dir, 'whereami.md'), '# whereami template\n');
+  writeFileSync(join(dir, '.bassclef-source.json'), '{"source": "template"}\n');
+  writeFileSync(join(dir, '.gitignore'), 'node_modules/\n');
+}
+
+function miniWiringManifest(): WiringManifest {
+  return {
+    $schema: 'https://example.com/schema.json',
+    version: '2.0.0',
+    hooks: {
+      SessionStart: [
+        {
+          matcher: '',
+          hooks: [
+            { type: 'command', command: '$HOME/.claude/hooks/lite-hook.sh', timeout: 10, tier: 'lite' },
+            { type: 'command', command: '$HOME/.claude/hooks/standard-hook.sh', timeout: 10, tier: 'standard' },
+            { type: 'command', command: '$HOME/.claude/hooks/ultra-hook.sh', timeout: 10, tier: 'ultra' },
+          ],
+        },
+      ],
+      UserPromptSubmit: [
+        {
+          matcher: '',
+          hooks: [
+            { type: 'command', command: '$HOME/.claude/hooks/lite-prompt.sh', timeout: 5, tier: 'lite' },
+          ],
+        },
+      ],
+    },
+    permissions: { allow: ['Bash(git status:*)'], deny: ['Bash(rm -rf /)'] },
+    env: { BASSCLEF_ROOT: '$HOME' },
+    additionalDirectories: ['$HOME/.claude/rules'],
+  };
+}
+
+describe('prepublish-bundle — Phase 2 dist/lite/ happy path', () => {
+  it('exits 0 and populates dist/lite/ with 5 files when wiring manifest + templates seeded', () => {
+    // Seed both the legacy substrate/ inputs AND the dist/lite/ inputs.
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    // Opt IN to dist/lite/ build.
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).toBe(0);
+    const distLite = join(bundleDir, 'dist', 'lite');
+    expect(existsSync(join(distLite, '.claude', 'settings.json'))).toBe(true);
+    expect(existsSync(join(distLite, 'CLAUDE.md'))).toBe(true);
+    expect(existsSync(join(distLite, 'whereami.md'))).toBe(true);
+    expect(existsSync(join(distLite, '.bassclef-source.json'))).toBe(true);
+    expect(existsSync(join(distLite, '.gitignore'))).toBe(true);
+  });
+
+  it('emits settings.json with tier=lite hook entries only (filters out standard + ultra)', () => {
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).toBe(0);
+    const settingsPath = join(bundleDir, 'dist', 'lite', '.claude', 'settings.json');
+    const parsed = JSON.parse(readFileSync(settingsPath, 'utf8'));
+    // SessionStart carries 1 lite entry (standard + ultra filtered out).
+    // UserPromptSubmit carries 1 lite entry.
+    const sessionStartHooks = parsed.hooks.SessionStart[0].hooks;
+    expect(sessionStartHooks.length).toBe(1);
+    expect(sessionStartHooks[0].command).toMatch(/lite-hook\.sh$/);
+    expect(sessionStartHooks[0].tier).toBeUndefined(); // tier stripped
+    const promptHooks = parsed.hooks.UserPromptSubmit[0].hooks;
+    expect(promptHooks.length).toBe(1);
+    expect(promptHooks[0].command).toMatch(/lite-prompt\.sh$/);
+    // permissions + env + additionalDirectories preserved.
+    expect(parsed.permissions.allow).toContain('Bash(git status:*)');
+    expect(parsed.env.BASSCLEF_ROOT).toBe('$HOME');
+    expect(parsed.additionalDirectories).toContain('$HOME/.claude/rules');
+  });
+});
+
+describe('prepublish-bundle — Phase 2 dist/lite/ fail-fast', () => {
+  it('exits nonzero with "wiring manifest missing" when standards/bassclef-wiring-manifest.json is absent', () => {
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    // Do NOT seed wiring manifest; DO seed templates.
+    seedDistTemplates();
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/wiring manifest missing/i);
+  });
+
+  it('exits nonzero on schema major mismatch (v1.x manifest against expected 2.x)', () => {
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    const oldSchema = miniWiringManifest();
+    oldSchema.version = '1.0.0'; // wrong major
+    seedWiringManifest(oldSchema);
+    seedDistTemplates();
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/incompatible|1\.0\.0/i);
+  });
+
+  it('exits nonzero when presence/dist-templates/ dir is missing', () => {
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    seedWiringManifest(miniWiringManifest());
+    // Do NOT seed templates.
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/dist-templates/i);
+  });
+
+  it('exits nonzero on empty hooks block (silent-empty guard)', () => {
+    const miniLegacy = loadMini();
+    seedSiblingManifest(miniLegacy);
+    seedSourceFiles(miniLegacy, '');
+    const empty = miniWiringManifest();
+    empty.hooks = {}; // silent-empty
+    seedWiringManifest(empty);
+    seedDistTemplates();
+    const result = runScript({
+      BASSCLEF_SIBLING_ROOT: fakeSibling,
+      BASSCLEF_BUILD_DIST_LITE: '1',
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/empty|hooks/i);
+  });
+});
+
 describe('prepublish-bundle — tarball audit (no operator-private path leaks)', () => {
   // Locks Saltzer #1 from the 2026-09-07 pre-mortem ledger:
   // `files: substrate/**` in package.json is broad. If any operator-private
@@ -271,6 +461,7 @@ describe('prepublish-bundle — tarball audit (no operator-private path leaks)',
     const topLevel = new Set(files.map((f) => f.path.split('/')[0]));
     // Allowlist per package.json `files` field + the always-included set
     // (LICENSE, README.md, package.json ship regardless of `files`).
+    // 'dist' top-level covers BOTH dist/*.js (cli output) AND dist/lite/ (Phase 2 bundle).
     const allowed = new Set(['dist', 'substrate', 'LICENSE', 'README.md', 'package.json']);
     const extras = [...topLevel].filter((d) => !allowed.has(d));
     expect(extras).toEqual([]);
