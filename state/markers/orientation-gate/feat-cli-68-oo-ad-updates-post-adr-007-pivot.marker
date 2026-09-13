@@ -1,0 +1,9 @@
+# Orientation-gate marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- whereami-read: docs/whereami.md at 2026-09-12T21:41:35Z (L17-35 + L22-34 open threads)
+- coord-doc-read: bassclef-upstream docs/coordination/2026-09-12e-cli-boundary.md (via gh api)
+- adr-055-read: bassclef-upstream architecture/decisions/ADR-055-wiring-manifest-as-init-contract.md (L1-140)
+- adr-051-consumers-read: via gh api search; Consumers section extracted
+- cli-73-read: gh issue view 73 body
+- cli-68-read: gh issue view 68 body

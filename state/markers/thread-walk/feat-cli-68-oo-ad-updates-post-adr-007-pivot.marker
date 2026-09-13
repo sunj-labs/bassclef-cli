@@ -1,0 +1,14 @@
+# Thread-walk marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- chain:
+  - Active goal: 2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot
+    - parent: docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md (npm distribution parent)
+      - parent: null (root)
+    - external parent: bassclef-upstream 12e (SHIPPED at v0.39.0)
+- drivers-consumed:
+  - cli#73 body — Phase 1 scope enumeration
+  - cli#68 body — 6 doc edits named
+  - upstream ADR-055 D1-D7 — cross-cited in Step 1
+  - upstream ADR-051 Consumers section — cited in Step 2 + 3
+  - coord doc — cited in Steps 5 + 6

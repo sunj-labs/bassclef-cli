@@ -1,0 +1,6 @@
+# ADR-deviation marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- adr_governing: ADR-055 (bassclef-upstream) + ADR-051 Consumers section (bassclef-upstream) + ADR-002 + ADR-005 + ADR-007 (cli)
+- outcome: ADR-honored
+- notes: Phase 1 IS the ADR update that brings cli-side ADRs into conformance with ADR-055 D1-D7. Change honors the ADRs; no deviation.

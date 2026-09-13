@@ -1,0 +1,7 @@
+# Temperance marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- scope-decision: Ship Phase 1 OOAD updates only — 1 new ADR + 3 amends + UC-init rewrite + decomposition amend. No code this session. Phases 2-4 defer to follow-on /longrun sessions.
+- right-thing: OOAD-first per operator directive; contract in doc before code reads from it
+- right-way: agent-merges-within-scope; hard ceilings (auth/schema/security/prod-deploy) stay operator-gated
+- drift-trigger: Phase 3 code work OR test authoring OR src/ edits fire pause + re-anchor

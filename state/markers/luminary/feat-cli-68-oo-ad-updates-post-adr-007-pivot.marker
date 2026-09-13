@@ -1,0 +1,10 @@
+# Luminary marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- lead: michael-nygard — ADR lifecycle across pivots; owns Steps 1-4 (ADR authoring)
+- supporting:
+  - alistair-cockburn — fully-dressed UC-init (Step 5)
+  - ivar-jacobson — BCE decomposition + AdopterSessionSimulator (Step 6)
+  - vaughn-vernon — anticorruption at manifest boundary (Steps 1 + 5)
+  - alan-cooper — Sam persona anchor (Step 3)
+  - linus-torvalds — adopter invariant preservation (Steps 2 + 3)

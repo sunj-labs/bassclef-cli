@@ -1,0 +1,8 @@
+# Pre-mortem light marker — 2026-09-13 cli#68 Phase 1 OOAD updates
+- date: 2026-09-13
+- branch: feat/cli-68-oo-ad-updates-post-adr-007-pivot
+- mode: light
+- lenses: [michael-nygard, vaughn-vernon, linus-torvalds]
+- risks-per-lens: 3
+- ledger: docs/risk-ledgers/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md
+- folded-into-plan: N2 (Step 2 verbatim quote) + V2 (Step 5 verbatim copy) + V3 (Step 6 verbatim quote) + L1 (Step 2 invariant contract)
