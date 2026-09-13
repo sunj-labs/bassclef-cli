@@ -1,0 +1,7 @@
+# Pre-mortem marker — cli 1.0.1 hook routing
+- date: 2026-09-13
+- branch: main
+- ledger: docs/risk-ledgers/2026-09-13d-cli-1.0.1-hook-routing.md
+- lenses: michael-nygard (lead), michael-feathers, saltzer-schroeder
+- mode: light (3 lenses × 5-8 risks; top 5 folded into engineering)
+- folds: S2 → user-scope symlink refuser; S3 → chmod 0755 enforcer; N5 → banner declared-vs-copied check; N2+S1 → HOME unset + sudo bypass gate; F6 → manifest scope field extension
