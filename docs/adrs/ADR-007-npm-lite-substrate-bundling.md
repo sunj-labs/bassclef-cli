@@ -17,6 +17,8 @@ amendments:
     scope: scope-e (ADR-008) — bassclef migrate subcommand ships the migration path D5 punted
   - date: 2026-09-13
     scope: goal 2026-09-13 cli#68 Phase 1 Step 4 — Acceptance delta section added citing ADR-055 D1-D7; partial_supersedes ADR-005 (Sam demo acceptance criterion superseded)
+  - date: 2026-09-13
+    scope: goal 2026-09-13b cli#25 Phase 2 Step 5 — D1 bundle path lock amended to add dist/<tier>/ as second accepted path alongside substrate/; Phase 3 drops substrate/ under MAJOR bump
 authoring_luminaries:
   primary: [john-ousterhout, david-parnas]
   supporting: [michael-nygard, michael-feathers, kent-beck, alan-cooper]
@@ -282,6 +284,34 @@ Every decision above pins to at least one risk ledger row. Every ledger row has 
 R2 (no execSync in prepublish) + R4 (extended manifest-io module with legacy detection) + R6 (path constants module) live in decomposition § Control objects; not ADR-level decisions because they're code shape rather than adopter contract.
 
 **Correction landed at Step 4 preflight** — R3 and R4 build targets amended in ledger v2 to reference EXISTING `src/lib/write-safely.ts` and EXISTING `src/lib/manifest-io.ts` (both shipped by WU-2 init work per `tests/write-safely.test.ts` L26 + `tests/manifest-io.test.ts` L18-23). Original decomposition text mislabeled both as "new file"; extension approach preserves the ADR-002 complete-mediation invariant already established by those modules.
+
+## Amendment 2026-09-13b — D1 bundle path lock adds dist/<tier>/ (Phase 2 ship)
+
+**Scope.** Phase 1's `## Acceptance delta` section (added 2026-09-13, below) named this Phase 2 amendment. Phase 2 landed here.
+
+**What changes.** D1 bundle path lock adds `dist/<tier>/` as a second accepted bundle path alongside `substrate/`. Both paths coexist through Phase 2 and Phase 3-boundary.
+
+**Prior D1 shape (2026-08-28, amended 2026-08-29 RFC-0001):**
+
+- Bundle path lock: everything lands under `substrate/<manifest.path>`
+- Additive changes OK; rearrangements are MAJOR
+
+**New D1 shape (this amendment):**
+
+- Bundle paths (plural) — `substrate/**` (149-file walk per lite-manifest.json) AND `dist/<tier>/**` (5-file tree per bassclef-upstream ADR-055 D1)
+- `substrate/**` — semver-locked per prior amendment; adopters at 0.1.x through 0.2.x read this path; Phase 3 drops it under MAJOR bump
+- `dist/<tier>/**` — semver-locked from 0.2.0; Phase 3 becomes the sole bundle path; adopters at 0.2.0+ read this path per ADR-055 D1
+- Both paths populate at publish time via extended `scripts/prepublish-bundle-substrate.mjs` from a pinned sibling clone of `sunj-labs/bassclef` at `v0.39.0`
+
+**Postcondition (Hoare) — tarball must carry both paths in Phase 2:**
+
+- `substrate/**` count >= 100 (existing floor per issue #40 cure)
+- `dist/<tier>/**` count >= 5 (new floor per this amendment; matches ADR-055 D1 emit shape)
+- Publish workflow at `.github/workflows/publish.yml` asserts both floors before publish fires
+
+**Semver.** Phase 2 ship at 0.2.0 is MINOR — additive `dist/<tier>/` alongside preserved `substrate/`. Phase 3 drop of `substrate/` is MAJOR per this D1 lock.
+
+**Cross-references from Phase 1's `## Acceptance delta` section (below).** Phase 1 named "What Phase 2 (cli#25) will change in ADR-007" — Phase 2 D1 amendment (this section) + Phase 2 D3 amendment (extended fail-fast per prepublish script + workflow assertions). Both landed at commit shipping Step 5 of goal 2026-09-13b.
 
 ## Acceptance delta 2026-09-13 — post-ADR-055 pivot
 
