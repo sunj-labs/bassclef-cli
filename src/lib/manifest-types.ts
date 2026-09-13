@@ -12,6 +12,13 @@
 // constant to decide when a manifest predates the bundling contract.
 export const MANIFEST_SCHEMA_VERSION = '0.1.0' as const;
 
+// Top-level shape-version integer added cli 1.0.1 per RFC-0002 L2 fold.
+// Distinct from the string $bassclef.manifest_schema_version — this
+// integer marks the shape gate for adopter tooling that reads the manifest.
+// v1 (implicit — no field): no per-entry scope field.
+// v2: per-entry scope field ('user' | 'project') on hook entries.
+export const MANIFEST_SHAPE_VERSION = 2 as const;
+
 export interface ManifestEntry {
   path: string;
   template: string;
@@ -19,9 +26,13 @@ export interface ManifestEntry {
   content_hash_sha256?: string;
   outcome: 'created' | 'unchanged' | 'refused' | 'error' | 'updated';
   updated_at?: string;
+  /** Scope the file landed at ('user' | 'project'). Cli 1.0.1+ per RFC-0002 F6+L2. */
+  scope?: 'user' | 'project';
 }
 
 export interface Manifest {
+  /** Top-level shape marker per RFC-0002 L2. Integer 2 as of cli 1.0.1. */
+  schema_version: typeof MANIFEST_SHAPE_VERSION;
   $bassclef: {
     template: 'init.manifest.json';
     manifest_schema_version: string;

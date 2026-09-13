@@ -20,9 +20,25 @@ import {
   accessSync,
   lstatSync,
   mkdirSync,
+  readlinkSync,
   constants,
 } from 'node:fs';
 import { dirname } from 'node:path';
+
+/**
+ * Read the symlink target if the path is a symlink. Used to enrich
+ * SymlinkRefused error messages with the actual target so adopters
+ * can decide whether to delete or preserve the pre-existing symlink.
+ * Returns null if readlink fails (permission, race, ENOENT).
+ * Per RFC-0002 N2 fold.
+ */
+function readlinkOrNull(path: string): string | null {
+  try {
+    return readlinkSync(path);
+  } catch {
+    return null;
+  }
+}
 
 export class WriteError extends Error {
   override readonly name = 'WriteError';
@@ -87,7 +103,13 @@ export function writeSafely(path: string, content: string, opts: WriteOptions = 
 
   // Symlink refusal is unconditional per ADR-002. --force cannot override.
   if (existing === 'symlink') {
-    throw new WriteError('SymlinkRefused', `refusing to follow symlink at target path: ${path}`);
+    const target = readlinkOrNull(path);
+    const targetClause = target ? ` (points to: ${target})` : '';
+    throw new WriteError(
+      'SymlinkRefused',
+      `refusing to follow symlink at target path: ${path}${targetClause}. ` +
+        `Delete or move the symlink and rerun bassclef init.`
+    );
   }
 
   if (existing !== 'none' && !opts.force) {

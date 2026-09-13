@@ -24,6 +24,25 @@ export class ManifestReadError extends Error {
   }
 }
 
+/**
+ * Read the manifest schema version integer (top-level `schema_version`
+ * field added cli 1.0.1 per RFC-0002 L2). Returns null when the manifest
+ * is absent, unreadable, or the field is missing. Never throws.
+ *
+ * Used by the cli 1.0.1 upgrade advisory in init.ts to detect 1.0.0-
+ * shaped manifests (no schema_version). Extracted here per R4 — all
+ * manifest JSON.parse targets live in src/lib/.
+ */
+export function readManifestShapeVersion(targetDir: string): number | null {
+  try {
+    const parsed = readManifest(targetDir) as unknown as { schema_version?: unknown };
+    if (typeof parsed.schema_version === 'number') return parsed.schema_version;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function readManifest(targetDir: string): Manifest {
   const path = join(targetDir, MANIFEST_RELATIVE_PATH);
   let raw: string;

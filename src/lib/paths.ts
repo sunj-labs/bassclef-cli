@@ -19,6 +19,14 @@
 export const SUBSTRATE_ROOT = 'substrate' as const;
 export const CLAUDE_TARGET_ROOT = '.claude' as const;
 
+// The hook binary subpath inside CLAUDE_TARGET_ROOT. Used by cli 1.0.1
+// walker + scope-router to recognize a bundle-relative hook file and
+// route it per settings.json prefix. Single source of truth per R6.
+export const HOOKS_SUBPATH = '.claude/hooks/' as const;
+
+// The settings.json subpath inside CLAUDE_TARGET_ROOT.
+export const SETTINGS_SUBPATH = '.claude/settings.json' as const;
+
 // The three config files an adopter edits between init and migrate.
 // Path A migration preserves these via SHA-256 hash comparison per
 // ADR-008 D3. List sourced from tests/fixtures/v0.0.2-init-manifest.json

@@ -38,7 +38,7 @@
 //   1. env BASSCLEF_SIBLING_ROOT (test override / CI workflow)
 //   2. default ../bassclef-upstream relative to CWD
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 const DIST_LITE_DIR = 'dist/lite';
@@ -227,9 +227,20 @@ function copyDistTemplates(siblingRoot, distRoot) {
   }
 }
 
-function postflightDistLite(distRoot, settingsObject) {
+function postflightDistLite(distRoot, settingsObject, copiedHookCount) {
   // Nygard N2 fold — hook entry count must be >= 1 so dist/lite/ is non-empty.
   const hookCount = countHookEntries(settingsObject);
+  // cli 1.0.1 (bassclef-cli#79) — declared count in settings.json must
+  // equal copied count in dist/lite/.claude/hooks/. Silent divergence
+  // reproduces the class the upstream cure PR #1624 closed at the
+  // release-script layer.
+  if (copiedHookCount !== undefined && copiedHookCount !== hookCount) {
+    fail(
+      `dist/lite/ postflight: settings.json declares ${hookCount} hooks but ` +
+        `dist/lite/.claude/hooks/ received ${copiedHookCount}. ` +
+        `Every declared hook must have a matching binary in the bundle.`
+    );
+  }
   if (hookCount < 1) {
     fail(
       `dist/lite/.claude/settings.json has 0 hook entries — refusing to ship an empty ` +
@@ -273,8 +284,80 @@ function buildDistLiteTree(siblingRoot) {
   // Phase 3 — put the wiring manifest at dist/lite/standards/ so the
   // reader can verify schema version per ADR-055 D4.
   copyWiringManifestIntoDist(siblingRoot, distRoot);
-  const hookCount = postflightDistLite(distRoot, filtered);
-  return { wiringManifestPath, settingsPath, hookCount, wiringVersion: wiringManifest.version };
+  // cli 1.0.1 (bassclef-cli#79) — copy hook binaries from sibling's
+  // dist/lite/.claude/hooks/ so the walker has real files to route
+  // per settings.json prefix. Without this the adopter downloads
+  // wiring without wired binaries (same cold-adopter regression the
+  // upstream cure closed at bassclef-upstream#1619).
+  const copiedHookCount = copyHookBinaries(siblingRoot, distRoot, filtered);
+  const hookCount = postflightDistLite(distRoot, filtered, copiedHookCount);
+  return { wiringManifestPath, settingsPath, hookCount, copiedHookCount, wiringVersion: wiringManifest.version };
+}
+
+/**
+ * Copy every hook binary referenced by the filtered settings.json from
+ * the sibling's dist/lite/.claude/hooks/ into cli's dist/lite/.claude/hooks/.
+ * Preserves executable bit (0755). Fails loud if any declared hook is
+ * missing from the sibling bundle — same class as the upstream cure
+ * PR bassclef-upstream#1624 (dist path missing from release ALLOWED_PATHS).
+ *
+ * Returns the copied-hook count so postflight can assert it equals the
+ * settings.json declared count.
+ */
+function copyHookBinaries(siblingRoot, distRoot, settingsObject) {
+  const sourceDir = join(siblingRoot, 'dist/lite/.claude/hooks');
+  if (!existsSync(sourceDir)) {
+    fail(
+      `hook source dir missing at ${sourceDir}. ` +
+        `Expected sibling clone to carry dist/lite/.claude/hooks/ at v0.40.0 or later. ` +
+        `Sibling may be pre-v0.40.0; upgrade the sibling checkout.`
+    );
+  }
+  const outDir = join(distRoot, '.claude/hooks');
+  mkdirSync(outDir, { recursive: true, mode: 0o755 });
+
+  // Enumerate hook filenames referenced in settings.json — strip the
+  // $HOME/ or $CLAUDE_PROJECT_DIR/ prefix + the .claude/hooks/ path
+  // segment; the leaf filename is what we copy from source.
+  const declared = new Set();
+  for (const eventBlocks of Object.values(settingsObject.hooks ?? {})) {
+    for (const block of eventBlocks) {
+      for (const entry of block.hooks ?? []) {
+        const cmd = entry.command;
+        if (typeof cmd !== 'string' || cmd.length === 0) continue;
+        if (!cmd.startsWith('$')) continue;
+        // Extract the leaf filename — everything after the last slash.
+        const leaf = cmd.slice(cmd.lastIndexOf('/') + 1);
+        if (leaf.endsWith('.sh')) declared.add(leaf);
+      }
+    }
+  }
+
+  const missing = [];
+  let copied = 0;
+  for (const leaf of declared) {
+    const src = join(sourceDir, leaf);
+    if (!existsSync(src)) {
+      missing.push(src);
+      continue;
+    }
+    const dst = join(outDir, leaf);
+    const content = readFileSync(src);
+    writeFileSync(dst, content);
+    chmodSync(dst, 0o755);
+    copied += 1;
+  }
+
+  if (missing.length > 0) {
+    fail(
+      `hook binary missing at ${missing[0]}` +
+        (missing.length > 1 ? ` (and ${missing.length - 1} more)` : '') +
+        `. settings.json declared ${declared.size} hooks; source shipped ${copied}. ` +
+        `Sibling checkout may be stale — pull latest public bassclef.`
+    );
+  }
+
+  return copied;
 }
 
 // ============================================================
@@ -292,6 +375,9 @@ function main() {
   );
   process.stdout.write(
     `dist/lite/.claude/settings.json emitted ${distLite.hookCount} hook entries\n`
+  );
+  process.stdout.write(
+    `dist/lite/.claude/hooks/ copied ${distLite.copiedHookCount} hook binaries (mode 0755)\n`
   );
 
   process.exit(0);

@@ -1,0 +1,10 @@
+{
+  "luminary_slug": "hyrum-wright",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "docs/session-logs/2026-09-13c-cli-73-phase-3-init-walker.md",
+    "docs/iteration-bets/2026-09-13d-cli-1.0.1-hook-routing.md"
+  ],
+  "last_scanned": "2026-09-13T21:04:51Z",
+  "scanner_version": "1.0"
+}

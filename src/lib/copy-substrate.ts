@@ -35,24 +35,19 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeSafely, mkdirSafely, WriteError } from './write-safely.js';
+import { classify, type ScopeDecision } from './scope-router.js';
+import { setExecutable } from './executable-bit-enforcer.js';
+import { HOOKS_SUBPATH, SETTINGS_SUBPATH } from './paths.js';
 
 const EXPECTED_WIRING_SCHEMA_MAJOR = 2;
 const WIRING_MANIFEST_RELATIVE = 'standards/bassclef-wiring-manifest.json';
 
-export type CopyFailureKind =
-  | 'ManifestMissing'
-  | 'SchemaIncompatible'
-  | 'BundleMissing';
-
-// Typed error the init dispatcher maps to exit codes 4 + 5.
-// Nygard fail-loud discipline: each kind carries the specific cure
-// as part of the message; the dispatcher does not fabricate its own.
-export class CopyFailure extends Error {
-  constructor(readonly kind: CopyFailureKind, message: string) {
-    super(message);
-    this.name = 'CopyFailure';
-  }
-}
+// CopyFailure + CopyFailureKind extracted to a shared module in cli
+// 1.0.1 so scope-router.ts + resolve-home.ts can throw the same type
+// without circular imports. Re-exported here for existing consumers
+// (init.ts, tests) that import from copy-substrate directly.
+export { CopyFailure, type CopyFailureKind } from './copy-substrate-failures.js';
+import { CopyFailure } from './copy-substrate-failures.js';
 
 interface CopyOptions {
   /** Directory that holds the bundled substrate tree. Tests override this. */
@@ -74,10 +69,33 @@ interface CopyOptions {
    * settings.json passes through untouched (verbatim per ADR-055 D1).
    */
   transform?: (relPath: string, content: string) => string;
+  /**
+   * Permit HOME=/root when routing user-scope hooks (matches init.ts
+   * --allow-root). Default false. Added cli 1.0.1 per RFC-0002 L1+S1
+   * folds — sudo bypass refused unless explicitly allowed.
+   */
+  allowRoot?: boolean;
+}
+
+/**
+ * A single copy attempt result. Added cli 1.0.1 per RFC-0002 P3 fold —
+ * carries the scope the file landed at (user vs project) so downstream
+ * consumers do not have to reconstruct scope from the path.
+ */
+export interface CopiedEntry {
+  path: string;
+  scope: 'user' | 'project';
 }
 
 export interface CopyResult {
+  /**
+   * Adopter-relative paths of successfully copied files. Kept as
+   * string[] for backward compatibility with cli 1.0.0 tests + consumers.
+   * The richer per-scope shape lives in `copiedEntries` per P3 fold.
+   */
   copied: string[];
+  /** Per-scope shape of the same list. Consumers preferring scope info read this. */
+  copiedEntries: CopiedEntry[];
   refused: string[];
   errored: string[];
   wouldCopy?: string[];
@@ -104,6 +122,7 @@ export function copySubstrate(
 
   const result: CopyResult = {
     copied: [],
+    copiedEntries: [],
     refused: [],
     errored: [],
     erroredMessages: [],
@@ -115,10 +134,16 @@ export function copySubstrate(
   const files = walkDistTree(bundleRoot);
   const groups = groupByTopDirectory(files);
 
+  // Build scope map AFTER the walk — needs the set of bundle hook
+  // files so buildScopeMap can silent-skip commands that reference
+  // hooks not in the bundle (legacy adopter fixtures).
+  const bundleHookRelPaths = new Set(files.filter(isHookFile));
+  const scopeMap = buildScopeMap(bundleRoot, targetDir, options, bundleHookRelPaths);
+
   for (const [directory, groupFiles] of groups) {
     let completedInGroup = 0;
     for (const relPath of groupFiles) {
-      const outcome = copyOne(relPath, bundleRoot, targetDir, options, result);
+      const outcome = copyOne(relPath, bundleRoot, targetDir, options, result, scopeMap);
       if (outcome !== 'skipped') completedInGroup += 1;
     }
     if (options.onProgress) options.onProgress(directory, completedInGroup);
@@ -229,16 +254,89 @@ function mapAdopterPath(relPath: string): string {
   return relPath;
 }
 
+/**
+ * Build a map from hook-relative-path (a HOOKS_SUBPATH entry — see
+ * src/lib/paths.ts) to a ScopeDecision that names where it should
+ * land per settings.json.
+ *
+ * Reads the bundled settings.json AND the set of hook files actually
+ * present in the bundle. Only classifies commands whose derived source
+ * path matches a bundle hook file — legacy adopter fixtures with
+ * unprefixed commands that reference files not in the bundle silent-
+ * skip. Real fail-loud on UnknownScopePrefix fires only when a bundle
+ * hook's declared command uses an unrecognized prefix (per N6 fold).
+ */
+function buildScopeMap(
+  bundleRoot: string,
+  targetDir: string,
+  options: CopyOptions,
+  bundleHookRelPaths: ReadonlySet<string>
+): Map<string, ScopeDecision> {
+  const map = new Map<string, ScopeDecision>();
+  const settingsPath = join(bundleRoot, SETTINGS_SUBPATH);
+  if (!fileExists(settingsPath)) return map;
+
+  let parsed: { hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>> };
+  try {
+    parsed = JSON.parse(readFileSync(settingsPath, 'utf8'));
+  } catch {
+    return map;
+  }
+
+  const allowRoot = options.allowRoot ?? false;
+  for (const eventBlocks of Object.values(parsed.hooks ?? {})) {
+    for (const block of eventBlocks) {
+      for (const entry of block.hooks ?? []) {
+        const cmd = entry.command;
+        if (typeof cmd !== 'string' || cmd.length === 0) continue;
+        // Legacy adopter fixtures may carry unprefixed commands
+        // (e.g., "example.sh"). Silent-skip so migrate flows on old
+        // shapes still work. Any `$`-prefixed command runs through
+        // classify — unknown prefixes throw per N6; path traversal
+        // throws per S4.
+        if (!cmd.startsWith('$')) continue;
+        // classify may throw UnknownScopePrefix, PathTraversalRefused,
+        // EnvironmentIncomplete, or SudoBypassRefused. All propagate —
+        // the walker refuses to write anything until the adopter cures.
+        const decision = classify({ command: cmd }, { targetDir, allowRoot });
+        // Derive the bundle-relative source path — strip the prefix.
+        const relSource = cmd
+          .replace(/^\$HOME\//, '')
+          .replace(/^\$CLAUDE_PROJECT_DIR\//, '')
+          .replace(/\/{2,}/g, '/');
+        // Only record commands referencing bundle hook files. Others
+        // (settings.json in the bundle may name hooks the bundle
+        // doesn't ship) silent-skip so the walker doesn't try to
+        // write files that don't exist.
+        if (!bundleHookRelPaths.has(relSource)) continue;
+        map.set(relSource, decision);
+      }
+    }
+  }
+  return map;
+}
+
+/** Recognize a bundle-relative hook file so the walker routes it per scope. */
+function isHookFile(relPath: string): boolean {
+  return relPath.startsWith(HOOKS_SUBPATH) && relPath.endsWith('.sh');
+}
+
 function copyOne(
   relPath: string,
   bundleRoot: string,
   targetDir: string,
   options: CopyOptions,
-  result: CopyResult
+  result: CopyResult,
+  scopeMap: Map<string, ScopeDecision>
 ): 'copied' | 'refused' | 'errored' | 'wouldCopy' | 'skipped' {
   const sourcePath = join(bundleRoot, relPath);
   const adopterRelPath = mapAdopterPath(relPath);
-  const targetPath = join(targetDir, adopterRelPath);
+  // Hook files route per scope map; non-hook files stay project-scope.
+  const scopeDecision: ScopeDecision | undefined = isHookFile(relPath)
+    ? scopeMap.get(relPath)
+    : undefined;
+  const targetPath = scopeDecision ? scopeDecision.targetPath : join(targetDir, adopterRelPath);
+  const scope: 'user' | 'project' = scopeDecision ? scopeDecision.scope : 'project';
 
   let content: string;
   try {
@@ -269,7 +367,14 @@ function copyOne(
   try {
     mkdirSafely(dirname(targetPath));
     writeSafely(targetPath, outputContent, { force: options.force ?? false });
+    // Hook files need the executable bit set — Claude Code invokes them
+    // via /bin/sh; a non-executable file silently fails at session-start.
+    if (isHookFile(relPath)) {
+      setExecutable(targetPath);
+    }
+    // Record both shapes — string path (backward compat) + scoped entry (P3 fold).
     result.copied.push(adopterRelPath);
+    result.copiedEntries.push({ path: adopterRelPath, scope });
     return 'copied';
   } catch (e) {
     if (e instanceof WriteError) {
@@ -279,6 +384,10 @@ function copyOne(
       }
       if (e.kind === 'SymlinkRefused') {
         result.refused.push(adopterRelPath);
+        // Surface the readlink target on stderr per N2 fold so the
+        // adopter can decide (delete symlink vs preserve). The message
+        // carries the "points to: X" clause per write-safely.ts.
+        process.stderr.write(`bassclef init: ${e.message}\n`);
         return 'refused';
       }
       const message =

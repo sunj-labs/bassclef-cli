@@ -16,7 +16,7 @@
 // [x] adopter whereami.md exists (placeholders substituted)
 // [x] adopter .bassclef-source.json exists (placeholders substituted)
 // [x] adopter .gitignore exists (verbatim)
-// [x] hook-count banner appears in stdout with shape "N hooks armed (lite tier)"
+// [x] hook-count banner appears in stdout with shape "Installed N of M hooks (lite tier)" (RFC-0002 N1 fold — Norman shape)
 // [x] N in banner matches hook count in copied settings.json
 // [x] adopter dir mirrors dist/lite/ shape — no extra dist/lite paths missing
 //
@@ -51,10 +51,14 @@ function runCli(args: readonly string[], opts?: { cwd?: string }) {
     encoding: 'utf8',
     timeout: 15000,
     cwd: opts?.cwd,
+    // Cli 1.0.1 writes user-scope hooks to $HOME/.claude/hooks/.
+    // Isolate HOME per test so runs don't touch operator's real home.
+    env: { ...process.env, HOME: fakeHome },
   });
 }
 
 let workDir: string;
+let fakeHome: string;
 
 beforeAll(() => {
   // Fixture precondition: dist/lite/ must exist. `npm run build` (vite)
@@ -78,11 +82,16 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(HOME, '.bassclef-init-parity-test-'));
+  // Isolate HOME first so mkdtemp for workDir sits inside it. Every
+  // test gets a fresh HOME so cli 1.0.1's user-scope writes go to a
+  // temp dir instead of the operator's real ~/.claude/hooks/.
+  fakeHome = mkdtempSync(join(HOME, '.bassclef-init-parity-fakehome-'));
+  workDir = mkdtempSync(join(fakeHome, '.bassclef-init-parity-test-'));
 });
 
 afterEach(() => {
   try { rmSync(workDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  try { rmSync(fakeHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
 describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', () => {
@@ -112,10 +121,10 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     expect(existsSync(join(workDir, '.gitignore'))).toBe(true);
   });
 
-  it('prints hook-count banner in shape "N hooks armed (lite tier)" per ADR-055 D5', () => {
+  it('prints hook-count banner in shape "Installed N of M hooks (lite tier)" per RFC-0002 N1 fold', () => {
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
-    expect(r.stdout).toMatch(/\d+ hooks armed \(lite tier\)/);
+    expect(r.stdout).toMatch(/Installed \d+ of \d+ hooks \(lite tier\)/);
   });
 
   it('banner N matches hook count across all events in copied settings.json', () => {
@@ -123,7 +132,7 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     expect(r.status).toBe(0);
 
     // Extract N from the banner.
-    const match = r.stdout.match(/(\d+) hooks armed \(lite tier\)/);
+    const match = r.stdout.match(/Installed (\d+) of (\d+) hooks \(lite tier\)/);
     expect(match).not.toBeNull();
     const banneredN = parseInt(match![1], 10);
 

@@ -1,0 +1,7 @@
+# Luminary marker — cli 1.0.1 hook routing
+- date: 2026-09-13
+- branch: main
+- lead: michael-nygard — fail-loud stability pattern on hook copy; banner reports honest count; walker exits non-zero on partial copy
+- supporting: michael-feathers — characterization tests before walker touch; real settings.json fixture pins behavior
+- supporting: jerome-saltzer-and-michael-schroeder — complete mediation on user-scope writes; symlink refusal + chmod 0755 + $HOME containment
+- outside-council TBD at Step 8 RFC — likely linus-torvalds + hyrum-wright + brooks + cooper + ousterhout

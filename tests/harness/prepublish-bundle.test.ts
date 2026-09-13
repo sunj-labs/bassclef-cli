@@ -87,6 +87,17 @@ function seedDistTemplates(): void {
   writeFileSync(join(dir, '.gitignore'), 'node_modules/\n');
 }
 
+// Cli 1.0.1 (bassclef-cli#79) — sibling's dist/lite/.claude/hooks/
+// must ship the hook binaries the walker copies. Fixture mirrors
+// the leaf filenames referenced by miniWiringManifest above.
+function seedSiblingHookBinaries(names: readonly string[]): void {
+  const dir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+  mkdirSync(dir, { recursive: true, mode: 0o755 });
+  for (const leaf of names) {
+    writeFileSync(join(dir, leaf), `#!/bin/sh\necho ${leaf}\n`);
+  }
+}
+
 function miniWiringManifest(): WiringManifest {
   return {
     $schema: 'https://example.com/schema.json',
@@ -130,13 +141,16 @@ describe('prepublish-bundle — R2 pure Node', () => {
 });
 
 describe('prepublish-bundle — Phase 3 dist/lite/ happy path', () => {
-  it('exits 0 and populates dist/lite/ with 6 files when wiring manifest + templates seeded', () => {
+  it('exits 0 and populates dist/lite/ with 4 templates + settings + manifest + hook binaries when seeded', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
+    // Cli 1.0.1 walker needs hook binaries in the bundle per bassclef-cli#79.
+    // miniWiringManifest declares 2 lite-tier hooks; seed both.
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
     expect(result.status).toBe(0);
     const distLite = join(bundleDir, 'dist', 'lite');
-    // 4 templates + settings.json + wiring manifest = 6 files.
+    // 4 templates + settings.json + wiring manifest = 6 base files.
     expect(existsSync(join(distLite, '.claude', 'settings.json'))).toBe(true);
     expect(existsSync(join(distLite, 'CLAUDE.md'))).toBe(true);
     expect(existsSync(join(distLite, 'whereami.md'))).toBe(true);
@@ -147,11 +161,15 @@ describe('prepublish-bundle — Phase 3 dist/lite/ happy path', () => {
     // Phase 3 L4 pre-mortem fold — wiring manifest lands in dist/lite/
     // standards/ so the reader schema check works.
     expect(existsSync(join(distLite, 'standards', 'bassclef-wiring-manifest.json'))).toBe(true);
+    // Cli 1.0.1 addition — hook binaries land under dist/lite/.claude/hooks/.
+    expect(existsSync(join(distLite, '.claude', 'hooks', 'lite-hook.sh'))).toBe(true);
+    expect(existsSync(join(distLite, '.claude', 'hooks', 'lite-prompt.sh'))).toBe(true);
   });
 
   it('emits settings.json with tier=lite hook entries only (filters out standard + ultra)', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
     expect(result.status).toBe(0);
     const settingsPath = join(bundleDir, 'dist', 'lite', '.claude', 'settings.json');

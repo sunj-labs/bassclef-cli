@@ -1,0 +1,82 @@
+{
+  "id": "2026-09-13d-cli-1-0-1-hook-routing",
+  "type": "mixed",
+  "source": "Inputs (concatenated verbatim from source files):\n\n---SOURCE 1: bassclef-cli#79 handoff body---\nhandoff: pin bassclef-upstream v0.40.0 for cli 1.0.1 (cold-adopter cure). Scope: bump upstream tag pin to v0.40.0 in package.json + dist/lite/.bassclef-source.json; extend init walker to copy dist/<tier>/.claude/hooks/*.sh files and route each per settings.json scope prefix ($HOME → ~/.claude/hooks/; $CLAUDE_PROJECT_DIR → adopter/.claude/hooks/); preserve executable bit; retire placeholder regex stopgap; republish @thebassclef/lite@1.0.1; run cold-adopter smoke on fresh machine.\n\n---SOURCE 2: bassclef-upstream#1619 Finding 1 (verbatim excerpt)---\nCold adopters running `npm install @thebassclef/lite@1.0.0 && bassclef init` hit 24 hook-not-found errors per Claude Code prompt. Root cause: v0.39.0 shipped as MVP with settings.json wiring but no hook binaries. Cure: ship the referenced hook scripts in `dist/lite/` at their wired paths.\n\n---SOURCE 3: public bassclef dist/lite/.claude/settings.json (v0.40.0 verbatim excerpt)---\nSix event blocks: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, UserPromptExpansion. Two distinct command prefixes: $HOME (bootstrap dispatchers — bassclef-sync.sh, session-reflection.sh) and $CLAUDE_PROJECT_DIR (per-repo enforcement — 22 hooks including plain-english-steering.sh, assert-verify-steering.sh, pre-commit-gate.sh).\n\n---SOURCE 4: public bassclef dist/lite/.claude/hooks/ (v0.40.0 tree)---\n24 blob files, all with git mode 100755. Sample: artifact-ingestion-gate.sh (11623 bytes), assert-verify-steering.sh (3296 bytes), bassclef-source-config-validate.sh (7886 bytes), bassclef-sync.sh (26404 bytes), compound-noun-scrub.sh (9432 bytes), kiss-expansion-inject.sh (2905 bytes), longrun-prep-compounding-sequence-check.sh (22459 bytes), plain-english-steering.sh (8103 bytes).\n\n---SOURCE 5: cli 1.0.0 src/lib/copy-substrate.ts (walker at commit c974f33)---\nWalks bundleRoot (dist/lite/) recursively via walkDistTree. Copies each file verbatim to targetDir via writeSafely. Wiring manifest schema major check at readWiringManifest. Placeholder transform applied per PLACEHOLDER_FILES set. Banner counts hooks from copied settings.json via readHookCount. No user-scope path exists yet — every copy targets under targetDir (adopter repo).\n\n---SOURCE 6: cli 1.0.0 src/commands/init.ts (init at commit c974f33)---\nRoot refusal via shouldRefuseRoot (uid 0 unless --allow-root). Target dir resolution via resolveTargetDir with HOME containment (--allow-any-dir bypass). Cli-composed plans limited to substrate.config.md. Walker dispatched via dispatchSubstrateCopy after cli-composed writes. Manifest write records only cli-composed entries (walker files omitted).\n\n---SOURCE 7: ADR-055 D1 (verbatim principle)---\nsettings.json is copied byte-for-byte from dist/<tier>/.claude/settings.json. Cli does NOT compose. Cli does NOT filter entries at runtime. Upstream did tier filtering at build time via scripts/build-adopter-tree.sh.\n\n---SOURCE 8: ADR-002 §Amendment 2026-09-13 (exit codes 4+5)---\n4 = wiring manifest missing; 5 = wiring manifest schema major incompatible. Placeholder substitution applies to PLACEHOLDER_FILES set only. Canonical shapes: [REPO_NAME], [ISO_TIMESTAMP], [TIER].\n\n---SOURCE 9: bassclef-upstream#1624 (cure PR)---\nAdded `dist` to ALLOWED_PATHS in scripts/release-to-bassclef.sh. Without this, release script filtered every dist/ file from the propagation set. v0.40.0 tag cut 2026-09-13T20:40:20Z after cure landed.",
+  "extracted_text": "Extend cli init walker to copy shell script files from the bundled substrate at dist/<tier>/.claude/hooks/*.sh into the correct scope on the adopter machine. Each hook is referenced in the bundled settings.json with one of two command prefixes: $HOME/.claude/hooks/... (bootstrap dispatchers — bassclef-sync + session-reflection) or $CLAUDE_PROJECT_DIR/.claude/hooks/... (per-repo enforcement — 22 steering/discipline hooks). The walker must route each hook file per its declared prefix, preserve the executable bit (git ships mode 100755; adopter target must land mode 0755), refuse symlinks on both scopes with the ADR-002 discipline, and fail loudly with a structured banner if declared hook count in settings.json diverges from copied count. Same run bumps upstream tag pin to v0.40.0 in package.json bassclef.upstream_tag and in dist/lite/.bassclef-source.json source_ref, and retires the placeholder regex stopgap from cli 1.0.0 since upstream dist-templates now use canonical [REPO_NAME] / [TIER] shapes only. Ship as cli 1.0.1 to @thebassclef/lite via the existing trusted-publisher workflow. Post-publish: smoke on fresh cold-adopter macOS profile confirming zero hook-not-found errors on Claude Code session-start.",
+  "structural_hints": {
+    "entities_seen": [
+      "Hook",
+      "HookBinary",
+      "WiringManifest",
+      "SettingsJson",
+      "BundleRoot",
+      "AdopterRepo",
+      "UserHome",
+      "InitWalker",
+      "InitDispatcher",
+      "PlaceholderTransform",
+      "InitManifest",
+      "CopyResult",
+      "CopyFailure",
+      "ScopePrefix",
+      "EventBlock"
+    ],
+    "actor_candidates": [
+      "ColdAdopter",
+      "InitDispatcher",
+      "InitWalker",
+      "ClaudeCodeSession"
+    ],
+    "boundary_objects": [
+      "bassclef init CLI command",
+      "dist/lite/.claude/settings.json (bundle input)",
+      "dist/lite/.claude/hooks/*.sh (bundle input)",
+      "standards/bassclef-wiring-manifest.json (bundle input)",
+      "~/.claude/hooks/*.sh (adopter output — user scope)",
+      "<adopter-repo>/.claude/hooks/*.sh (adopter output — project scope)",
+      ".bassclef/init.manifest.json (adopter output — audit trail)",
+      "hook-count banner (adopter output — operator signal)"
+    ]
+  },
+  "external_urls": [
+    "https://github.com/sunj-labs/bassclef/releases/tag/v0.40.0",
+    "https://github.com/sunj-labs/bassclef-cli/issues/79",
+    "https://github.com/sunj-labs/bassclef-upstream/issues/1619",
+    "https://github.com/sunj-labs/bassclef-upstream/issues/1623",
+    "https://github.com/sunj-labs/bassclef/pull/1488"
+  ],
+  "created_at": "2026-09-13T21:00:00Z",
+  "references": [
+    { "type": "iteration-bet", "id": "2026-09-13d-cli-1.0.1-hook-routing" },
+    { "type": "adr", "id": "ADR-002", "anchor": "Amendment 2026-09-13" },
+    { "type": "adr", "id": "ADR-055", "anchor": "D1-D7 (upstream reader contract)" },
+    { "type": "adr", "id": "ADR-009", "anchor": "cli-side pointer to ADR-055" }
+  ],
+  "intent": "Extend the cli init walker so cold adopters running bassclef init on the bundled substrate get shell script hook files copied to the correct scope on their machine (user home vs project repo), with executable bit preserved and symlink refusal on both scopes, replacing the current cli 1.0.0 shape that ships settings.json wiring without wired binaries. The build must fail loud on any drift between declared and copied hook counts so silent regressions cannot ship again.",
+  "mode": "brownfield",
+  "extracted_intent_grounding": {
+    "matched_luminaries": [
+      "michael-nygard",
+      "michael-feathers",
+      "jerome-saltzer-and-michael-schroeder",
+      "linus-torvalds",
+      "kent-beck",
+      "john-ousterhout"
+    ],
+    "matched_problem_patterns": [
+      "fail-loud-boundary",
+      "characterization-tests-before-touch",
+      "complete-mediation-on-file-writes",
+      "adopter-contract-preservation",
+      "red-green-refactor",
+      "deep-modules-single-interface"
+    ],
+    "matched_canvas_references": [
+      "docs/canvases/2026-08-25-ooad-chain-as-substrate-offering.md",
+      "docs/iteration-bets/2026-09-13-cli-73-phase-3-init-walker.md"
+    ],
+    "rationale": "Nygard leads — the whole ticket exists because a fail-loud gate was missing at release time. Feathers pairs — walker rewrites without characterization tests reproduce the class. Saltzer-Schroeder covers the new attack surface (user-scope writes + symlink refusal + chmod). Torvalds is the adopter-contract anchor. Beck governs the Tier 0 RED-first discipline before the walker touch. Ousterhout ensures the walker stays a deep module with a narrow interface across two scopes.",
+    "picker_version": "operator-hand-picked-1.0",
+    "match_confidence": 0.92
+  }
+}

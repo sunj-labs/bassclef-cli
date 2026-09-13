@@ -1,0 +1,17 @@
+# Thread walk marker — cli 1.0.1 hook routing
+- date: 2026-09-13
+- goal: 2026-09-13d-cli-1.0.1-hook-routing
+- parent-chain walked:
+  - 2026-09-13c cli#73 Phase 3+4 (init walker reads dist/lite/, drops substrate/, MAJOR 1.0.0) — SHIPPED via PR #76 → main commit c974f33 on 2026-09-13T02:15:05Z
+  - parent: 2026-08-06b launch npm @thebassclef/core — parent umbrella; ROOT for this thread
+- open acceptance from ancestors:
+  - 2026-09-13c: hooks actually fire at Claude Code session-start (Phase 4-operator smoke on cold-adopter-1) — validated only if cli 1.0.1 lands the hook routing; SUPERSEDED BY THIS GOAL
+  - 2026-08-06b: /architect-review run at goal close — deferred; not blocking 1.0.1
+- out_of_scope inherited from ancestors:
+  - 2026-09-13c: standard + ultra tier packages; runtime hook resolution beyond dist/lite/ (subsumed here since we resolve it)
+  - 2026-08-06b: Adam Sharpe security PRs (WU-7 — deferred per parent L128)
+- drivers this goal inherits:
+  - cli#73 umbrella still active for standard + ultra tier packages
+  - bassclef-upstream ADR-055 D1-D7 unchanged
+  - Sam demo acceptance from ADR-005 now measurable per Phase 4 cold-adopter smoke
+- no cycle detected in parent_bet chain

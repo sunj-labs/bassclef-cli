@@ -26,25 +26,25 @@ const CLI = resolve(REPO_ROOT, 'dist/cli.js');
 const HOME = homedir();
 
 let workDir: string;
+let fakeHome: string;
 
 function runCli(args: readonly string[], opts?: { cwd?: string }) {
   return spawnSync(process.execPath, [CLI, ...args], {
     encoding: 'utf8',
     timeout: 8000,
     cwd: opts?.cwd,
+    env: { ...process.env, HOME: fakeHome },
   });
 }
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(HOME, '.bassclef-init-nudge-test-'));
+  fakeHome = mkdtempSync(join(HOME, '.bassclef-init-nudge-fakehome-'));
+  workDir = mkdtempSync(join(fakeHome, '.bassclef-init-nudge-test-'));
 });
 
 afterEach(() => {
-  try {
-    rmSync(workDir, { recursive: true, force: true });
-  } catch {
-    /* ignore */
-  }
+  try { rmSync(workDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  try { rmSync(fakeHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
 describe('bassclef --help first-run hint (Beck RED for #55 reconciled scope)', () => {

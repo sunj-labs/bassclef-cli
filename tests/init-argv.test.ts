@@ -28,6 +28,8 @@ describe('parseInitArgs', () => {
       allowRoot: false,
       allowAnyDir: false,
       dir: undefined,
+      yes: false,
+      json: false,
     });
   });
 

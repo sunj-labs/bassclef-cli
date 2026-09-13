@@ -59,22 +59,31 @@ function stripPathsFromOutput(text: string): string {
 }
 
 let workDir: string;
+let fakeHome: string;
 
 function runCli(args: readonly string[], opts?: { cwd?: string }) {
   return spawnSync(process.execPath, [CLI, 'init', ...args], {
     encoding: 'utf8',
     timeout: 8000,
     cwd: opts?.cwd,
+    // Cli 1.0.1 writes to $HOME/.claude/hooks/ for user-scope hooks.
+    // Every test isolates to a temp HOME so runs don't pollute the
+    // operator's real ~/.claude/hooks/ tree.
+    env: { ...process.env, HOME: fakeHome },
   });
 }
 
 beforeEach(() => {
-  // Use HOME as the base so default-safety checks (under HOME) pass.
-  workDir = mkdtempSync(join(HOME, '.bassclef-init-test-'));
+  // Isolate HOME first so mkdtemp for workDir sits inside it — the
+  // resulting workDir is a real dir under a real (temp) HOME so the
+  // ADR-002 "target under HOME" safety check passes without --allow-any-dir.
+  fakeHome = mkdtempSync(join(HOME, '.bassclef-init-fakehome-'));
+  workDir = mkdtempSync(join(fakeHome, '.bassclef-init-test-'));
 });
 
 afterEach(() => {
   try { rmSync(workDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  try { rmSync(fakeHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
 describe('bassclef init — happy path', () => {
