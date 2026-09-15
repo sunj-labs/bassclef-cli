@@ -1,0 +1,6 @@
+# /longrun preset marker
+
+- date: 2026-09-14
+- branch: main
+- preset: exploratory
+- rationale: No fresh next-session-plan doc; wake-up flow blocked on upstream PR #1633 (8/17 CI checks failing per gh pr view); operator picks between wait vs pivot.
