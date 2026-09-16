@@ -1,0 +1,13 @@
+{
+  "matched_luminaries": [
+    "linus-torvalds",
+    "hunt-thomas",
+    "stephen-toulmin"
+  ],
+  "matched_problem_patterns": [],
+  "matched_canvas_references": [],
+  "matcher_version": "voyage-3-lite+haiku-4-5-1.0",
+  "match_confidence": 0.82,
+  "_rationale": "Linus (userspace contract & migration cost ownership), Hunt-Thomas (single authoritative representation—settings.json vs tarball duplication), and Toulmin (the fix's whole-organism argument collapses if any layer breaks) directly address the adversarial tension between observable behavior becoming law, specification discipline, and system coherence across the upstream→public→cli chain.",
+  "_mode": "LIVE"
+}

@@ -1,0 +1,6 @@
+# ADR-deviation marker — fix/cli-1.0.3-prepublish-recursive-hook-copy
+- date: 2026-09-16
+- branch: fix/cli-1.0.3-prepublish-recursive-hook-copy
+- adr_governing: ADR-004 (npm publish safety), ADR-007 (npm-lite substrate bundling); no deviation from either
+- outcome: ADR-honored
+- rationale: The fix strengthens ADR-007's dist/lite/ contract by making cli's walker copy the whole sibling tree upstream curates, rather than filtering by cli-side settings.json commands. ADR-004 (publish safety envelope) is unchanged. No new architectural contract; the walker just becomes faithful to what upstream v0.42.0 already ships.

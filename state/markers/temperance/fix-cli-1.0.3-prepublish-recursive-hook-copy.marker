@@ -1,0 +1,10 @@
+# Temperance marker — fix/cli-1.0.3-prepublish-recursive-hook-copy
+- date: 2026-09-16
+- branch: fix/cli-1.0.3-prepublish-recursive-hook-copy
+- scope-decision:
+  - right-thing: cli 1.0.3 hotfix — recursive tree copy so trace-helper.sh + session-reflection.d/ ship
+  - right-way: full OOAD + primary consult + adversarial RFC + risk ledger v2 already landed; Tier 0 RED before code per Beck; two-commit RED→GREEN split
+  - drift-trigger: any scope past Step 12 (deprecating 1.0.0-1.0.2 on npm)
+- verification: fixture round-trip + cold-adopter-1 re-smoke boots clean
+- reversible: git revert; new tag; retag would be blocked per memory
+- blast-radius: adopter-visible (npm publish); halt at Touch ID gate
