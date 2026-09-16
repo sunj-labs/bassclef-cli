@@ -202,23 +202,64 @@ describe('bassclef init — partial state', () => {
 
 describe('bassclef init — dry-run parity with real run (#60 + ADR-055)', () => {
   // Regression test for bassclef-cli#60. Extended for ADR-055 D1 in
-  // Phase 3: init now walks dist/lite/ (not substrate/). Invariant: the
-  // "would create" count matches the walker file count + the cli-composed
-  // config file (substrate.config.md).
-  it('would-create count equals dist/lite/ file count + 1 config file', () => {
-    // Walk dist/lite/ from this repo's prepublish output. Count all files.
+  // Phase 3: init walks dist/lite/ (not substrate/).
+  //
+  // cli 1.0.4 amended for dual-scope walker: undeclared hook files
+  // (helpers + fragments the settings.json does not name as `command:`)
+  // land at BOTH user scope AND project scope. Each undeclared hook
+  // file writes TWO filesystem entries, so dry-run reports two
+  // "would create" lines per undeclared hook file.
+  //
+  // Invariant: `wouldCreateLines.length` equals
+  //   walkerFileCount + undeclaredHookFileCount + 1 config file.
+  it('would-create count matches walker output including dual-scope helpers', () => {
+    const fsMod = require('node:fs') as typeof import('node:fs');
     const distLite = join(REPO_ROOT, 'dist/lite');
+
+    // Walk dist/lite/ once, count total files AND collect hook file paths
+    // (files under .claude/hooks/ ending in .sh).
     let walkerCount = 0;
-    function count(dir: string): void {
-      for (const name of require('node:fs').readdirSync(dir)) {
-        const full = join(dir, name);
-        const st = require('node:fs').statSync(full);
-        if (st.isDirectory()) count(full);
-        else walkerCount += 1;
+    const hookRelPaths: string[] = [];
+    function walk(absDir: string, relDir: string): void {
+      for (const name of fsMod.readdirSync(absDir)) {
+        const abs = join(absDir, name);
+        const rel = relDir ? `${relDir}/${name}` : name;
+        const st = fsMod.statSync(abs);
+        if (st.isDirectory()) walk(abs, rel);
+        else {
+          walkerCount += 1;
+          if (rel.startsWith('.claude/hooks/') && rel.endsWith('.sh')) {
+            hookRelPaths.push(rel);
+          }
+        }
       }
     }
-    count(distLite);
-    const expectedCount = walkerCount + 1; // + substrate.config.md
+    walk(distLite, '');
+
+    // Read settings.json declared commands — derive their bundle-relative
+    // source paths so we know which hook files are declared. Anything
+    // under .claude/hooks/*.sh NOT in this set is undeclared and
+    // dual-writes at cli 1.0.4.
+    const settings = JSON.parse(
+      fsMod.readFileSync(join(distLite, '.claude/settings.json'), 'utf8')
+    ) as { hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>> };
+    const declared = new Set<string>();
+    for (const eventBlocks of Object.values(settings.hooks ?? {})) {
+      for (const block of eventBlocks) {
+        for (const h of block.hooks ?? []) {
+          if (typeof h.command === 'string' && h.command.startsWith('$')) {
+            declared.add(
+              h.command
+                .replace(/^\$HOME\//, '')
+                .replace(/^\$CLAUDE_PROJECT_DIR\//, '')
+                .replace(/\/{2,}/g, '/')
+            );
+          }
+        }
+      }
+    }
+    const undeclaredHookCount = hookRelPaths.filter((p) => !declared.has(p)).length;
+    const expectedCount = walkerCount + undeclaredHookCount + 1; // + substrate.config.md
 
     const r = runCli(['--dry-run'], { cwd: workDir });
     expect(r.status).toBe(0);
