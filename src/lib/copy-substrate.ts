@@ -143,8 +143,18 @@ export function copySubstrate(
   for (const [directory, groupFiles] of groups) {
     let completedInGroup = 0;
     for (const relPath of groupFiles) {
-      const outcome = copyOne(relPath, bundleRoot, targetDir, options, result, scopeMap);
-      if (outcome !== 'skipped') completedInGroup += 1;
+      // cli 1.0.4 — undeclared hook files (helpers + fragments the
+      // settings.json does not name as `command:`) are sourced by
+      // declared hooks via relative `$(dirname "$0")/x.sh`. A user-
+      // scope hook (session-reflection.sh) needs its helper co-located
+      // at the user hooks dir; a project-scope hook needs the same
+      // helper at the project hooks dir. The walker dual-writes so
+      // either sourcer resolves its helper regardless of scope.
+      const decisions = decisionsForFile(relPath, scopeMap, targetDir, options);
+      for (const decision of decisions) {
+        const outcome = copyOne(relPath, bundleRoot, options, result, decision);
+        if (outcome !== 'skipped') completedInGroup += 1;
+      }
     }
     if (options.onProgress) options.onProgress(directory, completedInGroup);
   }
@@ -321,22 +331,59 @@ function isHookFile(relPath: string): boolean {
   return relPath.startsWith(HOOKS_SUBPATH) && relPath.endsWith('.sh');
 }
 
+/**
+ * Compute the list of ScopeDecisions to write `relPath` under. Non-hook
+ * files return a single project-default decision. Declared hook files
+ * return the scopeMap's decision. Undeclared hook files (helpers +
+ * fragments the settings.json does not name as a command) dual-write —
+ * one user-scope decision + one project-scope decision — so declared
+ * hooks at either scope find them co-located per the relative
+ * dirname source pattern.
+ *
+ * @pattern patterns/code/fowler/anticorruption-layer.md — the walker
+ * translates the bundle's file tree into per-scope filesystem writes
+ * without leaking scope-router details into copyOne.
+ */
+function decisionsForFile(
+  relPath: string,
+  scopeMap: Map<string, ScopeDecision>,
+  targetDir: string,
+  options: CopyOptions
+): ScopeDecision[] {
+  if (!isHookFile(relPath)) {
+    // Non-hook files stay project-scope. One decision, project.
+    return [{ scope: 'project', targetPath: join(targetDir, mapAdopterPath(relPath)) }];
+  }
+  const declared = scopeMap.get(relPath);
+  if (declared) {
+    return [declared];
+  }
+  // Undeclared hook file — dual-write. Synthesize user + project
+  // decisions via classify() so path-traversal + home-resolve checks
+  // still run per @luminary saltzer-schroeder complete mediation.
+  const allowRoot = options.allowRoot ?? false;
+  const userDecision = classify(
+    { command: `$HOME/${relPath}` },
+    { targetDir, allowRoot }
+  );
+  const projectDecision = classify(
+    { command: `$CLAUDE_PROJECT_DIR/${relPath}` },
+    { targetDir, allowRoot }
+  );
+  return [userDecision, projectDecision];
+}
+
 function copyOne(
   relPath: string,
   bundleRoot: string,
-  targetDir: string,
   options: CopyOptions,
   result: CopyResult,
-  scopeMap: Map<string, ScopeDecision>
+  scopeDecision: ScopeDecision
 ): 'copied' | 'refused' | 'errored' | 'wouldCopy' | 'skipped' {
   const sourcePath = join(bundleRoot, relPath);
   const adopterRelPath = mapAdopterPath(relPath);
-  // Hook files route per scope map; non-hook files stay project-scope.
-  const scopeDecision: ScopeDecision | undefined = isHookFile(relPath)
-    ? scopeMap.get(relPath)
-    : undefined;
-  const targetPath = scopeDecision ? scopeDecision.targetPath : join(targetDir, adopterRelPath);
-  const scope: 'user' | 'project' = scopeDecision ? scopeDecision.scope : 'project';
+  const targetPath = scopeDecision.targetPath;
+  const scope: 'user' | 'project' = scopeDecision.scope;
 
   let content: string;
   try {
