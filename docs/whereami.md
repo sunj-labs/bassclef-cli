@@ -14,11 +14,13 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-16T23:42:55Z
+last_updated: 2026-09-16T23:49:32Z
 iteration_bet: cli 1.1.0 SHIPPED — lite catalog bundle (skills / rules / agents / luminaries + libs + ADRs + standards + templates + scripts + root-docs)
 iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
-session: docs/session-logs/2026-09-16-cli-1.0.4-and-1.1.0-ship-cold-adopter-smoke.md
+session: docs/session-logs/2026-09-17-longrun-prep-interrupted.md
 iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
+
+**operator_recap 2026-09-17:** `/longrun prep` opened and was interrupted after the whereami read. No work landed. Next prep starts fresh; the 1.1.1 defect batch (cli#93, #94, #95) is the likely pick.
 
 **Prior operator_recap (retained for history):** cli 1.0.4 walker dual-scope shipped 2026-09-16 (PR #89). Cli 1.0.3 recursive hook tree shipped (PR #88). Cli 1.0.2 pin-bump to upstream v0.42.0.
 
