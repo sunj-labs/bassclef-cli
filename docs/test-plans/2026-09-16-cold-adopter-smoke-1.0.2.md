@@ -72,18 +72,25 @@ ls ~/.claude.bak.* 2>/dev/null | head -3
 - Both `npm ls -g` show empty
 - `~/.claude/` either doesn't exist OR shows the backup from 2026-09-14
 
-**If old install lingers:** run the reset first.
+**If old install lingers OR you want a clean slate between re-runs:** run the reset.
 
 ```
 # fetch reset script from main
 curl -sL -o /tmp/smoke-reset.sh https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-reset.sh
 chmod +x /tmp/smoke-reset.sh
-bash /tmp/smoke-reset.sh --dry-run
+bash /tmp/smoke-reset.sh --dry-run --cold
 # review output, then apply:
-bash /tmp/smoke-reset.sh --clean-home --yes
+bash /tmp/smoke-reset.sh --cold
 ```
 
-The reset uses `~/tmp/bassclef-smoke-test` as its work dir target (new path since 2026-09-13). The reset does NOT touch other repos or the `~/.claude.bak.*` archives.
+The `--cold` flag is shorthand for `--clean-home --yes`. One flag, re-runnable.
+
+What the reset cleans:
+- Global `@thebassclef/lite` (and legacy `@thebassclef/core`)
+- Work dir at `~/tmp/bassclef-smoke-test`
+- `~/.claude/` — moved to `~/.claude.bak.<ISO-timestamp>` (never deleted; every reset creates a fresh backup)
+
+What the reset leaves alone: other repos, `~/.npm/` cache, and any `~/.claude.bak.*` archives from prior runs.
 
 ---
 
@@ -191,13 +198,13 @@ bassclef migrate --help
 
 ---
 
-## Step 8 — Clean up (optional)
+## Step 8 — Clean up (optional; use before every re-run)
 
-If you want the profile clean again for future tests:
+Between smoke runs on the same profile, run the reset again:
 
 ```
 cd ~
-bash /tmp/smoke-reset.sh --clean-home --yes
+bash /tmp/smoke-reset.sh --cold
 ```
 
 Verify:
@@ -208,7 +215,9 @@ which bassclef
 
 **Signal:** returns nothing.
 
-Leave the profile as-is if you plan to use it for iteration.
+The `--cold` flag is idempotent — running it twice in a row yields the same clean state on the second run (nothing to uninstall, nothing to remove).
+
+Leave the profile as-is if you plan to iterate without a reset.
 
 ---
 
