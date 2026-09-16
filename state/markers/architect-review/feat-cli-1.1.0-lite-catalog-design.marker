@@ -1,0 +1,19 @@
+# Architect-review #1 (design gate) — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- gate: design (1 of 3)
+- audit: docs/audits/2026-09-16-cli-1.1.0-architect-review-1-design.md
+- findings: 7 (2 BLOCK, 2 AMBER, 2 GREEN, 1 NOTE)
+- cures applied:
+  - F-1 BLOCK — ADR-057 D1 table extended from 10 to 13 rows (script, root-doc, presence-template added; template scope corrected)
+  - F-2 BLOCK — interaction-design banner counts updated to real manifest v1.6.1 census (72 standards + 18 libs + 10 templates + 7 scripts + 6 root-docs)
+- ambers deferred:
+  - F-3 AMBER — UC skill-discovery assumption; folds into Step 10 smoke assertion
+  - F-4 AMBER — preflight file-count delta check dropped to advisory (offline git-only comparison)
+- greens confirmed:
+  - F-5 — walker seam reuse (existing 1.0.4 code path)
+  - F-6 — risk ledger design/impl/verify mapping complete for 5 🔴 rows
+- note tracked:
+  - F-7 — Ishikawa Environment thin; open only if Step 10 surfaces
+- verdict: CLEARED to proceed to Step 3 spike
+- lead lens: alistair-cockburn — walking skeleton discipline preserved via Step 10 smoke

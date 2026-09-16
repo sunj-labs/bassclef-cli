@@ -1,0 +1,15 @@
+# Luminary marker — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- lead: alistair-cockburn — walking skeleton drives Step 3 spike + Step 10 cold-adopter smoke
+- supporting:
+  - linus-torvalds — adopter contract; 1.1.0 MINOR must not break 1.0.x adopters
+  - conventional-commits — git-auditable regression trace at commit 1c7d919
+  - michael-nygard (parent pin) — fail-loud on missing manifest
+  - michael-feathers (parent pin) — characterization tests on 292-entry catalog
+  - jerome-saltzer-and-michael-schroeder — complete mediation preserved
+  - john-ousterhout — deep module: single walker hides entry-type routing
+  - tony-hoare — pre/postcondition on manifest read
+  - kent-beck — RED then GREEN commit split
+- matcher_version: voyage-3-lite+haiku-4-5-1.0 (confidence 0.92)
+- artifact: /private/tmp/claude-501/-Users-sanjay2025-src-sunj-labs-bassclef-cli/8afd21dd-8c1a-4eac-9e51-74354f8eeb79/scratchpad/cli-1.0.5-intent.json

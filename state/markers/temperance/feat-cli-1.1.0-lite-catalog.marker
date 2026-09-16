@@ -1,0 +1,8 @@
+# Temperance marker — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- scope-decision:
+  right thing: ship the 292 entries the lite-manifest catalogs
+  right way: prepublish reads manifest + walker routes non-hook types
+  drift-trigger: expanding to sync-time schema evolution or auto-refresh
+- brute-force check: not retrying a failed pattern. We are ADDING functionality that never shipped after commit 1c7d919 dropped copyEntry. First-time build.

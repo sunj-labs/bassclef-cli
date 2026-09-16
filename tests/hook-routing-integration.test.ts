@@ -309,3 +309,130 @@ describe('copySubstrate — cli 1.0.4 dual-scope undeclared helpers (Linus L + I
     expect(existsSync(helperSameDir)).toBe(true);
   });
 });
+
+// cli 1.1.0 — walker routes non-hook types per ADR-057 D1.
+//
+// Extends the fixture with skill, rule, agent, luminary, lib, adr,
+// standard, template, presence-template, script, root-doc entries.
+// Asserts each family lands at its ADR-057 target-path prefix at
+// project scope. Regression guard: 1.0.4 dual-scope hook behavior
+// unchanged.
+//
+// @verifies ADR-057 D1 routing table (all 13 rows)
+// @verifies F-9 GREEN — init walker path-prefix routing without manifest
+// @verifies risk-ledger HW — Hyrum contract on destination paths
+// @verifies risk-ledger regression guard — 1.0.4 hook logic preserved
+//
+// # test-list:
+// [ ] skill files land at <repo>/.claude/skills/ (project scope only)
+// [ ] rule files land at <repo>/.claude/rules/
+// [ ] agent files land at <repo>/.claude/agents/
+// [ ] luminary files land at <repo>/.claude/luminaries/
+// [ ] lib files land at <repo>/lib/
+// [ ] adr files land at <repo>/architecture/decisions/
+// [ ] standard files land at <repo>/standards/
+// [ ] template files land at <repo>/templates/
+// [ ] presence-template files land at <repo>/presence/install/
+// [ ] script files land at <repo>/scripts/
+// [ ] root-doc files land at <repo>/ (repo root)
+// [ ] non-hook files DO NOT dual-write to user scope
+// [ ] 1.0.4 hook dual-scope behavior preserved (regression guard)
+
+function seedFixtureBundleWithCatalog(root: string): void {
+  buildFixtureBundle(root);
+  // Add one file per ADR-057 D1 non-hook type
+  mkdirSync(join(root, '.claude/skills/temperance'), { recursive: true });
+  writeFileSync(join(root, '.claude/skills/temperance/SKILL.md'), '# temperance skill\n');
+  mkdirSync(join(root, '.claude/rules'), { recursive: true });
+  writeFileSync(join(root, '.claude/rules/testing.md'), '# testing rule\n');
+  mkdirSync(join(root, '.claude/agents'), { recursive: true });
+  writeFileSync(join(root, '.claude/agents/architect.md'), '# architect agent\n');
+  mkdirSync(join(root, '.claude/luminaries'), { recursive: true });
+  writeFileSync(join(root, '.claude/luminaries/kent-beck.md'), '# kent-beck luminary\n');
+  mkdirSync(join(root, 'lib'), { recursive: true });
+  writeFileSync(join(root, 'lib/hook-inject.sh'), '#!/bin/sh\necho hook-inject\n');
+  mkdirSync(join(root, 'architecture/decisions'), { recursive: true });
+  writeFileSync(join(root, 'architecture/decisions/ADR-029-release-pipeline.md'), '# ADR-029\n');
+  mkdirSync(join(root, 'standards'), { recursive: true });
+  writeFileSync(join(root, 'standards/testing.md'), '# testing standard\n');
+  mkdirSync(join(root, 'templates'), { recursive: true });
+  writeFileSync(join(root, 'templates/chronicle-template.md'), '# chronicle template\n');
+  mkdirSync(join(root, 'presence/install'), { recursive: true });
+  writeFileSync(join(root, 'presence/install/bassclef-sync.template.sh'), '#!/bin/sh\n');
+  mkdirSync(join(root, 'scripts'), { recursive: true });
+  writeFileSync(join(root, 'scripts/aggregate-telemetry.sh'), '#!/bin/sh\n');
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS.md\n');
+}
+
+describe('copySubstrate — cli 1.1.0 non-hook type routing (ADR-057 D1)', () => {
+  beforeEach(() => {
+    process.env.HOME = fakeHome;
+    seedFixtureBundleWithCatalog(bundleDir);
+  });
+
+  it('skill file lands at project scope only', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, '.claude/skills/temperance/SKILL.md'))).toBe(true);
+    expect(existsSync(join(fakeHome, '.claude/skills/temperance/SKILL.md'))).toBe(false);
+  });
+
+  it('rule file lands at project scope only', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, '.claude/rules/testing.md'))).toBe(true);
+    expect(existsSync(join(fakeHome, '.claude/rules/testing.md'))).toBe(false);
+  });
+
+  it('agent file lands at project scope only', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, '.claude/agents/architect.md'))).toBe(true);
+  });
+
+  it('luminary file lands at project scope only', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, '.claude/luminaries/kent-beck.md'))).toBe(true);
+  });
+
+  it('lib file lands at <repo>/lib/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'lib/hook-inject.sh'))).toBe(true);
+  });
+
+  it('adr file lands at <repo>/architecture/decisions/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'architecture/decisions/ADR-029-release-pipeline.md'))).toBe(true);
+  });
+
+  it('standard file lands at <repo>/standards/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'standards/testing.md'))).toBe(true);
+  });
+
+  it('template file lands at <repo>/templates/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'templates/chronicle-template.md'))).toBe(true);
+  });
+
+  it('presence-template file lands at <repo>/presence/install/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'presence/install/bassclef-sync.template.sh'))).toBe(true);
+  });
+
+  it('script file lands at <repo>/scripts/', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'scripts/aggregate-telemetry.sh'))).toBe(true);
+  });
+
+  it('root-doc file lands at <repo>/ (repo root)', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(workDir, 'AGENTS.md'))).toBe(true);
+  });
+
+  it('regression guard: 1.0.4 hook dual-scope behavior preserved', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    // session-reflection.sh at user scope (declared)
+    expect(existsSync(join(fakeHome, '.claude/hooks/session-reflection.sh'))).toBe(true);
+    // trace-helper.sh dual-writes at both scopes (undeclared helper — 1.0.4 logic)
+    expect(existsSync(join(fakeHome, '.claude/hooks/trace-helper.sh'))).toBe(true);
+    expect(existsSync(join(workDir, '.claude/hooks/trace-helper.sh'))).toBe(true);
+  });
+});

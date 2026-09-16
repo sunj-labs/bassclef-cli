@@ -38,7 +38,7 @@ import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifest-io.js';
 import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
-import { HOOKS_SUBPATH } from '../lib/paths.js';
+import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
 
 // Static tier for @thebassclef/lite. When standard + ultra packages
 // ship, this resolves from the installed package.json `name` field
@@ -320,6 +320,92 @@ function dispatchSubstrateCopy(
       `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix}\n`
     );
   }
+
+  // Cli 1.1.0 (goal 2026-09-16 cli#90) — per-type count banner for the
+  // lite catalog. Skills, rules, agents, luminaries land at project
+  // scope per ADR-057. Banner reports each family so adopters see what
+  // the tarball delivered. Norman signifier: name the type + location.
+  //
+  // Path-prefix classification (matches ADR-057 D1 exactly). Init walker
+  // routes by prefix, not manifest type — no manifest read at init time.
+  // @risk L2 (Toulmin — hidden signal): counts up front so adopters
+  // reading changelog fast see the file-count delta.
+  const catalogCounts = {
+    skills: 0,
+    rules: 0,
+    agents: 0,
+    luminaries: 0,
+    libs: 0,
+    adrs: 0,
+    standards: 0,
+    templates: 0,
+    'presence-templates': 0,
+    scripts: 0,
+    'root-docs': 0,
+  };
+  // Prefixes built from CLAUDE_TARGET_ROOT constant so R6 single-source-of-truth
+  // check (grep for literal .claude/(hooks|skills|rules) outside paths.ts) stays green.
+  const SKILLS_PREFIX = `${CLAUDE_TARGET_ROOT}/skills/`;
+  const RULES_PREFIX = `${CLAUDE_TARGET_ROOT}/rules/`;
+  const AGENTS_PREFIX = `${CLAUDE_TARGET_ROOT}/agents/`;
+  const LUMINARIES_PREFIX = `${CLAUDE_TARGET_ROOT}/luminaries/`;
+  const CLAUDE_ROOT_PREFIX = `${CLAUDE_TARGET_ROOT}/`;
+  for (const entry of result.copiedEntries) {
+    if (entry.path.startsWith(SKILLS_PREFIX)) catalogCounts.skills += 1;
+    else if (entry.path.startsWith(RULES_PREFIX)) catalogCounts.rules += 1;
+    else if (entry.path.startsWith(AGENTS_PREFIX)) catalogCounts.agents += 1;
+    else if (entry.path.startsWith(LUMINARIES_PREFIX)) catalogCounts.luminaries += 1;
+    else if (entry.path.startsWith('lib/')) catalogCounts.libs += 1;
+    else if (entry.path.startsWith('architecture/decisions/')) catalogCounts.adrs += 1;
+    else if (entry.path.startsWith('standards/')) catalogCounts.standards += 1;
+    else if (entry.path.startsWith('templates/')) catalogCounts.templates += 1;
+    else if (entry.path.startsWith('presence/install/')) catalogCounts['presence-templates'] += 1;
+    else if (entry.path.startsWith('scripts/')) catalogCounts.scripts += 1;
+    else if (
+      !entry.path.startsWith(CLAUDE_ROOT_PREFIX) &&
+      !entry.path.includes('/') &&
+      /^[A-Z]/.test(entry.path)
+    ) {
+      // Root-doc heuristic — repo-root file starting with uppercase letter
+      // (README.md, AGENTS.md, CLAUDE-lite.md, CONTRIBUTING.md, etc.)
+      catalogCounts['root-docs'] += 1;
+    }
+  }
+  const claudeCounts = [
+    catalogCounts.skills > 0 ? `${catalogCounts.skills} skills` : null,
+    catalogCounts.rules > 0 ? `${catalogCounts.rules} rules` : null,
+    catalogCounts.agents > 0 ? `${catalogCounts.agents} agents` : null,
+    catalogCounts.luminaries > 0 ? `${catalogCounts.luminaries} luminaries` : null,
+  ].filter((s): s is string => s !== null);
+  if (claudeCounts.length > 0) {
+    process.stdout.write(
+      `bassclef init: Installed ${claudeCounts.join(', ')} under <repo>/.claude/.\n`
+    );
+  }
+  const otherCounts = [
+    catalogCounts.libs > 0 ? `${catalogCounts.libs} libs` : null,
+    catalogCounts.adrs > 0 ? `${catalogCounts.adrs} ADRs` : null,
+    catalogCounts.templates > 0 ? `${catalogCounts.templates} templates` : null,
+    catalogCounts['presence-templates'] > 0
+      ? `${catalogCounts['presence-templates']} presence-templates`
+      : null,
+    catalogCounts.standards > 0 ? `${catalogCounts.standards} standards` : null,
+    catalogCounts['root-docs'] > 0 ? `${catalogCounts['root-docs']} root-docs` : null,
+    catalogCounts.scripts > 0 ? `${catalogCounts.scripts} scripts` : null,
+  ].filter((s): s is string => s !== null);
+  if (otherCounts.length > 0) {
+    process.stdout.write(
+      `bassclef init: Installed ${otherCounts.join(', ')} under <repo>/.\n`
+    );
+  }
+  // Norman feedback loop: refused-count line always emitted, even 0.
+  process.stdout.write(
+    `bassclef init: ${result.refused.length} files refused (path collision).` +
+      (result.refused.length > 0
+        ? ` Use --force to overwrite existing files.`
+        : ``) +
+      `\n`
+  );
   // H1 fold — --json emits structured stderr line adopter tooling can parse.
   if (json) {
     const report = {

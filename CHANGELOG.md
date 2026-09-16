@@ -24,6 +24,33 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.1.0] — 2026-09-16
+
+**This release adds ~260 files under `.claude/` and repo root.** Adopter tarball grows from ~180KB (1.0.4) to ~800KB uncompressed. Review the shape before upgrade.
+
+### Added
+
+- **Lite catalog now ships in the npm tarball.** Prepublish reads `lite-manifest.json` v1.6.x at bassclef-upstream and copies every catalog entry to `dist/lite/` via identity path mapping. Cold adopters running `bassclef init` on 1.1.0 land 40 skills, 63 rules, 32 luminaries, 4 agents, 18 libs, 6 ADRs, 72 standards, 10 templates, 5 presence-templates, 7 scripts, and 6 root-docs — the full lite tier the tier tag has promised since 1.0.0.
+- **New init banner lines report per-type counts.** `bassclef init` output now includes:
+  - `Installed N skills, N rules, N agents, N luminaries under <repo>/.claude/.`
+  - `Installed N libs, N ADRs, N templates, N presence-templates, N standards, N root-docs, N scripts under <repo>/.`
+  - `N files refused (path collision).` (always emitted, even at 0)
+- **ADR-057 — lite catalog destination-path invariant.** Pins the 13-row routing table for every manifest type. Every path shipped at 1.1.0 is immutable in 1.1.x per Hyrum's Law; moving a path is a MAJOR bump.
+- **Distribution pre-flight discipline (proposed at bassclef-upstream).** Drafts at `docs/proposed-upstream/` for `standards/distribution-preflight.md` + `.claude/rules/distribution-preflight-check.md`. Six-check standard prevents future distribution builds from shipping a tarball that lies about what it contains. Wiring lands at cli 1.1.1+ after upstream merges.
+
+### Fixed
+
+- **Regression from cli 1.0.0 — skills / rules / agents / luminaries missing from npm tarball.** Root cause: git commit `1c7d919` (MAJOR 1.0.0) dropped the pre-1.0 `copyEntry` walker along with the `substrate/` directory. Replacement wired hooks only. cli 1.0.0 through 1.0.4 shipped hooks-only bundles despite the lite tier promising the full catalog. cli 1.1.0 restores catalog delivery via `lite-manifest.json`-driven prepublish. See cli#90 for the filing ticket.
+
+### Notes
+
+- **Bundle size grows ~5x.** Compressed tarball ~200-400KB. Install time grows by seconds, not minutes.
+- **Walker unchanged.** cli 1.0.4 dual-scope hook behavior preserved. Non-hook file routing already lived at project scope by identity path mapping (surprise finding at Step 5); walker tests pin the invariant.
+- **Adopter contract preserved.** No breaking changes to `bassclef init` API, `--json` output shape, exit codes, or existing banner lines. New content lands at previously-empty paths.
+- **All 303 tests pass.** 7 new prepublish tests + 12 new walker characterization tests + all 284 pre-1.1.0 tests still green.
+- **19 new tests added — Beck rhythm.** RED (2a84c8e) committed before GREEN (d2647fc). Fixture uses real manifest slice, not hand-authored shape (Feathers characterization).
+- **Three architect-review gates cleared.** Design gate (2 BLOCKs cured inline: F-1 ADR-057 type coverage + F-2 banner counts). Spike gate (Cockburn walking skeleton passed; identity mapping surprise). Code gate (0 BLOCK; 1 AMBER for lowercase root-doc heuristic deferred to 1.1.1+).
+
 ## [1.0.4] — 2026-09-16
 
 ### Fixed

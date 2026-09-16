@@ -1,0 +1,20 @@
+# Architect-review #3 (code + test gate) — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- gate: code + test (3 of 3)
+- audit: docs/audits/2026-09-16-cli-1.1.0-architect-review-3-code.md
+- findings: 6 (0 BLOCK, 1 AMBER, 4 GREEN, 1 NOTE)
+- code state: 303/303 tests pass; typecheck clean; build clean
+- real prepublish output: 336 files in dist/lite/ (40 skills, 63 rules, 32 luminaries, 4 agents confirmed)
+- amber deferred:
+  - F-17 — root-doc detection heuristic assumes uppercase; folds to 1.1.1+ if lowercase root-docs ship in future manifest refresh
+- greens confirmed:
+  - F-12 — @risk annotations at code sites match ledger rows
+  - F-13 — Tier 0 coverage across 7 RED + 12 characterization tests
+  - F-14 — no hard-coded counts; F1/HT honored
+  - F-15 — init banner path-prefix routing; no init-time manifest read (F-9 honored)
+  - F-16 — refused-count line always emitted (Norman feedback loop)
+- note tracked:
+  - F-18 — Step 7 substrate cure lands as drafts; wiring in cli 1.1.1+ after upstream merges
+- verdict: SHIP cli 1.1.0
+- lead lens: alistair-cockburn confirms walking skeleton discipline preserved end-to-end via Step 10 smoke gate

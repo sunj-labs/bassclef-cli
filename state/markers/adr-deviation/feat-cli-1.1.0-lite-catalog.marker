@@ -1,0 +1,6 @@
+# ADR-deviation marker — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- adr_governing: ADR-056 (bassclef-upstream — self-containment invariant), ADR-055 (bassclef-upstream — dist/lite wiring), ADR-002 (bassclef-cli — init safety contract)
+- outcome: ADR-honored
+- rationale: ADR-056 D1 self-containment invariant bounds the source graph. This goal EXTENDS the invariant to the tagged content catalog (skills / rules / agents / luminaries). Extension aligns with D2 (sync is optional upgrade path) and the canvas 2026-07-19 lite scope. Mediation via classify() preserved per ADR-002. New ADR-057 authored in same PR names the catalog-shipping invariant explicitly per Hyrum-Wright discipline.
