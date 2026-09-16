@@ -61,6 +61,13 @@ const DIST_TEMPLATE_FILES = [
 ];
 const EXPECTED_WIRING_MAJOR = 2;
 
+// Cli 1.1.0 (goal 2026-09-16) — canonical lite catalog at sibling.
+// Prepublish reads this manifest and copies every entry to dist/lite/
+// via identity path mapping. See ADR-057 D1 for the destination-path
+// invariant at init time.
+const LITE_MANIFEST_REL = 'lite-manifest.json';
+const EXPECTED_LITE_MANIFEST_MAJOR = 1;
+
 // Tier hierarchy per ADR-055 D7: ultra ⊇ standard ⊇ lite.
 const TIER_SUPERSETS = {
   lite: ['lite'],
@@ -202,6 +209,122 @@ function copyWiringManifestIntoDist(siblingRoot, distRoot) {
   writeFileSync(dst, content, { mode: 0o644 });
 }
 
+// Cli 1.1.0 — catalog reader.
+//
+// @risk N1 (Nygard fail-loud on missing manifest)
+// @risk RH (Hickey — schema major check both at build + init)
+// @risk F-10 AMBER fold (collision guard against DIST_TEMPLATE_FILES)
+// @risk F-8 GREEN (identity path mapping — no transformation)
+
+function loadLiteManifest(siblingRoot) {
+  const path = join(siblingRoot, LITE_MANIFEST_REL);
+  if (!existsSync(path)) {
+    fail(
+      `lite-manifest.json missing at ${path}. ` +
+        `No such file — expected sibling clone to carry ${LITE_MANIFEST_REL} at v1.6.x. ` +
+        `Reinstall bassclef-upstream or upgrade the sibling checkout.`
+    );
+  }
+  const raw = readFileSync(path, 'utf8');
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    fail(`lite-manifest.json at ${path} is not valid JSON: ${e.message}`);
+  }
+  if (typeof parsed.manifest_version !== 'string' || parsed.manifest_version.length === 0) {
+    fail(
+      `lite-manifest.json missing 'manifest_version' field. ` +
+        `Expected schema major ${EXPECTED_LITE_MANIFEST_MAJOR}.x.`
+    );
+  }
+  const major = parseInt(parsed.manifest_version.split('.')[0], 10);
+  if (major !== EXPECTED_LITE_MANIFEST_MAJOR) {
+    fail(
+      `lite-manifest.json schema major mismatch: got manifest_version=${parsed.manifest_version} ` +
+        `but cli expects schema major ${EXPECTED_LITE_MANIFEST_MAJOR}.x. ` +
+        `Upgrade cli or downgrade bassclef-upstream to a compatible version.`
+    );
+  }
+  if (!Array.isArray(parsed.entries) || parsed.entries.length === 0) {
+    fail(
+      `lite-manifest.json 'entries' is empty or not an array. ` +
+        `Silent-empty guard — refusing to ship a catalog with 0 entries.`
+    );
+  }
+  return { manifest: parsed, path };
+}
+
+function assertNoManifestCollisions(manifest, siblingRoot) {
+  // F-10 AMBER cure: manifest entry.path must not collide with any
+  // file the existing prepublish path lays down in dist/lite/. If it
+  // did, the catalog copy would silently overwrite (or be overwritten
+  // by) the template layer. Fail-loud instead.
+  const distTemplates = new Set(
+    DIST_TEMPLATE_FILES.map((n) => (n === '.gitignore' ? 'gitignore' : n))
+  );
+  const collisions = [];
+  for (const entry of manifest.entries) {
+    if (typeof entry.path !== 'string' || entry.path.length === 0) {
+      fail(`lite-manifest.json entry ${JSON.stringify(entry)} has invalid path field`);
+    }
+    if (distTemplates.has(entry.path)) {
+      collisions.push(entry.path);
+    }
+  }
+  if (collisions.length > 0) {
+    fail(
+      `ManifestCollision — lite-manifest.json entries collide with DIST_TEMPLATE_FILES: ` +
+        collisions.join(', ') +
+        `. Templates ship via prepublish's dist-templates path; manifest ships via catalog copy. ` +
+        `Conflict at ${collisions[0]}. Amend the manifest or the templates set.`
+    );
+  }
+  // Also assert every entry.path resolves to a real file at sibling
+  const missing = [];
+  for (const entry of manifest.entries) {
+    const sourcePath = join(siblingRoot, entry.path);
+    if (!existsSync(sourcePath)) missing.push(entry.path);
+  }
+  if (missing.length > 0) {
+    fail(
+      `lite-manifest.json entries reference missing source files: ` +
+        missing.slice(0, 3).join(', ') +
+        (missing.length > 3 ? ` (and ${missing.length - 3} more)` : '') +
+        `. Sibling clone may be out of date with manifest — rerun the manifest generator.`
+    );
+  }
+}
+
+function copyLiteCatalogEntries(siblingRoot, distRoot, manifest) {
+  let copied = 0;
+  for (const entry of manifest.entries) {
+    const source = join(siblingRoot, entry.path);
+    const target = join(distRoot, entry.path);
+    mkdirSync(dirname(target), { recursive: true, mode: 0o755 });
+    const content = readFileSync(source);
+    // Preserve execute bit for scripts + lib + hooks; 0644 otherwise.
+    const executable =
+      entry.type === 'script' ||
+      entry.type === 'lib' ||
+      entry.type === 'hook' ||
+      entry.type === 'presence-template' ||
+      entry.path.endsWith('.sh');
+    writeFileSync(target, content, { mode: executable ? 0o755 : 0o644 });
+    copied += 1;
+  }
+  return copied;
+}
+
+function copyLiteManifestIntoDist(siblingRoot, distRoot) {
+  const src = join(siblingRoot, LITE_MANIFEST_REL);
+  const dstDir = join(distRoot, 'standards');
+  mkdirSync(dstDir, { recursive: true, mode: 0o755 });
+  const dst = join(dstDir, 'lite-manifest.json');
+  const content = readFileSync(src);
+  writeFileSync(dst, content, { mode: 0o644 });
+}
+
 function copyDistTemplates(siblingRoot, distRoot) {
   const templatesDir = join(siblingRoot, DIST_TEMPLATES_REL);
   if (!existsSync(templatesDir)) {
@@ -300,6 +423,15 @@ function buildDistLiteTree(siblingRoot) {
   // and fragment dirs (session-reflection.d/) that hooks source at
   // runtime now ship in the tarball.
   const { copiedFiles, copiedDirs } = copyHookTreeRecursive(siblingRoot, distRoot);
+  // Cli 1.1.0 (goal 2026-09-16 cli#90) — read canonical lite catalog and
+  // copy all 292 entries into dist/lite/ via identity path mapping.
+  // Skills, rules, agents, luminaries, libs, ADRs, standards, templates,
+  // presence-templates, scripts, root-docs now ship in the tarball per
+  // ADR-057. @risk N1 + RH + F-10 + F-8.
+  const { manifest: liteManifest } = loadLiteManifest(siblingRoot);
+  assertNoManifestCollisions(liteManifest, siblingRoot);
+  const catalogCopied = copyLiteCatalogEntries(siblingRoot, distRoot, liteManifest);
+  copyLiteManifestIntoDist(siblingRoot, distRoot);
   // Nygard fail-fast — postflight verifies every declared command has a
   // matching binary in the tree. Helpers pass with an INFO log.
   const treeInfo = assertDeclaredCommandsHaveBinaries(distRoot, filtered);
@@ -312,6 +444,8 @@ function buildDistLiteTree(siblingRoot) {
     copiedDirs,
     treeFileCount: treeInfo.treeFileCount,
     wiringVersion: wiringManifest.version,
+    liteCatalogCount: catalogCopied,
+    liteManifestVersion: liteManifest.manifest_version,
   };
 }
 

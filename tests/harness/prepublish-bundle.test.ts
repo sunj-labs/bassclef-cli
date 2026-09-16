@@ -76,6 +76,25 @@ function seedWiringManifest(manifest: WiringManifest): void {
   const dir = join(fakeSibling, 'standards');
   mkdirSync(dir, { recursive: true, mode: 0o755 });
   writeFileSync(join(dir, 'bassclef-wiring-manifest.json'), JSON.stringify(manifest, null, 2));
+  // Cli 1.1.0 (goal 2026-09-16) — every prepublish requires lite-manifest.json.
+  // Existing tests get a minimal 1-entry default; tests that need specific
+  // catalog shape override by calling seedLiteManifest() afterward.
+  const liteManifestPath = join(fakeSibling, 'lite-manifest.json');
+  if (!existsSync(liteManifestPath)) {
+    // Minimal manifest — one skill entry with the actual source file seeded.
+    // Fixture directory exists so entry passes collision guard's source check.
+    const skillDir = join(fakeSibling, '.claude', 'skills', 'default-fixture');
+    mkdirSync(skillDir, { recursive: true, mode: 0o755 });
+    writeFileSync(join(skillDir, 'SKILL.md'), '# default fixture skill\n');
+    writeFileSync(liteManifestPath, JSON.stringify({
+      tier: 'lite',
+      manifest_version: '1.6.1',
+      generated_at: '2026-09-16T00:00:00Z',
+      entries: [
+        { slug: 'default-fixture', type: 'skill', path: '.claude/skills/default-fixture/SKILL.md', tier: 'lite' },
+      ],
+    }, null, 2));
+  }
 }
 
 function seedDistTemplates(): void {
@@ -528,7 +547,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('reads lite-manifest.json and copies every entry via identity path mapping', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const manifest = miniLiteManifest();
     seedLiteManifest(manifest);
     seedAllManifestEntries(manifest);
@@ -546,8 +565,10 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('fails loud when lite-manifest.json is missing (N1)', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
-    // Deliberately skip seedLiteManifest()
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
+    // seedWiringManifest auto-seeds a default; explicitly remove it to test N1
+    const rmSyncFn = require('node:fs').rmSync;
+    rmSyncFn(join(fakeSibling, 'lite-manifest.json'), { force: true });
 
     const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
     expect(result.status).not.toBe(0);
@@ -558,7 +579,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('fails loud on schema major mismatch (RH)', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const badMajor: LiteManifest = { ...miniLiteManifest(), manifest_version: '99.0.0' };
     seedLiteManifest(badMajor);
     seedAllManifestEntries(badMajor);
@@ -571,7 +592,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('fails loud on collision with DIST_TEMPLATE_FILES (F-10 AMBER fold)', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const collisionManifest: LiteManifest = {
       ...miniLiteManifest(),
       entries: [
@@ -591,7 +612,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('type coverage — all 12 manifest types land per ADR-057 D1', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const manifest = miniLiteManifest();
     seedLiteManifest(manifest);
     seedAllManifestEntries(manifest);
@@ -611,7 +632,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('postflight file count includes manifest entries plus dist templates plus wiring manifest', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const manifest = miniLiteManifest();
     seedLiteManifest(manifest);
     seedAllManifestEntries(manifest);
@@ -638,7 +659,7 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
   it('bundled lite-manifest.json lands in dist/lite/standards/ for init reader', () => {
     seedWiringManifest(miniWiringManifest());
     seedDistTemplates();
-    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-prompt.sh']);
     const manifest = miniLiteManifest();
     seedLiteManifest(manifest);
     seedAllManifestEntries(manifest);
