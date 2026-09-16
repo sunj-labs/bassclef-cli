@@ -24,6 +24,23 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.0.2] - 2026-09-16
+
+### Changed
+
+- **Upstream pin bump v0.40.0 → v0.42.0** in `.github/workflows/publish.yml` (6 spots: 2 checkout refs, 2 tag-assertion comparisons, 2 header notes). Bassclef v0.42.0 ships install-class dispatch on adopter machines per bassclef-upstream ADR-058 + PR #1682 (goal 14c Step 6). Bundled hooks now install into `$HOME/.claude/hooks/` (operator scope) or `$CLAUDE_PROJECT_DIR/.claude/hooks/` (project scope) per each hook's `install-class` header.
+
+### Fixed
+
+- **Cold-adopter hook-cascade class from 1.0.1** — v0.42.0's self-contained lite bundle carries `trace-helper.sh` + `session-reflection.d/` fragments + 8 `lib/*.sh` modules that 1.0.1 adopters were missing. Fresh installs boot without `source` errors at SessionStart.
+
+### Notes
+
+- New lite luminary bundled — Andreas Zeller (Delta Debugging). David Agans stays upstream-tier.
+- Wiring manifest bumped to `1.6.1` (291 → 292 entries).
+- Wake-up flow triggered by bassclef-upstream release PR #1492 (commit `d99cdede`) publishing tag `v0.42.0` to public bassclef at 2026-09-16T06:12:29Z.
+- Cli-side pin bump executed autonomously under orchestrator-gated + agent-merges-within-scope per operator directive.
+
 ## [1.0.1] - 2026-09-13
 ### Added
 
