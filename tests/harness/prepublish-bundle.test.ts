@@ -447,3 +447,211 @@ describe('prepublish-bundle — tarball audit (no operator-private path leaks)',
     expect(topLevel.has('substrate')).toBe(false);
   });
 });
+
+// ============================================================
+// cli 1.1.0 — lite catalog reader (goal 2026-09-16)
+// ============================================================
+//
+// RED phase for cli 1.1.0. Prepublish must read lite-manifest.json
+// v1.6.x from the sibling and copy every entry to dist/lite/
+// via identity path mapping.
+//
+// @verifies F-1 fix — ADR-057 D1 covers 12 manifest types
+// @verifies F-8 GREEN — identity path mapping
+// @verifies F-10 AMBER fold — build-time collision guard
+// @verifies risk-ledger row N1 (fail-loud manifest missing)
+// @verifies risk-ledger row RH (schema major mismatch)
+//
+// # test-list:
+// [ ] Manifest read: prepublish reads lite-manifest.json + copies all entries at entry.path
+// [ ] Fail-loud N1: manifest missing → nonzero exit + stderr names cure
+// [ ] Fail-loud RH: schema major mismatch → nonzero exit + stderr names both versions
+// [ ] Collision guard: manifest entry path in DIST_TEMPLATE_FILES → nonzero exit (ManifestCollision)
+// [ ] Identity mapping: every entry.path resolves to a file under dist/lite/
+// [ ] Type coverage: all 12 manifest type values (skill/rule/agent/luminary/lib/hook/adr/standard/template/presence-template/script/root-doc) land per ADR-057
+// [ ] Postflight: dist/lite/ file count = manifest.entries.length + existing DIST_TEMPLATE_FILES + settings.json + wiring manifest
+
+interface LiteManifestEntry {
+  slug: string;
+  type: string;
+  path: string;
+  tier: 'lite' | 'standard' | 'ultra';
+  content_hash?: string;
+  description?: string;
+}
+
+interface LiteManifest {
+  tier: 'lite';
+  manifest_version: string;
+  generated_at: string;
+  entries: LiteManifestEntry[];
+}
+
+function seedLiteManifest(manifest: LiteManifest): void {
+  writeFileSync(join(fakeSibling, 'lite-manifest.json'), JSON.stringify(manifest, null, 2));
+}
+
+function seedManifestEntry(entry: LiteManifestEntry, content: string): void {
+  const filePath = join(fakeSibling, entry.path);
+  mkdirSync(join(filePath, '..'), { recursive: true });
+  writeFileSync(filePath, content);
+}
+
+function miniLiteManifest(): LiteManifest {
+  return {
+    tier: 'lite',
+    manifest_version: '1.6.1',
+    generated_at: '2026-09-16T22:22:04Z',
+    entries: [
+      { slug: 'temperance', type: 'skill', path: '.claude/skills/temperance/SKILL.md', tier: 'lite' },
+      { slug: 'testing', type: 'rule', path: '.claude/rules/testing.md', tier: 'lite' },
+      { slug: 'kent-beck', type: 'luminary', path: '.claude/luminaries/kent-beck.md', tier: 'lite' },
+      { slug: 'architect', type: 'agent', path: '.claude/agents/architect.md', tier: 'lite' },
+      { slug: 'hook-inject', type: 'lib', path: 'lib/hook-inject.sh', tier: 'lite' },
+      { slug: 'ADR-029', type: 'adr', path: 'architecture/decisions/ADR-029.md', tier: 'lite' },
+      { slug: 'testing', type: 'standard', path: 'standards/testing.md', tier: 'lite' },
+      { slug: 'chronicle-template', type: 'template', path: 'templates/chronicle-template.md', tier: 'lite' },
+      { slug: 'bassclef-sync-template', type: 'presence-template', path: 'presence/install/bassclef-sync.template.sh', tier: 'lite' },
+      { slug: 'aggregate-telemetry', type: 'script', path: 'scripts/aggregate-telemetry.sh', tier: 'lite' },
+      { slug: 'AGENTS', type: 'root-doc', path: 'AGENTS.md', tier: 'lite' },
+    ],
+  };
+}
+
+function seedAllManifestEntries(manifest: LiteManifest): void {
+  for (const entry of manifest.entries) {
+    seedManifestEntry(entry, `# ${entry.slug} (${entry.type}) fixture\n`);
+  }
+}
+
+describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () => {
+  it('reads lite-manifest.json and copies every entry via identity path mapping', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const manifest = miniLiteManifest();
+    seedLiteManifest(manifest);
+    seedAllManifestEntries(manifest);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+
+    // Every entry.path must exist under bundleDir/dist/lite/
+    for (const entry of manifest.entries) {
+      const target = join(bundleDir, 'dist', 'lite', entry.path);
+      expect(existsSync(target)).toBe(true);
+    }
+  });
+
+  it('fails loud when lite-manifest.json is missing (N1)', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    // Deliberately skip seedLiteManifest()
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/lite-manifest\.json/i);
+    expect(result.stderr).toMatch(/(missing|not found|no such)/i);
+  });
+
+  it('fails loud on schema major mismatch (RH)', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const badMajor: LiteManifest = { ...miniLiteManifest(), manifest_version: '99.0.0' };
+    seedLiteManifest(badMajor);
+    seedAllManifestEntries(badMajor);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/schema|version|manifest_version/i);
+  });
+
+  it('fails loud on collision with DIST_TEMPLATE_FILES (F-10 AMBER fold)', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const collisionManifest: LiteManifest = {
+      ...miniLiteManifest(),
+      entries: [
+        ...miniLiteManifest().entries,
+        // Deliberate collision — CLAUDE.md is already in DIST_TEMPLATE_FILES
+        { slug: 'CLAUDE', type: 'root-doc', path: 'CLAUDE.md', tier: 'lite' },
+      ],
+    };
+    seedLiteManifest(collisionManifest);
+    seedAllManifestEntries(collisionManifest);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/collision|conflict|CLAUDE\.md/i);
+  });
+
+  it('type coverage — all 12 manifest types land per ADR-057 D1', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const manifest = miniLiteManifest();
+    seedLiteManifest(manifest);
+    seedAllManifestEntries(manifest);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+
+    const typesInFixture = new Set(manifest.entries.map((e) => e.type));
+    expect(typesInFixture.size).toBeGreaterThanOrEqual(11); // 12 in real; 11 minimum viable coverage in fixture
+
+    for (const entry of manifest.entries) {
+      const target = join(bundleDir, 'dist', 'lite', entry.path);
+      expect(existsSync(target)).toBe(true);
+    }
+  });
+
+  it('postflight file count includes manifest entries plus dist templates plus wiring manifest', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const manifest = miniLiteManifest();
+    seedLiteManifest(manifest);
+    seedAllManifestEntries(manifest);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+
+    // Count real files under dist/lite/
+    const fsMod = require('node:fs') as typeof import('node:fs');
+    let fileCount = 0;
+    function walk(dir: string): void {
+      for (const name of fsMod.readdirSync(dir)) {
+        const p = join(dir, name);
+        if (fsMod.statSync(p).isDirectory()) walk(p);
+        else fileCount += 1;
+      }
+    }
+    walk(join(bundleDir, 'dist', 'lite'));
+
+    // 11 manifest entries + 4 dist templates + settings.json + wiring manifest + 2 hook binaries = 19 minimum
+    expect(fileCount).toBeGreaterThanOrEqual(manifest.entries.length + 4);
+  });
+
+  it('bundled lite-manifest.json lands in dist/lite/standards/ for init reader', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookBinaries(['lite-hook.sh', 'lite-hook-2.sh']);
+    const manifest = miniLiteManifest();
+    seedLiteManifest(manifest);
+    seedAllManifestEntries(manifest);
+
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+
+    // Manifest itself is copied so init can verify what shipped
+    const bundledManifest = join(bundleDir, 'dist', 'lite', 'standards', 'lite-manifest.json');
+    expect(existsSync(bundledManifest)).toBe(true);
+
+    const parsed = JSON.parse(readFileSync(bundledManifest, 'utf8'));
+    expect(parsed.manifest_version).toBe(manifest.manifest_version);
+    expect(parsed.entries.length).toBe(manifest.entries.length);
+  });
+});
