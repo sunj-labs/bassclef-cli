@@ -10,8 +10,9 @@
     "docs/risk-ledgers/2026-09-13b-cli-25-phase-2-publish-workflow-dist-lite.md",
     "docs/next-session-plan-2026-09-13-phase-3-init-walker.md",
     "docs/session-logs/2026-09-13c-cli-73-phase-3-init-walker.md",
-    "docs/iteration-bets/2026-09-13d-cli-1.0.1-hook-routing.md"
+    "docs/iteration-bets/2026-09-13d-cli-1.0.1-hook-routing.md",
+    "docs/iteration-bets/2026-09-16-cli-1.0.3-prepublish-recursive-hook-copy.md"
   ],
-  "last_scanned": "2026-09-13T21:04:51Z",
+  "last_scanned": "2026-09-16T07:58:25Z",
   "scanner_version": "1.0"
 }

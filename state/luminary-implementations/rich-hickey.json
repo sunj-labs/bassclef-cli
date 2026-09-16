@@ -1,8 +1,7 @@
 {
-  "luminary_slug": "alistair-cockburn",
+  "luminary_slug": "rich-hickey",
   "schema_version": 1,
   "referenced_by_files": [
-    "docs/iteration-bets/2026-09-13-cli-68-oo-ad-updates-post-adr-007-pivot.md",
     "docs/iteration-bets/2026-09-16-cli-1.0.3-prepublish-recursive-hook-copy.md"
   ],
   "last_scanned": "2026-09-16T07:58:25Z",
