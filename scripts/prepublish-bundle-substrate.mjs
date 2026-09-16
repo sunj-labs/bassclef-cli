@@ -38,7 +38,16 @@
 //   1. env BASSCLEF_SIBLING_ROOT (test override / CI workflow)
 //   2. default ../bassclef-upstream relative to CWD
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, readdirSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  chmodSync,
+  readdirSync,
+  lstatSync,
+  statSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 const DIST_LITE_DIR = 'dist/lite';
@@ -227,18 +236,19 @@ function copyDistTemplates(siblingRoot, distRoot) {
   }
 }
 
-function postflightDistLite(distRoot, settingsObject, copiedHookCount) {
+function postflightDistLite(distRoot, settingsObject, copiedFileCount) {
   // Nygard N2 fold — hook entry count must be >= 1 so dist/lite/ is non-empty.
   const hookCount = countHookEntries(settingsObject);
-  // cli 1.0.1 (bassclef-cli#79) — declared count in settings.json must
-  // equal copied count in dist/lite/.claude/hooks/. Silent divergence
-  // reproduces the class the upstream cure PR #1624 closed at the
-  // release-script layer.
-  if (copiedHookCount !== undefined && copiedHookCount !== hookCount) {
+  // Cli 1.0.3 (bassclef-cli#87) — count equality is no longer the check
+  // (copiedFileCount >= hookCount is expected because helpers land alongside
+  // commands). Postflight instead runs assertDeclaredCommandsHaveBinaries
+  // per-command below. The `>=` sanity check catches truly-broken builds
+  // where no files landed at all.
+  if (copiedFileCount !== undefined && copiedFileCount < hookCount) {
     fail(
-      `dist/lite/ postflight: settings.json declares ${hookCount} hooks but ` +
-        `dist/lite/.claude/hooks/ received ${copiedHookCount}. ` +
-        `Every declared hook must have a matching binary in the bundle.`
+      `dist/lite/ postflight: settings.json declares ${hookCount} hooks but only ` +
+        `${copiedFileCount} files landed in dist/lite/.claude/hooks/. ` +
+        `Expected count to be >= declared (helpers land alongside commands).`
     );
   }
   if (hookCount < 1) {
@@ -284,41 +294,161 @@ function buildDistLiteTree(siblingRoot) {
   // Phase 3 — put the wiring manifest at dist/lite/standards/ so the
   // reader can verify schema version per ADR-055 D4.
   copyWiringManifestIntoDist(siblingRoot, distRoot);
-  // cli 1.0.1 (bassclef-cli#79) — copy hook binaries from sibling's
-  // dist/lite/.claude/hooks/ so the walker has real files to route
-  // per settings.json prefix. Without this the adopter downloads
-  // wiring without wired binaries (same cold-adopter regression the
-  // upstream cure closed at bassclef-upstream#1619).
-  const copiedHookCount = copyHookBinaries(siblingRoot, distRoot, filtered);
-  const hookCount = postflightDistLite(distRoot, filtered, copiedHookCount);
-  return { wiringManifestPath, settingsPath, hookCount, copiedHookCount, wiringVersion: wiringManifest.version };
+  // Cli 1.0.3 (bassclef-cli#87) — recursive tree copy replaces the prior
+  // command-name filter. Upstream applies the tier filter at bundle time;
+  // cli trusts the tree and copies it whole. Helpers (trace-helper.sh)
+  // and fragment dirs (session-reflection.d/) that hooks source at
+  // runtime now ship in the tarball.
+  const { copiedFiles, copiedDirs } = copyHookTreeRecursive(siblingRoot, distRoot);
+  // Nygard fail-fast — postflight verifies every declared command has a
+  // matching binary in the tree. Helpers pass with an INFO log.
+  const treeInfo = assertDeclaredCommandsHaveBinaries(distRoot, filtered);
+  const hookCount = postflightDistLite(distRoot, filtered, copiedFiles);
+  return {
+    wiringManifestPath,
+    settingsPath,
+    hookCount,
+    copiedHookCount: copiedFiles,
+    copiedDirs,
+    treeFileCount: treeInfo.treeFileCount,
+    wiringVersion: wiringManifest.version,
+  };
 }
 
 /**
- * Copy every hook binary referenced by the filtered settings.json from
- * the sibling's dist/lite/.claude/hooks/ into cli's dist/lite/.claude/hooks/.
- * Preserves executable bit (0755). Fails loud if any declared hook is
- * missing from the sibling bundle — same class as the upstream cure
- * PR bassclef-upstream#1624 (dist path missing from release ALLOWED_PATHS).
+ * @pattern patterns/code/gof/template-method.md
  *
- * Returns the copied-hook count so postflight can assert it equals the
- * settings.json declared count.
+ * Recursively copy the sibling's dist/lite/.claude/hooks/ tree into cli's
+ * dist/lite/.claude/hooks/. The walk shape (enter → decide entry type
+ * → recurse or copy → exit) is the template; specific handling per entry
+ * type is the variation.
+ *
+ * Cli 1.0.3 (bassclef-cli#87) — replaces the prior command-name-filtered
+ * copy. Upstream applies the tier filter at bundle time; cli trusts the
+ * tree and copies it whole. Helpers (like trace-helper.sh) and fragment
+ * directories (like session-reflection.d/) that hooks source at runtime
+ * now ship in the tarball. See docs/decompositions/2026-09-16-cli-1.0.3-prepublish-domain.md
+ * for the GRASP roles.
+ *
+ * Refuses symlinks via lstat (Saltzer-Schroeder complete mediation) —
+ * an npm tarball must not carry a symlink that could escape or duplicate.
+ *
+ * Do NOT reintroduce a cli-side filter here. Filtering by settings.json
+ * commands drops helpers upstream ships intentionally — that is exactly
+ * the 1.0.2 crash class this fix cures. See risk ledger L2 for the
+ * anti-pattern lock.
+ *
+ * Returns { copiedFiles, copiedDirs } for postflight logging.
  */
-function copyHookBinaries(siblingRoot, distRoot, settingsObject) {
+function copyHookTreeRecursive(siblingRoot, distRoot) {
   const sourceDir = join(siblingRoot, 'dist/lite/.claude/hooks');
   if (!existsSync(sourceDir)) {
     fail(
       `hook source dir missing at ${sourceDir}. ` +
-        `Expected sibling clone to carry dist/lite/.claude/hooks/ at v0.40.0 or later. ` +
-        `Sibling may be pre-v0.40.0; upgrade the sibling checkout.`
+        `Expected sibling clone to carry dist/lite/.claude/hooks/ at v0.42.0 or later. ` +
+        `Sibling may be pre-v0.42.0; upgrade the sibling checkout.`
     );
   }
   const outDir = join(distRoot, '.claude/hooks');
   mkdirSync(outDir, { recursive: true, mode: 0o755 });
 
-  // Enumerate hook filenames referenced in settings.json — strip the
-  // $HOME/ or $CLAUDE_PROJECT_DIR/ prefix + the .claude/hooks/ path
-  // segment; the leaf filename is what we copy from source.
+  const counts = { copiedFiles: 0, copiedDirs: 0 };
+  walkTree(sourceDir, outDir, counts);
+
+  if (counts.copiedFiles === 0) {
+    fail(
+      `sibling hook tree at ${sourceDir} appears empty — zero *.sh files copied. ` +
+        `Sibling checkout may be missing bundled hooks; may be pre-v0.42.0.`
+    );
+  }
+  return counts;
+}
+
+/**
+ * Walk `srcDir` recursively, mirroring the tree into `dstDir`. Every entry
+ * is `lstat`'d — symlinks are refused before content is touched. Files
+ * preserve their executable bit. Directories carry mode 0o755.
+ *
+ * @param {string} srcDir source directory (already exists)
+ * @param {string} dstDir destination directory (already exists)
+ * @param {{copiedFiles: number, copiedDirs: number}} counts mutated per entry
+ */
+function walkTree(srcDir, dstDir, counts) {
+  const entries = readdirSync(srcDir);
+  for (const entry of entries) {
+    const src = join(srcDir, entry);
+    const dst = join(dstDir, entry);
+    let stat;
+    try {
+      stat = lstatSync(src);
+    } catch (err) {
+      fail(`cannot lstat ${src}: ${err.code ?? err.message}`);
+    }
+    if (stat.isSymbolicLink()) {
+      fail(
+        `refusing to follow symlink at ${src}. ` +
+          `An npm tarball must not carry a symlink that could escape or duplicate. ` +
+          `If upstream intentionally added this symlink, resolve to a plain file first.`
+      );
+    }
+    if (stat.isDirectory()) {
+      mkdirSync(dst, { recursive: true, mode: 0o755 });
+      counts.copiedDirs += 1;
+      walkTree(src, dst, counts);
+      continue;
+    }
+    if (stat.isFile()) {
+      let content;
+      try {
+        content = readFileSync(src);
+      } catch (err) {
+        fail(`cannot read ${src}: ${err.code ?? err.message}`);
+      }
+      try {
+        writeFileSync(dst, content);
+      } catch (err) {
+        fail(`cannot write ${dst}: ${err.code ?? err.message}`);
+      }
+      // Preserve executable bit. On POSIX systems the source mode reflects
+      // reality; on Windows the mode may not encode the exec bit. Best-effort.
+      try {
+        const srcMode = stat.mode & 0o777;
+        const isExecutable = (srcMode & 0o100) !== 0 || src.endsWith('.sh');
+        if (isExecutable) {
+          chmodSync(dst, 0o755);
+        }
+      } catch (err) {
+        if (process.platform !== 'win32') {
+          fail(`cannot chmod ${dst}: ${err.code ?? err.message}`);
+        }
+        // Windows — log INFO, continue.
+        process.stderr.write(`INFO: chmod skipped on Windows for ${dst}\n`);
+      }
+      counts.copiedFiles += 1;
+      continue;
+    }
+    // Any other type (socket, fifo, device) — refuse.
+    fail(`refusing to copy non-regular entry at ${src}`);
+  }
+}
+
+/**
+ * @pattern patterns/code/nygard/fail-fast.md
+ *
+ * Postflight — verify every command declared in the filtered settings.json
+ * has a matching *.sh binary somewhere in the copied tree. Fails loud with
+ * the missing command name if any command lacks a binary.
+ *
+ * Extra files in the tree (helpers, fragments) are logged INFO and pass —
+ * that is the whole point of the recursive copy. See risk ledger HT-1 for
+ * why postflight lives here, not in the walk.
+ *
+ * @param {string} distRoot cli's dist/lite/
+ * @param {object} settingsObject filtered lite-tier settings.json object
+ * @returns {{ declaredCount: number, treeFileCount: number }}
+ */
+function assertDeclaredCommandsHaveBinaries(distRoot, settingsObject) {
+  const treeDir = join(distRoot, '.claude/hooks');
   const declared = new Set();
   for (const eventBlocks of Object.values(settingsObject.hooks ?? {})) {
     for (const block of eventBlocks) {
@@ -326,38 +456,61 @@ function copyHookBinaries(siblingRoot, distRoot, settingsObject) {
         const cmd = entry.command;
         if (typeof cmd !== 'string' || cmd.length === 0) continue;
         if (!cmd.startsWith('$')) continue;
-        // Extract the leaf filename — everything after the last slash.
         const leaf = cmd.slice(cmd.lastIndexOf('/') + 1);
         if (leaf.endsWith('.sh')) declared.add(leaf);
       }
     }
   }
 
-  const missing = [];
-  let copied = 0;
-  for (const leaf of declared) {
-    const src = join(sourceDir, leaf);
-    if (!existsSync(src)) {
-      missing.push(src);
-      continue;
-    }
-    const dst = join(outDir, leaf);
-    const content = readFileSync(src);
-    writeFileSync(dst, content);
-    chmodSync(dst, 0o755);
-    copied += 1;
-  }
+  // Collect all *.sh files anywhere in the tree.
+  const treeFiles = new Set();
+  collectShFiles(treeDir, treeFiles);
 
+  const missing = [];
+  for (const leaf of declared) {
+    if (!treeFiles.has(leaf)) missing.push(leaf);
+  }
   if (missing.length > 0) {
     fail(
-      `hook binary missing at ${missing[0]}` +
+      `postflight: settings.json declares ${missing[0]}` +
         (missing.length > 1 ? ` (and ${missing.length - 1} more)` : '') +
-        `. settings.json declared ${declared.size} hooks; source shipped ${copied}. ` +
-        `Sibling checkout may be stale — pull latest public bassclef.`
+        ` but no matching binary in ${treeDir}. ` +
+        `Sibling checkout may be stale or upstream settings.json drifted from its own tree — ` +
+        `verify sibling tag ships this hook.`
     );
   }
+  // Log helper INFO — files present in tree but not declared as commands.
+  const helpers = [...treeFiles].filter((leaf) => !declared.has(leaf));
+  if (helpers.length > 0) {
+    process.stderr.write(
+      `INFO: ${helpers.length} helper file(s) in tree without settings.json command entry ` +
+        `(expected — sourced by other hooks): ${helpers.slice(0, 3).join(', ')}` +
+        (helpers.length > 3 ? ` +${helpers.length - 3} more` : '') +
+        `\n`
+    );
+  }
+  return { declaredCount: declared.size, treeFileCount: treeFiles.size };
+}
 
-  return copied;
+/**
+ * Collect leaf names of all *.sh files under `dir` (recursive) into `acc`.
+ * Assumes the tree contains no symlinks — copyHookTreeRecursive would have
+ * failed loud before this runs.
+ */
+function collectShFiles(dir, acc) {
+  if (!existsSync(dir)) return;
+  const entries = readdirSync(dir);
+  for (const entry of entries) {
+    const p = join(dir, entry);
+    const stat = statSync(p);
+    if (stat.isDirectory()) {
+      collectShFiles(p, acc);
+      continue;
+    }
+    if (stat.isFile() && entry.endsWith('.sh')) {
+      acc.add(entry);
+    }
+  }
 }
 
 // ============================================================

@@ -23,7 +23,7 @@
 //   4 — wiring manifest missing (ADR-055 D4)
 //   5 — wiring manifest schema major incompatible (ADR-055 D4)
 
-import { existsSync, lstatSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
@@ -289,10 +289,18 @@ function dispatchSubstrateCopy(
   );
   // Norman N1 fold — banner names installed HOOK count + per-scope breakdown.
   // The declared count comes from settings.json (result.hookCount).
-  // The copied count must be counted from HOOK files only, not total
-  // copied files (which include settings.json + templates + manifest).
+  // Cli 1.0.3 (bassclef-cli#87) — the tarball now ships helpers + fragments
+  // alongside declared commands (recursive tree copy at prepublish). The
+  // banner still reports "N of M" for DECLARED COMMANDS ONLY so the number
+  // matches settings.json. Helpers land silently — not counted in N.
+  const declaredCommandLeaves = readDeclaredCommandLeaves(
+    join(targetDir, '.claude', 'settings.json')
+  );
   const copiedHookEntries = result.copiedEntries.filter(
-    (e) => e.path.startsWith(HOOKS_SUBPATH) && e.path.endsWith('.sh')
+    (e) =>
+      e.path.startsWith(HOOKS_SUBPATH) &&
+      e.path.endsWith('.sh') &&
+      declaredCommandLeaves.has(basename(e.path))
   );
   const copiedCount = copiedHookEntries.length;
   const declaredCount = result.hookCount;
@@ -582,4 +590,36 @@ export function usage(): string {
     '  writing anything to disk.',
     '',
   ].join('\n');
+}
+
+/**
+ * Read the settings.json on disk and return the Set of hook leaf names
+ * declared as commands (`.sh` files at the end of `$HOME/…` or
+ * `$CLAUDE_PROJECT_DIR/…` paths). Powers the cli 1.0.3 banner filter
+ * that separates declared commands from helpers.
+ *
+ * Returns empty Set on any parse failure — banner degrades to 0-count
+ * gracefully rather than crashing.
+ */
+function readDeclaredCommandLeaves(settingsPath: string): Set<string> {
+  try {
+    const parsed = JSON.parse(readFileSync(settingsPath, 'utf8')) as {
+      hooks?: Record<string, Array<{ hooks?: Array<{ command?: string }> }>>;
+    };
+    const leaves = new Set<string>();
+    for (const matcherBlocks of Object.values(parsed.hooks ?? {})) {
+      for (const block of matcherBlocks) {
+        for (const entry of block.hooks ?? []) {
+          const cmd = entry.command;
+          if (typeof cmd !== 'string' || cmd.length === 0) continue;
+          if (!cmd.startsWith('$')) continue;
+          const leaf = cmd.slice(cmd.lastIndexOf('/') + 1);
+          if (leaf.endsWith('.sh')) leaves.add(leaf);
+        }
+      }
+    }
+    return leaves;
+  } catch {
+    return new Set();
+  }
 }
