@@ -1,0 +1,20 @@
+# Thread-walk marker — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- parent chain walked (deepest first):
+  - cli 1.1.0 — bundle the lite catalog (this goal)
+  - cli 1.0.4 — walker dual-scope for undeclared hooks (shipped 2026-09-16 as v1.0.4)
+  - cli 1.0.3 — recursive hook tree copy (shipped)
+  - cli 1.0.2 — install-class dispatch pin bump (shipped)
+  - cli 1.0.0 — MAJOR bump; substrate/ dropped; copyEntry retired at commit 1c7d919 (REGRESSION POINT)
+  - bassclef-upstream 2026-09-14b — lite-bundle-self-contained (parent thread — Phase 1+2 shipped hooks+libs; skipped catalog)
+  - bassclef-upstream #1631 — filing ticket
+  - bassclef-upstream canvas 2026-07-19-bassclef-lite — original lite scope definition
+- carried acceptance:
+  - Cold-adopter Sam's magic demo runs end-to-end via /onboard-repo --greenfield-from-intent (STILL OPEN — 1.0.4 didn't close; 1.1.0 targets)
+  - Lite tier feature parity does not depend on sync succeeding (ADR-056 D2) — STILL OPEN for content beyond hooks
+  - All lite-tagged content reaches adopters via npm — NEW acceptance this goal opens
+- out of scope from ancestors carried:
+  - Ultra / standard / upstream tier bundles
+  - Sync-time schema evolution
+  - Auto-refresh

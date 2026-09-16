@@ -1,0 +1,33 @@
+# Pre-mortem marker — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- mode: light (3 luminary lenses; ~30 min per Klein workshop)
+
+## Lens 1 — Linus (adopter contract)
+- Risk: 1.1.0 lays down 400 files at project scope; existing adopter has custom files at same paths.
+  Mitigation: walker refuses AlreadyExists (existing 1.0.4 behavior); banner reports refused count so operator sees.
+- Risk: MINOR bump hides breaking change from adopter who reads changelog quickly.
+  Mitigation: changelog opens with "This adds 400 files under .claude/ — review the shape before upgrade."
+- Risk: adopter on 1.0.x has their own bassclef-sync setup pulling skills; 1.1.0 also lays down skills; conflict.
+  Mitigation: walker refuse-existing preserves adopter's vendored skills; operator picks force flag if they want npm-owned.
+
+## Lens 2 — Feathers (characterization tests)
+- Risk: Tier 0 tests hard-code the 292 entry count; every manifest refresh at upstream breaks cli.
+  Mitigation: count via manifest.entries.length; never a literal.
+- Risk: fixture manifest diverges from real manifest shape as upstream evolves.
+  Mitigation: fixture is a slice of REAL v1.6.1 (5 entries per type) not a hand-authored shape.
+
+## Lens 3 — Saltzer-Schroeder (complete mediation)
+- Risk: extending walker to non-hook types opens new path-traversal surface.
+  Mitigation: classify() runs on every entry (user + project synthesizers already do this in 1.0.4); assertContained fires on every write.
+- Risk: symlink at target for a rule/skill dir.
+  Mitigation: writeSafely S-fold refuses symlink writes on all paths.
+- Risk: entry.path uses .. for traversal.
+  Mitigation: PathTraversalRefused fires on classify(); build fails loud.
+
+## Risk ledger — top 3
+1. adopter overwrite conflict (Linus L1) — 🟡 MEDIUM; mitigation is existing 1.0.4 AlreadyExists refusal + banner reporting refused count.
+2. manifest schema drift (Feathers L2) — 🟢 LOW; mitigation is schema-major check + fail-loud on mismatch.
+3. path-traversal via manifest entry.path (Saltzer L3) — 🟢 LOW; mitigation is existing classify() mediation.
+
+Strongest concern to fold into plan: adopter overwrite. Add init banner line naming refused count. Add cold-adopter smoke assertion: refused count is 0 on cold install.
