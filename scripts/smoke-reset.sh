@@ -16,13 +16,16 @@
 # timestamped sibling before removal, so recovery is a single mv.
 #
 # Flags:
+#   --cold          Cold-adopter shorthand — same as --clean-home --yes.
+#                   Use this on a dedicated cold-adopter profile so you can
+#                   re-run the smoke test with one command every time.
 #   --dry-run       Print what would happen; change nothing
 #   --yes           Skip the confirmation prompt
 #   --clean-home    Also back up + remove ~/.claude/ (cold-profile only)
 #   -h, --help      Print this help and exit
 #
-# Usage on a cold-adopter profile:
-#   bash scripts/smoke-reset.sh --clean-home --yes
+# Usage on a cold-adopter profile (one flag, re-runnable):
+#   bash scripts/smoke-reset.sh --cold
 #
 # Usage on any machine (safe subset — no home touch):
 #   bash scripts/smoke-reset.sh
@@ -46,6 +49,7 @@ while (( "$#" )); do
     --dry-run) DRY_RUN=1; shift ;;
     --yes) ASSUME_YES=1; shift ;;
     --clean-home) CLEAN_HOME=1; shift ;;
+    --cold) CLEAN_HOME=1; ASSUME_YES=1; shift ;;
     -h|--help) print_usage; exit 0 ;;
     *) echo "unknown flag: $1" >&2; print_usage; exit 2 ;;
   esac
