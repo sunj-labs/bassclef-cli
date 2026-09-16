@@ -9,8 +9,9 @@
     "tests/init-output-parity.test.ts",
     "docs/risk-ledgers/2026-09-13d-cli-1.0.1-hook-routing.md",
     "docs/iteration-bets/2026-09-13d-cli-1.0.1-hook-routing.md",
-    "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md"
+    "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
+    "docs/risk-ledgers/2026-09-16-cli-1.1.0-lite-catalog.md"
   ],
-  "last_scanned": "2026-09-16T16:04:05Z",
+  "last_scanned": "2026-09-16T16:12:51Z",
   "scanner_version": "1.0"
 }
