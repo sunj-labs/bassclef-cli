@@ -1,0 +1,10 @@
+# Temperance marker — chore/cli-1.0.2-pin-bump-v0.42.0
+- date: 2026-09-16
+- branch: chore/cli-1.0.2-pin-bump-v0.42.0
+- scope-decision:
+  - right-thing: pin upstream v0.40.0 → v0.42.0 to unblock cold-adopter cure (1.0.1 shipped with incomplete lite bundle)
+  - right-way: execute the 12-step wake-up flow authored 2026-09-14 verbatim; no design work, only pin-bump + version + CHANGELOG
+  - drift-trigger: any scope past Step 12 (deprecation of 1.0.0/1.0.1) — goes to next session
+- verification: publish workflow CI green + npm view shows 1.0.2 + cold-adopter-1 fresh install boots clean
+- reversible: git revert the merge; retag would be blocked by memory feedback_git_tag_collision_across_rename
+- blast-radius: adopter-visible (npm publish); halt at Step 9 (Touch ID) per orchestrator-gated mode

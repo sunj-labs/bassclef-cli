@@ -1,0 +1,10 @@
+# Temperance marker
+- date: 2026-09-16
+- branch: chore/smoke-reset-one-flag-idempotent
+- scope-decision:
+  - right-thing: one-flag shorthand for cold-adopter smoke reset so operator can run + rerun without remembering --clean-home --yes
+  - right-way: add --cold flag as alias for --clean-home + --yes; update test plan Step 2 + Step 8 to use it; keep prior flags working
+  - drift-trigger: any rewrite of the underlying uninstall / mv logic
+- verification: bash smoke-reset.sh --cold runs the full reset on a dry-run + on a real machine; rerunning twice yields identical clean state
+- reversible: git revert; no adopter surface touched
+- blast-radius: none (test tooling only, tier: upstream)

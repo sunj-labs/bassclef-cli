@@ -77,6 +77,17 @@ function buildFixtureBundle(root: string): void {
     writeFileSync(p, `#!/bin/sh\necho ${name}\n`);
     chmodSync(p, 0o755);
   }
+  // cli 1.0.4 — undeclared hook files (helpers + fragments) that
+  // declared hooks source by relative dirname path. These land at
+  // BOTH scopes because user-scope hooks (session-reflection.sh)
+  // and project-scope hooks source them from co-located dirs.
+  const traceHelper = join(root, '.claude/hooks/trace-helper.sh');
+  writeFileSync(traceHelper, `#!/bin/sh\n# helper — sourced by declared hooks at either scope\ntrace_log() { echo "[trace] $*" >&2; }\n`);
+  chmodSync(traceHelper, 0o755);
+  mkdirSync(join(root, '.claude/hooks/session-reflection.d'), { recursive: true });
+  const fragment = join(root, '.claude/hooks/session-reflection.d/10-example.sh');
+  writeFileSync(fragment, `#!/bin/sh\n# fragment — sourced by session-reflection.sh\necho fragment\n`);
+  chmodSync(fragment, 0o755);
 }
 
 beforeEach(() => {
@@ -238,5 +249,63 @@ describe('copySubstrate — Ext 10a idempotency (S5 fold)', () => {
     const second = copySubstrate(workDir, { bundleRoot: bundleDir });
     expect(second.refused.length).toBeGreaterThan(0);
     expect(second.copied.length).toBe(0);
+  });
+});
+
+// cli 1.0.4 — undeclared hook files must land at BOTH scopes.
+// Cold-adopter smoke on 1.0.3 crashed because trace-helper.sh (undeclared
+// helper) landed at project scope only; session-reflection.sh at user
+// scope sources it via `$(dirname "$0")/trace-helper.sh`, which resolves
+// to ~/.claude/hooks/trace-helper.sh — the walker never wrote there.
+//
+// Falsification test on cold-adopter-1 (2026-09-16): manual cp of
+// trace-helper.sh + session-reflection.d/ to ~/.claude/hooks/ cured
+// SessionStart. That confirms dual-write is the right cure.
+//
+// @verifies L-fold (Torvalds — adopter contract: helpers land where sourcer looks)
+// @verifies I-fold (Ishikawa — Machine axis of 6M fishbone: walker default is the fault)
+// @verifies F-fold (Feathers — characterization test pins dual-scope invariant)
+// @verifies K-fold (Beck — RED first)
+// @verifies SS-fold (Saltzer-Schroeder — complete mediation: walker routes every hook file)
+//
+// # test-list:
+// [ ] undeclared helper (trace-helper.sh) lands at BOTH ~/.claude/hooks/ and <repo>/.claude/hooks/
+// [ ] undeclared fragment (session-reflection.d/10-example.sh) lands at both scopes
+// [ ] fragment landing preserves the session-reflection.d/ directory shape at both scopes
+// [ ] helper file at user scope is executable (0755) so declared user-scope hooks can source it
+// [ ] cold-adopter simulation: session-reflection.sh at ~/.claude/hooks/ resolves trace-helper.sh via $(dirname "$0")
+describe('copySubstrate — cli 1.0.4 dual-scope undeclared helpers (Linus L + Ishikawa I + Feathers F folds)', () => {
+  it('undeclared helper (trace-helper.sh) lands at BOTH user scope AND project scope', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(fakeHome, '.claude/hooks/trace-helper.sh'))).toBe(true);
+    expect(existsSync(join(workDir, '.claude/hooks/trace-helper.sh'))).toBe(true);
+  });
+
+  it('undeclared fragment (session-reflection.d/10-example.sh) lands at BOTH scopes', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    expect(existsSync(join(fakeHome, '.claude/hooks/session-reflection.d/10-example.sh'))).toBe(true);
+    expect(existsSync(join(workDir, '.claude/hooks/session-reflection.d/10-example.sh'))).toBe(true);
+  });
+
+  it('fragment landing preserves session-reflection.d/ directory shape at user scope', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    const userFragmentDir = join(fakeHome, '.claude/hooks/session-reflection.d');
+    expect(existsSync(userFragmentDir)).toBe(true);
+    expect(statSync(userFragmentDir).isDirectory()).toBe(true);
+  });
+
+  it('trace-helper.sh at user scope is executable (0755) so user-scope hooks can source it', () => {
+    if (process.platform === 'win32') return;
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    const mode = statSync(join(fakeHome, '.claude/hooks/trace-helper.sh')).mode & 0o777;
+    expect(mode).toBe(0o755);
+  });
+
+  it('cold-adopter simulation: session-reflection.sh at user scope co-locates with trace-helper.sh', () => {
+    copySubstrate(workDir, { bundleRoot: bundleDir });
+    const sourcerPath = join(fakeHome, '.claude/hooks/session-reflection.sh');
+    const helperSameDir = join(dirname(sourcerPath), 'trace-helper.sh');
+    expect(existsSync(sourcerPath)).toBe(true);
+    expect(existsSync(helperSameDir)).toBe(true);
   });
 });

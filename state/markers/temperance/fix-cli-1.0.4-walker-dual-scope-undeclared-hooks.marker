@@ -1,0 +1,8 @@
+# Temperance marker — fix cli 1.0.4 walker dual-scope
+- date: 2026-09-16
+- branch: fix/cli-1.0.4-walker-dual-scope-undeclared-hooks
+- scope-decision: smallest shape — dual-write undeclared hook files at walker.
+  right thing: helpers land where their sourcer looks (user + project).
+  right way: at walker loop, synthesize both ScopeDecisions for undeclared hook files.
+- drift-trigger: expanding to schema-level declaration of scope in bundle-hook headers.
+- brute-force check: not retrying a failed 1.0.3 tree-copy — this is the walker fallback bug 1.0.3 revealed at cold-adopter smoke.

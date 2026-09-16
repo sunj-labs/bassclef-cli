@@ -1,0 +1,10 @@
+# Temperance marker — chore/cold-adopter-smoke-1.0.2-test-plan
+- date: 2026-09-16
+- branch: chore/cold-adopter-smoke-1.0.2-test-plan
+- scope-decision:
+  - right-thing: create curl-friendly test plan for cli 1.0.2 cold-adopter smoke; fix stale 1.0.1 ref in smoke-reset.sh
+  - right-way: 2 files — new test plan doc + one-line smoke-reset script fix; no code changes
+  - drift-trigger: any new script or hook change
+- verification: `curl` on raw githubusercontent URL returns 200 after merge; smoke-reset.sh final log line reads @1.0.2 (or @latest)
+- reversible: git revert; both files are purely additive doc/script
+- blast-radius: none adopter-visible (test plan is repo doc; smoke script is upstream tier)
