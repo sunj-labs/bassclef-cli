@@ -14,10 +14,13 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-iteration_bet: cli 1.0.2 pin bump — awaits bassclef-upstream v0.41.1 shipping self-contained lite bundle (bassclef-upstream#1631 + #1632)
-iteration_started: 2026-09-14
-session: docs/session-logs/2026-09-14-cli-1.0.1-cold-adopter-smoke-diagnosis.md
-iteration_phase: **BLOCKED — waiting on bassclef-upstream v0.41.1.** cli 1.0.1 published 2026-09-13T23:04Z; cold-adopter-1 smoke on live 1.0.1 surfaced NEW crash class (upstream lite bundle missing trace-helper.sh + session-reflection.d/ + lib/state.sh + lib/hook-heartbeat.sh + lib/hook-inject.sh). Root cause is upstream, not cli walker. Ticket bassclef-upstream#1631 (private) tracks the cure — upstream session running Path B overnight; Phase 1 + Phase 2 code-complete on branch feature/1631-lite-bundle-self-contained; awaits CI green + release-step6 → v0.41.1. cli 1.0.2 wake-up flow ready per session log.
+last_updated: 2026-09-16T23:42:55Z
+iteration_bet: cli 1.1.0 SHIPPED — lite catalog bundle (skills / rules / agents / luminaries + libs + ADRs + standards + templates + scripts + root-docs)
+iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
+session: docs/session-logs/2026-09-16-cli-1.0.4-and-1.1.0-ship-cold-adopter-smoke.md
+iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
+
+**Prior operator_recap (retained for history):** cli 1.0.4 walker dual-scope shipped 2026-09-16 (PR #89). Cli 1.0.3 recursive hook tree shipped (PR #88). Cli 1.0.2 pin-bump to upstream v0.42.0.
 
 **Original iteration_phase (retained for history):** cli#73 Phase 3 merged to main via PR #76 (c974f33) at 2026-09-13T02:15:05Z. Version bumped 0.2.0 → 1.0.0 MAJOR. Six commits on `feat/cli-73-phase-3-init-walker` squashed to one merge commit. Init walker reads dist/lite/ per ADR-055 D1. Fails loud with exit 4 (manifest missing) + exit 5 (schema mismatch) per D4. Prints `N hooks armed (<tier> tier)` banner per D5. Substitutes `[REPO_NAME]` + `[ISO_TIMESTAMP]` + `[TIER]` in CLAUDE.md + whereami.md + .bassclef-source.json. substrate/ bundle path retired (operator confirmed zero npm adopters; no compat-shim owed per ADR-031 threshold). ADR-001 §Invariants amended (dist/lite/** sole substrate path). ADR-002 §Amendment 2026-09-13 already carried the new exit codes. Suite 224/224 GREEN. Phase 4-agent tarball smoke PASS (exit 0 happy path + exit 4 missing manifest + exit 5 schema mismatch + placeholders substituted). Session ran ~95 turns. Ticket #73 closes with this ship.
 
