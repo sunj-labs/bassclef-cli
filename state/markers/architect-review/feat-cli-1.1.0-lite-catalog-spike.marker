@@ -1,0 +1,14 @@
+# Architect-review #2 (spike gate) — cli 1.1.0 lite catalog
+- date: 2026-09-16
+- branch: feat/cli-1.1.0-lite-catalog
+- gate: spike (2 of 3)
+- audit: docs/audits/2026-09-16-cli-1.1.0-architect-review-2-spike.md
+- findings: 4 (0 BLOCK, 1 AMBER, 3 GREEN)
+- ambers folded:
+  - F-10 — build-time collision guard against DIST_TEMPLATE_FILES; folds into Step 6 code with new CopyFailure kind ManifestCollision
+- greens confirmed:
+  - F-8 — identity path mapping simplification is correct
+  - F-9 — init walker path-prefix routing, no init-time manifest read
+  - F-11 — bundle size 5x growth well under npm limits
+- verdict: CLEARED to proceed to Step 5 RED tests
+- lead lens: alistair-cockburn — walking skeleton passed at build layer; ready to scale to full 292-entry test coverage
