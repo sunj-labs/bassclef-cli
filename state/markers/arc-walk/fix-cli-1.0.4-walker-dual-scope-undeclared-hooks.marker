@@ -1,0 +1,10 @@
+# Arc-walk marker — fix cli 1.0.4 walker dual-scope
+- date: 2026-09-16
+- branch: fix/cli-1.0.4-walker-dual-scope-undeclared-hooks
+- parent chain walked (deepest first):
+  - cli 1.0.4 — walker default for undeclared hook files (this goal)
+  - cli 1.0.3 — recursive hook tree copy + declared-command postflight (fixed prepublish filter; walker default now revealed)
+  - cli 1.0.2 — install-class dispatch pin bump (bassclef-upstream v0.42.0)
+  - cli 1.0.0 — npm launch, MAJOR bump to dist/lite bundle path
+- carried acceptance: cold-adopter smoke returns clean `claude` boot (still open — 1.0.3 didn't close it; 1.0.4 targets it).
+- out of scope: settings.json schema extension to declare helper scope; hook-header scope self-declaration; bassclef-upstream #640 OOAD-hook edit-gap.

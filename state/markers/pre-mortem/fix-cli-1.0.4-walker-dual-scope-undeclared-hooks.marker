@@ -1,0 +1,29 @@
+# Pre-mortem marker — fix cli 1.0.4 walker dual-scope
+- date: 2026-09-16
+- branch: fix/cli-1.0.4-walker-dual-scope-undeclared-hooks
+- mode: light (3 luminary lenses, ~30 min per Klein workshop)
+
+## Lens 1 — Linus (adopter contract)
+- Risk: dual-write leaks files at ~/.claude/hooks/ that user didn't expect.
+  Mitigation: only fires for hook files present in bundle (bundle is the manifest).
+- Risk: user has custom ~/.claude/hooks/trace-helper.sh — we overwrite.
+  Mitigation: writeSafely uses AlreadyExists refusal; --force needed to overwrite. Default behavior preserves.
+
+## Lens 2 — Feathers (characterization tests)
+- Risk: RED test overspecifies — pins impl detail, brittle to refactor.
+  Mitigation: assert observable filesystem outcome (files exist at both paths) not walker internals.
+- Risk: fixture doesn't include a user-scope hook that sources a helper.
+  Mitigation: use session-reflection.sh + trace-helper.sh shape from real dist/lite bundle.
+
+## Lens 3 — Saltzer-Schroeder (complete mediation)
+- Risk: dual-write bypasses the scopeMap discipline for security-sensitive files.
+  Mitigation: dual-write ONLY for hook files (isHookFile guard); non-hook files unchanged. Scope classification still runs classify() on declared commands.
+- Risk: symlink at target path — walker overwrites blindly.
+  Mitigation: writeSafely already refuses symlink writes per S-fold; SymlinkRefused path unchanged.
+
+## Risk ledger — top 3
+1. adopter overwrite (Linus L1-2) — MEDIUM; mitigated by writeSafely refusal defaults.
+2. test brittleness (Feathers L2) — LOW; mitigation is observable-only assertions.
+3. symlink refusal on new user-scope target dirs (Saltzer L3-2) — LOW; existing S-fold path covers.
+
+Strongest concern to fold into plan: adopter overwrite. Verify writeSafely refuses AlreadyExists at ~/.claude/hooks/ path before shipping.

@@ -1,0 +1,6 @@
+# ADR-deviation marker — fix cli 1.0.4 walker dual-scope
+- date: 2026-09-16
+- branch: fix/cli-1.0.4-walker-dual-scope-undeclared-hooks
+- adr_governing: ADR-002 (bassclef-init safety contract), ADR-055 (dist/lite wiring — bassclef-upstream)
+- outcome: ADR-honored
+- rationale: dual-write for undeclared hook files preserves atomic-write + path-scoping contract from ADR-002. Sourcer/sourcee co-location matches ADR-055 D-something on install-class dispatch (bassclef-upstream owns; cli follows). No ADR shifted.

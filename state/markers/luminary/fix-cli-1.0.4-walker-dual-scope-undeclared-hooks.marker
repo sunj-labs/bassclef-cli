@@ -1,0 +1,11 @@
+# Luminary marker — fix cli 1.0.4 walker dual-scope
+- date: 2026-09-16
+- branch: fix/cli-1.0.4-walker-dual-scope-undeclared-hooks
+- lead: linus-torvalds — adopter contract; helpers must land where sourcer looks or we break userspace.
+- supporting:
+  - kaoru-ishikawa — 6M fishbone; Machine (walker default) is the fault axis; Method + Environment mapped but out of scope.
+  - michael-feathers — characterization test pins dual-scope invariant before source lands.
+  - kent-beck — RED then GREEN commit split.
+  - jerome-saltzer-and-michael-schroeder — complete mediation; walker routes every hook file, no unrouted fall-through.
+- matcher_version: voyage-3-lite+haiku-4-5-1.0 (confidence 0.72)
+- artifact: /private/tmp/claude-501/-Users-sanjay2025-src-sunj-labs-bassclef-cli/8afd21dd-8c1a-4eac-9e51-74354f8eeb79/scratchpad/cli-1.0.4-intent.json

@@ -24,6 +24,35 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.0.4] — 2026-09-16
+
+### Fixed
+
+- **Walker dual-scope for undeclared hook files.** `bassclef init` now
+  copies helper files (e.g., `trace-helper.sh`) and fragment files
+  (e.g., `session-reflection.d/*.sh`) that `settings.json` does not
+  name as `command:` to BOTH `~/.claude/hooks/` AND
+  `<repo>/.claude/hooks/`. Declared hooks source these files via
+  relative dirname (`$(dirname "$0")/trace-helper.sh`); a user-scope
+  hook resolves the source call from `~/.claude/hooks/`, a project-
+  scope hook from `<repo>/.claude/hooks/`. Prior to 1.0.4 the walker
+  defaulted undeclared hook files to project scope only, which
+  crashed `claude` SessionStart on cold-adopter installs:
+  `session-reflection.sh: line 38: trace-helper.sh: No such file or
+  directory`. Cure landed at `src/lib/copy-substrate.ts` walker loop;
+  path-traversal + home-resolve checks still run via `classify()` per
+  Saltzer-Schroeder complete mediation.
+
+### Notes
+
+- Falsification test on cold-adopter-1 (2026-09-16) confirmed manual
+  `cp` of the helper to `~/.claude/hooks/` cures `claude` boot,
+  isolating the fault to the walker's default routing.
+- Adopter contract: no observable schema change; `settings.json` shape
+  unchanged; `init.manifest.json` schema unchanged.
+- 5 new Tier 0 tests pin the dual-scope invariant. Total: 284 tests
+  pass on `main`.
+
 ## [1.0.3] - 2026-09-16
 
 ### Fixed
