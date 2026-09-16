@@ -66,7 +66,10 @@ Once shipped at 1.1.0, every destination path becomes an adopter contract (Hyrum
 | `lib` | project | `$CLAUDE_PROJECT_DIR/lib/` | Hooks source via `$CLAUDE_PROJECT_DIR/lib/*.sh` per ADR-056 D3 |
 | `adr` | project | `$CLAUDE_PROJECT_DIR/architecture/decisions/` | Read reference for adopter |
 | `standard` | project | `$CLAUDE_PROJECT_DIR/standards/` | Read reference for adopter; hooks may cite |
-| `template` | project | `$CLAUDE_PROJECT_DIR/presence/install/` | Install-helper templates for downstream tools |
+| `template` | project | `$CLAUDE_PROJECT_DIR/templates/` | General templates (chronicle, deferred-action, persona, pr-faq, etc.) |
+| `presence-template` | project | `$CLAUDE_PROJECT_DIR/presence/install/` | Install-helper templates for downstream tools |
+| `script` | project | `$CLAUDE_PROJECT_DIR/scripts/` | Adopter-runnable helper scripts |
+| `root-doc` | project | `$CLAUDE_PROJECT_DIR/` (repo root) | Repo-root docs — CLAUDE-lite.md, README.md, AGENTS.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md |
 
 **D2. Immutability of shipped paths.** Every destination-path row shipped at 1.1.0 is immutable in 1.1.x. Moving a shipped path is a MAJOR bump (2.0.0). Adding a new type at 1.2.0+ adds a new row; never modifies an existing one.
 
