@@ -6,8 +6,10 @@
     "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
     "docs/risk-ledgers/2026-09-16-cli-1.1.0-lite-catalog.md",
     "docs/use-cases/UC-init-lite-catalog.md",
-    "docs/adrs/ADR-057-lite-catalog-destination-path-invariant.md"
+    "docs/adrs/ADR-057-lite-catalog-destination-path-invariant.md",
+    "docs/proposed-upstream/standards--distribution-preflight.md",
+    "docs/proposed-upstream/rules--distribution-preflight-check.md"
   ],
-  "last_scanned": "2026-09-16T16:17:54Z",
+  "last_scanned": "2026-09-16T21:06:58Z",
   "scanner_version": "1.0"
 }
