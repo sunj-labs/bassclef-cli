@@ -225,6 +225,166 @@ describe('prepublish-bundle — Phase 3 dist/lite/ fail-fast', () => {
   });
 });
 
+// ============================================================
+// cli 1.0.3 (#87) — recursive hook tree copy
+// ============================================================
+//
+// test-list (Beck) for cli 1.0.3:
+// [ ] recursive walk copies a helper file that is NOT declared as a command
+// [ ] recursive walk copies files nested under a fragment directory
+// [ ] recursive walk preserves the executable bit on nested files
+// [ ] postflight fails loud when a declared command lacks a matching binary
+// [ ] recursive walk fails loud when sibling hook tree has zero *.sh files
+// [ ] recursive walk fails loud when the sibling tree contains a symlink at top level
+// [ ] recursive walk fails loud when the sibling tree contains a symlink nested inside a fragment dir
+//
+// @risk N1 — recursive walk misses a nested file
+// @risk F1 — fixture drifts from real sibling shape
+// @risk SS-1 — symlink refusal must fire on nested entries too
+
+function seedSiblingHookTreeWithHelpers(): void {
+  // Mirrors the real v0.42.0 shape: declared commands + helper + fragment dir.
+  const hooksDir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+  const fragDir = join(hooksDir, 'session-reflection.d');
+  mkdirSync(fragDir, { recursive: true, mode: 0o755 });
+
+  // Declared commands (referenced by miniWiringManifest).
+  writeFileSync(join(hooksDir, 'lite-hook.sh'), '#!/bin/sh\necho lite-hook\n', { mode: 0o755 });
+  writeFileSync(join(hooksDir, 'lite-prompt.sh'), '#!/bin/sh\necho lite-prompt\n', { mode: 0o755 });
+
+  // Helper — NOT a declared command; other hooks source it.
+  writeFileSync(join(hooksDir, 'trace-helper.sh'), '#!/bin/sh\n# helper sourced by others\n', {
+    mode: 0o755,
+  });
+
+  // Fragment dir contents.
+  writeFileSync(join(fragDir, 'fragment-a.sh'), '#!/bin/sh\necho fragment-a\n', { mode: 0o755 });
+  writeFileSync(join(fragDir, 'fragment-b.sh'), '#!/bin/sh\necho fragment-b\n', { mode: 0o755 });
+}
+
+describe('prepublish-bundle — cli 1.0.3 recursive tree copy', () => {
+  it('copies a helper file that is NOT declared as a command in settings.json', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookTreeWithHelpers();
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const helperPath = join(bundleDir, 'dist', 'lite', '.claude', 'hooks', 'trace-helper.sh');
+    expect(existsSync(helperPath)).toBe(true);
+  });
+
+  it('copies files nested under session-reflection.d/ fragment directory', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookTreeWithHelpers();
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const fragA = join(
+      bundleDir,
+      'dist',
+      'lite',
+      '.claude',
+      'hooks',
+      'session-reflection.d',
+      'fragment-a.sh',
+    );
+    const fragB = join(
+      bundleDir,
+      'dist',
+      'lite',
+      '.claude',
+      'hooks',
+      'session-reflection.d',
+      'fragment-b.sh',
+    );
+    expect(existsSync(fragA)).toBe(true);
+    expect(existsSync(fragB)).toBe(true);
+  });
+
+  it('preserves executable bit on nested fragment files', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    seedSiblingHookTreeWithHelpers();
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).toBe(0);
+    const fragPath = join(
+      bundleDir,
+      'dist',
+      'lite',
+      '.claude',
+      'hooks',
+      'session-reflection.d',
+      'fragment-a.sh',
+    );
+    const { statSync } = require('node:fs');
+    const mode = statSync(fragPath).mode & 0o777;
+    // Executable bit on user (owner) — 0o100. Windows CI may report 0o644 — allow either exec bit or 0o644.
+    const hasExecBit = (mode & 0o100) !== 0;
+    const isWindowsBestEffort = process.platform === 'win32' && mode === 0o644;
+    expect(hasExecBit || isWindowsBestEffort).toBe(true);
+  });
+
+  it('postflight fails loud when a declared command lacks a matching binary in the tree', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    // Seed a tree that has trace-helper.sh + fragments but MISSES lite-hook.sh
+    // (which miniWiringManifest declares as a command).
+    const hooksDir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+    mkdirSync(hooksDir, { recursive: true, mode: 0o755 });
+    writeFileSync(join(hooksDir, 'trace-helper.sh'), '#!/bin/sh\n');
+    writeFileSync(join(hooksDir, 'lite-prompt.sh'), '#!/bin/sh\n');
+    // lite-hook.sh MISSING on purpose.
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/lite-hook\.sh/);
+  });
+
+  it('fails loud when sibling hook tree has zero *.sh files', () => {
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    // Create empty hooks dir.
+    const hooksDir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+    mkdirSync(hooksDir, { recursive: true, mode: 0o755 });
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/empty|zero|missing/i);
+  });
+
+  it('fails loud when sibling tree contains a symlink at top level', () => {
+    // Skip on Windows — symlinks require admin.
+    if (process.platform === 'win32') return;
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    const hooksDir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+    mkdirSync(hooksDir, { recursive: true, mode: 0o755 });
+    writeFileSync(join(hooksDir, 'lite-hook.sh'), '#!/bin/sh\n');
+    writeFileSync(join(hooksDir, 'lite-prompt.sh'), '#!/bin/sh\n');
+    writeFileSync(join(hooksDir, 'target.sh'), '#!/bin/sh\n');
+    const { symlinkSync } = require('node:fs');
+    symlinkSync('target.sh', join(hooksDir, 'trace-helper.sh'));
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/symlink/i);
+  });
+
+  it('fails loud when sibling tree contains a symlink nested inside a fragment directory', () => {
+    if (process.platform === 'win32') return;
+    seedWiringManifest(miniWiringManifest());
+    seedDistTemplates();
+    const hooksDir = join(fakeSibling, 'dist', 'lite', '.claude', 'hooks');
+    const fragDir = join(hooksDir, 'session-reflection.d');
+    mkdirSync(fragDir, { recursive: true, mode: 0o755 });
+    writeFileSync(join(hooksDir, 'lite-hook.sh'), '#!/bin/sh\n');
+    writeFileSync(join(hooksDir, 'lite-prompt.sh'), '#!/bin/sh\n');
+    writeFileSync(join(fragDir, 'real-fragment.sh'), '#!/bin/sh\n');
+    const { symlinkSync } = require('node:fs');
+    symlinkSync('real-fragment.sh', join(fragDir, 'linked-fragment.sh'));
+    const result = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/symlink/i);
+  });
+});
+
 describe('prepublish-bundle — tarball audit (no operator-private path leaks)', () => {
   // Locks Saltzer #1: any operator-private path (chronicles, journals,
   // session logs, state markers, risk ledgers, iteration goal docs) must

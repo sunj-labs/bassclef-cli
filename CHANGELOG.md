@@ -24,6 +24,24 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.0.3] - 2026-09-16
+
+### Fixed
+
+- **Cold-adopter hook-cascade class from 1.0.2** — `scripts/prepublish-bundle-substrate.mjs` now recursively copies the sibling `dist/lite/.claude/hooks/` tree instead of filtering by `settings.json.hooks[].command` leaf names. Helper scripts that other hooks source (like `trace-helper.sh`) and fragment directories (like `session-reflection.d/`) now ship in the tarball. Closes bassclef-cli#87. Root cause: 1.0.1's `copyHookBinaries` cure (bassclef-cli#79) undershipped by only copying declared commands, silently dropping helpers upstream added at v0.42.0.
+
+### Changed
+
+- **Postflight rewritten** — `assertDeclaredCommandsHaveBinaries` replaces the strict `copiedHookCount === declaredCount` equality check with a `copiedFiles >= declaredCount` sanity plus per-command binary presence check. Extra files (helpers, fragments) log INFO and pass. Every declared command still fails loud if its binary is absent.
+- **Symlink refusal** — recursive walk `lstat`s every entry (top-level AND nested) and refuses symlinks per Saltzer-Schroeder complete mediation. An npm tarball must not carry a symlink.
+
+### Notes
+
+- Full OOAD ceremony landed with this fix — use case (fully-dressed Cockburn), IA model, interaction design (state + sequence diagrams), decomposition (GRASP + `@pattern`), primary luminary consult (Linus + Cockburn + Nygard + Feathers + Beck), adversarial RFC-0003 (Hunt-Thomas + Toulmin + Hyrum + Rich Hickey + Saltzer-Schroeder), risk ledger v2 (11 primary risks + 11 RFC folds).
+- Live matcher grounding — Voyage + Haiku picked Linus + Cockburn as primary (0.82 confidence).
+- Tarball impact: cli 1.0.3 ships every file the sibling `dist/lite/.claude/hooks/` tree contains at the pinned tag. File removals at upstream are now covert breaks per Hyrum; ADR-031 compat window applies.
+- 1.0.2 should be deprecated on npm alongside 1.0.0 and 1.0.1 once 1.0.3 is smoke-verified.
+
 ## [1.0.2] - 2026-09-16
 
 ### Changed

@@ -1,0 +1,12 @@
+{
+  "matched_luminaries": [
+    "linus-torvalds",
+    "alistair-cockburn"
+  ],
+  "matched_problem_patterns": [],
+  "matched_canvas_references": [],
+  "matcher_version": "voyage-3-lite+haiku-4-5-1.0",
+  "match_confidence": 0.82,
+  "_rationale": "Linus's 'do not break userspace' directly addresses the silent regression risk where downstream npm adopters experience cold-boot failures; Cockburn's walking skeleton enforces fail-fast verification by requiring the thinnest end-to-end slice (postflight assertion) to prove the tarball's transitive dependencies work before shipping.",
+  "_mode": "LIVE"
+}

@@ -1,0 +1,9 @@
+# Parent-goal walk — cli 1.0.3 prepublish recursive hook copy
+- date: 2026-09-16
+- goal: 2026-09-16-cli-1.0.3-prepublish-recursive-hook-copy
+- parent_bet: none (this is a standalone hotfix goal off main)
+- parent_roadmap: none (npm distribution roadmap covered by iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md; not this goal's parent)
+- ancestor walk: trivial — no ancestors declared; the smoke result from cli#82 tracker is the driver, cli#87 is the filed fix ticket
+- drivers consumed: cold-adopter-1 smoke output 2026-09-16 shows 1.0.2 crashes at first SessionStart; adopters cannot use the tarball
+- open acceptance from ancestors: none applicable
+- out_of_scope inherited: none applicable — this hotfix scope is set by cli#87 body directly
