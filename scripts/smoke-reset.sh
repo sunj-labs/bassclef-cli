@@ -165,5 +165,5 @@ if (( VERIFY_FAIL )); then
 fi
 
 log "reset complete. Ready for cold-adopter smoke test."
-log "next: npm install -g ${PRIMARY_PKG}@1.0.1"
+log "next: npm install -g ${PRIMARY_PKG}@latest"
 exit 0
