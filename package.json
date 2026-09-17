@@ -1,8 +1,13 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
-  "keywords": ["bassclef", "claude-code", "cli", "scaffolding"],
+  "keywords": [
+    "bassclef",
+    "claude-code",
+    "cli",
+    "scaffolding"
+  ],
   "homepage": "https://github.com/sunj-labs/bassclef-cli",
   "repository": {
     "type": "git",
@@ -37,10 +42,12 @@
     "LICENSE"
   ],
   "bassclef": {
-    "upstream_tag": "v0.39.0",
+    "upstream_tag": "v0.42.0",
     "wiring_manifest_schema_major": 2,
-    "bundle_paths": ["dist/lite/"],
-    "phase_note": "Phase 3 (goal 2026-09-13c cli#73) — MAJOR bump. Cli init reads dist/lite/ per bassclef-upstream ADR-055 D1. substrate/ bundle path retired. Zero npm adopters at bump time (operator confirmed 2026-09-13); no compat-shim owed."
+    "bundle_paths": [
+      "dist/lite/"
+    ],
+    "phase_note": "cli 1.1.1 (goal 2026-09-17) — init reporting contract per ADR-010. Manifest names every file written; --json moves to stdout and names all catalog families."
   },
   "engines": {
     "node": ">=20"
