@@ -181,8 +181,8 @@ One Control per multi-step coordination inside the use case. Each fires its Boun
 | **SkillDriver** | ClaudeInvoker (per skill) + StderrReader + FilesystemWriter | CaptureFile (per skill) |
 | **AssertionSuite** | Four Strategy check functions per CaptureFile | AssertionResult (per check per surface) |
 | **ReportBuilder** | reads AssertionResult set + writes Report | Report (markdown file) |
-| **PublisherController** | GhInvoker (once) with Report body | Issue (external — GitHub state) |
-| **ResetController** | FilesystemWriter (many targets) + NpmInvoker (uninstall) | ResetLog (idempotency record) |
+| **PublisherController** | GhInvoker for issue list (search open smoke-run-v1 with matching version + date) + GhInvoker for create-or-update + report body versioning marker | Issue (external — GitHub state); labeled `smoke-run-v1` |
+| **ResetController** | FilesystemWriter (many targets) + NpmInvoker (uninstall) + FilesystemWriter for snapshot dirs + FilesystemWriter for restore | ResetLog (idempotency record); Snapshot (per-timestamp backup dir under `~/tmp/bassclef-smoke-reset-backups/`) |
 
 ### Entity objects (persistent or per-use-case data)
 
@@ -191,11 +191,12 @@ Nouns that carry data across steps.
 | Entity type | Persistence | Owned by |
 |---|---|---|
 | **CaptureFile** | on disk under `docs/smoke-captures/<date>/hooks/*.out` and `.../skills/*.out` | HookRunner + SkillDriver create; AssertionSuite reads |
-| **AssertionResult** | on disk as `hooks-assertions.json` and `skills-assertions.json` | AssertionSuite creates; ReportBuilder reads |
+| **AssertionResult** | on disk as `hooks-assertions.json` and `skills-assertions.json`; per-check variant `<check-name>-only.json` when `--only` fires | AssertionSuite creates; ReportBuilder reads |
 | **Fixture** | on disk under `.claude/hooks/tests/fixtures/2026-09-18-smoke-findings/cli-<N>/` | Committed to repo; AssertionSuite reads at fixture-test time |
-| **Report** | on disk as `docs/smoke-captures/<date>/report.md` | ReportBuilder creates; PublisherController reads |
+| **Report** | on disk as `docs/smoke-captures/<date>/report.md`; body carries a version marker in the frontmatter (`report_shape_version: 1`) matching the `smoke-run-v1` label | ReportBuilder creates; PublisherController reads |
 | **Allowlist** | on disk as `.claude/hooks/tests/fixtures/smoke-allowlist/<check>.txt` | Committed to repo; AssertionSuite reads |
-| **Issue** | external — GitHub | PublisherController creates via GhInvoker |
+| **Issue** | external — GitHub; labeled `smoke-run-v1`; body follows Report's versioned shape | PublisherController creates or updates via GhInvoker |
+| **Snapshot** | on disk under `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/` (RFC F6 fold); mirrors target dirs; auto-expires after 7 days | ResetController writes on `--whole`; reads on `--restore` |
 | **ResetLog** | on disk as `docs/smoke-captures/<date>/reset.log` | ResetController writes; operator reads |
 
 ### BCE call sequence (main flow)
@@ -235,11 +236,21 @@ Two classes carried temptation to blur. Named here so the implementer keeps them
 - **HookRunner is Control, not Boundary.** It coordinates enumerate → invoke → capture. The invocation itself belongs to DispatcherInvoker (Boundary). Blur risk: putting the `bash <dispatcher>` call inline in HookRunner ties the coordinator to the external process shape. Keeping DispatcherInvoker separate lets Layer 2 or 3 swap invocation shapes without touching the coordinator.
 - **AssertionSuite is Control, not Entity.** Assertions produce AssertionResult objects (Entities), but the coordination — enumerate captures, apply four checks, collect results — is Control. Blur risk: putting the check logic on the AssertionResult object couples data to check semantics.
 
+## RFC F1 + F2 + F4 + F6 folds (2026-09-18)
+
+Design deltas from `docs/rfc/RFC-smoke-evidence-adversarial.md`:
+
+- **F1 — Report shape versioned.** Report entity gains `report_shape_version: 1` frontmatter. Issue label becomes `smoke-run-v1`. Future breaking changes ship as `-v2` per ADR-031 grace.
+- **F2 — Two personas.** Operator-Release + Operator-Diagnose. `smoke-assert-hooks.sh --only <check-name>` and `smoke-assert-skills.sh --only <check-name>` serve Operator-Diagnose. New AssertionResult variant `<check-name>-only.json`.
+- **F4 — Publish idempotent.** PublisherController now runs a search-first step: `gh issue list --label smoke-run-v1 --state open --search "<version>"`. When open issue exists on same date, updates body via `gh issue edit` instead of creating. `--new` flag forces fresh create.
+- **F6 — Reset snapshotted.** New Snapshot entity under `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/`. ResetController writes snapshot before clear; `--restore <ISO-timestamp>` reads snapshot. Auto-expires after 7 days.
+
 ## References
 
 - Jacobson, *Object-Oriented Software Engineering* (1992) — BCE classification
 - Larman, *Applying UML and Patterns* — GRASP roles
 - Spec: `docs/specs/smoke-evidence-capture.md`
 - Use case: `docs/use-cases/UC-smoke-run.md`
+- RFC folds: `docs/rfc/RFC-smoke-evidence-adversarial.md`
 - Parent goal: `docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md`
 - Pattern rule: `.claude/rules/pattern-annotation.md`

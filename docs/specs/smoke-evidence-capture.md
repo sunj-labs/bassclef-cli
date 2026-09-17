@@ -56,9 +56,12 @@ captured artifact survives.
 
 ## Actors
 
+Two operator personas per RFC F2 (fold-in 2026-09-18):
+
 | Actor | Role |
 |---|---|
-| Operator | Runs the smoke on the cold profile before every release |
+| **Operator-Release** | Runs the smoke on the cold profile before every release. Wants under 5 minutes end-to-end, pass/fail exit code, thumbs-up. Report body irrelevant beyond pass/fail. |
+| **Operator-Diagnose** | A prior smoke was RED. Wants raw captures, per-check drill-down, ability to re-run one check via `--only <check-name>`. Reads the report body carefully. |
 | Cold profile | Mac profile with fresh `~/.claude/` and no state from prior runs |
 | GitHub as ferry | Public repo `sunj-labs/bassclef-cli` receives the run's report as an issue |
 | Agent (me) | Reads the issue on demand and runs `/diagnose` on each RED row |
@@ -90,7 +93,10 @@ captured artifact survives.
 - Every check has a pass/fail row in the report
 - Every RED row links to its raw capture
 - The report's exit code is 0 when all pass, non-zero when any fails
-- When `--publish` is set, one issue exists on `sunj-labs/bassclef-cli` with `smoke-run` label and the report body
+- When `--publish` is set, one issue exists on `sunj-labs/bassclef-cli` with the `smoke-run-v1` label and the report body
+- **Report body shape is versioned** (RFC F1 fold): `smoke-run-v1` label carries V1 shape (pass/fail table + per-hook + per-skill + raw capture links). Breaking format changes ship as `smoke-run-v2` with a grace window per ADR-031. Agents pick by label.
+- **Publish is idempotent per version-and-date** (RFC F4 fold): when an open `smoke-run-v1` issue exists for the same `<version>` on the same `<date>`, `--publish` updates that issue's body instead of creating a new one. `--publish --new` forces a fresh issue.
+- **Reset snapshots before it clears** (RFC F6 fold): `--whole` copies affected dirs to `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/` before clearing. `--restore <ISO-timestamp>` restores. Backups auto-expire after 7 days.
 
 ## Acceptance criteria (measurable)
 
@@ -100,9 +106,10 @@ captured artifact survives.
 4. `bash scripts/smoke-drive-skills.sh` fires exactly five skills (`/temperance`, `/luminary don-norman`, `/kiss words <sample>`, `/state-a-problem brief <sample>`, `/whats-the-plan`) via `claude -p` and captures each response
 5. `bash scripts/smoke-assert-skills.sh` runs the same four checks per skill capture
 6. `bash scripts/smoke-report.sh` writes `docs/smoke-captures/<date>/report.md` with a pass/fail table; exits with the union code
-7. `bash scripts/smoke-report.sh --publish` posts the report as an issue on `sunj-labs/bassclef-cli` with the `smoke-run` label and returns the issue number
-8. `bash scripts/smoke-reset.sh --whole` clears npm global cache plus `~/.claude/projects/<repo>/` plus `~/tmp/bassclef-smoke-test`; idempotent; `--dry-run` flag preserved
+7. `bash scripts/smoke-report.sh --publish` posts the report as an issue on `sunj-labs/bassclef-cli` with the `smoke-run-v1` label and returns the issue number. When an open `smoke-run-v1` issue exists for the same `<version>` on the same date, `--publish` updates the existing body. `--publish --new` forces a fresh issue.
+8. `bash scripts/smoke-reset.sh --whole` clears npm global cache plus `~/.claude/projects/<repo>/` plus `~/tmp/bassclef-smoke-test`; idempotent; `--dry-run` flag preserved. Before clearing, snapshots each target dir to `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/`. `--restore <ISO-timestamp>` restores from the snapshot. Backups auto-expire after 7 days.
 9. `docs/test-plans/2026-09-16-cold-adopter-smoke-1.0.2.md` Steps 5-7 name the new scripts
+10. **Per-check re-run** (RFC F2 fold): `bash scripts/smoke-assert-hooks.sh --only <check-name>` runs a single check across all hook captures. Same flag on `smoke-assert-skills.sh`. Serves Operator-Diagnose after a RED smoke.
 
 ## Four checks (per surface)
 
@@ -152,8 +159,12 @@ Each script must honor these preconditions and postconditions. Step 1 onward imp
 - **Precondition:** both assertion JSON files exist
 - **Reads:** `hooks-assertions.json` plus `skills-assertions.json`
 - **Writes:** `docs/smoke-captures/<date>/report.md` with pass/fail matrix
-- **Optional:** `--publish` flag posts issue to `sunj-labs/bassclef-cli` with `smoke-run` label; returns issue number to stdout
+- **Optional:** `--publish` flag posts issue to `sunj-labs/bassclef-cli` with `smoke-run-v1` label; returns issue number to stdout. Same-day-same-version idempotent — updates the open issue body when one already exists. `--publish --new` forces a fresh issue.
 - **Exit:** union of both assertion exit codes
+
+### `scripts/smoke-assert-hooks.sh` and `smoke-assert-skills.sh` — `--only <check-name>` flag (RFC F2 fold)
+
+Both scripts accept `--only <check-name>` where `<check-name>` is one of `no-not-found`, `no-silent-skip`, `no-unexpected-blocked`, `paths-exist`. Runs that single check across all captures. Serves Operator-Diagnose after a RED smoke.
 
 ### `scripts/smoke-reset.sh --whole` (extension of existing script)
 
@@ -161,6 +172,8 @@ Each script must honor these preconditions and postconditions. Step 1 onward imp
 - **Reads:** existing reset targets plus new whole-env targets
 - **Writes:** cleared state at npm global cache plus `~/.claude/projects/<repo>/` plus `~/tmp/bassclef-smoke-test`
 - **Flags preserved:** `--dry-run` (no side effects, prints plan)
+- **Snapshot before clear:** copies each target dir to `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/`. Backups auto-expire after 7 days.
+- **Restore flag:** `bash scripts/smoke-reset.sh --restore <ISO-timestamp>` restores from a snapshot dir.
 - **Exit:** 0 on reset complete; non-zero on partial clear
 
 ## Out of scope
