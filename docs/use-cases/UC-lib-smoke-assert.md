@@ -44,7 +44,7 @@ Per `.claude/rules/oo-ad-entry-point.md` matrix — new files under `lib/*.sh` r
 
 ## Main scenario (compressed)
 
-1. Driver script sources `lib/smoke-schema.sh` and `lib/smoke-assert.sh`
+1. Driver script sources `scripts/lib/smoke-schema.sh` and `scripts/lib/smoke-assert.sh`
 2. Driver calls one of four check functions per capture: `check_no_not_found`, `check_no_silent_skip`, `check_no_unexpected_blocked`, `check_paths_exist`
 3. Each check returns a status line — `<STATUS>|<check-name>|<message>`
 4. Driver calls `assertion_result_json` to shape the status as an AssertionResult JSON object
@@ -58,8 +58,8 @@ Per `.claude/rules/oo-ad-entry-point.md` matrix — new files under `lib/*.sh` r
 
 ## Pre-mortem folds baked in
 
-- **F4** (Fowler — assertion signature drift): one contract in `lib/smoke-assert.sh`; any new check amends the contract in one place
-- **F6** (Fowler — AssertionResult schema baked into report): one schema helper in `lib/smoke-schema.sh`; ReportBuilder consumes via the same shape
+- **F4** (Fowler — assertion signature drift): one contract in `scripts/lib/smoke-assert.sh`; any new check amends the contract in one place
+- **F6** (Fowler — AssertionResult schema baked into report): one schema helper in `scripts/lib/smoke-schema.sh`; ReportBuilder consumes via the same shape
 
 ## References
 

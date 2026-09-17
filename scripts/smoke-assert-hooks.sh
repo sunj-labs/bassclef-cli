@@ -31,10 +31,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# shellcheck source=../lib/smoke-schema.sh
-source "${SCRIPT_DIR}/../lib/smoke-schema.sh"
-# shellcheck source=../lib/smoke-assert.sh
-source "${SCRIPT_DIR}/../lib/smoke-assert.sh"
+# shellcheck source=lib/smoke-schema.sh
+source "${SCRIPT_DIR}/lib/smoke-schema.sh"
+# shellcheck source=lib/smoke-assert.sh
+source "${SCRIPT_DIR}/lib/smoke-assert.sh"
 
 CAPTURE_DIR=""
 OUT_FILE=""
