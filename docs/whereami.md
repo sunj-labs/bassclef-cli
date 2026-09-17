@@ -38,6 +38,12 @@ Two false alarms worth remembering. The registry showed 1.1.0 for about three mi
 
 **Cold-adopter smoke on 1.1.1 PASSED** (2026-09-17, fresh macOS profile). `smoke-reset.sh --cold` then `npm install -g @thebassclef/lite@latest` then `git init` then `bassclef init`: 378 substrate files, 379 total, **24 of 24 hooks armed**, 40 skills, 63 rules, 4 agents, 32 luminaries. `claude` booted clean with zero hook-not-found errors. That is the breakage cli#78 described, gone. Counts match the registry install I ran independently, so the tarball an adopter gets is the one that was verified.
 
+**Next-session pickup written: `docs/next-session-plan-2026-09-17-cli-pickup.md`.** Five options with evidence; recommends option e — make the cold-adopter smoke produce evidence.
+
+The doc is at revision 2. Revision 1 recommended fixing the install harness and called it the gate between a broken tarball and npm. The operator asked how that differed from their profile test, and the premise did not survive the question. `publish.yml` already asserts `dist/lite/` present in the tarball in its `checks` job (L177), and `publish` has `needs: checks` (L204), so the cli 1.0.0 failure class is blocked before publishing. The harness fires on `release: published` — after. Fixing it is cleanup, not safety; the doc now sizes it at 15-25 turns and names deleting it as a legitimate answer.
+
+Option e came out of the same exchange. The profile test is the real check — it found eight defects tonight that no automated check here would catch — and it is fully manual with ephemeral evidence. `smoke-reset.sh` and `smoke-preflight.sh` reset and inventory; nothing captures the session output, and tonight's findings nearly got lost in three collapsed tool blocks.
+
 **Routed upstream as bassclef-upstream#1728.** One coordination ticket indexing tonight's eight smoke findings, cross-referenced on all eight cli tickets and on upstream#1706.
 
 Why one ticket rather than eight mirrors: 23 tickets sit open at bassclef-cli and only two were mirrored upstream, the oldest unrouted ones 18 days old. That is cli#72 doing what it did before. And upstream#1706 already exists — the v1.7.0 cold-adopter smoke planned before the next release, whose step 3 expects zero session-start hook errors. Six of the eight would fail that step, so this batch is pre-work for a gate upstream already wrote down, not a parallel queue.
