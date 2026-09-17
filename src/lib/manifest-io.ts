@@ -95,7 +95,7 @@ export function readManifest(targetDir: string): Manifest {
     throw new ManifestReadError(
       'SchemaTooNew',
       `manifest schema version ${schema} is newer than this package understands ` +
-        `(${MANIFEST_SCHEMA_VERSION}). Upgrade @thebassclef/core.`
+        `(${MANIFEST_SCHEMA_VERSION}). Upgrade @thebassclef/lite.`
     );
   }
 

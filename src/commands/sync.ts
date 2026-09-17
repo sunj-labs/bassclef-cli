@@ -438,12 +438,24 @@ function emitL2Output(decisions: readonly FileDecision[], verbose: boolean): voi
   }
 }
 
+/**
+ * Find an entry by path AND scope.
+ *
+ * Path alone is not unique. The init walker writes undeclared hook
+ * helpers to both user scope and project scope, so two entries share one
+ * bundle-relative path (src/lib/copy-substrate.ts dual-write). Matching
+ * on path alone finds the first and silently leaves the second stale.
+ * Per ADR-010 D1 and RFC-0004 S-1.
+ */
 function updateManifestEntry(
   manifest: { files: ManifestEntry[] },
   path: string,
   patch: Partial<ManifestEntry>
 ): void {
-  const idx = manifest.files.findIndex((f) => f.path === path);
+  const wantScope = patch.scope;
+  const idx = manifest.files.findIndex(
+    (f) => f.path === path && (wantScope === undefined || f.scope === wantScope)
+  );
   if (idx < 0) {
     manifest.files.push({
       path,

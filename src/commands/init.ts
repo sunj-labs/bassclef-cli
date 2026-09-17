@@ -39,11 +39,30 @@ import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifest-io.js';
 import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
 import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
+import { buildInitReport, renderJsonReport, type InitReport } from '../lib/init-report.js';
+import type { CopyResult } from '../lib/copy-substrate.js';
 
 // Static tier for @thebassclef/lite. When standard + ultra packages
 // ship, this resolves from the installed package.json `name` field
 // (see UC-init §"Technology + data variations").
 const RESOLVED_TIER = 'lite';
+
+/**
+ * @pattern patterns/code/gof/strategy.md
+ *
+ * The output writer is chosen once from the --json flag and passed down.
+ * Before cli 1.1.1 each print site asked whether JSON was on, and the
+ * JSON itself went to stderr with human prose following it on stdout.
+ * Per ADR-010 D6: under --json the routine human lines are not printed
+ * at all, so stdout carries the object and nothing else. Errors keep
+ * using stderr directly and stay the only thing there.
+ */
+type Say = (s: string) => void;
+const SAY_HUMAN: Say = (s) => { process.stdout.write(s); };
+const SAY_QUIET: Say = () => { /* --json: stdout belongs to the report */ };
+function makeSay(json: boolean): Say {
+  return json ? SAY_QUIET : SAY_HUMAN;
+}
 
 // Files subject to placeholder substitution per UC-init §Main step 5 +
 // ADR-002 §Amendment 2026-09-13 §Placeholder substitution. settings.json
@@ -115,7 +134,7 @@ export function runInit(argv: readonly string[]): number {
   // 1.0.0-shaped manifest exists (no schema_version field OR < 2).
   // If the adopter confirms (or passes --yes), init proceeds as though
   // --force was set — the confirmation IS the consent to overwrite.
-  const advisoryOutcome = maybeEmitUpgradeAdvisory(targetDir, args.yes);
+  const advisoryOutcome = maybeEmitUpgradeAdvisory(targetDir, args.yes, args.json);
   if (advisoryOutcome === 'refused') return 1;
   const upgradeApproved = advisoryOutcome === 'upgrade-approved';
 
@@ -149,15 +168,37 @@ export function runInit(argv: readonly string[]): number {
     },
   ];
 
+  const say = makeSay(args.json);
+
   if (args.dryRun) {
-    runDryRun(plans);
-    return dispatchSubstrateCopy(targetDir, args.force || upgradeApproved, args.verbose, true, args.allowRoot, args.json);
+    runDryRun(plans, say);
+    const outcome = dispatchSubstrateCopy(
+      targetDir, args.force || upgradeApproved, args.verbose, true, args.allowRoot, say
+    );
+    if (args.json) {
+      // A dry run writes no manifest (RFC-0004 M-3) but still reports
+      // what it would have written, so a script can preview the shape.
+      const report = buildInitReport({
+        entries: outcome.result?.wouldCopyEntries ?? [],
+        configs: plans.map((pl) => ({ path: pl.relativePath })),
+        refused: outcome.result?.refused ?? [],
+        // A dry run still reads every source file, so it can still fail
+        // to read one. Hard-coding this empty hid those failures from
+        // the JSON (RFC-0005 A-3).
+        errored: outcome.result?.errored ?? [],
+        hookCount: outcome.result?.hookCount ?? 0,
+        declaredHooksCopied: 0,
+        tier: RESOLVED_TIER,
+      });
+      renderJsonReport(report, (t) => { process.stdout.write(t); });
+    }
+    return outcome.code;
   }
 
   // runReal writes the cli-composed plans (substrate.config.md) then
   // dispatches the walker for dist/lite/. Manifest is written last with
   // the union of both results so `bassclef sync` sees every managed file.
-  return runReal(plans, args.force || upgradeApproved, args.verbose, targetDir, args.allowRoot, args.json);
+  return runReal(plans, args.force || upgradeApproved, args.verbose, targetDir, args.allowRoot, args.json, say);
 }
 
 /**
@@ -173,7 +214,10 @@ export function runInit(argv: readonly string[]): number {
  * the advisory + reads one line from stdin. Empty or 'y' → proceed.
  * Any other line → refuse (exit 1).
  */
-function maybeEmitUpgradeAdvisory(targetDir: string, yes: boolean): 'ok' | 'refused' | 'upgrade-approved' {
+function maybeEmitUpgradeAdvisory(targetDir: string, yes: boolean, json: boolean): 'ok' | 'refused' | 'upgrade-approved' {
+  // Under --json stdout carries the report alone, so the prompt moves to
+  // stderr rather than being suppressed. A prompt nobody sees would hang.
+  const prompt: Say = json ? (t) => { process.stderr.write(t); } : SAY_HUMAN;
   const manifestPath = join(targetDir, MANIFEST_RELATIVE_PATH);
   if (!existsSync(manifestPath)) return 'ok';
   // Manifest read goes through the typed wrapper in src/lib/manifest-io.ts
@@ -182,15 +226,15 @@ function maybeEmitUpgradeAdvisory(targetDir: string, yes: boolean): 'ok' | 'refu
   const version = readManifestShapeVersion(targetDir);
   // Manifest already at v2 (or later) — no upgrade to announce.
   if (version !== null && version >= 2) return 'ok';
-  process.stdout.write(
+  prompt(
     'bassclef init: cli 1.0.1 introduces user-scope hook installation at ' +
       `~/${HOOKS_SUBPATH}. cli 1.0.0 did not write there.\n`
   );
   if (yes) return 'upgrade-approved';
-  process.stdout.write('bassclef init: continue? (y/N) ');
+  prompt('bassclef init: continue? (y/N) ');
   const answer = readOneLineFromStdin();
   if (answer === '' || answer === 'y' || answer === 'Y') return 'upgrade-approved';
-  process.stdout.write('bassclef init: aborted by adopter.\n');
+  prompt('bassclef init: aborted by adopter.\n');
   return 'refused';
 }
 
@@ -211,14 +255,20 @@ function readOneLineFromStdin(): string {
 // Fails loudly with exit codes 4 (manifest missing) + 5 (schema
 // incompatible) per ADR-055 D4. Prints hook-count banner per ADR-055 D5.
 // Returns the dispatch's exit code so runInit can propagate it.
+interface DispatchOutcome {
+  code: number;
+  /** Present when the walker ran. Absent when it failed before copying. */
+  result?: CopyResult;
+}
+
 function dispatchSubstrateCopy(
   targetDir: string,
   force: boolean,
   verbose: boolean,
   dryRun: boolean,
   allowRoot: boolean,
-  json: boolean
-): number {
+  say: Say
+): DispatchOutcome {
   const substitute = makePlaceholderTransform(targetDir);
   let result;
   try {
@@ -233,11 +283,11 @@ function dispatchSubstrateCopy(
       // Nygard fail-loud per ADR-055 D4. Exit codes 4 + 5 documented
       // in ADR-002 §Amendment 2026-09-13.
       process.stderr.write(`bassclef init: ${e.message}\n`);
-      if (e.kind === 'ManifestMissing') return 4;
-      if (e.kind === 'SchemaIncompatible') return 5;
+      if (e.kind === 'ManifestMissing') return { code: 4 };
+      if (e.kind === 'SchemaIncompatible') return { code: 5 };
       // BundleMissing falls through — reinstall message already in the
       // exception; treat as exit 2 (write-time class per ADR-002).
-      return 2;
+      return { code: 2 };
     }
     throw e;
   }
@@ -248,22 +298,22 @@ function dispatchSubstrateCopy(
     const wouldCopy = result.wouldCopy ?? [];
     for (const relativePath of wouldCopy) {
       const targetPath = join(targetDir, relativePath);
-      process.stdout.write(`  ${'would create'.padEnd(14)} ${targetPath}\n`);
+      say(`  ${'would create'.padEnd(14)} ${targetPath}\n`);
     }
     if (wouldCopy.length > 0) {
-      process.stdout.write(
+      say(
         `bassclef init: ${wouldCopy.length} substrate files would be copied.\n`
       );
     }
     // Banner in dry-run too — reader sees the shape before committing.
-    process.stdout.write(
+    say(
       `bassclef init: ${result.hookCount} hooks armed (${RESOLVED_TIER} tier).\n`
     );
-    return 0;
+    return { code: 0, result };
   }
 
   if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
-    return 0;
+    return { code: 0, result };
   }
   // Group copied files by top-level directory for the summary line.
   const groupCounts = new Map<string, number>();
@@ -273,18 +323,18 @@ function dispatchSubstrateCopy(
     groupCounts.set(top, (groupCounts.get(top) ?? 0) + 1);
   }
   for (const [directory, count] of groupCounts) {
-    process.stdout.write(`  ${directory}: ${count} files copied\n`);
+    say(`  ${directory}: ${count} files copied\n`);
   }
   const parts: string[] = [];
   if (result.copied.length > 0) parts.push(`${result.copied.length} substrate files copied`);
   if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
   if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
-  process.stdout.write(`bassclef init: ${parts.join(', ')}.\n`);
+  say(`bassclef init: ${parts.join(', ')}.\n`);
   // Per bassclef-cli#60: print the grand total so the reader sees one
   // number that matches the on-disk footprint (1 config file — substrate.config.md
   // — plus the walker output).
   const grandTotal = 1 + result.copied.length;
-  process.stdout.write(
+  say(
     `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
   );
   // Norman N1 fold — banner names installed HOOK count + per-scope breakdown.
@@ -311,12 +361,12 @@ function dispatchSubstrateCopy(
     ? ` ${projectScope} in <repo>/${HOOKS_SUBPATH.replace(/\/$/, '')}, ${userScope} in ~/${HOOKS_SUBPATH.replace(/\/$/, '')}.`
     : '';
   if (failedCount > 0) {
-    process.stdout.write(
+    say(
       `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix} ` +
         `${failedCount} failed — see errors above. Rerun bassclef init to retry.\n`
     );
   } else {
-    process.stdout.write(
+    say(
       `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix}\n`
     );
   }
@@ -378,7 +428,7 @@ function dispatchSubstrateCopy(
     catalogCounts.luminaries > 0 ? `${catalogCounts.luminaries} luminaries` : null,
   ].filter((s): s is string => s !== null);
   if (claudeCounts.length > 0) {
-    process.stdout.write(
+    say(
       `bassclef init: Installed ${claudeCounts.join(', ')} under <repo>/.claude/.\n`
     );
   }
@@ -394,29 +444,21 @@ function dispatchSubstrateCopy(
     catalogCounts.scripts > 0 ? `${catalogCounts.scripts} scripts` : null,
   ].filter((s): s is string => s !== null);
   if (otherCounts.length > 0) {
-    process.stdout.write(
+    say(
       `bassclef init: Installed ${otherCounts.join(', ')} under <repo>/.\n`
     );
   }
   // Norman feedback loop: refused-count line always emitted, even 0.
-  process.stdout.write(
+  say(
     `bassclef init: ${result.refused.length} files refused (path collision).` +
       (result.refused.length > 0
         ? ` Use --force to overwrite existing files.`
         : ``) +
       `\n`
   );
-  // H1 fold — --json emits structured stderr line adopter tooling can parse.
-  if (json) {
-    const report = {
-      copied: copiedCount,
-      declared: declaredCount,
-      failed: failedCount,
-      scope_counts: { user: userScope, project: projectScope },
-      tier: RESOLVED_TIER,
-    };
-    process.stderr.write(JSON.stringify(report) + '\n');
-  }
+  // The JSON report used to be written here, to stderr, with human lines
+  // following it on stdout. It now goes to stdout as the last thing the
+  // run writes. See runReal + runInit. Per ADR-010 D6 (#94).
   if (verbose && result.erroredMessages) {
     for (const msg of result.erroredMessages) {
       process.stderr.write(`  substrate: ${msg}\n`);
@@ -426,7 +468,7 @@ function dispatchSubstrateCopy(
   // code follows the existing refused/errored discipline so partial-
   // copy scenarios where settings.json refused (adopter's existing
   // file preserved) still exit 0 when no hook copy actually errored.
-  return result.errored.length > 0 ? 2 : 0;
+  return { code: result.errored.length > 0 ? 2 : 0, result };
 }
 
 // Placeholder substitution per UC-init §Main step 5 + ADR-002 amendment.
@@ -457,7 +499,7 @@ function makePlaceholderTransform(targetDir: string): (relPath: string, content:
   };
 }
 
-function runDryRun(plans: readonly FilePlan[]): number {
+function runDryRun(plans: readonly FilePlan[], say: Say): number {
   for (const p of plans) {
     let planned: 'would create' | 'would skip' | 'would refuse';
     let extra = '';
@@ -477,12 +519,12 @@ function runDryRun(plans: readonly FilePlan[]): number {
         planned = 'would skip';
       }
     }
-    process.stdout.write(`  ${planned.padEnd(14)} ${p.fullPath}${extra}\n`);
+    say(`  ${planned.padEnd(14)} ${p.fullPath}${extra}\n`);
   }
   return 0;
 }
 
-function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string, allowRoot: boolean, json: boolean): number {
+function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string, allowRoot: boolean, json: boolean, say: Say): number {
   const results: FileResult[] = [];
   let anyRefused = false;
   let anyError = false;
@@ -540,7 +582,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
       if (r.outcome === 'error') label = `error (${r.message ?? 'unknown'})`;
       else if (r.outcome === 'refused') label = 'refused';
       else label = r.outcome;
-      process.stdout.write(`  ${label.padEnd(10)} ${r.plan.fullPath}\n`);
+      say(`  ${label.padEnd(10)} ${r.plan.fullPath}\n`);
     }
   }
 
@@ -563,13 +605,13 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   }
 
   if (anyRefused && created > 0) {
-    process.stdout.write(
+    say(
       `bassclef init: ${created} config files created, ${unchanged} unchanged. Pass --force to overwrite.\n`
     );
   } else if (created === 0 && unchanged === plans.length) {
-    process.stdout.write('bassclef init: already initialized. No changes.\n');
+    say('bassclef init: already initialized. No changes.\n');
   } else {
-    process.stdout.write(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
+    say(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
   }
 
   // Walker fires now — per ADR-055 D1-D5. Fails loudly with structured
@@ -577,21 +619,51 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   // files stay OUT of the init manifest — sync manages cli-composed
   // templates (currently substrate.config.md); walker files refresh via
   // `bassclef init --force`.
-  const walkerExit = dispatchSubstrateCopy(targetDir, force, verbose, false, allowRoot, json);
+  const walker = dispatchSubstrateCopy(targetDir, force, verbose, false, allowRoot, say);
 
-  // Manifest reflects cli-composed writes only. Walker success or
-  // failure does not change this.
-  writeManifest(targetDir, results);
+  // One description of the run, read by the manifest and by the JSON
+  // report. Before cli 1.1.1 each counted separately and disagreed.
+  // Count declared hook commands the same way the banner does, so the
+  // report's hooks.declared and hooks.copied share one unit (RFC-0005 A-2).
+  const declaredLeaves = readDeclaredCommandLeaves(
+    join(targetDir, '.claude', 'settings.json')
+  );
+  const declaredHooksCopied = (walker.result?.copiedEntries ?? []).filter(
+    (e) =>
+      e.path.startsWith(HOOKS_SUBPATH) &&
+      e.path.endsWith('.sh') &&
+      declaredLeaves.has(basename(e.path))
+  ).length;
+
+  const report = buildInitReport({
+    entries: walker.result?.copiedEntries ?? [],
+    configs: results.map((r) => ({ path: r.plan.relativePath })),
+    refused: walker.result?.refused ?? [],
+    errored: walker.result?.errored ?? [],
+    hookCount: walker.result?.hookCount ?? 0,
+    declaredHooksCopied,
+    tier: RESOLVED_TIER,
+  });
+
+  // The manifest now names every file the run touched, not just the
+  // config files. Per ADR-010 D1; this is what ADR-002 §Amendment
+  // 2026-09-13 already committed to and the Phase 3 code did not do.
+  writeManifest(targetDir, results, walker.result);
 
   // RFC N4 — folder guidance line after walker (only on success).
-  if (walkerExit === 0) {
-    process.stdout.write(
+  if (walker.code === 0) {
+    say(
       `bassclef init: your substrate lives under .claude/. ` +
         `Add .claude/ to .gitignore if you have not.\n`
     );
   }
 
-  return walkerExit;
+  // Last thing written, and under --json the only thing on stdout.
+  if (json) {
+    renderJsonReport(report, (t) => { process.stdout.write(t); });
+  }
+
+  return walker.code;
 }
 
 // Root-refusal predicate. Pure so it can be unit-tested without a
@@ -605,13 +677,27 @@ export function shouldRefuseRoot(currentUid: number | undefined, allowRoot: bool
   return !allowRoot;
 }
 
-function writeManifest(targetDir: string, results: readonly FileResult[]): void {
+/**
+ * Record what the run wrote.
+ *
+ * Postcondition per ADR-010 D1 + D4: the manifest names every file the
+ * run touched — the files cli composed, the files the walker copied, and
+ * the files it refused or errored on. Entries are keyed by path AND
+ * scope, because the walker writes undeclared hook helpers to both
+ * scopes and two entries therefore share one path (RFC-0004 S-1).
+ */
+function writeManifest(
+  targetDir: string,
+  results: readonly FileResult[],
+  walkerResult?: CopyResult
+): void {
   const entries: ManifestEntry[] = results.map((r) => {
     const entry: ManifestEntry = {
       path: r.plan.relativePath,
       template: r.plan.templateName,
       template_version: r.plan.templateVersion,
       outcome: r.outcome,
+      source: 'config-composer',
     };
     // Hash the content we actually wrote so sync can detect adopter
     // edits later. Only include a hash when we actually created the
@@ -624,6 +710,48 @@ function writeManifest(targetDir: string, results: readonly FileResult[]): void 
     }
     return entry;
   });
+
+  if (walkerResult) {
+    // Bundle entries carry a template name that is absent from the sync
+    // TEMPLATES table on purpose. sync.ts classify() returns a no-op for
+    // an unknown template, so recording these files changes no sync
+    // action. `bassclef init --force` remains their refresh path.
+    for (const copied of walkerResult.copiedEntries) {
+      entries.push({
+        path: copied.path,
+        template: `bundle:${copied.path}`,
+        template_version: pkgVersion,
+        outcome: 'created',
+        source: 'bundle',
+        scope: copied.scope,
+        ...(copied.content_hash_sha256
+          ? { content_hash_sha256: copied.content_hash_sha256 }
+          : {}),
+        updated_at: new Date().toISOString(),
+      });
+    }
+    // A partial init has to look partial. Recording only the successes
+    // would make a half-finished run read as complete (ADR-010 D4).
+    for (const path of walkerResult.refused) {
+      entries.push({
+        path,
+        template: `bundle:${path}`,
+        template_version: pkgVersion,
+        outcome: 'refused',
+        source: 'bundle',
+      });
+    }
+    for (const path of walkerResult.errored) {
+      entries.push({
+        path,
+        template: `bundle:${path}`,
+        template_version: pkgVersion,
+        outcome: 'error',
+        source: 'bundle',
+      });
+    }
+  }
+
   const manifestDir = join(targetDir, '.bassclef');
   const manifestPath = join(manifestDir, 'init.manifest.json');
   const content = manifestTemplate({
@@ -636,8 +764,17 @@ function writeManifest(targetDir: string, results: readonly FileResult[]): void 
     // Manifest is always overwritten — it reflects the LATEST init run.
     // No safety concern: the marker keys make its origin explicit.
     writeSafely(manifestPath, content, { force: true });
-  } catch {
-    // Best-effort; do not fail init on manifest errors.
+  } catch (e) {
+    // Init still exits 0: the files did land, and failing here would be
+    // a lie in the other direction. What changes at cli 1.1.1 is the
+    // silence. Sync reads this file to know what exists, so an init that
+    // writes 379 files, fails to record them, and prints success leaves
+    // the adopter with no way to notice. Per ADR-010 D10 (RFC-0004 N-1).
+    const reason = e instanceof Error ? e.message : String(e);
+    process.stderr.write(
+      `bassclef init: could not write ${manifestPath} (${reason}). ` +
+        `The files were written. Run \`bassclef init --force\` to rebuild the record.\n`
+    );
   }
 }
 

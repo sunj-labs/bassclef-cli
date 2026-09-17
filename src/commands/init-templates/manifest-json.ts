@@ -5,6 +5,12 @@
 
 import { Manifest, MANIFEST_SCHEMA_VERSION, MANIFEST_SHAPE_VERSION, type ManifestEntry } from '../../lib/manifest-types.js';
 
+// The package that actually ships this cli. Was hardcoded to
+// '@thebassclef/core', which npm deprecated when the free tier was
+// renamed. A manifest naming a dead package sends its reader nowhere.
+// Per ADR-010 D9.
+const GENERATED_BY = '@thebassclef/lite';
+
 export function manifestTemplate(input: {
   pkgVersion: string;
   targetDir: string;
@@ -15,7 +21,7 @@ export function manifestTemplate(input: {
     $bassclef: {
       template: 'init.manifest.json',
       manifest_schema_version: MANIFEST_SCHEMA_VERSION,
-      generated_by: '@thebassclef/core',
+      generated_by: GENERATED_BY,
       generated_by_version: input.pkgVersion,
     },
     created_at: new Date().toISOString(),
