@@ -14,10 +14,10 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-17T01:15:00Z
+last_updated: 2026-09-17T22:09:16Z
 iteration_bet: cli 1.1.1 SHIPPED — init reporting contract (published to npm 2026-09-17)
 iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
-session: docs/session-logs/2026-09-17-cli-1.1.1-init-reporting.md
+session: docs/session-logs/2026-09-17-cli-1.1.1-init-reporting.md (closed out 23:09 BST; two working blocks, ~5h, 12 commits)
 iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
 
 **operator_recap 2026-09-17:** `/longrun` shipped the 1.1.1 defect batch. PR #98 is open and mergeable: 3 commits, 32 files, 2,146 insertions, suite 303 to 345 green. Closes cli#93 (install record named 1 file when 499 landed), #94 (`--json` went to stderr with 151 human lines on stdout after it), #95 (report counted hooks and none of the other 11 families). Root cause was one seam, not three: init computed the full picture, used a slice for the banner, discarded the rest, and the record and the JSON each re-derived a smaller slice. Two new modules close it — one classifier, one report object read by all three writers.
