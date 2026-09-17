@@ -15,6 +15,10 @@ authoring_luminaries:
     - donald-norman
     - john-ousterhout
     - gary-klein
+    - michael-nygard        # added post intent audit — Fail-Fast + 3 UC extensions + cross-cutting
+    - ivar-jacobson         # added post intent audit — anchors Step 0d BCE section
+    - david-parnas          # added post intent audit — info hiding audit in cross-cutting + BCE split
+    - frederick-brooks      # added post intent audit — conceptual integrity in "What NOT to build"
 parent_goal_ids: []
 references:
   - path: docs/next-session-plan-2026-09-17-cli-pickup.md
