@@ -14,10 +14,14 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-17T22:09:16Z
-iteration_bet: cli 1.1.1 SHIPPED — init reporting contract (published to npm 2026-09-17)
-iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
-session: docs/session-logs/2026-09-17-cli-1.1.1-init-reporting.md (closed out 23:09 BST; two working blocks, ~5h, 12 commits)
+last_updated: 2026-09-18T05:00:00Z
+iteration_bet: goal 2026-09-18a Layer 1 smoke evidence — shipped to PR; awaits operator review + cold-profile smoke
+iteration_started: 2026-09-18
+session: docs/session-logs/2026-09-18-goal-2026-09-18a-smoke-evidence-capture-layer-1.md (~150 turns, ~9h, 14 commits on feat/109 + 10 on main)
+
+**operator_recap 2026-09-18:** Goal 2026-09-18a Layer 1 shipped end to end. PR against main pending push + open. Six new scripts under `scripts/` cover capture + assert + drive + report + reset with snapshot. Two shared libs under `scripts/lib/` hold the check contracts + JSON schema. Six defect fixtures pin cli#101 through #108 (six mapped; cli#106 + #107 outside V1 check surface — documented). 41 new Tier 0 tests; full suite 355 to 396 all GREEN. Design chain complete before code: spec + UC fully-dressed + decomposition + BCE + intent audit + RFC adversarial + pre-mortem light. 18 pre-mortem risks folded across Steps 1 through 7. 4 RFC findings folded pre-code. Turn count ~150 vs 90-140 budget — overrun accepted at prep. What broke: bash 3.2 `mapfile` gap, `set -e` exit-code capture kill, `paths-exist` false-positive on capture-header slugs — all caught by Tier 0 tests first pass. What held: four checks per surface (Saltzer-Schroeder), BCE split, shared lib pattern paid off at Step 5 skill assert reuse. Layer 2 next — drive /launch + /build to produce a mock app.
+
+prior_operator_recap 2026-09-17:
 iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
 
 **operator_recap 2026-09-17:** `/longrun` shipped the 1.1.1 defect batch. PR #98 is open and mergeable: 3 commits, 32 files, 2,146 insertions, suite 303 to 345 green. Closes cli#93 (install record named 1 file when 499 landed), #94 (`--json` went to stderr with 151 human lines on stdout after it), #95 (report counted hooks and none of the other 11 families). Root cause was one seam, not three: init computed the full picture, used a slice for the banner, discarded the rest, and the record and the JSON each re-derived a smaller slice. Two new modules close it — one classifier, one report object read by all three writers.
