@@ -14,13 +14,23 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-16T23:49:32Z
-iteration_bet: cli 1.1.0 SHIPPED — lite catalog bundle (skills / rules / agents / luminaries + libs + ADRs + standards + templates + scripts + root-docs)
+last_updated: 2026-09-17T01:15:00Z
+iteration_bet: cli 1.1.1 — init reporting contract (PR #98 open, awaiting merge + publish)
 iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
-session: docs/session-logs/2026-09-17-longrun-prep-interrupted.md
+session: docs/session-logs/2026-09-17-cli-1.1.1-init-reporting.md
 iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
 
-**operator_recap 2026-09-17:** `/longrun prep` opened and was interrupted after the whereami read. No work landed. Next prep starts fresh; the 1.1.1 defect batch (cli#93, #94, #95) is the likely pick.
+**operator_recap 2026-09-17:** `/longrun` shipped the 1.1.1 defect batch. PR #98 is open and mergeable: 3 commits, 32 files, 2,146 insertions, suite 303 to 345 green. Closes cli#93 (install record named 1 file when 499 landed), #94 (`--json` went to stderr with 151 human lines on stdout after it), #95 (report counted hooks and none of the other 11 families). Root cause was one seam, not three: init computed the full picture, used a slice for the banner, discarded the rest, and the record and the JSON each re-derived a smaller slice. Two new modules close it — one classifier, one report object read by all three writers.
+
+Reading the existing artifacts reframed #93: `ADR-002` Amendment 2026-09-13 and `UC-init.md` L75 already promised what the code was not doing, so this was a regression against a written contract.
+
+Two adversarial councils, and they caught different classes. RFC-0004 read the design before any test existed and found that the walker dual-writes hook helpers to both scopes — two entries share one path, and sync looks up by path alone. Recording every file would have turned a dormant collision live. RFC-0005 read the shipped code and found two defects the tests could not see, including `totals.files` disagreeing with the record by exactly the refused count on any re-run — the very class this goal set out to close, reintroduced two commits later.
+
+Measured rather than assumed: record 198 KB (ADR first guessed ~100 KB, since corrected), 498 hashes cost 114-122 ms, npm shows 244 downloads in 30 days so the adopter count is unknown rather than zero — which is why the `failed` field survives one release instead of being cut.
+
+Two promotes filed from live hits: **cli#97** (session-start sync postcondition false-fails; the comparator merges user and project settings with a rule that discards the user's hooks for any event the project file also names — mirrored upstream as bassclef-upstream#1707) and **cli#99** (bassclef syncs ~500 files into `.claude/` and nothing gitignores them, so a `git add -A` swept 575 files into this very branch; cost a rebuild and force-push).
+
+**Awaiting operator:** merge PR #98, then tag + approve the publish gate for 1.1.1 (Touch ID).
 
 **Prior operator_recap (retained for history):** cli 1.0.4 walker dual-scope shipped 2026-09-16 (PR #89). Cli 1.0.3 recursive hook tree shipped (PR #88). Cli 1.0.2 pin-bump to upstream v0.42.0.
 
