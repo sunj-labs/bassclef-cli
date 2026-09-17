@@ -15,7 +15,7 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 ## Active iteration
 
 last_updated: 2026-09-17T01:15:00Z
-iteration_bet: cli 1.1.1 — init reporting contract (PR #98 open, awaiting merge + publish)
+iteration_bet: cli 1.1.1 SHIPPED — init reporting contract (published to npm 2026-09-17)
 iteration_started: 2026-09-14 (rolls up cli 1.0.2 + 1.0.3 + 1.0.4 + 1.1.0)
 session: docs/session-logs/2026-09-17-cli-1.1.1-init-reporting.md
 iteration_phase: **SHIPPED.** cli 1.1.0 published 2026-09-16 via workflow run 35150987785 with npm provenance. Cold-adopter-1 smoke on 1.1.0 confirmed clean: 40 skills, 63 rules, 4 agents, 32 luminaries under `<repo>/.claude/`; 378 substrate files total. `claude` boots clean. `/skills`, `/temperance`, `/luminary` all dispatched. cli#82, #87, #90 closed by PR #91 auto-link. **5 substrate defects filed from smoke:** cli#93 (init manifest incomplete), cli#94 (--json not on tail -1), cli#95 (--json shape stale), bassclef-upstream#1691 (bassclef-sync partial-heal), #1694 (state/markers machine_alias — Path A' portable state), #1701 (README full-tier counts), #1702 (Sam demo blocked by /interview-me not lite), #1704 (session-start banner tone + /howdoi lite — luminary consult). Plus cli#92 (bassclef list catalog verb).
@@ -30,7 +30,13 @@ Measured rather than assumed: record 198 KB (ADR first guessed ~100 KB, since co
 
 Two promotes filed from live hits: **cli#97** (session-start sync postcondition false-fails; the comparator merges user and project settings with a rule that discards the user's hooks for any event the project file also names — mirrored upstream as bassclef-upstream#1707) and **cli#99** (bassclef syncs ~500 files into `.claude/` and nothing gitignores them, so a `git add -A` swept 575 files into this very branch; cost a rebuild and force-push).
 
-**Awaiting operator:** merge PR #98, then tag + approve the publish gate for 1.1.1 (Touch ID).
+**Shipped.** PR #98 merged as `3799637`. Tag v1.1.1 pushed, release published, publish workflow run 35166069313 succeeded with provenance. `@thebassclef/lite@1.1.1` is live and tagged `latest`.
+
+Verified against the published package, not the local build: installed from the registry into a clean directory, `bassclef init --json` exits 0, stdout is one line of valid JSON, stderr is empty, the install record holds 379 entries matching the report exactly, all hashed, `generated_by` reads lite. 379 matches the count ticket #93 cited from the 1.1.0 smoke.
+
+Two false alarms worth remembering. The registry showed 1.1.0 for about three minutes after a clean publish — the publish log said "Your package is being processed", so reading the log beat guessing. Then `npm install` returned ETARGET while a direct registry read showed the version present; that was npm's local metadata cache, and `--prefer-online` fixed it.
+
+**New: cli#100** — the install harness has failed on every release since v0.1.3 (five runs: v0.1.3, v1.0.0, v1.0.1, main, v1.1.1). `harness.yml` L94 runs `npm run build`, which empties `dist/`, and never runs the prepublish bundle script, so the locally packed tarball carries no `dist/lite/` and init exits 4. `publish.yml` does it right; the harness skips the sibling checkout and the bundle step. Cli 1.0.0 shipped the #78 cold-adopter breakage while this check was already red.
 
 **Prior operator_recap (retained for history):** cli 1.0.4 walker dual-scope shipped 2026-09-16 (PR #89). Cli 1.0.3 recursive hook tree shipped (PR #88). Cli 1.0.2 pin-bump to upstream v0.42.0.
 
