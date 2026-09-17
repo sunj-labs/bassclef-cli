@@ -36,7 +36,9 @@ Verified against the published package, not the local build: installed from the 
 
 Two false alarms worth remembering. The registry showed 1.1.0 for about three minutes after a clean publish — the publish log said "Your package is being processed", so reading the log beat guessing. Then `npm install` returned ETARGET while a direct registry read showed the version present; that was npm's local metadata cache, and `--prefer-online` fixed it.
 
-**New: cli#100** — the install harness has failed on every release since v0.1.3 (five runs: v0.1.3, v1.0.0, v1.0.1, main, v1.1.1). `harness.yml` L94 runs `npm run build`, which empties `dist/`, and never runs the prepublish bundle script, so the locally packed tarball carries no `dist/lite/` and init exits 4. `publish.yml` does it right; the harness skips the sibling checkout and the bundle step. Cli 1.0.0 shipped the #78 cold-adopter breakage while this check was already red.
+**New: cli#100** — the harness does not test what adopters install. Two separate problems. Its local-pack test is red because `harness.yml` L94 runs `npm run build` (which empties `dist/`) and never runs the bundle script, so the packed tarball has no `dist/lite/` and init exits 4. Its published test passes by fetching `@thebassclef/core@0.0.2`, which npm reports as renamed — a package we stopped shipping three releases ago. Neither path has run against a released version of the current package.
+
+I first filed this as "the harness has failed on every release" and linked it to #78. The operator pushed back. Eleven of twelve tests pass, the product is fine, and the #78 link was never verified. Corrected the ticket and this entry. Cold-adopter testing in a parallel profile is doing the real work today.
 
 **Prior operator_recap (retained for history):** cli 1.0.4 walker dual-scope shipped 2026-09-16 (PR #89). Cli 1.0.3 recursive hook tree shipped (PR #88). Cli 1.0.2 pin-bump to upstream v0.42.0.
 
