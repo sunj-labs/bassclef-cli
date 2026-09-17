@@ -36,6 +36,17 @@ Verified against the published package, not the local build: installed from the 
 
 Two false alarms worth remembering. The registry showed 1.1.0 for about three minutes after a clean publish — the publish log said "Your package is being processed", so reading the log beat guessing. Then `npm install` returned ETARGET while a direct registry read showed the version present; that was npm's local metadata cache, and `--prefer-online` fixed it.
 
+**Cold-adopter smoke on 1.1.1 PASSED** (2026-09-17, fresh macOS profile). `smoke-reset.sh --cold` then `npm install -g @thebassclef/lite@latest` then `git init` then `bassclef init`: 378 substrate files, 379 total, **24 of 24 hooks armed**, 40 skills, 63 rules, 4 agents, 32 luminaries. `claude` booted clean with zero hook-not-found errors. That is the breakage cli#78 described, gone. Counts match the registry install I ran independently, so the tarball an adopter gets is the one that was verified.
+
+**Four findings filed from that smoke, none blocking.** All four are upstream substrate surfaced through a cli test:
+
+- **cli#101 (priority-high)** — `/onboard-repo` has no path for a repo where `bassclef init` already ran. Path A refuses (no remote, no commits, no peer checkout); Path B would wipe the install, since `SKILL.md` L188/L207/L241 use `cat >` on settings.json, substrate.config.md and CLAUDE.md. Grepping the skill for any existing-install branch returns nothing. The smoke session invented a fourth option rather than run either — correct, and the option the skill should already hold.
+- **cli#102** — the orientation gate fires a red BLOCKED on the first session of a repo with no goal, no commits and no remote. Its own output prints `Active iteration_bet: (none in whereami)`. The hook has four silence paths (`55-orientation-gate.sh` L47-75) and none is "no active goal", though it has already computed that value.
+- **cli#103** — `whereami.md` ships at the repo root; the rule names `docs/whereami.md` at L3, L8, L17. Also four of eight schema sections missing from the template.
+- **cli#104** — `.claude/bassclef-configs.jsonc` is absent from the bundle, so no adopter gets a settings file. Three rules read their toggles from it.
+
+#103 and #104 may be closed by the walker tagging expansion in cli#96; both tickets say so up front and a cross-reference comment sits on #96, so nobody builds the fix twice.
+
 **Deprecated 1.0.0 and 1.0.1 on npm** (2026-09-17). Both shipped a tarball whose hooks were missing, so a fresh install broke at session start. The message on each points at `npm install -g @thebassclef/lite@latest`. Deprecation needed the operator — `npm whoami` returns E401 for a token alone, and npm now refuses account changes on token auth ("npm tokens that bypass 2FA are being restricted for account changes and direct publishing"). `--otp` does not apply; this account uses Touch ID, so `npm login` in a browser is the path.
 
 **Closed cli#78, #79, #83.** All three described 1.0.x cold-adopter breakage that 1.1.1 clears. #78's named operator step was the deprecate, now done. #79 asked for a v0.40.0 pin; we are on v0.42.0. #83 recommended the 1.0.2 pin bump, five releases ago. On the session-start half of #79 and #83, the evidence is the operator's parallel-profile run, not mine — I verified the registry install and all three verbs but never started a live session.
