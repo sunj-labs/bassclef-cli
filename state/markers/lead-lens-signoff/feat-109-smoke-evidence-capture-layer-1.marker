@@ -1,0 +1,7 @@
+# Lead-lens sign-off marker — feat/109-smoke-evidence-capture-layer-1
+- date: 2026-09-18
+- branch: feat/109-smoke-evidence-capture-layer-1
+- lead: michael-feathers
+- Step 1 sign-off: no findings — 10 tests GREEN first-try after bash 3.2 fix + set -e capture fix; characterization holds
+- Step 2 sign-off: no findings — 14 tests GREEN first-try; complete mediation contract shipped in shared lib
+- next-checkpoint: at Step 3 fixture commit; will update this marker with fixture coverage sign-off

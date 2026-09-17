@@ -1,0 +1,9 @@
+# Pre-mortem light marker — feat/109-smoke-evidence-capture-layer-1
+- date: 2026-09-18
+- branch: feat/109-smoke-evidence-capture-layer-1
+- ledger: docs/risk-ledgers/2026-09-18-smoke-evidence-capture-pre-mortem.md
+- shape: Klein light — 3 lenses × 5-8 risks per lens
+- lenses: [peter-deutsch, werner-vogels, martin-fowler]
+- Step 2 folds baked: F4 (shared assertion contract), F6 (shared schema)
+- Step 1 folds baked: V2 (df check before write)
+- fold-in-later: 3 (F3 timeout, F5 metric, F7 CLI version — Layer 1 closeout)
