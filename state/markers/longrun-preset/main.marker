@@ -1,4 +1,5 @@
 # Preset marker — main
 - date: 2026-09-17
 - preset: exploratory
-- signal: no docs/next-session-plan-*.md present; no fresh state-a-problem marker; operator typed /longrun prep alone
+- signal: no plan doc on disk at prep time; operator asked for scope options before a new-session pickup
+- note: this prep WRITES the plan doc, so the next session should pick converged
