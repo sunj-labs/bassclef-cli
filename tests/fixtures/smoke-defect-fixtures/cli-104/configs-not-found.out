@@ -1,0 +1,9 @@
+=== output ===
+reading toggles from bassclef-configs.jsonc
+bash: bassclef-configs.jsonc: No such file or directory
+
+Toggle defaults apply. Adopter never gets a settings file to edit.
+
+Per cli#104 — bundle ships no configs.jsonc. Three rules read from it.
+
+=== exit: 0

@@ -1,0 +1,10 @@
+=== output ===
+BLOCKED: ABRUPT STOP DETECTED
+
+Uncommitted files present. Prior session may have ended without
+committing. Review + commit before proceeding.
+
+Per cli#108 — every uncommitted file is fresh init output. Check reads
+git status porcelain non-empty; successful install always satisfies.
+
+=== exit: 2

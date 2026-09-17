@@ -1,0 +1,7 @@
+=== output ===
+00-bassclef-hook-connect: skip — BASSCLEF_DIR not a bassclef checkout
+
+Per cli#105 — dispatcher derives BASSCLEF_DIR wrong; lands on HOME.
+13 fragments read that variable; two confirmed silently dead.
+
+=== exit: 0
