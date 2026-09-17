@@ -154,7 +154,92 @@ Naming what would be tempting to add but violates scope:
 - Parent goal: `docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md`
 - Pattern rule: `.claude/rules/pattern-annotation.md`
 
-## Next section (Step 0d — /objectory-decompose)
+## Jacobson BCE classification (Step 0d — /objectory-decompose)
 
-Jacobson BCE classification appended in a follow-on commit. This
-decomposition ships without BCE; BCE section lands in the same file.
+Per Jacobson's Object-Oriented Software Engineering (1992). Every entity gets one primary class — Boundary, Control, or Entity. Classes with two responsibilities split.
+
+### Boundary objects (interfaces to actors)
+
+Adapters to the world outside the use case. Each Boundary type wraps one external interface.
+
+| Boundary type | Wraps | Actor |
+|---|---|---|
+| **DispatcherInvoker** | `bash .claude/hooks/session-reflection.sh <event>` | Claude Code dispatcher |
+| **ClaudeInvoker** | `claude -p "<skill>"` with `timeout 30` | Claude CLI |
+| **FilesystemWriter** | `printf` / `tee` write to capture path under `docs/smoke-captures/<date>/` | Filesystem |
+| **GhInvoker** | `gh issue create --repo sunj-labs/bassclef-cli --label smoke-run --body-file <path>` | GitHub API |
+| **NpmInvoker** | `npm install -g @thebassclef/lite@<version>` | npm registry |
+| **StderrReader** | reads stderr streams into capture files | subprocess stderr |
+
+### Control objects (coordinate use case per step)
+
+One Control per multi-step coordination inside the use case. Each fires its Boundary objects in sequence and writes to Entity objects.
+
+| Control type | Fires | Writes to |
+|---|---|---|
+| **HookRunner** | DispatcherInvoker (per hook) + StderrReader + FilesystemWriter | CaptureFile (per hook) |
+| **SkillDriver** | ClaudeInvoker (per skill) + StderrReader + FilesystemWriter | CaptureFile (per skill) |
+| **AssertionSuite** | Four Strategy check functions per CaptureFile | AssertionResult (per check per surface) |
+| **ReportBuilder** | reads AssertionResult set + writes Report | Report (markdown file) |
+| **PublisherController** | GhInvoker (once) with Report body | Issue (external — GitHub state) |
+| **ResetController** | FilesystemWriter (many targets) + NpmInvoker (uninstall) | ResetLog (idempotency record) |
+
+### Entity objects (persistent or per-use-case data)
+
+Nouns that carry data across steps.
+
+| Entity type | Persistence | Owned by |
+|---|---|---|
+| **CaptureFile** | on disk under `docs/smoke-captures/<date>/hooks/*.out` and `.../skills/*.out` | HookRunner + SkillDriver create; AssertionSuite reads |
+| **AssertionResult** | on disk as `hooks-assertions.json` and `skills-assertions.json` | AssertionSuite creates; ReportBuilder reads |
+| **Fixture** | on disk under `.claude/hooks/tests/fixtures/2026-09-18-smoke-findings/cli-<N>/` | Committed to repo; AssertionSuite reads at fixture-test time |
+| **Report** | on disk as `docs/smoke-captures/<date>/report.md` | ReportBuilder creates; PublisherController reads |
+| **Allowlist** | on disk as `.claude/hooks/tests/fixtures/smoke-allowlist/<check>.txt` | Committed to repo; AssertionSuite reads |
+| **Issue** | external — GitHub | PublisherController creates via GhInvoker |
+| **ResetLog** | on disk as `docs/smoke-captures/<date>/reset.log` | ResetController writes; operator reads |
+
+### BCE call sequence (main flow)
+
+```
+Operator → HookRunner (Control)
+  HookRunner → DispatcherInvoker (Boundary) — fires dispatcher per hook
+  HookRunner → StderrReader (Boundary) — reads stderr streams
+  HookRunner → FilesystemWriter (Boundary) — writes CaptureFile (Entity)
+
+Operator → AssertionSuite (Control)
+  AssertionSuite → CaptureFile (Entity) — reads
+  AssertionSuite → [Strategy check × 4 per capture]
+  AssertionSuite → FilesystemWriter (Boundary) — writes AssertionResult (Entity)
+
+Operator → SkillDriver (Control)
+  SkillDriver → ClaudeInvoker (Boundary) — fires claude -p per skill
+  SkillDriver → StderrReader (Boundary) — reads stderr
+  SkillDriver → FilesystemWriter (Boundary) — writes CaptureFile (Entity)
+
+Operator → AssertionSuite (Control) — same shape, reads skill captures
+
+Operator → ReportBuilder (Control)
+  ReportBuilder → AssertionResult (Entity) — reads both
+  ReportBuilder → FilesystemWriter (Boundary) — writes Report (Entity)
+
+Operator → PublisherController (Control) [when --publish]
+  PublisherController → Report (Entity) — reads
+  PublisherController → GhInvoker (Boundary) — POST to GitHub
+  GhInvoker → Issue (Entity, external) — created
+```
+
+### Why the split matters
+
+Two classes carried temptation to blur. Named here so the implementer keeps them apart:
+
+- **HookRunner is Control, not Boundary.** It coordinates enumerate → invoke → capture. The invocation itself belongs to DispatcherInvoker (Boundary). Blur risk: putting the `bash <dispatcher>` call inline in HookRunner ties the coordinator to the external process shape. Keeping DispatcherInvoker separate lets Layer 2 or 3 swap invocation shapes without touching the coordinator.
+- **AssertionSuite is Control, not Entity.** Assertions produce AssertionResult objects (Entities), but the coordination — enumerate captures, apply four checks, collect results — is Control. Blur risk: putting the check logic on the AssertionResult object couples data to check semantics.
+
+## References
+
+- Jacobson, *Object-Oriented Software Engineering* (1992) — BCE classification
+- Larman, *Applying UML and Patterns* — GRASP roles
+- Spec: `docs/specs/smoke-evidence-capture.md`
+- Use case: `docs/use-cases/UC-smoke-run.md`
+- Parent goal: `docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md`
+- Pattern rule: `.claude/rules/pattern-annotation.md`
