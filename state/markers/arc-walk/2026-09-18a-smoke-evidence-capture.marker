@@ -1,0 +1,9 @@
+# Thread-walk marker — 2026-09-18a-smoke-evidence-capture
+- date: 2026-09-18
+- branch: main
+- parent_goal_ids: []
+- walk: root goal — no parent chain to walk
+- parent_drivers: none (Layer 1 of a three-layer sequence; Layers 2 + 3 planned as follow-on goals but not yet filed)
+- open_acceptance: none inherited (this goal is the first in its thread)
+- out_of_scope_inherited: none inherited; own out-of-scope declared in goal doc body
+- rationale: cli 1.1.1 shipped 2026-09-17 closed prior thread; this is a new thread anchored on cold-adopter smoke evidence gap surfaced during that ship (whereami L41-49; docs/next-session-plan-2026-09-17-cli-pickup.md)

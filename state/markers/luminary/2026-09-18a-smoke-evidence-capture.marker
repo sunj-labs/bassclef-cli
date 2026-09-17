@@ -1,0 +1,13 @@
+# Luminary marker — 2026-09-18a-smoke-evidence-capture
+- date: 2026-09-18
+- branch: main
+- lead: michael-feathers
+- supporting: [jerome-saltzer-and-michael-schroeder, kent-beck, alistair-cockburn, donald-norman, john-ousterhout, gary-klein]
+- lens caught:
+  - feathers (lead): characterization tests pin actual behavior; the eight fixtures ARE the characterization tests for cli#101-#108 shape
+  - saltzer-schroeder: complete mediation — every wired hook plus every driven skill gets its four checks; nothing goes unchecked
+  - beck: red-green-refactor discipline on the assertion scripts (Tier 0)
+  - cockburn: UC-smoke-run fully-dressed at Step 0b; ceremony scales up from adopter-script default
+  - norman: report is a signifier — pass/fail glyphs, exit code, one-place-to-look surface for the agent
+  - ousterhout: capture + assert + report as deep modules with narrow interfaces (capture files as the shared shape)
+  - klein: pre-mortem light fires at Step 2a before code lands at Step 1

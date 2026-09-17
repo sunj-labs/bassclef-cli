@@ -1,0 +1,7 @@
+# Temperance marker — 2026-09-18a-smoke-evidence-capture
+- date: 2026-09-18
+- branch: main
+- scope-decision:
+  - right thing: close the ephemeral-evidence gap the cold-adopter smoke lives with today; the smoke found 8 defects on 1.1.1 that no automated check here would catch
+  - right way: capture per hook + per skill to files; assert; report as GitHub issue on bassclef-cli with smoke-run label; agent picks up on demand; ship Layer 1 shape so Layers 2 + 3 extend by list, not rewrite
+  - drift trigger: any of — attempting to build the mock app this session (Layer 2 work), fixing cli#101-#108 in this goal (upstream cures per #1728), touching cli#100 harness (different scope), extending checks past the four named per surface
