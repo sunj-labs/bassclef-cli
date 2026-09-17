@@ -36,6 +36,7 @@ import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeSafely, mkdirSafely, WriteError } from './write-safely.js';
 import { classify, type ScopeDecision } from './scope-router.js';
+import { hashContent } from './hash.js';
 import { setExecutable } from './executable-bit-enforcer.js';
 import { HOOKS_SUBPATH, SETTINGS_SUBPATH } from './paths.js';
 
@@ -85,6 +86,13 @@ interface CopyOptions {
 export interface CopiedEntry {
   path: string;
   scope: 'user' | 'project';
+  /**
+   * SHA-256 of the bytes this run wrote, taken at the moment of the
+   * write per ADR-010 D3. It records what init wrote, not what is on
+   * disk now — that difference is what lets a later reader spot an
+   * adopter edit. No extra disk read: copyOne already holds the bytes.
+   */
+  content_hash_sha256?: string;
 }
 
 export interface CopyResult {
@@ -99,6 +107,8 @@ export interface CopyResult {
   refused: string[];
   errored: string[];
   wouldCopy?: string[];
+  /** Per-scope shape of wouldCopy, so a dry run can build the same report. */
+  wouldCopyEntries?: CopiedEntry[];
   erroredMessages?: string[];
   /**
    * Total hook entries counted across every event in the copied
@@ -129,7 +139,10 @@ export function copySubstrate(
     hookCount: 0,
     wiringVersion: manifest.version,
   };
-  if (options.dryRun) result.wouldCopy = [];
+  if (options.dryRun) {
+    result.wouldCopy = [];
+    result.wouldCopyEntries = [];
+  }
 
   const files = walkDistTree(bundleRoot);
   const groups = groupByTopDirectory(files);
@@ -408,6 +421,11 @@ function copyOne(
 
   if (options.dryRun) {
     result.wouldCopy?.push(adopterRelPath);
+    result.wouldCopyEntries?.push({
+      path: adopterRelPath,
+      scope,
+      content_hash_sha256: hashContent(outputContent),
+    });
     return 'wouldCopy';
   }
 
@@ -421,7 +439,11 @@ function copyOne(
     }
     // Record both shapes — string path (backward compat) + scoped entry (P3 fold).
     result.copied.push(adopterRelPath);
-    result.copiedEntries.push({ path: adopterRelPath, scope });
+    result.copiedEntries.push({
+      path: adopterRelPath,
+      scope,
+      content_hash_sha256: hashContent(outputContent),
+    });
     return 'copied';
   } catch (e) {
     if (e instanceof WriteError) {

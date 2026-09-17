@@ -62,3 +62,17 @@ state/markers/turn-prose-flags/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# Substrate synced from bassclef into this repo at session start. These
+# files belong to the operator's machine, not to the cli source tree.
+# Only .claude/settings.json and .claude/bassclef-configs.jsonc are ours.
+# Added 2026-09-17 after `git add -A` swept ~575 of them into a PR.
+.claude/skills/
+.claude/rules/
+.claude/agents/
+.claude/luminaries/
+.claude/hooks/
+.claude/embeddings/
+.claude/bassclef-orientation.md
+.claude/*.bak.*
+/lib/

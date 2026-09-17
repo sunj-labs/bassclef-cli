@@ -17,7 +17,28 @@ export const MANIFEST_SCHEMA_VERSION = '0.1.0' as const;
 // integer marks the shape gate for adopter tooling that reads the manifest.
 // v1 (implicit — no field): no per-entry scope field.
 // v2: per-entry scope field ('user' | 'project') on hook entries.
-export const MANIFEST_SHAPE_VERSION = 2 as const;
+export const MANIFEST_SHAPE_VERSION = 3 as const;
+
+/**
+ * Shape versions this cli can read. Writers emit the newest; readers
+ * accept every version in this list, so a manifest written by cli 1.1.0
+ * still loads under 1.1.1. Per ADR-010 D5.
+ */
+export const MANIFEST_READABLE_SHAPE_VERSIONS: readonly number[] = [2, 3];
+
+/**
+ * Who wrote an entry.
+ *
+ * `config-composer` — cli rendered the file from a template. Sync owns it.
+ * `bundle`          — the walker copied it from dist/<tier>/. Sync does
+ *                     not own it; `bassclef init --force` refreshes it.
+ *
+ * The stored value is the authority. It could be derived from whether
+ * `template` appears in the sync TEMPLATES table, but a derivation that
+ * depends on another module's lookup table breaks when that table
+ * changes. Per ADR-010 D2 and RFC-0004 B-1.
+ */
+export type EntrySource = 'config-composer' | 'bundle';
 
 export interface ManifestEntry {
   path: string;
@@ -28,6 +49,8 @@ export interface ManifestEntry {
   updated_at?: string;
   /** Scope the file landed at ('user' | 'project'). Cli 1.0.1+ per RFC-0002 F6+L2. */
   scope?: 'user' | 'project';
+  /** Who wrote it. Cli 1.1.1+ per ADR-010 D2. */
+  source?: EntrySource;
 }
 
 export interface Manifest {
@@ -36,7 +59,7 @@ export interface Manifest {
   $bassclef: {
     template: 'init.manifest.json';
     manifest_schema_version: string;
-    generated_by: '@thebassclef/core';
+    generated_by: string;
     generated_by_version: string;
   };
   created_at: string;

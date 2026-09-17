@@ -19,11 +19,11 @@
 // # test-list:
 // [ ] init banner uses Norman "Installed N of M" shape
 // [ ] init banner on partial-copy failure includes "N failed" clause
-// [ ] init manifest carries schema_version=2 at top level
+// [x] init manifest carries schema_version=3 at top level (ADR-010 D5)
 // [ ] init manifest carries per-entry scope field (user | project)
 // [ ] init on a 1.0.0-installed target prints upgrade advisory + waits for confirm
 // [ ] init with --yes flag on 1.0.0-installed target skips the advisory prompt
-// [ ] init --json flag emits structured stderr line
+// [x] init --json flag emits the report on stdout (ADR-010 D6)
 // [ ] init without --json omits the structured line
 // [ ] CopyResult.copied entries are {path, scope} objects (not raw strings)
 // [ ] symlink error message includes readlink target path
@@ -84,13 +84,16 @@ describe('init banner — Norman shape (N1 council fold)', () => {
   });
 });
 
-describe('init manifest — schema v2 (L2 + F6 fold)', () => {
-  it('writes manifest with schema_version=2 at top level', () => {
+describe('init manifest — schema v3 (L2 + F6 fold; bumped by ADR-010 D5)', () => {
+  it('writes manifest with schema_version=3 at top level', () => {
+    // Was 2 through cli 1.1.0. ADR-010 D5 bumps it because the manifest
+    // now names every file the run wrote, not just the composed configs.
+    // Readers accept 2 and 3; writers emit 3.
     runCli(['--dir', workDir, '--allow-any-dir']);
     const manifest = JSON.parse(
       readFileSync(join(workDir, '.bassclef/init.manifest.json'), 'utf8')
     );
-    expect(manifest.schema_version).toBe(2);
+    expect(manifest.schema_version).toBe(3);
   });
 
   it('writes per-entry scope field on hook entries', () => {
@@ -133,17 +136,23 @@ describe('init upgrade path from 1.0.0 (L1 council fold)', () => {
   });
 });
 
-describe('init --json flag (H1 council fold)', () => {
-  it('emits structured stderr line when --json passed', () => {
+describe('init --json flag (H1 council fold; stream moved by ADR-010 D6)', () => {
+  it('emits the report on stdout, not stderr', () => {
+    // Through cli 1.1.0 the object went to stderr while human prose went
+    // to stdout after it, so `tail -1` returned prose (#94). ADR-010 D6
+    // reverses that: stdout carries the object, and under --json the
+    // routine human lines are not printed at all.
     const r = runCli(['--dir', workDir, '--allow-any-dir', '--json']);
-    const jsonLine = r.stderr.split('\n').find((l) => l.trim().startsWith('{'));
-    expect(jsonLine).toBeDefined();
-    const parsed = JSON.parse(jsonLine!);
-    expect(parsed).toHaveProperty('copied');
-    expect(parsed).toHaveProperty('declared');
-    expect(parsed).toHaveProperty('scope_counts');
-    expect(parsed.scope_counts).toHaveProperty('user');
-    expect(parsed.scope_counts).toHaveProperty('project');
+    const onStderr = r.stderr.split('\n').find((l) => l.trim().startsWith('{'));
+    expect(onStderr).toBeUndefined();
+
+    const parsed = JSON.parse(r.stdout);
+    expect(parsed).toHaveProperty('schema_version', 3);
+    expect(parsed).toHaveProperty('catalog');
+    expect(parsed).toHaveProperty('hooks');
+    expect(parsed.hooks).toHaveProperty('declared');
+    expect(parsed.totals).toHaveProperty('user');
+    expect(parsed.totals).toHaveProperty('project');
   });
 
   it('omits structured line when --json omitted', () => {

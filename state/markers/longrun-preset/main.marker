@@ -1,1 +1,4 @@
-converged
+# Preset marker — main
+- date: 2026-09-17
+- preset: exploratory
+- signal: no docs/next-session-plan-*.md present; no fresh state-a-problem marker; operator typed /longrun prep alone

@@ -1,0 +1,12 @@
+{
+  "matched_luminaries": [
+    "linus-torvalds",
+    "conventional-commits"
+  ],
+  "matched_problem_patterns": [],
+  "matched_canvas_references": [],
+  "matcher_version": "voyage-3-lite+haiku-4-5-1.0",
+  "match_confidence": 0.85,
+  "_rationale": "The intent requires fixing output contract breakage while preserving backward compatibility (non-JSON path unchanged), making authoritative machine-readable manifest the source of truth—directly aligned with Torvalds's 'do not break userspace' principle and Conventional Commits' belief that machine-readable outputs enable reliable tooling.",
+  "_mode": "LIVE"
+}

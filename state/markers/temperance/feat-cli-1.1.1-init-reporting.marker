@@ -1,0 +1,5 @@
+# Temperance marker — feat/cli-1.1.1-init-reporting
+- date: 2026-09-17
+- branch: feat/cli-1.1.1-init-reporting
+- scope-decision: right thing — three verified output defects in one file, all adopter-visible today. Right way — one shared classifier feeds banner, JSON, and manifest, so the three cures collapse into one seam instead of three patches.
+- drift-trigger: pause if I start building `bassclef list` (cli#92), if I touch the sync postcondition fix (belongs upstream, cli#97), or if any step exceeds 1.5x its turn estimate.
