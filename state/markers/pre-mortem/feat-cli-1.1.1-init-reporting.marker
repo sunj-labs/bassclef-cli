@@ -1,0 +1,7 @@
+# Pre-mortem marker — feat/cli-1.1.1-init-reporting
+- date: 2026-09-17
+- mode: light (3 lenses)
+- lenses: linus-torvalds, tony-hoare, john-ousterhout
+- risks: 16
+- ledger: docs/risk-ledgers/2026-09-17-cli-1.1.1-init-reporting.md
+- folds: L1 L2 L4 L5 H1 H2 H3 H4 O1 O2 O4 into Step 3; L3 into Step 7; H5 into ADR-010; O3 O5 into Steps 3-5; L6 measured Step 3

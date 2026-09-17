@@ -1,0 +1,7 @@
+# Luminary marker — feat/cli-1.1.1-init-reporting
+- date: 2026-09-17
+- lead: linus-torvalds
+- supporting: conventional-commits, tony-hoare, john-ousterhout, kent-beck, michael-feathers, alistair-cockburn, donald-norman
+- source: live intent match, voyage-3-lite+haiku-4-5-1.0, confidence 0.85
+- artifact: docs/input-artifacts/2026-09-17-cli-1.1.1-init-reporting.json
+- lead rationale: every change here alters what an adopter's script reads. Linus is the lens that asks whether the old script still works, and names the cost when it cannot.

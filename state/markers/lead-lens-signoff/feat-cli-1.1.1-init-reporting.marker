@@ -1,0 +1,6 @@
+# Lead lens sign-off — feat/cli-1.1.1-init-reporting
+- date: 2026-09-17
+- lead: linus-torvalds
+- findings cleared: RFC-0004 S-1, N-1, H-1, S-2, H-2, B-1, B-2 (dispositioned in ADR-010); RFC-0004 M-1 M-2 M-3 M-4 N-2 N-3 (tests + measurements); RFC-0005 A-1, A-2, A-3 (fixed with tests); RFC-0005 A-4 (noted, pre-release)
+- lead verdict: the non-JSON path prints what it printed before, pinned by 6 characterization tests written before any change. The --json stream move and the `failed` retention are the two adopter-visible changes; both are recorded in ADR-010 and go in the changelog. 244 downloads in 30 days is not zero, which is why `failed` survives a release rather than being cut today.
+- open: none blocking release

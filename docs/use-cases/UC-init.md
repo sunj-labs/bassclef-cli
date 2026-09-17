@@ -75,6 +75,7 @@ Per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` §Cockburn
 Cli-side reinforcements:
 
 - Each file has a SHA-256 content hash recorded in `.bassclef/init.manifest.json`
+- The manifest names every file the run touched. Its entry count equals the number of config files cli composed plus the number of files the walker handled, counting refused and errored files too (per ADR-010 D1 + D4)
 - Every write went through `writeSafely()` — the single audited mutation point (ADR-002 complete mediation preserved)
 - Terminal output ends with the hook-count banner: `N hooks armed (<tier> tier)` per ADR-055 D5
 - Exit code 0
@@ -120,6 +121,13 @@ Per bassclef-upstream `docs/coordination/2026-09-12e-cli-boundary.md` §Cockburn
 - cli exits non-zero with structured error naming the path expected + schema_version required. Silent skip is NOT acceptable (Hyrum W3 finding folded per RFC-0002)
 - Exit code 4 (manifest missing) or 5 (schema incompatible)
 - Message shape: "Wiring manifest missing at `<path>`. Cli built for schema_version `<major>.x`. Run `npm install @thebassclef/<tier>@<latest>` to fix."
+
+**7. Adopter passes `--json`** (added cli 1.1.1 per ADR-010 D6 + D7)
+
+- Every human line the run would print goes to stderr instead
+- stdout carries one JSON object and nothing else, so `bassclef init --json | python3 -m json.tool` parses with no pipeline workaround
+- The object names each of the eleven catalog families with a count, reports hooks separately, and splits refusals from errors
+- Exit codes are unchanged by the flag
 
 **4b. Existing `.claude/settings.json` in adopter repo**
 
@@ -204,3 +212,7 @@ Once per project. Occasionally re-run with `--force` after major version bumps i
 **Prior text preserved in git history.** Every prior version of this UC lives in `git log docs/use-cases/UC-init.md`. Nygard ADR lifecycle discipline: contracts get amended in place; history preserves via version control.
 
 **When this rewrite becomes the shipped state.** Phase 3 (cli init walker code) lands the code that satisfies the new postconditions. Until Phase 3 ships, cli init runs on the current 3-file shape. This UC-init describes the target state Phase 3 implements.
+
+**Amendment 2026-09-17 (cli 1.1.1).** Two changes. The manifest postcondition gained a countable form, because the prior wording ("each file has a hash recorded") was true of a manifest holding one entry and so could not fail a test. Extension 7 records what `--json` does; the flag shipped at cli 1.0.x and this use case never described it.
+
+**What the amendment fixes.** Phase 3 shipped the walker but wrote a manifest holding one entry, which contradicted this use case's own postcondition and `ADR-002` §Amendment 2026-09-13. Cli 1.1.1 makes the code match the contract that was already written. See `docs/adrs/ADR-010-init-reporting-contract.md`.
