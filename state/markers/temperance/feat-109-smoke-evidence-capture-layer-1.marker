@@ -1,0 +1,8 @@
+# Temperance marker — feat/109-smoke-evidence-capture-layer-1
+- date: 2026-09-18
+- branch: feat/109-smoke-evidence-capture-layer-1
+- goal: 2026-09-18a-smoke-evidence-capture
+- scope-decision:
+  - right thing: ship Step 1 of Layer 1 smoke — capture wired SessionStart hooks per hook to file; matches spec-smoke-evidence-capture § Interfaces § scripts/smoke-capture.sh
+  - right way: bash script + Vitest TypeScript test matching repo pattern (tests/*.test.ts); V2 pre-mortem fold (df check) baked in; --settings + --out flags support the test harness
+  - drift trigger: implementing Step 2 assertions here (belongs in the next commit), or firing --publish (Step 6), or adding retry/idempotency logic (Step 6 folds)
