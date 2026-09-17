@@ -38,6 +38,19 @@ Two false alarms worth remembering. The registry showed 1.1.0 for about three mi
 
 **Cold-adopter smoke on 1.1.1 PASSED** (2026-09-17, fresh macOS profile). `smoke-reset.sh --cold` then `npm install -g @thebassclef/lite@latest` then `git init` then `bassclef init`: 378 substrate files, 379 total, **24 of 24 hooks armed**, 40 skills, 63 rules, 4 agents, 32 luminaries. `claude` booted clean with zero hook-not-found errors. That is the breakage cli#78 described, gone. Counts match the registry install I ran independently, so the tarball an adopter gets is the one that was verified.
 
+**Routed upstream as bassclef-upstream#1728.** One coordination ticket indexing tonight's eight smoke findings, cross-referenced on all eight cli tickets and on upstream#1706.
+
+Why one ticket rather than eight mirrors: 23 tickets sit open at bassclef-cli and only two were mirrored upstream, the oldest unrouted ones 18 days old. That is cli#72 doing what it did before. And upstream#1706 already exists — the v1.7.0 cold-adopter smoke planned before the next release, whose step 3 expects zero session-start hook errors. Six of the eight would fail that step, so this batch is pre-work for a gate upstream already wrote down, not a parallel queue.
+
+Recommended shape in the ticket: separate PRs per `.claude/rules/pr-strategy.md` (four surfaces, four revert paths), one release, one cli pin bump, one re-smoke. Start with cli#105 since it may reshape the others.
+
+**Stale check on the older backlog, done before mirroring rather than after.** Two were already fixed:
+
+- **cli#37 closed** — the shipped `dist/lite/gitignore` carries no bare `lib` line; the pattern that ignored `src/lib/` at any depth is gone.
+- **cli#70 closed** — `grep -c 'PARENT.CITATION'` on the shipped `bet-doc-gate.sh` returns 0. The hook now runs a thread-walk gate and a produces/consumes check, neither of which is the gate that ticket described.
+
+Verified still live and listed in #1728: cli#44 (contact addresses now ship at three sites, not two — `lib/telemetry.sh:120` is new), cli#71, cli#67, cli#49, cli#80. cli#42 names a workflow step that no longer exists (`Assert substrate/ present` became `Assert dist/lite/ present`); it wants a rewrite, not a mirror.
+
 **Full hook audit on the cold-adopter session found four more (cli#105-108).** The operator asked that session for every hook error, not just the one they remembered. It returned 17 findings across SessionStart, UserPromptSubmit and the fragments.
 
 - **cli#105 (priority-high)** — `BASSCLEF_DIR` resolves to `$HOME` under the operator install. `session-reflection.sh:43` derives it by walking two levels up from the dispatcher, which sits at `$HOME/.claude/hooks/` — so it lands on `$HOME`. **13 fragments** read that variable. Two confirmed silently dead: `00-bassclef-hook-connect.sh` skips its whole job with one stderr shrug, and `08-settings-drift.sh` skips with no output at all, leaving only a trace line. Reproduced twice independently — once on the cold profile, once here on a clean registry install. The sharp part: `bassclef-sync.template.sh` sets the same variable correctly at L334 and L446 by *finding* the checkout. One file in the bundle already knows the answer; the dispatcher guesses and gets it wrong.
