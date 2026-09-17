@@ -1,0 +1,12 @@
+# Pre-mortem light marker — 2026-09-18a-smoke-evidence-capture
+- date: 2026-09-18
+- branch: main
+- shape: Klein light — 3 lenses × 5-8 risks per lens
+- anchor: gary-klein
+- lenses: [peter-deutsch, werner-vogels, martin-fowler]
+- ledger: docs/risk-ledgers/2026-09-18-smoke-evidence-capture-pre-mortem.md
+- surfaced: 18 risks (6 MED, 12 LOW)
+- fold-in-now: 14 (across Steps 1-7)
+- fold-in-later: 1 (Step 8 test plan)
+- closeout-notes: 3 (F3 sequence diagram drift, F5 fixture-dir rename, D4 provenance check)
+- verdict: proceed to Step 1 code; each step's code cites the folds landing in it
