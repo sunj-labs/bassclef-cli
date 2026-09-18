@@ -78,6 +78,7 @@ Two operator personas per RFC F2 (fold-in 2026-09-18):
 | ReportBuilder | Control — reads assertions, writes markdown summary | one file plus a union exit code |
 | IssuePublisher | Boundary — posts to GitHub | issue on `sunj-labs/bassclef-cli` with `smoke-run` label |
 | ResetHarness | Boundary — resets the whole environment | idempotent state cleanup |
+| ScriptFetcher | Boundary — curls the ten smoke files from raw.githubusercontent.com; prints next-command block after fetch | files land under `$TARGET/scripts/` + `$TARGET/scripts/lib/` with the source-of-truth layout |
 
 ## Preconditions
 
@@ -166,6 +167,15 @@ Each script must honor these preconditions and postconditions. Step 1 onward imp
 
 Both scripts accept `--only <check-name>` where `<check-name>` is one of `no-not-found`, `no-silent-skip`, `no-unexpected-blocked`, `paths-exist`. Runs that single check across all captures. Serves Operator-Diagnose after a RED smoke.
 
+### `scripts/smoke-bootstrap.sh` (post-merge addition — 2026-09-18)
+
+- **Precondition:** `curl` on PATH
+- **Reads:** hardcoded list of 10 smoke files from `raw.githubusercontent.com/sunj-labs/bassclef-cli/<ref>/scripts/...`
+- **Writes:** each file into `$TARGET_DIR/scripts/...` or `$TARGET_DIR/scripts/lib/...` preserving layout so scripts source each other
+- **Flags:** `--target DIR` (default `~/tmp/bassclef-smoke`), `--ref REF` (default `main`), `--dry-run`
+- **Feedback:** on both dry-run and real fetch, prints a "next commands" block to stderr — reset (with destructive warning), version-fetch, and the runbook one-liner
+- **Exit:** 0 all fetched; 1 usage error; 2 one or more curl failures
+
 ### `scripts/smoke-reset.sh --whole` (extension of existing script)
 
 - **Precondition:** operator confirmation via existing `--cold` gate
@@ -183,6 +193,14 @@ Named in the parent goal doc; not repeated here. Highlights:
 - Skills that read a target app (Layer 3)
 - CI wiring for the smoke
 - Fixing cli#101 through #108 (fixture pins only)
+
+## Terminal feedback (post-merge addition — 2026-09-18)
+
+Every smoke script prints a bookend banner to stderr — `>>> <name> starting` at the top, `<<< <name> done (exit N)` at the end. The end banner fires from `trap ... EXIT` so it prints on any exit path including errors.
+
+When the runbook one-liner chains six scripts, the operator sees clear boundaries between steps. No more interleaved output where you cannot tell which step is running.
+
+Norman signifier: the boundary IS the feedback. Cooper flow: operator sees each step start plus end, so a slow step never looks hung.
 
 ## Success metrics
 

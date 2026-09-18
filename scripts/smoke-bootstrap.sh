@@ -37,6 +37,10 @@
 
 set -euo pipefail
 
+SCRIPT_NAME="$(basename "$0" .sh)"
+echo ">>> ${SCRIPT_NAME} starting" >&2
+trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
+
 TARGET_DIR="${HOME}/tmp/bassclef-smoke"
 REF="main"
 DRY_RUN=0

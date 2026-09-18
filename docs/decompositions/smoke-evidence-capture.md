@@ -91,6 +91,7 @@ Concerns that touch more than one entity. Each concern gets one owner to prevent
 | GitHub API auth | IssuePublisher only | Scripts other than `smoke-report` never touch `gh`; auth failure isolated |
 | Allowlist per check | AssertionSuite | Per-check allowlist file under `.claude/hooks/tests/fixtures/smoke-allowlist/<check>.txt`; empty when no exceptions |
 | Timeout on skill drive | SkillDriver | 30 second `timeout` per `claude -p` call; kill returns TIMEOUT capture |
+| Terminal feedback boundaries (post-merge 2026-09-18) | Every smoke script | `>>> <name> starting` at top + `<<< <name> done (exit N)` at exit via `trap ... EXIT`; makes chain boundaries visible when the one-liner runs |
 
 ## Sequence — main flow (per UC-smoke-run steps 7-16)
 
@@ -170,6 +171,7 @@ Adapters to the world outside the use case. Each Boundary type wraps one externa
 | **GhInvoker** | `gh issue create --repo sunj-labs/bassclef-cli --label smoke-run --body-file <path>` | GitHub API |
 | **NpmInvoker** | `npm install -g @thebassclef/lite@<version>` | npm registry |
 | **StderrReader** | reads stderr streams into capture files | subprocess stderr |
+| **CurlFetcher** (post-merge 2026-09-18) | `curl -sfL <url> -o <dest>` for the 10 smoke files | raw.githubusercontent.com |
 
 ### Control objects (coordinate use case per step)
 
@@ -183,6 +185,7 @@ One Control per multi-step coordination inside the use case. Each fires its Boun
 | **ReportBuilder** | reads AssertionResult set + writes Report | Report (markdown file) |
 | **PublisherController** | GhInvoker for issue list (search open smoke-run-v1 with matching version + date) + GhInvoker for create-or-update + report body versioning marker | Issue (external — GitHub state); labeled `smoke-run-v1` |
 | **ResetController** | FilesystemWriter (many targets) + NpmInvoker (uninstall) + FilesystemWriter for snapshot dirs + FilesystemWriter for restore | ResetLog (idempotency record); Snapshot (per-timestamp backup dir under `~/tmp/bassclef-smoke-reset-backups/`) |
+| **BootstrapController** (post-merge 2026-09-18) | CurlFetcher (10 files) + FilesystemWriter (target-dir layout) + stderr next-command block | fetched scripts under `$TARGET/scripts/` with `scripts/lib/` layout preserved |
 
 ### Entity objects (persistent or per-use-case data)
 
@@ -235,6 +238,14 @@ Two classes carried temptation to blur. Named here so the implementer keeps them
 
 - **HookRunner is Control, not Boundary.** It coordinates enumerate → invoke → capture. The invocation itself belongs to DispatcherInvoker (Boundary). Blur risk: putting the `bash <dispatcher>` call inline in HookRunner ties the coordinator to the external process shape. Keeping DispatcherInvoker separate lets Layer 2 or 3 swap invocation shapes without touching the coordinator.
 - **AssertionSuite is Control, not Entity.** Assertions produce AssertionResult objects (Entities), but the coordination — enumerate captures, apply four checks, collect results — is Control. Blur risk: putting the check logic on the AssertionResult object couples data to check semantics.
+
+## Post-merge additions (2026-09-18, after PR #110)
+
+Three additions surfaced between PR #110 merge and the cold-profile smoke run:
+
+- **BootstrapController (Boundary + Control) + CurlFetcher (Boundary).** New `scripts/smoke-bootstrap.sh` fetches all 10 smoke files from `raw.githubusercontent.com` via curl. Cold-adopter no longer needs `git clone`. Bootstrap prints a next-command block on stderr after fetch — Norman signifier, Cooper flow. Ships in PR #112. See spec § Interfaces § `scripts/smoke-bootstrap.sh`.
+- **Terminal feedback (cross-cutting concern).** Every smoke script prints `>>> <name> starting` at top, `<<< <name> done (exit N)` at exit via `trap ... EXIT`. Makes chain boundaries visible in the operator's terminal. Ships in PR #112.
+- **Gitignore un-ignore for `scripts/lib/`.** `.gitignore` bare `lib` pattern was matching `scripts/lib/` too. `smoke-schema.sh` got silently ignored on the PR #110 squash. Fix landed as PR #111 — added `!scripts/lib` + `!scripts/lib/**` un-ignore lines mirroring the src/lib pattern.
 
 ## RFC F1 + F2 + F4 + F6 folds (2026-09-18)
 

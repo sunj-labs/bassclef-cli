@@ -1,0 +1,10 @@
+# Pre-mortem light marker — fix/bootstrap-next-steps
+- date: 2026-09-18
+- branch: fix/bootstrap-next-steps
+- shape: Klein light applied in-context (3 lenses; runbook polish scope)
+- lenses: [donald-norman, alan-cooper, michael-nygard]
+- ledger: inline (this scope is polish on shipped Layer 1)
+- risks folded:
+  - Norman: without banners, chained one-liner interleaves stderr; operator loses step boundary → fold: >>> / <<< bookends via trap EXIT
+  - Cooper: curl-pipe cannot prompt interactively; auto-run of destructive reset would surprise → fold: print next commands to stderr, operator pastes with intent
+  - Nygard: bootstrap failure without visible output leaves operator confused → fold: banner-on-any-exit-path via trap; failed count reported

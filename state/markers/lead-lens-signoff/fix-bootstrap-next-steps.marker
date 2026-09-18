@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — fix/bootstrap-next-steps
+- date: 2026-09-18
+- branch: fix/bootstrap-next-steps
+- lead: donald-norman
+- sign-off: no findings — bootstrap verified with --dry-run; banners verified via smoke-capture --help (>>> starts and <<< ends print correctly); 59 tests GREEN after banner insertion (zero regressions)
+- next-checkpoint: PR #112 merge; then cold-profile smoke against merged main
