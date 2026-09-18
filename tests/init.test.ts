@@ -64,11 +64,13 @@ let fakeHome: string;
 function runCli(args: readonly string[], opts?: { cwd?: string }) {
   return spawnSync(process.execPath, [CLI, 'init', ...args], {
     encoding: 'utf8',
-    // Bumped 8s -> 60s 2026-09-18 — v0.45.0 substrate has ~445 files.
-    // Init dry-run on slower CI hardware exceeded 8s and got SIGKILLed
-    // mid-stdout, truncating "would create" lines to ~240. Same class
-    // as bassclef-cli#116 (smoke timeout). See PR #128.
-    timeout: 60000,
+    // Bumped 8s -> 60s -> 180s 2026-09-18. v0.45.0 substrate has ~445
+    // files locally, ~507 on CI (fresh sibling regen). Init dry-run on
+    // slower CI hardware previously SIGKILLed at 60s mid-stdout,
+    // truncating "would create" lines to 172 out of 507 expected. The
+    // parity test at line ~274 caught it; publish workflow blocked.
+    // Same class as bassclef-cli#116 (smoke timeout), PR #128 (8s→60s).
+    timeout: 180000,
     cwd: opts?.cwd,
     // Cli 1.0.1 writes to $HOME/.claude/hooks/ for user-scope hooks.
     // Every test isolates to a temp HOME so runs don't pollute the
@@ -266,11 +268,43 @@ describe('bassclef init — dry-run parity with real run (#60 + ADR-055)', () =>
     const expectedCount = walkerCount + undeclaredHookCount + 1; // + substrate.config.md
 
     const r = runCli(['--dry-run'], { cwd: workDir });
+
+    // DIAG (2026-09-18 — remove after root cause fixed). Publish CI kept
+    // failing this assertion with 172 vs 507 while local ran 14/14 green.
+    // Prime suspect: SIGKILL truncation at prior 60s timeout. Sister
+    // suspect: substrate.config.md "already exists" on a fresh mkdtemp
+    // workDir. This trace answers both in one CI round-trip.
+    // eslint-disable-next-line no-console
+    console.error(
+      `DIAG init-parity: status=${r.status} signal=${r.signal} ` +
+        `stdout.len=${r.stdout.length} stderr.len=${r.stderr.length} ` +
+        `walkerCount=${walkerCount} undeclared=${undeclaredHookCount} ` +
+        `expected=${expectedCount} ` +
+        `workDir=${workDir} ` +
+        `substrateExistsPre=${fsMod.existsSync(join(workDir, 'substrate.config.md'))} ` +
+        `workDirEntriesPre=${fsMod.readdirSync(workDir).length}`
+    );
+
     expect(r.status).toBe(0);
 
     const wouldCreateLines = (r.stdout + r.stderr)
       .split('\n')
       .filter((line) => /would create/i.test(line));
+
+    // DIAG — if the assertion fails, print the actual count + a sample
+    // of the tail so we see whether output was truncated mid-line.
+    if (wouldCreateLines.length !== expectedCount) {
+      const allLines = (r.stdout + r.stderr).split('\n');
+      // eslint-disable-next-line no-console
+      console.error(
+        `DIAG init-parity MISMATCH: got=${wouldCreateLines.length} ` +
+          `expected=${expectedCount} ` +
+          `totalLines=${allLines.length} ` +
+          `firstLine=${JSON.stringify(allLines[0]?.slice(0, 120))} ` +
+          `lastLine=${JSON.stringify(allLines[allLines.length - 2]?.slice(0, 120))}`
+      );
+    }
+
     expect(wouldCreateLines.length).toBe(expectedCount);
   });
 
