@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18 (v3 — bootstrap prints next commands)
+last_updated: 2026-09-18 (v4 — pinned to 1.2.0 substrate + .version manifest field cure)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -106,7 +106,19 @@ git init -q
 bassclef init
 ```
 
-Expect the banner to say **24 hooks armed** and around 379 files.
+**Expected banner shape (as of 1.2.0):**
+
+- `bassclef init: N substrate files would be copied` — around **445 files** on 1.2.0 (up from ~379 pre-1.2.0 after the v0.45.0 substrate pull)
+- `bassclef init: 28 hooks armed (lite tier)` — up from 24 pre-1.2.0
+- `.bassclef/init.manifest.json` written to the target with a top-level `.version` field equal to the installed CLI version. Quick check:
+
+  ```bash
+  jq -r .version .bassclef/init.manifest.json  # → 1.2.0
+  ```
+
+  If this returns `null` or empty, the install predates 1.2.0 and the drift hook will silent-pass. See fixture pin cli#129.
+
+Exact numbers drift with each substrate bump; treat them as landmarks, not asserts.
 
 ## Step 4 — Capture SessionStart hooks
 
@@ -212,8 +224,11 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - PR: sunj-labs/bassclef-cli#110
 - Coordination ticket for the 2026-09-17 smoke findings: bassclef-upstream#1728
 - Fixture pins: cli#101 through cli#108
+- New in 1.2.0: cli#129 (.version manifest field), cli#131 (migrate.ts fix), cli#134 (stdout blocking fix)
 
 ## Change log
+
+**2026-09-18 v4 — pinned to 1.2.0 substrate.** Step 3 banner expectations updated: ~445 files (was ~379) and 28 hooks armed (was 24) after the v0.45.0 substrate pull. Added a jq check for the new top-level `.version` field in `.bassclef/init.manifest.json` — required for the v0.45.0 drift hook to compare installed vs npm-latest (cli#129, bassclef-upstream#1749). References gain 1.2.0 fixture pins (cli#129, #131, #134).
 
 **2026-09-18 v3 — bootstrap prints next commands.** After fetching the ten files, `smoke-bootstrap.sh` now prints the reset + version-fetch + one-liner commands to stderr. Operator pastes with intent. Reset stays operator-triggered (destructive; `curl | bash` has no interactive stdin, so an auto-prompt would either be skipped or surprising). Norman + Cooper + Nygard lens driven.
 
