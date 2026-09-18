@@ -135,6 +135,12 @@ export async function runPathA(
   // preserved config entries with adopter-edited hashes recorded.
   const newManifest: Manifest = {
     schema_version: MANIFEST_SHAPE_VERSION,
+    // Top-level `.version` — read by the v0.45.0 npm-version-drift hook
+    // (fragment 91 under session-reflection) via lib/npm-version-check.sh
+    // `jq -r '.version // ""' "$manifest"`. Duplicates
+    // $bassclef.generated_by_version on purpose — the hook does not walk
+    // into $bassclef. Per bassclef-upstream#1749; bassclef-cli#129.
+    version,
     $bassclef: {
       template: 'init.manifest.json',
       manifest_schema_version: '0.1.0',

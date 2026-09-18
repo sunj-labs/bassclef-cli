@@ -1,0 +1,12 @@
+# Temperance marker — fix migrate.ts missing .version field
+
+- date: 2026-09-18
+- branch: fix/migrate-manifest-version-field
+- scope-decision:
+  - RIGHT THING: yes — publish CI caught real TS2741 in src/lib/migrate.ts:136; #129 marked .version required on Manifest but missed the second construction site.
+  - SIMPLEST: yes — add one field to the object literal, mirror the pattern from src/commands/init-templates/manifest-json.ts.
+  - BRUTE FORCE: no — read migrate.ts, saw the exact site, applied the same fix.
+  - BLAST RADIUS: low — bassclef migrate is the 0.0.2→0.1.0 upgrade path; the field is written not read by anything in-repo yet; drift hook is external.
+  - VERIFICATION: local typecheck clean; 428/428 tests pass; publish workflow re-dispatched on main.
+  - REVERSIBLE: yes — pure additive object-literal field.
+- drift-trigger: any other typecheck error or test regression — pause.
