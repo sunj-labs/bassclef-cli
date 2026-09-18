@@ -1,0 +1,10 @@
+# Temperance marker — fix/120-init-banner
+- date: 2026-09-18
+- branch: fix/120-init-banner
+- right-thing: yes — bassclef-cli#120 is filed; welcome email needs clean banner; fresh-adopter reproducer confirmed
+- simplest: two targeted edits in src/commands/init.ts (L357 conflation + L452 noise-gate); no schema shape change
+- brute-force: no — sources read (init.ts, copy-substrate.ts, init-report.ts) before edit; hypothesis pinned by diagnose marker
+- reach: hook line phrasing + refused line presence; ADR-010 shape preserved; existing char test needs update
+- verification: run vitest on init-reporting-characterization + manual bassclef init in fresh mktemp fakeHome; both should pass with new shape
+- reversible: yes — two edits, easy revert
+- scope-decision: right-thing = ship #120 small cleanup; right-way = TDD via existing char test suite; drift-trigger = if scope grows past 3 edits or ADR-010 shape needs a bump, stop + escalate

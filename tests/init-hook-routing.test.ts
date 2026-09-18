@@ -72,15 +72,20 @@ describe('init banner — Norman shape (N1 council fold)', () => {
     expect(r.stdout).toMatch(/Installed \d+ of \d+ hooks \(lite tier\)/);
   });
 
-  it('emits partial-copy banner "N of M hooks. K failed" on error path', () => {
-    // Seed a symlink at user-scope target to force refusal.
+  it('surfaces a refused-count line and mentions --force on the refuse path', () => {
+    // Seed a symlink at user-scope target to force refusal (SymlinkRefused
+    // in copy-substrate.ts). This test was updated for bassclef-cli#120 —
+    // refusal is no longer conflated with "failed" on the hook line.
+    // A refused file is an adopter file preserved (or safety block on
+    // symlink); it surfaces via the dedicated refused-count line, not by
+    // qualifying the hook-install summary with a "K failed" clause.
     mkdirSync(join(fakeHome, '.claude/hooks'), { recursive: true });
     const decoy = join(fakeHome, '.claude/hooks/decoy');
     writeFileSync(decoy, 'sentinel');
     symlinkSync(decoy, join(fakeHome, '.claude/hooks/bassclef-sync.sh'));
     const r = runCli(['--dir', workDir, '--allow-any-dir']);
-    expect(r.stdout).toMatch(/failed/);
-    expect(r.stdout).toMatch(/Rerun bassclef init/);
+    expect(r.stdout).toMatch(/files refused \(path collision\)/);
+    expect(r.stdout).toMatch(/Use --force to overwrite/);
   });
 });
 

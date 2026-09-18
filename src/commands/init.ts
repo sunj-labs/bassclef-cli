@@ -354,16 +354,20 @@ function dispatchSubstrateCopy(
   );
   const copiedCount = copiedHookEntries.length;
   const declaredCount = result.hookCount;
-  const failedCount = result.refused.length + result.errored.length;
+  // Per bassclef-cli#120: "failed" means write errored, not refused.
+  // Refused means the adopter file was preserved (expected + safe); errored
+  // means a write actually failed. Conflating them told fresh-install readers
+  // "44 failed" when nothing failed. Only errored counts qualify the hook line.
+  const erroredCount = result.errored.length;
   const userScope = copiedHookEntries.filter((e) => e.scope === 'user').length;
   const projectScope = copiedHookEntries.filter((e) => e.scope === 'project').length;
   const scopeSuffix = userScope + projectScope > 0
     ? ` ${projectScope} in <repo>/${HOOKS_SUBPATH.replace(/\/$/, '')}, ${userScope} in ~/${HOOKS_SUBPATH.replace(/\/$/, '')}.`
     : '';
-  if (failedCount > 0) {
+  if (erroredCount > 0) {
     say(
       `bassclef init: Installed ${copiedCount} of ${declaredCount} hooks (${RESOLVED_TIER} tier).${scopeSuffix} ` +
-        `${failedCount} failed — see errors above. Rerun bassclef init to retry.\n`
+        `${erroredCount} failed — see errors above. Rerun bassclef init to retry.\n`
     );
   } else {
     say(
@@ -448,14 +452,15 @@ function dispatchSubstrateCopy(
       `bassclef init: Installed ${otherCounts.join(', ')} under <repo>/.\n`
     );
   }
-  // Norman feedback loop: refused-count line always emitted, even 0.
-  say(
-    `bassclef init: ${result.refused.length} files refused (path collision).` +
-      (result.refused.length > 0
-        ? ` Use --force to overwrite existing files.`
-        : ``) +
-      `\n`
-  );
+  // Per bassclef-cli#120: Norman feedback discipline — surface a line only
+  // when it names something the reader can act on. "0 files refused" tells a
+  // fresh adopter nothing they need. Only emit when refused > 0.
+  if (result.refused.length > 0) {
+    say(
+      `bassclef init: ${result.refused.length} files refused (path collision).` +
+        ` Use --force to overwrite existing files.\n`
+    );
+  }
   // The JSON report used to be written here, to stderr, with human lines
   // following it on stdout. It now goes to stdout as the last thing the
   // run writes. See runReal + runInit. Per ADR-010 D6 (#94).
