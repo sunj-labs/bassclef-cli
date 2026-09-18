@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18 (v3 — bootstrap prints next commands)
+last_updated: 2026-09-18 (v5 — pipe callout + troubleshooting)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -34,12 +34,22 @@ No git clone needed. The bootstrap curls everything.
 
 ## Setup — one-curl bootstrap
 
-Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`:
+Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`.
+
+**⚠ The `| bash` at the end is what runs it.** Without the pipe, curl just prints the script to your terminal and nothing happens on disk.
 
 ```bash
 curl -sfL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-bootstrap.sh | bash
 export BCLI=~/tmp/bassclef-smoke
 ```
+
+Verify the bootstrap ran:
+
+```bash
+ls $BCLI/scripts/  # should list 8 smoke-*.sh files + a lib/ dir
+```
+
+If you see the files, you're good. If the `ls` says "No such file or directory," re-run the curl command with `| bash` included.
 
 Idempotent — re-run any time to pull the latest scripts.
 
@@ -187,6 +197,10 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 
 ## Troubleshooting
 
+**Bootstrap printed the script but nothing ran.** You forgot `| bash` on the curl command. Re-run the full line — `curl ... | bash`. First observed 2026-09-18 on cold-adopter-1.
+
+**`bash $BCLI/scripts/smoke-reset-whole.sh --dry-run` says "No such file or directory."** Bootstrap did not populate `$BCLI/scripts/`. Confirm with `ls $BCLI/scripts/`. If empty, re-run the bootstrap curl command with `| bash` at the end.
+
 **`gh` auth fails at publish.** Run `gh auth status`. Re-run `gh auth login` if needed.
 
 **`jq` not found.** `brew install jq`.
@@ -214,6 +228,8 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - Fixture pins: cli#101 through cli#108
 
 ## Change log
+
+**2026-09-18 v5 — pipe callout + troubleshooting.** Added a bold warning above the bootstrap curl block noting that `| bash` is required, plus an ls-verify step right after. Added two troubleshooting entries for the "printed but didn't run" and "empty scripts dir" cases. First observed 2026-09-18 on cold-adopter-1 — operator ran the curl without the pipe.
 
 **2026-09-18 v3 — bootstrap prints next commands.** After fetching the ten files, `smoke-bootstrap.sh` now prints the reset + version-fetch + one-liner commands to stderr. Operator pastes with intent. Reset stays operator-triggered (destructive; `curl | bash` has no interactive stdin, so an auto-prompt would either be skipped or surprising). Norman + Cooper + Nygard lens driven.
 

@@ -1,0 +1,7 @@
+# Temperance marker — fix/runbook-v5-pipe-callout
+- date: 2026-09-18
+- branch: fix/runbook-v5-pipe-callout
+- scope-decision:
+  - right thing: make the | bash requirement harder to miss + add troubleshooting for the observed failure
+  - right way: bold callout above the code block + ls-verify step + two troubleshooting entries + change log entry
+  - drift trigger: refactoring the bootstrap script itself (belongs in a separate scope)
