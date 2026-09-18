@@ -172,7 +172,7 @@ describe('prepublish-bundle — Phase 3 dist/lite/ happy path', () => {
     // 4 templates + settings.json + wiring manifest = 6 base files.
     expect(existsSync(join(distLite, '.claude', 'settings.json'))).toBe(true);
     expect(existsSync(join(distLite, 'CLAUDE.md'))).toBe(true);
-    expect(existsSync(join(distLite, 'whereami.md'))).toBe(true);
+    expect(existsSync(join(distLite, 'docs/whereami.md'))).toBe(true);
     expect(existsSync(join(distLite, '.bassclef-source.json'))).toBe(true);
     // npm-pack strips .gitignore files; prepublish ships it as
     // `gitignore` (no dot) in dist/lite/; walker renames back at write.

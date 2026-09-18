@@ -13,7 +13,7 @@
 // [x] fresh dir + init → exit 0
 // [x] adopter .claude/settings.json byte-identical to dist/lite/.claude/settings.json
 // [x] adopter CLAUDE.md exists (placeholders substituted)
-// [x] adopter whereami.md exists (placeholders substituted)
+// [x] adopter docs/whereami.md exists (placeholders substituted; moved from root per bassclef-cli#103)
 // [x] adopter .bassclef-source.json exists (placeholders substituted)
 // [x] adopter .gitignore exists (verbatim)
 // [x] hook-count banner appears in stdout with shape "Installed N of M hooks (lite tier)" (RFC-0002 N1 fold — Norman shape)
@@ -114,7 +114,7 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     // Files from dist/lite/ that carry placeholders (substitution runs
     // at write time; content differs from bundle source but the file
     // must exist).
-    for (const name of ['CLAUDE.md', 'whereami.md', '.bassclef-source.json']) {
+    for (const name of ['CLAUDE.md', 'docs/whereami.md', '.bassclef-source.json']) {
       expect(existsSync(join(workDir, name))).toBe(true);
     }
     // .gitignore is verbatim (no placeholders).
@@ -153,7 +153,7 @@ describe('init output parity — adopter tree mirrors dist/lite/ (ADR-055 D1)', 
     const r = runCli([], { cwd: workDir });
     expect(r.status).toBe(0);
 
-    for (const name of ['CLAUDE.md', 'whereami.md', '.bassclef-source.json']) {
+    for (const name of ['CLAUDE.md', 'docs/whereami.md', '.bassclef-source.json']) {
       const content = readFileSync(join(workDir, name), 'utf8');
       // Canonical shapes per ADR-002 amendment 2026-09-13.
       expect(content).not.toMatch(/\[REPO_NAME\]/);
