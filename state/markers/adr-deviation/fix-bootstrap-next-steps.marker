@@ -1,0 +1,6 @@
+# ADR-deviation marker — fix/bootstrap-next-steps
+- date: 2026-09-18
+- branch: fix/bootstrap-next-steps
+- adr_governing: none — confirmed no ADR coverage for smoke test tooling
+- outcome: ADR-honored
+- note: Bootstrap + banner + OOAD update all extend the smoke test scope shipped in PR #110. No ADR governs smoke test tooling (ADRs cover npm package + init + sync + publish). Change stays inside scripts/ + docs/ scope; no invariants touched.

@@ -1,0 +1,9 @@
+# Luminary marker — fix/bootstrap-next-steps
+- date: 2026-09-18
+- branch: fix/bootstrap-next-steps
+- lead: donald-norman (signifier — next-step visible on the terminal, not in a doc)
+- supporting: [alan-cooper (persona flow — cold-adopter operator wants one command tell me next), michael-nygard (safe default — reset stays operator-triggered, no hidden state under curl-pipe)]
+- lens caught:
+  - Norman: banners are the boundary; boundary IS the feedback
+  - Cooper: curl-pipe has no interactive stdin; must print, not prompt
+  - Nygard: end-banner via trap EXIT fires on any exit path including errors

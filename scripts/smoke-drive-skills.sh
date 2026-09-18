@@ -31,6 +31,10 @@
 
 set -euo pipefail
 
+SCRIPT_NAME="$(basename "$0" .sh)"
+echo ">>> ${SCRIPT_NAME} starting" >&2
+trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
+
 OUT_ROOT=""
 SKILL_LIST_FILE=""
 CLAUDE_BIN="claude"

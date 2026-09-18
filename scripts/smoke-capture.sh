@@ -33,6 +33,10 @@
 
 set -euo pipefail
 
+SCRIPT_NAME="$(basename "$0" .sh)"
+echo ">>> ${SCRIPT_NAME} starting" >&2
+trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
+
 # --- defaults -----------------------------------------------------------------
 
 SETTINGS_FILE=".claude/settings.json"
