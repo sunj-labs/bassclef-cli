@@ -1,0 +1,10 @@
+# Temperance marker — fix/99-gitignore-claude-line
+- date: 2026-09-18
+- branch: fix/99-gitignore-claude-line
+- right-thing: yes — ticket filed with reproducer; adopters lose work when git add -A sweeps synced files
+- simplest: append lines to gitignore content in prepublish (5-line edit); no walker changes, no schema shape change
+- brute-force: no — sources read (prepublish script, sibling gitignore, copy-substrate rename map)
+- reach: adopter .gitignore template only; existing adopters unaffected (init preserves their existing file)
+- verification: run init in fresh mktemp dir, assert `.gitignore` at adopter target contains `.claude/`
+- reversible: yes — one commit revert
+- scope-decision: right-thing = ship the gitignore additions cli-side; right-way = TDD via new test; drift-trigger = if scope grows past prepublish edit + one test, stop
