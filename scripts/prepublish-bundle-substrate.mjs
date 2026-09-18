@@ -350,10 +350,20 @@ function copyDistTemplates(siblingRoot, distRoot) {
   // `gitignore` in dist/lite/; the walker renames it back at write time
   // per src/lib/copy-substrate.ts §GITIGNORE_RENAME.
   const GITIGNORE_SPECIAL = '.gitignore';
+  // Per bassclef-cli#103: the whereami rule (dist/lite/.claude/rules/
+  // whereami-load-bearing.md) names `docs/whereami.md` as authoritative.
+  // The sibling template ships at root; cli routes it to docs/ so bundle
+  // and rule agree. Adopters with an existing root-level whereami.md are
+  // preserved by init's fail-safe defaults (ADR-002).
+  const WHEREAMI_TO_DOCS = 'whereami.md';
   for (const name of DIST_TEMPLATE_FILES) {
     const src = join(templatesDir, name);
-    const dstName = name === GITIGNORE_SPECIAL ? 'gitignore' : name;
-    const dst = join(distRoot, dstName);
+    let dstRel;
+    if (name === GITIGNORE_SPECIAL) dstRel = 'gitignore';
+    else if (name === WHEREAMI_TO_DOCS) dstRel = join('docs', 'whereami.md');
+    else dstRel = name;
+    const dst = join(distRoot, dstRel);
+    mkdirSync(dirname(dst), { recursive: true, mode: 0o755 });
     let content = readFileSync(src);
     if (name === GITIGNORE_SPECIAL) {
       // Per bassclef-cli#99: append a synced-substrate block so `git add -A`
@@ -419,12 +429,18 @@ function postflightDistLite(distRoot, settingsObject, copiedFileCount) {
         `copyWiringManifestIntoDist did not run OR the write silently failed.`
     );
   }
-  // 4 templates (with .gitignore renamed to gitignore) + settings.json
-  // + wiring manifest = 6 expected files.
+  // 4 templates (.gitignore → gitignore, whereami.md → docs/whereami.md
+  // per bassclef-cli#103) + settings.json + wiring manifest = 6 expected
+  // files. Path mapping mirrors copyDistTemplates above.
+  const templatePath = (n) => {
+    if (n === '.gitignore') return 'gitignore';
+    if (n === 'whereami.md') return join('docs', 'whereami.md');
+    return n;
+  };
   const expected = [
     join(distRoot, '.claude', 'settings.json'),
     join(distRoot, 'standards', 'bassclef-wiring-manifest.json'),
-    ...DIST_TEMPLATE_FILES.map((n) => join(distRoot, n === '.gitignore' ? 'gitignore' : n)),
+    ...DIST_TEMPLATE_FILES.map((n) => join(distRoot, templatePath(n))),
   ];
   for (const p of expected) {
     if (!existsSync(p)) {

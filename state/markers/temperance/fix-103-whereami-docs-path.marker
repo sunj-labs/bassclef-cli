@@ -1,0 +1,10 @@
+# Temperance marker — fix/103-whereami-docs-path
+- date: 2026-09-18
+- branch: fix/103-whereami-docs-path
+- right-thing: yes — ticket filed; adopters have path drift from minute one; skills that read docs/whereami.md fail on default install
+- simplest: rename destination in prepublish only (same pattern as `.gitignore`); no walker change; PLACEHOLDER_FILES already covers both paths
+- brute-force: no — sources read (prepublish, init.ts placeholder set, rule ref); alternative (option b — update rule) rejected as cross-repo
+- reach: whereami.md destination path only; existing adopters unaffected (their file preserved at root); new adopters get docs/whereami.md
+- verification: test asserts docs/whereami.md exists at adopter target + no root whereami.md; full suite green
+- reversible: yes — one commit revert
+- scope-decision: right-thing = ship option (a) path move cli-side; right-way = TDD via new test; drift-trigger = if scope grows past prepublish edit + one test, stop
