@@ -1,0 +1,12 @@
+# Temperance marker — diagnose init-parity CI trace
+
+- date: 2026-09-18
+- branch: diagnose/init-parity-ci-trace
+- scope-decision:
+  - RIGHT THING: yes — publish CI's tests/init.test.ts:274 keeps failing (172 vs 507). Local passes. Need CI-only signal to decide fix vs symptom. Operator picked B' (trace + iterate).
+  - SIMPLEST: yes — add trace lines to the failing test + bump runCli timeout 60s → 180s. Two hypotheses tested at once.
+  - BRUTE FORCE: no — trace answers exactly which of (a) SIGKILL truncation vs (b) real CLI bug is behind the mismatch.
+  - BLAST RADIUS: low — test-file edit only; no CLI behavior change.
+  - VERIFICATION: publish CI Test step runs; either passes (hypothesis a) OR fails with trace output surfacing the actual gap (hypothesis b).
+  - REVERSIBLE: yes — trace + timeout bump are 5-line edits.
+- drift-trigger: if the fix expands beyond test-file edits — pause.
