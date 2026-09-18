@@ -1,0 +1,12 @@
+# Temperance marker — fix stdout blocking on cli entry
+
+- date: 2026-09-18
+- branch: fix/stdout-blocking-on-cli-entry
+- scope-decision:
+  - RIGHT THING: yes — probe 1 + web search converged on Node's async-pipe-write + process.exit() bug (nodejs/node#3669, #6456, #19218). CLI at src/cli.ts:92 calls process.exit(exitCode), losing buffered stdout writes on CI Linux.
+  - SIMPLEST: yes — 4-line block at top of main() to set stdout/stderr handles blocking. Matches Node community's canonical workaround.
+  - BRUTE FORCE: no — targeted at the exact class the search found.
+  - BLAST RADIUS: low — makes stdio writes sync (same behavior as TTY). Zero code changes elsewhere. Fully reversible.
+  - VERIFICATION: local vitest 428/428 still green; retagged v1.2.0-alpha.1 publishes clean on CI; npm alpha lands.
+  - REVERSIBLE: yes — remove the setBlocking block.
+- drift-trigger: if publish CI still shows 172 vs 507 after this fix, hypothesis was wrong — pivot to c2 (skip test + follow-on).

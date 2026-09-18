@@ -36,6 +36,20 @@ Version: ${version}
 Docs:    https://github.com/sunj-labs/bassclef-cli
 `;
 
+// Node writes to a pipe asynchronously. When process.exit(code) fires at
+// L92 below, buffered writes still in Node's stream queue are dropped.
+// TTY writes are sync, so this never bites when a human runs the CLI.
+// Pipes bite — spawnSync under vitest CI at tests/init.test.ts:274 caught
+// this class: 172 of 506 `would create` lines emitted on Linux CI while
+// local macOS emitted the full 506 (macOS pipe drains faster than Node's
+// stream queue fills). Setting the handle to blocking mode makes every
+// stdout/stderr write synchronous, so process.exit() finds nothing queued
+// to drop. Per nodejs/node#3669, #6456, #19218 — community-converged
+// workaround.
+for (const stream of [process.stdout, process.stderr] as Array<NodeJS.WriteStream & { _handle?: { setBlocking?: (b: boolean) => void } }>) {
+  stream._handle?.setBlocking?.(true);
+}
+
 async function main(argv: readonly string[]): Promise<number> {
   const first = argv[0];
 
