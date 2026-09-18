@@ -24,6 +24,25 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.2.0-alpha.1] — 2026-09-18
+
+Rolls up alpha.0 (which never landed on npm — publish workflow failed twice on the shipped tag) and adds the missing `.version` field to `.bassclef/init.manifest.json`. That field is the contract v0.45.0's session-start drift hook reads via `jq -r '.version // ""'`. Without it the hook silently returns 0 and adopters on stale lite never see the "update available" banner.
+
+### Added
+
+- **`.version` at top level of `.bassclef/init.manifest.json`** (bassclef-cli#129, closes bassclef-upstream#1749). `Manifest` interface in `src/lib/manifest-types.ts:68` gains the field; `manifestTemplate` in `src/commands/init-templates/manifest-json.ts:26` emits it as the installed cli semver. Duplicates `$bassclef.generated_by_version` on purpose — the drift hook stays a shallow read at `.version` and does not walk into `$bassclef`.
+- 3 Tier 0 tests at `tests/init-manifest-version-field.test.ts` pin the field is present, equals `package.json` version, and matches `$bassclef.generated_by_version`.
+
+### Fixed
+
+- **Test timeout bump 8s → 60s** in `tests/init.test.ts` and `tests/init-hook-routing.test.ts` `runCli` helper (bassclef-cli#128). The 8-second cap killed the publish workflow twice when v0.45.0's 445-file `bassclef init` exceeded it on slower CI hardware. Local machines pass either cap; CI needs the headroom.
+
+### Notes
+
+- **Adopter reinstall required to activate the drift signal.** Existing lite installs on 1.1.1 or earlier will not gain the `.version` field until they run `npm install -g @thebassclef/lite@latest` (post-alpha promotion) or `@alpha`. Adopters on stale installs stay silent until they upgrade once through some other trigger.
+- Install with `npm install -g @thebassclef/lite@alpha`. Verify with `bassclef --version` → `1.2.0-alpha.1`.
+- Bundled substrate stays at bassclef v0.45.0 (no upstream bump this alpha).
+
 ## [1.2.0-alpha.0] — 2026-09-18
 
 Substrate bumped to bassclef v0.45.0. Ships seven adopter cures upstream plus five cli-side PRs from tonight's session. First alpha in the 1.2.0 cycle. Adopters install with `npm install -g @thebassclef/lite@alpha`.
