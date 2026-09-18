@@ -1,0 +1,10 @@
+# Temperance marker — fix/init-test-timeout-8s-too-short
+- date: 2026-09-18
+- branch: fix/init-test-timeout-8s-too-short
+- right-thing: yes — blocks v1.2.0-alpha.0 publish; CI test kill under real substrate is a substrate-scale defect
+- simplest: two 1-line edits (8000 -> 60000); no logic change
+- brute-force: no — diagnosis identified same class as #116 (empirical timeout too tight for real workload)
+- reach: test-only; no runtime code path
+- verification: publish workflow rerun on v1.2.0-alpha.0 passes checks-job
+- reversible: trivial
+- scope-decision: right-thing = 60s covers CI hardware p99; right-way = TDD confirmed local passes; drift-trigger = if 60s still not enough, bump to 120s

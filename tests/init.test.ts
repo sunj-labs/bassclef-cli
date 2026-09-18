@@ -64,7 +64,11 @@ let fakeHome: string;
 function runCli(args: readonly string[], opts?: { cwd?: string }) {
   return spawnSync(process.execPath, [CLI, 'init', ...args], {
     encoding: 'utf8',
-    timeout: 8000,
+    // Bumped 8s -> 60s 2026-09-18 — v0.45.0 substrate has ~445 files.
+    // Init dry-run on slower CI hardware exceeded 8s and got SIGKILLed
+    // mid-stdout, truncating "would create" lines to ~240. Same class
+    // as bassclef-cli#116 (smoke timeout). See PR #128.
+    timeout: 60000,
     cwd: opts?.cwd,
     // Cli 1.0.1 writes to $HOME/.claude/hooks/ for user-scope hooks.
     // Every test isolates to a temp HOME so runs don't pollute the

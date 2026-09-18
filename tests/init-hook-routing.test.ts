@@ -47,7 +47,9 @@ let originalHome: string | undefined;
 function runCli(args: readonly string[], opts?: { cwd?: string; env?: NodeJS.ProcessEnv }) {
   return spawnSync(process.execPath, [CLI, 'init', ...args], {
     encoding: 'utf8',
-    timeout: 8000,
+    // Bumped 8s -> 60s 2026-09-18 — same class as bassclef-cli#116.
+    // v0.45.0 substrate is bigger; slower CI hardware needed more time.
+    timeout: 60000,
     cwd: opts?.cwd,
     env: opts?.env ?? { ...process.env, HOME: fakeHome },
   });
