@@ -102,20 +102,48 @@ done <<< "$FILES"
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "smoke-bootstrap: dry run complete (would fetch 10 files)" >&2
-  exit 0
-fi
-
-echo "" >&2
-echo "smoke-bootstrap: fetched ${fetched} file(s); ${failed} failure(s)" >&2
-
-if [ "$failed" -gt 0 ]; then
+  echo "" >&2
+  echo "Next commands you would run after a real bootstrap:" >&2
+elif [ "$failed" -gt 0 ]; then
+  echo "" >&2
+  echo "smoke-bootstrap: fetched ${fetched} file(s); ${failed} failure(s)" >&2
   echo "" >&2
   echo "Some files failed. Retry after a moment (raw.githubusercontent.com" >&2
   echo "caches; a just-merged PR may take 30 seconds to propagate)." >&2
   exit 2
+else
+  echo "" >&2
+  echo "smoke-bootstrap: fetched ${fetched} file(s); ${failed} failure(s)" >&2
 fi
 
 echo "" >&2
-echo "Next: set BCLI and run the smoke per docs/runbooks/smoke.md" >&2
-echo "  export BCLI=${TARGET_DIR}" >&2
+cat >&2 <<NEXT
+Next commands (paste with intent):
+
+  # 1. Set BCLI
+  export BCLI=${TARGET_DIR}
+
+  # 2. Reset the cold profile (DESTRUCTIVE — dry run first)
+  bash \$BCLI/scripts/smoke-reset-whole.sh --dry-run
+  bash \$BCLI/scripts/smoke-reset-whole.sh
+
+  # 3. Fetch the latest version tag
+  LITE_VER=\$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r .version)
+
+  # 4. Install + init + smoke + report (the runbook one-liner)
+  npm install -g "@thebassclef/lite@\${LITE_VER}" && \\
+    mkdir -p ~/tmp/bassclef-smoke-test && cd ~/tmp/bassclef-smoke-test && \\
+    git init -q && bassclef init && \\
+    bash \$BCLI/scripts/smoke-capture.sh && \\
+    bash \$BCLI/scripts/smoke-drive-skills.sh && \\
+    bash \$BCLI/scripts/smoke-assert-hooks.sh; \\
+    bash \$BCLI/scripts/smoke-assert-skills.sh; \\
+    bash \$BCLI/scripts/smoke-report.sh --version-tag "\${LITE_VER}" --publish
+
+Full runbook: docs/runbooks/smoke.md (in the bassclef-cli repo).
+
+Reset is destructive. It backs up ~/.claude/ before clearing, and
+smoke-reset-whole.sh --whole snapshots more of the env. Read the
+--dry-run output before running the second command.
+NEXT
 exit 0

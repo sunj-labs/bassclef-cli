@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18 (v2 — curl bootstrap)
+last_updated: 2026-09-18 (v3 — bootstrap prints next commands)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -64,6 +64,8 @@ curl -sfL .../smoke-bootstrap.sh | bash -s -- --dry-run
 - `scripts/lib/smoke-assert.sh`, `scripts/lib/smoke-schema.sh`
 
 The scripts source each other via `${SCRIPT_DIR}/lib/...`, so the layout under `$BCLI/scripts/` is what makes them work.
+
+**Bootstrap prints the next commands** — reset (dry-run + apply), version fetch, one-liner. You paste with intent. Reset is destructive, so bootstrap will not run it for you.
 
 ## Step 1 — Reset with snapshot (safe)
 
@@ -212,6 +214,8 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - Fixture pins: cli#101 through cli#108
 
 ## Change log
+
+**2026-09-18 v3 — bootstrap prints next commands.** After fetching the ten files, `smoke-bootstrap.sh` now prints the reset + version-fetch + one-liner commands to stderr. Operator pastes with intent. Reset stays operator-triggered (destructive; `curl | bash` has no interactive stdin, so an auto-prompt would either be skipped or surprising). Norman + Cooper + Nygard lens driven.
 
 **2026-09-18 v2 — curl bootstrap.** Setup no longer needs `git clone`. New `scripts/smoke-bootstrap.sh` curls the ten smoke files into `~/tmp/bassclef-smoke/scripts/`. One command from the cold profile.
 
