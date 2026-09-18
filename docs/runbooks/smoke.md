@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18 (v3 — bootstrap prints next commands)
+last_updated: 2026-09-18 (v4 — terminal-banner note added)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -179,6 +179,30 @@ LITE_VER=$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r 
 
 The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and the report still needs to run.
 
+## What you'll see in the terminal
+
+Every smoke script prints two banner lines to stderr:
+
+- `>>> smoke-<name> starting` — the script has begun work
+- `<<< smoke-<name> done (exit N)` — the script finished; N is the exit code
+
+The end banner fires from a `trap ... EXIT` hook, so it prints on any exit path — success, failure, or error mid-run. When you run the one-liner, six banner pairs march down your terminal:
+
+```
+>>> smoke-capture starting
+smoke-capture: found 24 SessionStart hook(s)
+smoke-capture: captured 24 hook(s) to docs/smoke-captures/...
+<<< smoke-capture done (exit 0)
+>>> smoke-drive-skills starting
+smoke-drive-skills: driving 5 skill(s) via /opt/homebrew/bin/claude
+...
+<<< smoke-drive-skills done (exit 0)
+>>> smoke-assert-hooks starting
+...
+```
+
+A slow step (like `smoke-drive-skills` waiting on `claude -p`) shows the start banner right away, so you know it's running and not hung.
+
 ## What to expect on the first real run
 
 **`paths-exist` may fire more RED rows than you want.** Real hook output carries many absolute paths that exist on the machine that produced them but not on yours. Treat `paths-exist` FAILs as advisory unless they cluster on one hook. Layer 2 will likely tighten the check or add an allowlist for system paths.
@@ -214,6 +238,8 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - Fixture pins: cli#101 through cli#108
 
 ## Change log
+
+**2026-09-18 v4 — terminal-banner note.** Added "What you'll see in the terminal" section naming the `>>>` and `<<<` bookend banners that ship with every smoke script since PR #113. Should have shipped in PR #113; caught by the operator on runbook re-read.
 
 **2026-09-18 v3 — bootstrap prints next commands.** After fetching the ten files, `smoke-bootstrap.sh` now prints the reset + version-fetch + one-liner commands to stderr. Operator pastes with intent. Reset stays operator-triggered (destructive; `curl | bash` has no interactive stdin, so an auto-prompt would either be skipped or surprising). Norman + Cooper + Nygard lens driven.
 

@@ -1,0 +1,7 @@
+# Temperance marker — fix/runbook-v4-banner-note
+- date: 2026-09-18
+- branch: fix/runbook-v4-banner-note
+- scope-decision:
+  - right thing: add "What you'll see in the terminal" section to runbook naming >>> and <<< banners; bump last_updated to v4
+  - right way: single doc edit; branch + PR + merge; no code touched
+  - drift trigger: adding new scripts or check types (that's a Layer 2 concern)
