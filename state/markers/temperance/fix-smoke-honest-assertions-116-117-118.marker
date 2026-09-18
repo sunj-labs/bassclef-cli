@@ -1,0 +1,10 @@
+# Temperance marker — fix/smoke-honest-assertions-116-117-118
+- date: 2026-09-18
+- branch: fix/smoke-honest-assertions-116-117-118
+- right-thing: yes — three tickets filed with real cold-adopter evidence 2026-09-18; smoke lies (PASS on timeout) undercuts every future run
+- simplest: three targeted edits + tier-appropriate tests; one PR because one logical concern per pr-strategy atomic-exception (all changes serve "honest smoke on real captures")
+- brute-force: no — sources read (three ticket bodies + smoke script shape from #110 run); each edit small
+- reach: smoke scripts only (dev-facing; not shipped to adopters via init walker); tests-only for lib/smoke-assert.sh; no runtime code path
+- verification: fixture-driven Tier 0/1 tests per ticket test plans; full vitest suite green
+- reversible: yes — one commit revert
+- scope-decision: right-thing = ship all three cures cli-side; right-way = TDD via fixtures; drift-trigger = if scope grows past three edits + three test cases, stop

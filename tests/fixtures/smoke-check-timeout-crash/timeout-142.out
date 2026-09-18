@@ -1,0 +1,5 @@
+=== skill: temperance
+=== command: claude -p /temperance
+=== timeout_sec: 30
+Alarm clock: 14
+=== exit: 142

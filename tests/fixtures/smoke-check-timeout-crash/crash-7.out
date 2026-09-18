@@ -1,0 +1,4 @@
+=== skill: launch
+=== command: claude -p /launch
+Some error output before crash.
+=== exit: 7
