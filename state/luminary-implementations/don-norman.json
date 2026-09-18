@@ -1,0 +1,9 @@
+{
+  "luminary_slug": "don-norman",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "tests/init-banner-noise-cleanup.test.ts"
+  ],
+  "last_scanned": "2026-09-18T11:44:31Z",
+  "scanner_version": "1.0"
+}
