@@ -377,6 +377,81 @@ function copyDistTemplates(siblingRoot, distRoot) {
 }
 
 /**
+ * Emit a default `.claude/bassclef-configs.jsonc` at dist/lite/.claude/.
+ * Per bassclef-cli#104. Every block the substrate rules read is present at
+ * a safe default with a comment explaining what it does. Adopters find the
+ * file already there on first install; they change what they want to tune.
+ *
+ * Never overwrites an existing file (defensive). Adopters get the default
+ * only on the first install; subsequent installs preserve their edits per
+ * ADR-002 fail-safe defaults at the walker layer.
+ */
+function emitDefaultBassclefConfigsJsonc(distRoot) {
+  const dstDir = join(distRoot, '.claude');
+  mkdirSync(dstDir, { recursive: true, mode: 0o755 });
+  const dst = join(dstDir, 'bassclef-configs.jsonc');
+  if (existsSync(dst)) return; // idempotent
+  const body =
+    '// tier: lite\n' +
+    '// bassclef adopter config — tune substrate rules from one file.\n' +
+    '// Reference schema: standards/bassclef-configs-schema.md\n' +
+    '// Every block below matches what a substrate rule reads. Values shown\n' +
+    '// are the defaults; delete a block and the default kicks in.\n' +
+    '{\n' +
+    '  // What your project runs. Frontend framework the /shadcn-first and\n' +
+    '  // /new-dependency-check rules key off. Common values: "vite-react",\n' +
+    '  // "nextjs", "remix", "vue", "svelte", "none".\n' +
+    '  "tech_stack": {\n' +
+    '    "frontend": "none"\n' +
+    '  },\n' +
+    '\n' +
+    '  // Prose discipline. The kiss-check Stop hook watches your writing\n' +
+    '  // for jargon. Value "true" = advisory (findings to stderr, no block).\n' +
+    '  // Value "strict" = BLOCK the stop, forcing a rewrite turn.\n' +
+    '  // Value false = disabled.\n' +
+    '  "prose_discipline": {\n' +
+    '    "kiss_words_turn_prose": true\n' +
+    '  },\n' +
+    '\n' +
+    '  // Where /promote sends proposals. Two shapes:\n' +
+    '  //   "<owner>/<repo>" — gh issue create --repo <value>\n' +
+    '  //   "email:<address>" — mailto: URL printed for adopter to send\n' +
+    '  // Absent → /promote files in the current repo (backward-compat).\n' +
+    '  // "promote_target": "your-org/your-repo",\n' +
+    '\n' +
+    '  // Testing tiers per .claude/rules/testing-tier-config.md. Global\n' +
+    '  // floor sets the baseline for every path that no matcher covers.\n' +
+    '  // Tier 0 = strict TDD (test-first, BLOCK on missing). Tier 1 =\n' +
+    '  // test-with (WARN on missing). Tier 2 = smoke test only. Tier 3 =\n' +
+    '  // manual verify (no test discipline).\n' +
+    '  "testing": {\n' +
+    '    "global_floor": 1,\n' +
+    '    "path_matchers": [\n' +
+    '      { "match": ".claude/rules/*.md", "tier": 3 },\n' +
+    '      { "match": "state/markers/*/*", "tier": 3 },\n' +
+    '      { "match": "chronicle/*.md", "tier": 3 },\n' +
+    '      { "match": "docs/iteration-bets/*.md", "tier": 3 },\n' +
+    '      { "match": "docs/decompositions/*.md", "tier": 3 }\n' +
+    '    ]\n' +
+    '  },\n' +
+    '\n' +
+    '  // /longrun preset picker per .claude/skills/longrun/SKILL.md. Values:\n' +
+    '  //   "converged" — plan doc drives; lean prep output\n' +
+    '  //   "exploratory" — scan-table with no cards until asked\n' +
+    '  //   "reversible-small" — three-chunk compact for small scope\n' +
+    '  //   "auto" — picker decides per session signals (default)\n' +
+    '  "longrun": {\n' +
+    '    "preset": "auto"\n' +
+    '  },\n' +
+    '\n' +
+    '  // Adopter defaults surface. Reserved for future rules. Absent =\n' +
+    '  // downstream rules keep their own defaults.\n' +
+    '  "adopter_defaults": {}\n' +
+    '}\n';
+  writeFileSync(dst, body, { mode: 0o644 });
+}
+
+/**
  * Append the synced-substrate block to a gitignore body when missing.
  * Idempotent — if `.claude/` already appears (upstream ships it one day,
  * or an adopter customizes), we do not double-write. Buffer in, Buffer out.
@@ -457,6 +532,11 @@ function buildDistLiteTree(siblingRoot) {
   mkdirSync(distRoot, { recursive: true, mode: 0o755 });
   const settingsPath = emitDistLiteSettings(distRoot, filtered);
   copyDistTemplates(siblingRoot, distRoot);
+  // Per bassclef-cli#104: ship a default .claude/bassclef-configs.jsonc so
+  // adopters see the toggles surface on install. Rules read from this file;
+  // absent means every rule falls back to defaults silently. The walker
+  // picks the file up via its recursive readdirSync of dist/lite/.
+  emitDefaultBassclefConfigsJsonc(distRoot);
   // Phase 3 — put the wiring manifest at dist/lite/standards/ so the
   // reader can verify schema version per ADR-055 D4.
   copyWiringManifestIntoDist(siblingRoot, distRoot);

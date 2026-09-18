@@ -1,0 +1,10 @@
+# Temperance marker — fix/104-configs-jsonc-in-bundle
+- date: 2026-09-18
+- branch: fix/104-configs-jsonc-in-bundle
+- right-thing: yes — ticket filed; adopters silently miss the toggles surface; welcome-email path benefits from a file adopters can find + edit
+- simplest: emit default jsonc in prepublish (bassclef-cli-side); no walker change (readdirSync picks it up); no manifest change
+- brute-force: no — verified walker discovery mechanism; verified default file shape from upstream + ticket criteria; author minimal template with commented blocks
+- reach: bundle output only; existing adopters unaffected (init preserves their existing file); rules that read from it keep working when file present or absent
+- verification: test asserts file at adopter target + parses as valid jsonc + contains expected block keys; full suite green
+- reversible: yes — one commit revert
+- scope-decision: right-thing = ship default jsonc via prepublish emit; right-way = TDD via one new test; drift-trigger = if scope grows past prepublish emit + one test + one wire call, stop
