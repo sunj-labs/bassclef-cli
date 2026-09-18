@@ -354,9 +354,36 @@ function copyDistTemplates(siblingRoot, distRoot) {
     const src = join(templatesDir, name);
     const dstName = name === GITIGNORE_SPECIAL ? 'gitignore' : name;
     const dst = join(distRoot, dstName);
-    const content = readFileSync(src);
+    let content = readFileSync(src);
+    if (name === GITIGNORE_SPECIAL) {
+      // Per bassclef-cli#99: append a synced-substrate block so `git add -A`
+      // on a fresh adopter does not sweep 500+ vendored files. Sibling
+      // upstream template lacks the block today; cli fills the gap at
+      // pack time so adopters get a working ignore on install.
+      content = ensureClaudeIgnored(content);
+    }
     writeFileSync(dst, content, { mode: 0o644 });
   }
+}
+
+/**
+ * Append the synced-substrate block to a gitignore body when missing.
+ * Idempotent — if `.claude/` already appears (upstream ships it one day,
+ * or an adopter customizes), we do not double-write. Buffer in, Buffer out.
+ */
+function ensureClaudeIgnored(bodyBuf) {
+  const body = Buffer.isBuffer(bodyBuf) ? bodyBuf.toString('utf8') : String(bodyBuf);
+  // Match either bare `.claude/` or `.claude` as a whole line (with slash or without).
+  if (/^\.claude\/?$/m.test(body)) return bodyBuf;
+  const trailer =
+    (body.endsWith('\n') ? '' : '\n') +
+    '\n' +
+    '# Bassclef synced substrate — vendored via `bassclef init` + `bassclef sync`.\n' +
+    '# Ignore by default so `git add -A` does not sweep hundreds of files.\n' +
+    '# Adopters who want to pin substrate: remove these lines OR add `!path/to/track`.\n' +
+    '.claude/\n' +
+    '.bassclef/\n';
+  return Buffer.from(body + trailer, 'utf8');
 }
 
 function postflightDistLite(distRoot, settingsObject, copiedFileCount) {
