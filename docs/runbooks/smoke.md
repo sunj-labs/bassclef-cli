@@ -134,7 +134,7 @@ Writes one file per hook under `docs/smoke-captures/<date>/hooks/`.
 bash $BCLI/scripts/smoke-drive-skills.sh
 ```
 
-Writes one file per skill under `docs/smoke-captures/<date>/skills/`. Default timeout is 30 seconds per call. Bump with `--timeout 60` if a skill is slow.
+Writes one file per skill under `docs/smoke-captures/<date>/skills/`. Default timeout is **120 seconds per call** (per `scripts/smoke-drive-skills.sh:41`; runbook v1-v3 said 30 — corrected in v4). 5 skills sequential means up to 10 minutes worst case. Bump with `--timeout 180` for slow skills; lower with `--timeout 60` for fast smoke.
 
 ## Step 6 — Assert both surfaces
 
@@ -207,7 +207,7 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 
 **Registry returns stale version.** Wait 3 minutes and re-fetch. First observed 2026-09-17 — npm registry lag after publish per whereami L37.
 
-**One skill hits the 30-second timeout.** Bump with `--timeout 60`. Deferred pre-mortem F3 fold — measure real latency across three runs, then pin the default from data.
+**One skill hits the 120-second timeout.** Bump with `--timeout 180`. Deferred pre-mortem F3 fold — measure real latency across three runs, then pin the default from data.
 
 ## Updating this doc
 
@@ -228,7 +228,7 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 
 ## Change log
 
-**2026-09-18 v4 — pinned to 1.2.0 substrate.** Step 3 banner expectations updated: ~445 files (was ~379) and 28 hooks armed (was 24) after the v0.45.0 substrate pull. Added a jq check for the new top-level `.version` field in `.bassclef/init.manifest.json` — required for the v0.45.0 drift hook to compare installed vs npm-latest (cli#129, bassclef-upstream#1749). References gain 1.2.0 fixture pins (cli#129, #131, #134).
+**2026-09-18 v4 — pinned to 1.2.0 substrate.** Step 3 banner expectations updated: ~445 files (was ~379) and 28 hooks armed (was 24) after the v0.45.0 substrate pull. Added a jq check for the new top-level `.version` field in `.bassclef/init.manifest.json` — required for the v0.45.0 drift hook to compare installed vs npm-latest (cli#129, bassclef-upstream#1749). References gain 1.2.0 fixture pins (cli#129, #131, #134). Also corrected Step 5 timeout: `smoke-drive-skills.sh` default is 120s per call (was documented as 30s in v1-v3 by mistake — script default at L41 has always been 120s since PR #125 shipped it).
 
 **2026-09-18 v3 — bootstrap prints next commands.** After fetching the ten files, `smoke-bootstrap.sh` now prints the reset + version-fetch + one-liner commands to stderr. Operator pastes with intent. Reset stays operator-triggered (destructive; `curl | bash` has no interactive stdin, so an auto-prompt would either be skipped or surprising). Norman + Cooper + Nygard lens driven.
 
