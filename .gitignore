@@ -3,6 +3,8 @@
 # pattern also matches src/lib/ and harness/lib/. Un-ignore both trees.
 !src/lib
 !src/lib/**
+!scripts/lib
+!scripts/lib/**
 !harness
 !harness/**
 
@@ -57,6 +59,8 @@ state/markers/turn-prose-flags/
 # managed block — later rules win in .gitignore.
 !src/lib
 !src/lib/**
+!scripts/lib
+!scripts/lib/**
 !harness
 !harness/**
 

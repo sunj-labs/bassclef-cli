@@ -1,0 +1,7 @@
+# Temperance marker — fix/scripts-lib-untracked
+- date: 2026-09-18
+- branch: fix/scripts-lib-untracked
+- scope-decision:
+  - right thing: add scripts/lib/smoke-schema.sh to git tracking so runbook works from a fresh clone; fix .gitignore so future files under scripts/lib/ don't hit the same silent-ignore trap
+  - right way: two-line gitignore un-ignore (mirror src/lib pattern) + git add -f the missing file; small PR straight into main
+  - drift trigger: refactoring smoke scripts, adding a new check, editing test coverage
