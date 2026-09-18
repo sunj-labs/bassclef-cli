@@ -1,12 +1,17 @@
-// Characterization tests — cli 1.1.1 init reporting.
+// Characterization tests — cli 1.1.x init reporting.
 //
 // Per @luminary michael-feathers: these pin what init does TODAY, before
-// the 1.1.1 cures touch it. They are written first and they are not
+// the current cure touches it. They are written first and they are not
 // edited afterward. If a later change makes one of these fail, the change
 // broke something an adopter could see.
 //
 // The one behavior deliberately NOT pinned here is `--json` stream
 // placement. That is the defect (#94); its test lives in the cure file.
+//
+// Updated for bassclef-cli#120 (2026-09-18): the "0 files refused" line
+// no longer fires on a fresh install (was noise; only fires now when
+// refused > 0). The order test drops that regex from the fresh-install
+// path. See tests/init-banner-noise-cleanup.test.ts for the new gates.
 //
 // test-list:
 // [x] non-JSON run exits 0 on a fresh target
@@ -68,7 +73,9 @@ describe('characterization — bassclef init without --json', () => {
       /substrate files copied/,
       /files total \(1 config \+ \d+ substrate\)/,
       /Installed \d+ of \d+ hooks/,
-      /files refused \(path collision\)/,
+      // "files refused (path collision)" line removed per bassclef-cli#120 —
+      // fires only when refused > 0. Fresh install (this test) sees zero
+      // refused and no line at all.
       /your substrate lives under/,
     ];
 
