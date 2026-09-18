@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18
+last_updated: 2026-09-18 (v2 — curl bootstrap)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -26,18 +26,44 @@ Runs Layer 1 of the smoke test system against whatever is currently `latest` on 
 - Node 20+ and npm 10+
 - `jq` on PATH (`brew install jq`)
 - `perl` on PATH (ships with macOS)
+- `curl` on PATH (ships with macOS)
 - `gh` on PATH plus `gh auth login` completed as `kingofrock`
 - `claude` CLI on PATH
-- Bassclef-cli checkout at `~/tmp/bassclef-cli` (or elsewhere — set `$BCLI` below)
 
-## Setup
+No git clone needed. The bootstrap curls everything.
+
+## Setup — one-curl bootstrap
+
+Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`:
 
 ```bash
-cd ~/tmp
-[ -d bassclef-cli ] || git clone https://github.com/sunj-labs/bassclef-cli.git
-cd bassclef-cli && git checkout main && git pull
-export BCLI=~/tmp/bassclef-cli
+curl -sfL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-bootstrap.sh | bash
+export BCLI=~/tmp/bassclef-smoke
 ```
+
+Idempotent — re-run any time to pull the latest scripts.
+
+**Options:**
+
+```bash
+# Fetch from a branch other than main
+curl -sfL .../smoke-bootstrap.sh | bash -s -- --ref feat/109-smoke-evidence-capture-layer-1
+
+# Land in a different dir
+curl -sfL .../smoke-bootstrap.sh | bash -s -- --target ~/tools/smoke
+
+# Preview without fetching
+curl -sfL .../smoke-bootstrap.sh | bash -s -- --dry-run
+```
+
+**Fetched files** (10 total):
+
+- `scripts/smoke-capture.sh`, `scripts/smoke-assert-hooks.sh`, `scripts/smoke-assert-skills.sh`
+- `scripts/smoke-drive-skills.sh`, `scripts/smoke-report.sh`
+- `scripts/smoke-reset.sh`, `scripts/smoke-reset-whole.sh`, `scripts/smoke-preflight.sh`
+- `scripts/lib/smoke-assert.sh`, `scripts/lib/smoke-schema.sh`
+
+The scripts source each other via `${SCRIPT_DIR}/lib/...`, so the layout under `$BCLI/scripts/` is what makes them work.
 
 ## Step 1 — Reset with snapshot (safe)
 
@@ -184,3 +210,9 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - PR: sunj-labs/bassclef-cli#110
 - Coordination ticket for the 2026-09-17 smoke findings: bassclef-upstream#1728
 - Fixture pins: cli#101 through cli#108
+
+## Change log
+
+**2026-09-18 v2 — curl bootstrap.** Setup no longer needs `git clone`. New `scripts/smoke-bootstrap.sh` curls the ten smoke files into `~/tmp/bassclef-smoke/scripts/`. One command from the cold profile.
+
+**2026-09-18 v1 — initial runbook.** Shipped with PR #110 alongside Layer 1 scripts. Setup used `git clone`.
