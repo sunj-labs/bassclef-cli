@@ -1,0 +1,5 @@
+# ADR-deviation marker — fix/smoke-honest-assertions-116-117-118
+- date: 2026-09-18
+- branch: fix/smoke-honest-assertions-116-117-118
+- adr_governing: none — smoke assertion library (scripts/lib/smoke-assert.sh) is dev-facing test infrastructure not covered by any pinned ADR; no adopter contract, no cli runtime path
+- outcome: ADR-honored

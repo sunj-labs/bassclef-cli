@@ -4,12 +4,17 @@
 // tests/smoke-defect-fixtures.test.ts (same shared lib). This file proves the
 // skills variant uses skills-specific defaults and output paths.
 //
-// @verifies spec § Acceptance item 5 (assert-skills runs same 4 checks per skill)
+// @verifies spec § Acceptance item 5 (assert-skills runs same checks per skill)
 // @verifies UC-smoke-run § Main flow Step 14 + Extension 13b
+//
+// Updated for bassclef-cli#117 (2026-09-18) — the skill check set now
+// includes no-timeout + no-crash, extending the base 4 checks to 6.
+// The base check names + skill-specific paths remain the contract; the
+// row count assertion updates to reflect the two new checks.
 //
 // # test-list:
 // [x] --help exits 0
-// [x] happy path: single skill capture; exits 0; JSON has 4 rows
+// [x] happy path: single skill capture; exits 0; JSON has 6 rows (base 4 + no-timeout + no-crash per bassclef-cli#117)
 // [x] default OUT_FILE is skills-assertions.json (not hooks-)
 // [x] --only <check> writes skills-assertions-<check>.json
 
@@ -45,17 +50,21 @@ describe('smoke-assert-skills — uses skills-specific paths', () => {
     expect(r.stdout).toContain('smoke-assert-skills.sh');
   });
 
-  it('happy path — clean skill capture; exits 0; JSON has 4 rows', () => {
+  it('happy path — clean skill capture; exits 0; JSON has 6 rows (base 4 + timeout + crash per bassclef-cli#117)', () => {
     writeCapture('temperance', '=== skill: /temperance\n=== output ===\nok\n=== exit: 0\n');
     const outFile = join(workDir, 'skills-assertions.json');
     const r = spawnSync('bash', [SCRIPT, '--capture-dir', captureDir, '--out', outFile], { encoding: 'utf8' });
     expect(r.status).toBe(0);
     const results = JSON.parse(readFileSync(outFile, 'utf8'));
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(6);
     for (const row of results) {
       expect(row.source).toBe('temperance');
       expect(row.status).toBe('PASS');
     }
+    // Assert the new checks are named per bassclef-cli#117
+    const checkNames = results.map((r: { check: string }) => r.check).sort();
+    expect(checkNames).toContain('no-timeout');
+    expect(checkNames).toContain('no-crash');
   });
 
   it('default OUT_FILE lands as skills-assertions.json under captures parent', () => {

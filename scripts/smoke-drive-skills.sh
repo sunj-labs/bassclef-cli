@@ -38,7 +38,7 @@ trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
 OUT_ROOT=""
 SKILL_LIST_FILE=""
 CLAUDE_BIN="claude"
-TIMEOUT_SEC=30
+TIMEOUT_SEC=120
 DRY_RUN=0
 
 # Default skill list per spec § Acceptance item 4.

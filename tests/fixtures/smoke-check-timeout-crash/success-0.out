@@ -1,0 +1,4 @@
+=== skill: whereami
+=== command: claude -p /whereami
+Everything is fine here — normal skill output.
+=== exit: 0

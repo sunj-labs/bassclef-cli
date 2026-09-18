@@ -1,0 +1,5 @@
+=== hook: session-reflection
+The hook mentions /agents/architect.md and /rules/testing.md.
+It also references /skills/temperance/SKILL.md and /luminaries/kent-beck.md.
+None of these are absolute filesystem paths — they're path tails inside content.
+=== exit: 0

@@ -98,8 +98,11 @@ check_no_unexpected_blocked() {
 }
 
 # check_paths_exist — every filesystem path the capture names must
-# exist on disk. Heuristic: matches /<segment>/... where segment
-# starts with a letter or underscore.
+# exist on disk. Per bassclef-cli#118 Option A — only extract paths
+# that start with a known-absolute prefix (/Users/, /opt/, /etc/, /tmp/,
+# /var/, /private/, /home/, /root/). Fragment paths like /agents/x.md
+# are relative-path tails, not filesystem targets, and were false-
+# positive-failing on the 2026-09-18 cold-adopter smoke.
 check_paths_exist() {
   local capture_file="$1"
   _smoke_assert_precheck "$capture_file" || return 1
@@ -107,13 +110,12 @@ check_paths_exist() {
   local missing=0
   local missing_list=""
   local paths
-  # Skip capture-header lines (start with ===) — these carry the harness's
-  # metadata (skill, command, exit) and do not name filesystem paths worth
-  # checking. Also require paths to have at least one dot or a nested slash
-  # so we don't false-positive on skill-slug shapes like /temperance.
+  # Skip capture-header lines (start with ===). Anchor to known-absolute
+  # prefixes only. The prefix union covers macOS ($HOME under /Users/,
+  # /private/var, /opt/homebrew), Linux (/home/, /var/, /etc/, /opt/, /root/),
+  # and shared tmp (/tmp/). Fragment paths (/agents/, /rules/) skip.
   paths=$(grep -v '^===' "$capture_file" 2>/dev/null \
-    | grep -oE '/[A-Za-z_][A-Za-z0-9_/.-]*' 2>/dev/null \
-    | grep -E '(\.[a-z]|/[A-Za-z_])' \
+    | grep -oE '(/Users|/opt|/etc|/tmp|/var|/private|/home|/root)/[A-Za-z0-9_/.-]+' 2>/dev/null \
     | sort -u || echo "")
   if [ -z "$paths" ]; then
     echo "PASS|paths-exist|0 paths named"
@@ -136,5 +138,57 @@ check_paths_exist() {
     return 0
   fi
   echo "FAIL|paths-exist|${missing} of ${total} missing: ${missing_list}"
+  return 1
+}
+
+# check_no_timeout — capture must not report exit 142 (SIGALRM). Per
+# bassclef-cli#117: smoke-drive-skills wraps each `claude -p` call in a
+# perl timeout; on hit the wrapper exits 142. Empty captures then passed
+# every content check, so assert suite reported PASS on timed-out runs.
+# This check reads the '=== exit: N' header line and fails on 142.
+check_no_timeout() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  local exit_line
+  exit_line=$(grep '^=== exit: ' "$capture_file" 2>/dev/null | tail -1)
+  if [ -z "$exit_line" ]; then
+    # No exit line at all — captures without a header are legacy; pass
+    # to keep the check additive. Sister check_no_crash covers non-zero
+    # exits when the header is present.
+    echo "PASS|no-timeout|no exit header (legacy capture)"
+    return 0
+  fi
+  local exit_code
+  exit_code=$(printf '%s' "$exit_line" | awk '{print $NF}')
+  if [ "$exit_code" = "142" ]; then
+    echo "FAIL|no-timeout|skill killed by timeout (exit 142)"
+    return 1
+  fi
+  echo "PASS|no-timeout|exit ${exit_code}"
+  return 0
+}
+
+# check_no_crash — capture must not report a non-zero exit other than
+# 142 (which check_no_timeout covers). Per bassclef-cli#117: a skill
+# exiting 7 or 1 means the run crashed before finishing; the capture
+# body may look OK but the run failed. Zero exits pass here; timeouts
+# also pass (delegated to check_no_timeout so the failure message stays
+# specific per check).
+check_no_crash() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  local exit_line
+  exit_line=$(grep '^=== exit: ' "$capture_file" 2>/dev/null | tail -1)
+  if [ -z "$exit_line" ]; then
+    echo "PASS|no-crash|no exit header (legacy capture)"
+    return 0
+  fi
+  local exit_code
+  exit_code=$(printf '%s' "$exit_line" | awk '{print $NF}')
+  if [ "$exit_code" = "0" ] || [ "$exit_code" = "142" ]; then
+    echo "PASS|no-crash|exit ${exit_code}"
+    return 0
+  fi
+  echo "FAIL|no-crash|skill exited ${exit_code}"
   return 1
 }

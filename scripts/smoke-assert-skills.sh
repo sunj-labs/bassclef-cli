@@ -68,7 +68,7 @@ ISO_DATE=$(date -u +"%Y-%m-%d")
 # --only validation
 if [ -n "$ONLY_CHECK" ]; then
   case "$ONLY_CHECK" in
-    no-not-found|no-silent-skip|no-unexpected-blocked|paths-exist) ;;
+    no-not-found|no-silent-skip|no-unexpected-blocked|paths-exist|no-timeout|no-crash) ;;
     *) echo "smoke-assert-skills: unknown check '$ONLY_CHECK'" >&2; exit 1 ;;
   esac
   OUT_FILE="$(dirname "$OUT_FILE")/skills-assertions-${ONLY_CHECK}.json"
@@ -97,7 +97,9 @@ else
   CHECKS="no-not-found
 no-silent-skip
 no-unexpected-blocked
-paths-exist"
+paths-exist
+no-timeout
+no-crash"
 fi
 
 # accumulate
