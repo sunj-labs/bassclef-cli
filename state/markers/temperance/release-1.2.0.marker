@@ -1,0 +1,12 @@
+# Temperance marker — release 1.2.0 clean
+
+- date: 2026-09-18
+- branch: release/1.2.0
+- scope-decision:
+  - RIGHT THING: yes — 1.2.0-alpha.1 published clean at @next; diff from 1.1.1 is fully additive (.version manifest field + v0.45.0 substrate + setBlocking fix); qualifies as minor semver bump; prerelease framing was inherited inertia, not intentional strategy.
+  - SIMPLEST: yes — version bump + CHANGELOG rollup + DIAG trace removal + tag/release without --prerelease → publish workflow uses --tag latest per publish.yml:294.
+  - BRUTE FORCE: no — targeted release.
+  - BLAST RADIUS: adopters on 1.1.1 will auto-update to 1.2.0 on next `npm install -g @thebassclef/lite@latest`. Additive change; drift hook + init behavior unchanged for non-adopters of the new field. Real risk: unknown behavior in fresh v0.45.0 substrate that cold-adopter smoke hasn't run yet.
+  - VERIFICATION: local 428/428 tests + typecheck clean; publish workflow lands; npm view @thebassclef/lite version returns 1.2.0.
+  - REVERSIBLE: yes — npm deprecate + revert dist-tag if defect surfaces.
+- drift-trigger: publish CI failing again — pause and pivot.

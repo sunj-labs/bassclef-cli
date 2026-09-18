@@ -268,83 +268,11 @@ describe('bassclef init — dry-run parity with real run (#60 + ADR-055)', () =>
     const expectedCount = walkerCount + undeclaredHookCount + 1; // + substrate.config.md
 
     const r = runCli(['--dry-run'], { cwd: workDir });
-
-    // DIAG (2026-09-18 — remove after root cause fixed). Publish CI kept
-    // failing this assertion with 172 vs 507 while local ran 14/14 green.
-    // Probe 1 falsified H1 (SIGKILL) + H2 (workDir contam).
-    // Probe 2 (Nygard fail-loud + Ousterhout deep-modules lens): the CLI
-    // ships stdout that ends mid-list with NO banners AND status=0.
-    // The CLI's `result` object may carry evidence stdout doesn't reveal
-    // (errored files, wouldCopy count). Fetch the --json report to see it.
-    // eslint-disable-next-line no-console
-    console.error(
-      `DIAG-1 init-parity: status=${r.status} signal=${r.signal} ` +
-        `stdout.len=${r.stdout.length} stderr.len=${r.stderr.length} ` +
-        `walkerCount=${walkerCount} undeclared=${undeclaredHookCount} ` +
-        `expected=${expectedCount} ` +
-        `workDir=${workDir} ` +
-        `substrateExistsPre=${fsMod.existsSync(join(workDir, 'substrate.config.md'))} ` +
-        `workDirEntriesPre=${fsMod.readdirSync(workDir).length} ` +
-        `node=${process.version} platform=${process.platform}`
-    );
-
-    // DIAG probe 2 — separate --json run so we see the CLI's own report
-    // structure. Fresh workDir per beforeEach means we can call runCli
-    // again without state pollution (this test already ran once above).
-    const rJson = runCli(['--dry-run', '--json'], { cwd: workDir });
-    let reportShape = 'PARSE-FAIL';
-    try {
-      // --json under --dry-run emits the report object on stdout per
-      // src/commands/init.ts:178-193. Any other output goes to stderr.
-      const jsonLine = rJson.stdout
-        .split('\n')
-        .find((l) => l.trim().startsWith('{'));
-      if (jsonLine) {
-        const rep = JSON.parse(jsonLine);
-        reportShape = JSON.stringify({
-          keys: Object.keys(rep),
-          hooksDeclared: rep.hooks?.declared,
-          hooksInBundle: rep.hooks?.in_bundle,
-          totalsUser: rep.totals?.user,
-          totalsProject: rep.totals?.project,
-          erroredCount: (rep.errored ?? []).length,
-          refusedCount: (rep.refused ?? []).length,
-          entriesCount: (rep.hooks?.entries ?? rep.entries ?? []).length,
-          catalog: rep.catalog,
-        });
-      } else {
-        reportShape = `NO-JSON-LINE stdoutLen=${rJson.stdout.length} first=${JSON.stringify(rJson.stdout.slice(0, 80))}`;
-      }
-    } catch (e) {
-      reportShape = `PARSE-ERR ${(e as Error).message}`;
-    }
-    // eslint-disable-next-line no-console
-    console.error(
-      `DIAG-2 json-report: status=${rJson.status} signal=${rJson.signal} ` +
-        `stdout.len=${rJson.stdout.length} stderr.len=${rJson.stderr.length} ` +
-        `report=${reportShape}`
-    );
-
     expect(r.status).toBe(0);
 
     const wouldCreateLines = (r.stdout + r.stderr)
       .split('\n')
       .filter((line) => /would create/i.test(line));
-
-    // DIAG — if the assertion fails, print the actual count + a sample
-    // of the tail so we see whether output was truncated mid-line.
-    if (wouldCreateLines.length !== expectedCount) {
-      const allLines = (r.stdout + r.stderr).split('\n');
-      // eslint-disable-next-line no-console
-      console.error(
-        `DIAG init-parity MISMATCH: got=${wouldCreateLines.length} ` +
-          `expected=${expectedCount} ` +
-          `totalLines=${allLines.length} ` +
-          `firstLine=${JSON.stringify(allLines[0]?.slice(0, 120))} ` +
-          `lastLine=${JSON.stringify(allLines[allLines.length - 2]?.slice(0, 120))}`
-      );
-    }
-
     expect(wouldCreateLines.length).toBe(expectedCount);
   });
 

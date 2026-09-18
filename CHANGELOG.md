@@ -24,6 +24,29 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.2.0] — 2026-09-18
+
+Additive minor release. Rolls up alpha.0 + alpha.1 (both shipped as preview at `@next` on npm) into a clean release at `@latest`. Diff from 1.1.1 is fully additive: no breaking changes, no schema shape change adopters must migrate. Existing adopters get the update on next `npm install -g @thebassclef/lite@latest`.
+
+### Added
+
+- **`.version` at top level of `.bassclef/init.manifest.json`** (bassclef-cli#129, closes bassclef-upstream#1749). `Manifest` interface in `src/lib/manifest-types.ts:68` gains the field; `manifestTemplate` in `src/commands/init-templates/manifest-json.ts:26` and `src/lib/migrate.ts:136` emit it as the installed cli semver. Duplicates `$bassclef.generated_by_version` on purpose — v0.45.0's session-start drift hook reads `.version` shallow via `jq -r '.version // ""'` and does not walk into `$bassclef`. Existing 1.1.1 installs will not gain the field until they reinstall (or run `bassclef init --force`).
+- 3 Tier 0 tests at `tests/init-manifest-version-field.test.ts` pin the field is present, equals `package.json` version, and matches `$bassclef.generated_by_version`.
+- **Bundled substrate at bassclef v0.45.0.** Ships seven adopter cures from upstream — cli#102 (no false BLOCKED banner on fresh install), cli#105 (BASSCLEF_DIR probe finds bundled path), cli#106 (clone-failure classifier names real cause), cli#107 (textstat warning fires once per session), cli#108 (no false ABRUPT STOP banner on fresh install), bassclef-upstream#1742 (`compare_wirings` guarded-command normalization), release-pipeline (PR body auto-populate + SESSION_LOCK guard). Plus the new drift hook + `.bassclef-source-config-validate.sh` mechanism.
+
+### Fixed
+
+- **stdout writes dropped on CLI exit under CI pipes** (bassclef-cli#134). `src/cli.ts:92` calls `process.exit(exitCode)` after `main` resolves. Node's writes to a pipe (spawnSync capture, `bassclef init | tee`, CI subprocess) are async; buffered writes still in Node's stream state get abandoned when `process.exit` fires. TTY writes are sync, so the bug never bit human runs. Publish CI at `tests/init.test.ts:274` caught the class after PR #128 unmasked it — 172 of 506 `would create` lines emitted on Linux CI vs the full 506 on macOS local. Fix: set stdout/stderr handles blocking at CLI entry so every write is synchronous. Per nodejs/node#3669, #6456, #19218.
+- **Missing `.version` field in migrate manifest** (bassclef-cli#131). Follow-on to #129 — the `Manifest` type made `.version` required but `src/lib/migrate.ts:136` was the second construction site and wasn't updated. Vitest passes locally (esbuild transform) but strict `tsc --noEmit` on CI catches the class.
+- **Test timeout 8s → 60s → 180s** in `tests/init.test.ts` `runCli` helper (PRs #128, #132). Slower CI hardware needs the headroom for `bassclef init` walking 445+ files.
+
+### Notes
+
+- **Install:** `npm install -g @thebassclef/lite@latest`. Verify: `bassclef --version` → `1.2.0`.
+- **Migration path:** no migration required. Additive change.
+- **1.2.0-alpha.0 / alpha.1 stay published at `@next` for reference.** Not deprecated; adopters can pin them if they need the specific pre-release SHA. `@latest` now points at 1.2.0.
+- Bundled substrate at bassclef v0.45.0 (unchanged from alpha.1).
+
 ## [1.2.0-alpha.1] — 2026-09-18
 
 Rolls up alpha.0 (which never landed on npm — publish workflow failed twice on the shipped tag) and adds the missing `.version` field to `.bassclef/init.manifest.json`. That field is the contract v0.45.0's session-start drift hook reads via `jq -r '.version // ""'`. Without it the hook silently returns 0 and adopters on stale lite never see the "update available" banner.

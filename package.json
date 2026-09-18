@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.2.0-alpha.1",
+  "version": "1.2.0",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
@@ -47,7 +47,7 @@
     "bundle_paths": [
       "dist/lite/"
     ],
-    "phase_note": "cli 1.2.0-alpha.1 (2026-09-18) — adds the top-level `.version` field to `.bassclef/init.manifest.json` so v0.45.0's `91-npm-version-drift.sh` hook can compare installed vs npm-latest. Cures the silent-drift class where an adopter on stale lite never sees the update banner. Rolls up the alpha.0 substrate (bassclef v0.45.0 + 5 cli-side PRs) that never published. Per bassclef-upstream#1749; cli PR #129."
+    "phase_note": "cli 1.2.0 (2026-09-18) — additive minor release. Adds the top-level `.version` field to `.bassclef/init.manifest.json` so v0.45.0's `91-npm-version-drift.sh` hook can compare installed vs npm-latest. Bundles bassclef v0.45.0 substrate (7 adopter cures + drift hook). Ships the stdout-blocking fix at cli entry (Node async-pipe-write dropped writes on process.exit under CI pipes). Rolls up 1.2.0-alpha.0 + alpha.1 which shipped as previews at @next. Per bassclef-upstream#1749; cli PRs #129, #131, #134."
   },
   "engines": {
     "node": ">=20"
