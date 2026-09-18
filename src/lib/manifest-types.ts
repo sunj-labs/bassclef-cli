@@ -56,6 +56,16 @@ export interface ManifestEntry {
 export interface Manifest {
   /** Top-level shape marker per RFC-0002 L2. Integer 2 as of cli 1.0.1. */
   schema_version: typeof MANIFEST_SHAPE_VERSION;
+  /**
+   * Installed cli semver. Read by the v0.45.0 session-reflection fragment
+   * 91 (via lib/npm-version-check.sh) to detect when npm-latest has moved
+   * past this install. Field name pinned to `.version` at top level so
+   * the drift check's `jq -r '.version // ""'` finds it. Same string as
+   * $bassclef.generated_by_version — the duplicate is deliberate; the
+   * drift check does not walk into $bassclef.
+   * Per bassclef-upstream#1749.
+   */
+  version: string;
   $bassclef: {
     template: 'init.manifest.json';
     manifest_schema_version: string;

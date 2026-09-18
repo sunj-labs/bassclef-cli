@@ -1,0 +1,10 @@
+# Temperance marker — feat/init-manifest-version-field-drift-hook
+- date: 2026-09-18
+- branch: feat/init-manifest-version-field-drift-hook
+- right-thing: yes — precondition owed per bassclef-upstream#1749; v0.45.0 drift hook needs this field to fire.
+- simplest: one field addition to Manifest interface + one line in manifestTemplate + one test. Additive; no schema_version bump needed (readers ignore unknown fields).
+- brute-force: no — sources read (drift hook lib, manifestTemplate, Manifest interface); one hypothesis; test-first path.
+- reach: additive field. Existing adopters: unaffected. New installs from this alpha get the field.
+- verification: (a) Tier 0 test asserts field present with pkgVersion value; (b) smoke test edits version to 0.44.0 and confirms drift banner fires with correct old/new numbers
+- reversible: trivial
+- scope-decision: right-thing = additive field; right-way = TDD + smoke; drift-trigger = if smoke does NOT surface banner, halt + investigate hook wiring
