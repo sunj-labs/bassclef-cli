@@ -1,0 +1,7 @@
+# Temperance marker — fix/bootstrap-next-steps
+- date: 2026-09-18
+- branch: fix/bootstrap-next-steps
+- scope-decision:
+  - right thing: make smoke-bootstrap.sh print next commands so cold-adopter operator sees what to do after fetch; runbook Setup notes this
+  - right way: append cat heredoc after successful fetch AND after dry-run; keep reset operator-triggered per Nygard safe-default (curl-pipe has no interactive stdin)
+  - drift trigger: adding interactive prompt inside bootstrap (won't work under curl | bash), wrapping reset in the bootstrap call itself
