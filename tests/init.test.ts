@@ -271,18 +271,58 @@ describe('bassclef init — dry-run parity with real run (#60 + ADR-055)', () =>
 
     // DIAG (2026-09-18 — remove after root cause fixed). Publish CI kept
     // failing this assertion with 172 vs 507 while local ran 14/14 green.
-    // Prime suspect: SIGKILL truncation at prior 60s timeout. Sister
-    // suspect: substrate.config.md "already exists" on a fresh mkdtemp
-    // workDir. This trace answers both in one CI round-trip.
+    // Probe 1 falsified H1 (SIGKILL) + H2 (workDir contam).
+    // Probe 2 (Nygard fail-loud + Ousterhout deep-modules lens): the CLI
+    // ships stdout that ends mid-list with NO banners AND status=0.
+    // The CLI's `result` object may carry evidence stdout doesn't reveal
+    // (errored files, wouldCopy count). Fetch the --json report to see it.
     // eslint-disable-next-line no-console
     console.error(
-      `DIAG init-parity: status=${r.status} signal=${r.signal} ` +
+      `DIAG-1 init-parity: status=${r.status} signal=${r.signal} ` +
         `stdout.len=${r.stdout.length} stderr.len=${r.stderr.length} ` +
         `walkerCount=${walkerCount} undeclared=${undeclaredHookCount} ` +
         `expected=${expectedCount} ` +
         `workDir=${workDir} ` +
         `substrateExistsPre=${fsMod.existsSync(join(workDir, 'substrate.config.md'))} ` +
-        `workDirEntriesPre=${fsMod.readdirSync(workDir).length}`
+        `workDirEntriesPre=${fsMod.readdirSync(workDir).length} ` +
+        `node=${process.version} platform=${process.platform}`
+    );
+
+    // DIAG probe 2 — separate --json run so we see the CLI's own report
+    // structure. Fresh workDir per beforeEach means we can call runCli
+    // again without state pollution (this test already ran once above).
+    const rJson = runCli(['--dry-run', '--json'], { cwd: workDir });
+    let reportShape = 'PARSE-FAIL';
+    try {
+      // --json under --dry-run emits the report object on stdout per
+      // src/commands/init.ts:178-193. Any other output goes to stderr.
+      const jsonLine = rJson.stdout
+        .split('\n')
+        .find((l) => l.trim().startsWith('{'));
+      if (jsonLine) {
+        const rep = JSON.parse(jsonLine);
+        reportShape = JSON.stringify({
+          keys: Object.keys(rep),
+          hooksDeclared: rep.hooks?.declared,
+          hooksInBundle: rep.hooks?.in_bundle,
+          totalsUser: rep.totals?.user,
+          totalsProject: rep.totals?.project,
+          erroredCount: (rep.errored ?? []).length,
+          refusedCount: (rep.refused ?? []).length,
+          entriesCount: (rep.hooks?.entries ?? rep.entries ?? []).length,
+          catalog: rep.catalog,
+        });
+      } else {
+        reportShape = `NO-JSON-LINE stdoutLen=${rJson.stdout.length} first=${JSON.stringify(rJson.stdout.slice(0, 80))}`;
+      }
+    } catch (e) {
+      reportShape = `PARSE-ERR ${(e as Error).message}`;
+    }
+    // eslint-disable-next-line no-console
+    console.error(
+      `DIAG-2 json-report: status=${rJson.status} signal=${rJson.signal} ` +
+        `stdout.len=${rJson.stdout.length} stderr.len=${rJson.stderr.length} ` +
+        `report=${reportShape}`
     );
 
     expect(r.status).toBe(0);

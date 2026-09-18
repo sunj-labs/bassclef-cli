@@ -1,0 +1,12 @@
+# Temperance marker — probe 2 (Nygard + Ousterhout lens)
+
+- date: 2026-09-18
+- branch: diagnose/init-parity-probe-2
+- scope-decision:
+  - RIGHT THING: yes — probe 1 falsified H1 (SIGKILL) + H2 (workDir contam). Real defect narrowed to "CLI copySubstrate emits 172/506 wouldCopy silently on CI." Probe 2 uses --json flag to capture full report structure + Node version + tier.
+  - SIMPLEST: yes — swap the failing test's runCli invocation to add --json flag so the CLI emits the report structure; parse it; log errored/wouldCopy/hookCount counts.
+  - BRUTE FORCE: no — targeted probe.
+  - BLAST RADIUS: low — test-file change only, preserves original assertions.
+  - VERIFICATION: CI Test step prints DIAG-2 line; either errored.length is high (H3 silent errors) OR wouldCopy report equals stdout count (report shape is short at source, not truncated downstream).
+  - REVERSIBLE: yes — 10-line test edit.
+- drift-trigger: if the probe doesn't localize the bug, pivot to c2 (skip + follow-on).
