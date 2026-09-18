@@ -24,6 +24,40 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.2.0-alpha.0] — 2026-09-18
+
+Substrate bumped to bassclef v0.45.0. Ships seven adopter cures upstream plus five cli-side PRs from tonight's session. First alpha in the 1.2.0 cycle. Adopters install with `npm install -g @thebassclef/lite@alpha`.
+
+### Added
+
+- `.claude/bassclef-configs.jsonc` — default settings file ships in the bundle so adopters find every tunable block with inline comments on first install. Was absent through 1.1.x. (bassclef-cli#104, PR #124)
+- `.claude/` and `.bassclef/` added to the adopter `.gitignore` template. `git add -A` no longer sweeps 500+ synced files into an accidental commit. (bassclef-cli#99, PR #122)
+- `scripts/lib/smoke-assert.sh` — two new check functions `check_no_timeout` and `check_no_crash` read the `=== exit: N` trailer. Skill captures that exit 142 (SIGALRM) or non-zero now FAIL the assertion suite instead of passing on empty content. (bassclef-cli#117, PR #125)
+
+### Changed
+
+- `bassclef init` banner reads as success on an empty target. The "N failed" phrasing on the hook line fires only when `errored > 0`, never on refused. The `0 files refused (path collision)` line only prints when refused > 0. (bassclef-cli#120, PR #121)
+- `whereami.md` template ships at `docs/whereami.md` instead of the repo root. Bundle and rule now agree; the `/whereami` skill stops guessing. Adopters with an existing root file keep it (init preserves existing per ADR-002). (bassclef-cli#103, PR #123)
+- `scripts/smoke-drive-skills.sh` — `TIMEOUT_SEC` default 30 → 120. First cold-adopter run hit `Alarm clock: 14` on every skill; new default covers observed p95. (bassclef-cli#116, PR #125)
+- `scripts/lib/smoke-assert.sh` `check_paths_exist` — regex anchored to known-absolute prefixes (`/Users/`, `/opt/`, `/etc/`, `/tmp/`, `/var/`, `/private/`, `/home/`, `/root/`). Fragment paths like `/agents/x.md` in content no longer false-positive-fail as missing filesystem targets. (bassclef-cli#118, PR #125)
+- `bassclef.upstream_tag` in `package.json` bumped v0.42.0 → v0.45.0. `dist/lite/` regenerated from the sibling checkout at v0.45.0.
+
+### Fixed (from upstream v0.45.0)
+
+- **cli#102** — no BLOCKED orientation banner on fresh install. `session-reflection.d/55-orientation-gate.sh` uses new `lib/fresh-install-check.sh` and stays silent when no commits + no SESSION_LOCK.
+- **cli#105** — `BASSCLEF_DIR` probe finds the bundled path. New `lib/bassclef-dir-resolver.sh` walks peer → `$HOME/bassclef` → bundled → `$CWD` fallback. Prior 2-line resolver lost the bundled path under operator install.
+- **cli#106** — clone-failure classifier names the real cause (auth / visibility / network / unknown). Adopter running with `gh` logged in against a private repo they cannot see no longer gets told to "set up GitHub auth."
+- **cli#107** — textstat warning fires once per session, not once per prompt. Marker under `$HOME/.claude/state/sessions/<id>/textstat-warned`.
+- **cli#108** — no ABRUPT STOP banner on fresh install. `session-reflection.d/10-abrupt-stop-recovery.sh` uses the fresh-install lib.
+- **upstream#1742** — `compare_wirings` jq filter normalizes guarded command shape (`[ -f "path" ] && ... || true`). Adopter settings using the guarded form no longer report as missing. Empty banner suppressed.
+- **release-pipeline** — release PR body auto-populates from `docs/release-notes/v<SEMVER>.md`. SESSION_LOCK write guards `.claude/` directory creation.
+
+### Notes
+
+- **Alpha release.** Install with `npm install -g @thebassclef/lite@alpha`. Verify with `bassclef --version` → `1.2.0-alpha.0`.
+- **Sibling smoke tracking** in bassclef#1495 — this alpha ship gates the deferred smoke follow-on.
+- Related bassclef-cli PRs: #121, #122, #123, #124, #125 (all merged 2026-09-18).
+
 ## [1.1.1] — 2026-09-17
 
 `bassclef init` now reports the truth about what it wrote. Three defects

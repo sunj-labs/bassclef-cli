@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.1.1",
+  "version": "1.2.0-alpha.0",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
@@ -42,12 +42,12 @@
     "LICENSE"
   ],
   "bassclef": {
-    "upstream_tag": "v0.42.0",
+    "upstream_tag": "v0.45.0",
     "wiring_manifest_schema_major": 2,
     "bundle_paths": [
       "dist/lite/"
     ],
-    "phase_note": "cli 1.1.1 (goal 2026-09-17) — init reporting contract per ADR-010. Manifest names every file written; --json moves to stdout and names all catalog families."
+    "phase_note": "cli 1.2.0-alpha.0 (2026-09-18) — pulls bassclef v0.45.0 (7 adopter cures for cli#102/#105/#106/#107/#108 + upstream#1742 + drift-check) plus tonight's 5 cli-side PRs (#121 init banner, #122 gitignore, #123 whereami path, #124 bassclef-configs.jsonc, #125 smoke honesty)."
   },
   "engines": {
     "node": ">=20"

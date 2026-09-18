@@ -1,0 +1,10 @@
+# Temperance marker — release/1.2.0-alpha.0
+- date: 2026-09-18
+- branch: release/1.2.0-alpha.0
+- right-thing: yes — v0.45.0 shipped 7 adopter cures (cli#102/#105/#106/#107/#108 + upstream#1742 + drift-check). Alpha ship gates the follow-on cycle in bassclef#1495 (deferred smoke).
+- simplest: two package.json field bumps + full prepublish regen + tests + smoke. No src/ changes.
+- brute-force: no — sibling checked out at v0.45.0 exact tag; regeneration is deterministic.
+- reach: dist/lite/ regenerates from sibling v0.45.0; all four PRs merged tonight (#121/#122/#123/#124/#125) already ride main.
+- verification: full vitest suite green; typecheck clean; fresh init smoke shows no BLOCKED banner + clean session-start
+- reversible: yes — pre-alpha bump; deprecate on npm if needed.
+- scope-decision: right-thing = ship the alpha now; right-way = TDD-verified regen + smoke; drift-trigger = if any test fails or smoke shows BLOCKED, halt + investigate.
