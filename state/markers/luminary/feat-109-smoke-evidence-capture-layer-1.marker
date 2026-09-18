@@ -1,0 +1,8 @@
+# Luminary marker — feat/109-smoke-evidence-capture-layer-1
+- date: 2026-09-18
+- branch: feat/109-smoke-evidence-capture-layer-1
+- goal: 2026-09-18a-smoke-evidence-capture
+- lead: michael-feathers (characterization tests pin cli#101-#108 in Step 3)
+- supporting: [jerome-saltzer-and-michael-schroeder, kent-beck, alistair-cockburn, donald-norman, john-ousterhout, gary-klein, michael-nygard, ivar-jacobson, david-parnas, frederick-brooks]
+- Step 1 lens: feathers + saltzer-schroeder (test as characterization; complete mediation across wired hooks)
+- Step 2 lens: saltzer-schroeder (four checks per surface — complete mediation of capture content)

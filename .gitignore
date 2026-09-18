@@ -59,9 +59,6 @@ state/markers/turn-prose-flags/
 !src/lib/**
 !harness
 !harness/**
-# >>> bassclef-sync managed symlinks (do not edit) >>>
-CLAUDE.md.bak.*
-# <<< bassclef-sync managed symlinks <<<
 
 # Substrate synced from bassclef into this repo at session start. These
 # files belong to the operator's machine, not to the cli source tree.
@@ -76,3 +73,6 @@ CLAUDE.md.bak.*
 .claude/bassclef-orientation.md
 .claude/*.bak.*
 /lib/
+# >>> bassclef-sync managed symlinks (do not edit) >>>
+CLAUDE.md.bak.*
+# <<< bassclef-sync managed symlinks <<<

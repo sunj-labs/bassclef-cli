@@ -1,0 +1,6 @@
+=== output ===
+BLOCKED: onboard-repo has no path for existing install
+
+This repo already has bassclef initialized. Refuse per cli#101.
+
+=== exit: 2

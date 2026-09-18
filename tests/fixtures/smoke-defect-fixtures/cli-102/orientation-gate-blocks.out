@@ -1,0 +1,8 @@
+=== output ===
+BLOCKED: orientation gate — active goal not read this session
+
+Active iteration_bet: (none in whereami)
+
+Per cli#102 — false-fire on fresh repo (no goal, no commits, no remote).
+
+=== exit: 2

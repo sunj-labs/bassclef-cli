@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/109-smoke-evidence-capture-layer-1
+- date: 2026-09-18
+- branch: feat/109-smoke-evidence-capture-layer-1
+- adr_governing: none — confirmed no ADR coverage for smoke test scripts
+- outcome: ADR-honored
+- note: ADRs governing this repo cover npm package + init + sync + publish surfaces. Smoke test scripts are internal test tooling; no ADR touches this class. Change honors the existing ADR set by staying inside the scripts/ + lib/ scope without touching npm, init, sync, publish, or package.json invariants.

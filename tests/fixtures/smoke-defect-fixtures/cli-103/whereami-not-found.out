@@ -1,0 +1,8 @@
+=== output ===
+reading whereami frontmatter
+cat: whereami.md: No such file or directory
+
+Per cli#103 — rule names the file under docs; template ships it at repo
+root instead.
+
+=== exit: 1

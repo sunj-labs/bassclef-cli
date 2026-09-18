@@ -198,6 +198,69 @@ bassclef migrate --help
 
 ---
 
+## Automated evidence capture (post 2026-09-18 — goal 2026-09-18a)
+
+Steps 5, 6, 7 above are eyeball checks. As of 2026-09-18 they have an
+automated counterpart that captures per-hook + per-skill output to
+files, runs four checks per capture, writes one report, and posts as a
+GitHub issue on `sunj-labs/bassclef-cli` with the `smoke-run-v1` label.
+
+The automated version does NOT replace the eyeball checks yet — the
+plan doc keeps Steps 5-7 for operators who want to eyeball. The
+automated scripts run alongside and produce a durable artifact that
+survives the session (whereas an eyeball pass leaves no trail).
+
+Ship (from goal 2026-09-18a):
+
+- `scripts/smoke-capture.sh` — fires wired SessionStart hooks; writes
+  one file per hook under `docs/smoke-captures/<date>/hooks/`
+- `scripts/smoke-assert-hooks.sh` — runs four checks per hook capture
+- `scripts/smoke-drive-skills.sh` — fires five skills via `claude -p`;
+  writes one file per skill under `docs/smoke-captures/<date>/skills/`
+- `scripts/smoke-assert-skills.sh` — runs same four checks per skill
+- `scripts/smoke-report.sh` — builds report; optional `--publish` posts
+  as GitHub issue with `smoke-run-v1` label; idempotent per version+date
+- `scripts/smoke-reset-whole.sh` — reset with snapshot + `--restore`
+
+To use them after Step 4 above:
+
+```bash
+# from ~/tmp/bassclef-smoke-test (where bassclef init ran)
+
+# capture SessionStart hooks
+bash /path/to/bassclef-cli/scripts/smoke-capture.sh
+
+# capture 5 skills (needs `claude` on PATH)
+bash /path/to/bassclef-cli/scripts/smoke-drive-skills.sh
+
+# assert both surfaces
+bash /path/to/bassclef-cli/scripts/smoke-assert-hooks.sh
+bash /path/to/bassclef-cli/scripts/smoke-assert-skills.sh
+
+# build report and post as issue
+bash /path/to/bassclef-cli/scripts/smoke-report.sh \
+  --version-tag 1.1.1 \
+  --publish
+```
+
+The exit code of `smoke-report.sh` is 0 when all checks pass, 3 when
+any check fails, 4 when publish itself fails.
+
+For a per-check drill-down after a RED smoke, use `--only`:
+
+```bash
+bash /path/to/bassclef-cli/scripts/smoke-assert-hooks.sh --only paths-exist
+```
+
+Design refs: `docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md`,
+`docs/specs/smoke-evidence-capture.md`, `docs/use-cases/UC-smoke-run.md`.
+
+Note on npm provenance (per pre-mortem D4 fold): before installing at
+Step 3 above, verify the provenance badge on the npm package page. Any
+mismatch is a real smoke signal, not a routine check.
+
+---
+
 ## Step 8 — Clean up (optional; use before every re-run)
 
 Between smoke runs on the same profile, run the reset again:
