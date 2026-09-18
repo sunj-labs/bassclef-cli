@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.2.0-alpha.0",
+  "version": "1.2.0-alpha.1",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
@@ -47,7 +47,7 @@
     "bundle_paths": [
       "dist/lite/"
     ],
-    "phase_note": "cli 1.2.0-alpha.0 (2026-09-18) — pulls bassclef v0.45.0 (7 adopter cures for cli#102/#105/#106/#107/#108 + upstream#1742 + drift-check) plus tonight's 5 cli-side PRs (#121 init banner, #122 gitignore, #123 whereami path, #124 bassclef-configs.jsonc, #125 smoke honesty)."
+    "phase_note": "cli 1.2.0-alpha.1 (2026-09-18) — adds the top-level `.version` field to `.bassclef/init.manifest.json` so v0.45.0's `91-npm-version-drift.sh` hook can compare installed vs npm-latest. Cures the silent-drift class where an adopter on stale lite never sees the update banner. Rolls up the alpha.0 substrate (bassclef v0.45.0 + 5 cli-side PRs) that never published. Per bassclef-upstream#1749; cli PR #129."
   },
   "engines": {
     "node": ">=20"

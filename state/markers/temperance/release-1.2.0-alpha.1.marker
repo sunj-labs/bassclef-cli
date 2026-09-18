@@ -1,0 +1,12 @@
+# Temperance marker — release 1.2.0-alpha.1
+
+- date: 2026-09-18
+- branch: release/1.2.0-alpha.1
+- scope-decision:
+  - RIGHT THING: yes — alpha.0 never landed on npm (publish failed twice); alpha.1 rolls up the alpha.0 substrate + adds the .version manifest field (#129) so v0.45.0's drift hook can fire for adopters.
+  - SIMPLEST: yes — semver-clean alpha bump; alternative (re-cut alpha.0) requires deleting the shipped tag + release, more noise.
+  - BRUTE FORCE: no — bump version, changelog entry, build, tag, release. No new code.
+  - BLAST RADIUS: low. Alpha channel only; adopters opt-in via @alpha; existing latest (1.1.1) unchanged.
+  - VERIFICATION: publish workflow lands; `npm view @thebassclef/lite@alpha version` returns 1.2.0-alpha.1; cold-adopter smoke shows .version=1.2.0-alpha.1 in manifest.
+  - REVERSIBLE: yes — `npm deprecate @thebassclef/lite@1.2.0-alpha.1 "..."` if defect surfaces.
+- drift-trigger: any edit beyond version/changelog files, or the publish workflow failing again — pause and reassess.
