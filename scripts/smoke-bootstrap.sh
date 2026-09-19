@@ -135,7 +135,10 @@ Next commands (paste with intent):
   LITE_VER=\$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r .version)
 
   # 4. Install + init + smoke + report (the runbook one-liner)
-  npm install -g "@thebassclef/lite@\${LITE_VER}" && \\
+  #    Leading 'cd ~' is defensive — reset may have deleted the
+  #    prior CWD, which crashes npm on ENOENT: process.cwd.
+  cd ~ && \\
+    npm install -g "@thebassclef/lite@\${LITE_VER}" && \\
     mkdir -p ~/tmp/bassclef-smoke-test && cd ~/tmp/bassclef-smoke-test && \\
     git init -q && bassclef init && \\
     bash \$BCLI/scripts/smoke-capture.sh && \\
