@@ -1,0 +1,7 @@
+# Thread-walk marker — 2026-09-19a-launch-prep-os-contract-plus-docs-merge
+- date: 2026-09-19
+- goal: 2026-09-19a-launch-prep-os-contract-plus-docs-merge
+- parent_goal: NONE (thread root — no ancestors to walk)
+- parent_roadmap: NONE
+- walk-result: single-goal thread; two parallel-safe options ride one goal doc
+- ancestors-scanned: 0 (root goal)

@@ -1,0 +1,7 @@
+# Pre-mortem light marker — feature-151-phase-1-os-contract
+- date: 2026-09-19
+- mode: light (3 lenses × 5-7 risks)
+- lenses: martin-fowler, kent-beck, frederick-brooks
+- risk-ledger: docs/risk-ledgers/2026-09-19a-launch-prep-pre-mortem.md
+- highest-risk: F1 (typo in os array passes JSON, breaks all installs) + K1 (three surfaces drift) + K5 (copy-vs-code contradiction if Linux breaks)
+- folds: 7 folded into Step 1 plan (F1, F3, B1, K1, K2, K3, K5); 3 deferred (F2, B3, K4); 2 falsified (F5, B5)

@@ -49,6 +49,10 @@
     ],
     "phase_note": "cli 1.2.0 (2026-09-18) — additive minor release. Adds the top-level `.version` field to `.bassclef/init.manifest.json` so v0.45.0's `91-npm-version-drift.sh` hook can compare installed vs npm-latest. Bundles bassclef v0.45.0 substrate (7 adopter cures + drift hook). Ships the stdout-blocking fix at cli entry (Node async-pipe-write dropped writes on process.exit under CI pipes). Rolls up 1.2.0-alpha.0 + alpha.1 which shipped as previews at @next. Per bassclef-upstream#1749; cli PRs #129, #131, #134."
   },
+  "os": [
+    "darwin",
+    "linux"
+  ],
   "engines": {
     "node": ">=20"
   },

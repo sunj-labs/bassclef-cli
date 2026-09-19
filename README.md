@@ -1,9 +1,9 @@
-# @thebassclef/core
+# @thebassclef/lite
 
 Install bassclef in your project. Two commands.
 
-```
-npm install -g @thebassclef/core
+```bash
+npm install -g @thebassclef/lite
 bassclef init
 ```
 
@@ -13,76 +13,32 @@ Five minutes from install to a working bassclef in your repo.
 
 `bassclef init` writes a small set of files into your project — a
 settings file for Claude Code, a config file for the CLI, and a
-project manifest. Your project inherits bassclef's skills, rules, and
-agents on the next Claude Code session.
+project manifest. Your project inherits bassclef's skills, rules,
+and agents on the next Claude Code session.
 
 `bassclef sync` upgrades those files in place when a newer package
 version publishes.
+
+## Supported systems
+
+- **macOS** — first-class. Every release is tested here.
+- **Linux** — supported. `npm install` works. First-class support waits on the substrate bash portability audit at [sunj-labs/bassclef#1497](https://github.com/sunj-labs/bassclef/issues/1497). File a ticket if a hook breaks.
+- **WSL 2** (Windows Subsystem for Linux 2) — supported. WSL 2 reports as `linux` to npm, so install works. Same audit note as Linux.
+- **Windows (native PowerShell)** — not supported. `npm install` returns `EBADPLATFORM` by design. Use WSL 2.
+
+See [`standards/os-support.md`](standards/os-support.md) for the full policy.
 
 ## Requirements
 
 - Node.js 20 or newer.
 - npm 10 or newer.
 
-## Status
+## Current release
 
-`0.0.1` — scaffold only. Real behavior lands over the next work units:
+<!-- version-start -->1.2.0<!-- version-end -->
 
-- WU-1 (this release) — package shape, README, LICENSE, CLI shell.
-- WU-2 — `bassclef init` writes your project files.
-- WU-3 — `bassclef sync` upgrades in place.
-- WU-4 — publish pipeline with security defaults.
-- WU-5 — semver + changelog discipline.
-
-`bassclef init` and `bassclef sync` in `0.0.1` print a "not yet — WU-2
-will land this" message and exit non-zero. This is intentional; the
-scaffold ships before the behavior so publish + install can be
-tested end-to-end.
-
-## Contributing
-
-Traceability check runs on every commit that touches source, tests,
-`vite.config.ts`, or `docs/requirements/`. One-time install:
-
-```
-bash scripts/install-git-hooks.sh
-```
-
-The hook fires the traceability test at
-`tests/requirements-traceability.test.ts`. The test walks source for
-`@requirement R-NPM-XXX` comments and tests for `@verifies R-NPM-XXX`
-comments. It fails if a satisfied requirement is missing an edge or
-if a referenced ID is not in the registry at
-`docs/requirements/2026-08-11-npm-distribution.md`.
-
-Bypass in a bind:
-
-```
-SKIP_TRACEABILITY_CHECK=1 git commit -m "..."
-```
-
-The workflow's `checks` job still runs the full test suite (including
-the traceability check) so bypassed commits get caught at CI.
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 
-Apache-2.0. See [LICENSE](./LICENSE).
-
-## Source
-
-Development happens at
-[sunj-labs/bassclef-cli](https://github.com/sunj-labs/bassclef-cli).
-Bassclef's core work happens at
-[sunj-labs/bassclef](https://github.com/sunj-labs/bassclef); the CLI
-here ships the packaged form.
-
-## Sibling repos
-
-- `sunj-labs/bassclef-upstream` — substrate source of truth (private R&D)
-- `sunj-labs/bassclef` — public release target for the substrate
-
-## Docs
-
-- `docs/iteration-bets/2026-08-06b-launch-npm-thebassclef-core.md` — active goal doc
-- `docs/decompositions/wu-1-repo-shape.md` — WU-1 responsibility split
-- `HANDOFF.md` — first-session bootstrap instructions
+Apache-2.0. See [LICENSE](LICENSE).

@@ -1,0 +1,13 @@
+# Lead-lens sign-off — feature-151-phase-1-os-contract
+- date: 2026-09-19
+- branch: feature/151-phase-1-os-contract
+- lead: linus-torvalds
+- signoff: PASS — no findings
+- rationale (Linus lens = adopter-contract balancing check):
+  1. Does the pin keep adopters working? YES — darwin adopters unaffected; new Linux + WSL 2 adopters unblocked; Windows PowerShell fail-fast is intentional and clearly signaled in README + standard.
+  2. Does README agree with package.json? YES — README supported-systems section lists darwin + linux + WSL 2 (linux) + Windows (unsupported); standards/os-support.md carries same list; package.json `"os": ["darwin", "linux"]`.
+  3. Are all three surfaces one commit? YES — atomic PR; independent revert path.
+  4. Does the change introduce silent regression risk? NO — Docker Linux adopters keep working (linux in pin); CI runs on ubuntu-latest (linux in pin); npm install on Windows PowerShell fails loud with EBADPLATFORM (intentional).
+  5. Is the version marker mechanism honest? YES — writeReadmeVersion mirrors writeIndexTsVersion; refuses when marker missing; 3 Tier 0 tests pin behavior.
+- red/amber findings cleared: none (no findings surfaced)
+- suite state at signoff: 433/433 GREEN; typecheck clean

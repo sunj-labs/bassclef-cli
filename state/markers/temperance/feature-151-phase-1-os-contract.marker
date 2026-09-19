@@ -1,0 +1,8 @@
+# Temperance marker — feature-151-phase-1-os-contract
+- date: 2026-09-19
+- branch: feature/151-phase-1-os-contract
+- scope-decision: right thing = #151 Phase 1 (OS contract) + full README rewrite + dynamic version marker in bump-version.mjs; three surfaces + one script extension ship as one atomic PR
+- right-way: package.json + README + standards/os-support.md + scripts/bump-version.mjs + 2 Tier 0 tests all in one commit
+- scope-expansion-2026-09-19T14:10Z: operator authorized extension — README top was stale (@thebassclef/core@0.0.1 scaffold); rewrite is a launch-blocker of its own; dynamic version marker requested to keep bump discipline
+- drift-trigger: if scope creeps into #151 Phase 2 (upstream portability audit) OR touches substrate bash OR touches release workflow OR touches src/*.ts behavior, PAUSE
+- brute-force-check: no. Still one PR, one commit. Right shape.

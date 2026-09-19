@@ -113,7 +113,7 @@ export function refuseIfDirty(allowDirty, runCmd) {
   const runner = runCmd || ((cmd) => execSync(cmd).toString());
   const status = runner('git status --porcelain');
   const lines = status.split('\n').filter(Boolean);
-  const allowed = new Set(['package.json', 'CHANGELOG.md', 'src/index.ts']);
+  const allowed = new Set(['package.json', 'CHANGELOG.md', 'src/index.ts', 'README.md']);
   const disallowed = lines.filter(line => {
     // porcelain format: XY<space>path where XY is a 2-char status field.
     const match = line.match(/^..\s(.+)$/);
@@ -157,6 +157,27 @@ export function writeIndexTsVersion(indexTsPath, newVersion) {
   const tmpPath = indexTsPath + '.tmp';
   writeFileSync(tmpPath, updated, 'utf8');
   renameSync(tmpPath, indexTsPath);
+}
+
+// Keeps the README.md current-release marker in sync with package.json.
+// The marker is what adopters read on the npm page + repo front page.
+// Format: <!-- version-start -->X.Y.Z<!-- version-end -->
+// Refuses when the marker is missing rather than silently no-op.
+export function writeReadmeVersion(readmePath, newVersion) {
+  const text = readFileSync(readmePath, 'utf8');
+  const pattern = /<!-- version-start -->[^<]*<!-- version-end -->/;
+  if (!pattern.test(text)) {
+    throw new RefusedError(
+      `Version marker not found in ${readmePath}. Expected: <!-- version-start -->...<!-- version-end -->`
+    );
+  }
+  const updated = text.replace(
+    pattern,
+    `<!-- version-start -->${newVersion}<!-- version-end -->`
+  );
+  const tmpPath = readmePath + '.tmp';
+  writeFileSync(tmpPath, updated, 'utf8');
+  renameSync(tmpPath, readmePath);
 }
 
 export function writeChangelog(changelogPath, newText) {
@@ -213,9 +234,15 @@ export async function main(argv, cwd) {
     }
     writeIndexTsVersion(indexTsPath, newVersion);
 
+    const readmePath = path.join(workDir, 'README.md');
+    if (!existsSync(readmePath)) {
+      throw new RefusedError(`README.md not found at ${readmePath}. Run from repo root.`);
+    }
+    writeReadmeVersion(readmePath, newVersion);
+
     process.stdout.write(`Bumped: ${pkg.version} → ${newVersion}\n`);
     process.stdout.write('Next steps:\n');
-    process.stdout.write('  git add package.json CHANGELOG.md src/index.ts\n');
+    process.stdout.write('  git add package.json CHANGELOG.md src/index.ts README.md\n');
     process.stdout.write(`  git commit -m "chore: release v${newVersion}"\n`);
     process.stdout.write(`  git tag v${newVersion}\n`);
     process.stdout.write(`  git push origin main v${newVersion}\n`);
