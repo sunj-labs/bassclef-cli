@@ -251,11 +251,25 @@ publish_report() {
     exit 4
   fi
 
+  # Require --version-tag when publishing so the label + title stay stable.
+  # Missing --version-tag would yield "(unspecified)" — not a valid label.
+  if [ -z "$VERSION_TAG" ]; then
+    echo "smoke-report: --version-tag required for --publish" >&2
+    echo "  pass e.g. --version-tag \"\${LITE_VER}\"" >&2
+    exit 1
+  fi
+
   local ver="$VERSION_TAG"
-  [ -z "$ver" ] && ver="(unspecified)"
 
   local title="smoke: @thebassclef/lite@${ver} · ${ISO_DATE}"
-  local label="smoke-run-v1"
+  # Derived label — one per release. Auto-created below, no operator setup.
+  local label="smoke-run-${ver}"
+
+  # Idempotent auto-create so the first run on a fresh target repo works.
+  # --force updates description on re-run; silent on race.
+  "$GH_BIN" label create "$label" --repo "$REPO_TARGET" \
+    --description "smoke test report for @thebassclef/lite@${ver}" \
+    --color 0E8A16 --force >/dev/null 2>&1 || true
 
   # D2 fold — progress print.
   echo "smoke-report: posting to GitHub (${REPO_TARGET}, label ${label})..." >&2
@@ -271,23 +285,23 @@ publish_report() {
   if [ -n "$existing" ]; then
     echo "smoke-report: updating existing issue #${existing} (idempotent)" >&2
     if gh_with_retry "$GH_BIN" issue edit "$existing" --repo "$REPO_TARGET" \
-         --body-file "$OUT_FILE" >/dev/null 2>&1; then
+         --body-file "$OUT_FILE" >/dev/null; then
       echo "${existing} (updated)"
       return 0
     fi
-    echo "smoke-report: publish failed after retry" >&2
+    echo "smoke-report: publish failed after retry (see gh error above)" >&2
     exit 4
   fi
 
   local new_number
   if new_number=$(gh_with_retry "$GH_BIN" issue create --repo "$REPO_TARGET" \
     --title "$title" --label "$label" --body-file "$OUT_FILE" \
-    2>/dev/null | tail -1 | grep -oE '[0-9]+$'); then
+    | tail -1 | grep -oE '[0-9]+$'); then
     echo "$new_number"
     return 0
   fi
 
-  echo "smoke-report: publish failed after retry" >&2
+  echo "smoke-report: publish failed after retry (see gh error above)" >&2
   exit 4
 }
 
