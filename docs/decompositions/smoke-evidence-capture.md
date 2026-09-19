@@ -183,7 +183,7 @@ One Control per multi-step coordination inside the use case. Each fires its Boun
 | **SkillDriver** | ClaudeInvoker (per skill) + StderrReader + FilesystemWriter | CaptureFile (per skill) |
 | **AssertionSuite** | Four Strategy check functions per CaptureFile | AssertionResult (per check per surface) |
 | **ReportBuilder** | reads AssertionResult set + writes Report | Report (markdown file) |
-| **PublisherController** | GhInvoker for issue list (search open smoke-run-v1 with matching version + date) + GhInvoker for create-or-update + report body versioning marker | Issue (external — GitHub state); labeled `smoke-run-v1` |
+| **PublisherController** | GhInvoker for label ensure (auto-create `smoke-run-<version>` via `gh label create --force`) + GhInvoker for issue list (search open `smoke-run-<version>` with matching version + date) + GhInvoker for create-or-update + report body versioning marker | Issue (external — GitHub state); labeled `smoke-run-<version>` |
 | **ResetController** | FilesystemWriter (many targets) + NpmInvoker (uninstall) + FilesystemWriter for snapshot dirs + FilesystemWriter for restore | ResetLog (idempotency record); Snapshot (per-timestamp backup dir under `~/tmp/bassclef-smoke-reset-backups/`) |
 | **BootstrapController** (post-merge 2026-09-18) | CurlFetcher (10 files) + FilesystemWriter (target-dir layout) + stderr next-command block | fetched scripts under `$TARGET/scripts/` with `scripts/lib/` layout preserved |
 
@@ -196,9 +196,9 @@ Nouns that carry data across steps.
 | **CaptureFile** | on disk under `docs/smoke-captures/<date>/hooks/*.out` and `.../skills/*.out` | HookRunner + SkillDriver create; AssertionSuite reads |
 | **AssertionResult** | on disk as `hooks-assertions.json` and `skills-assertions.json`; per-check variant `<check-name>-only.json` when `--only` fires | AssertionSuite creates; ReportBuilder reads |
 | **Fixture** | on disk under `.claude/hooks/tests/fixtures/2026-09-18-smoke-findings/cli-<N>/` | Committed to repo; AssertionSuite reads at fixture-test time |
-| **Report** | on disk as `docs/smoke-captures/<date>/report.md`; body carries a version marker in the frontmatter (`report_shape_version: 1`) matching the `smoke-run-v1` label | ReportBuilder creates; PublisherController reads |
+| **Report** | on disk as `docs/smoke-captures/<date>/report.md`; body carries a version marker in the frontmatter (`report_shape_version: 1`); label carries the release version, not the body-shape version (see F1 note below) | ReportBuilder creates; PublisherController reads |
 | **Allowlist** | on disk as `.claude/hooks/tests/fixtures/smoke-allowlist/<check>.txt` | Committed to repo; AssertionSuite reads |
-| **Issue** | external — GitHub; labeled `smoke-run-v1`; body follows Report's versioned shape | PublisherController creates or updates via GhInvoker |
+| **Issue** | external — GitHub; labeled `smoke-run-<version>` (e.g. `smoke-run-1.2.0`); body follows Report's versioned shape | PublisherController creates or updates via GhInvoker |
 | **Snapshot** | on disk under `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/` (RFC F6 fold); mirrors target dirs; auto-expires after 7 days | ResetController writes on `--whole`; reads on `--restore` |
 | **ResetLog** | on disk as `docs/smoke-captures/<date>/reset.log` | ResetController writes; operator reads |
 
@@ -251,9 +251,9 @@ Three additions surfaced between PR #110 merge and the cold-profile smoke run:
 
 Design deltas from `docs/rfc/RFC-smoke-evidence-adversarial.md`:
 
-- **F1 — Report shape versioned.** Report entity gains `report_shape_version: 1` frontmatter. Issue label becomes `smoke-run-v1`. Future breaking changes ship as `-v2` per ADR-031 grace.
+- **F1 — Report shape versioned.** Report entity gains `report_shape_version: 1` frontmatter. Future breaking body-shape changes bump the frontmatter version per ADR-031 grace. Agents parse the frontmatter to pick shape. (Original F1 fold put the shape version in the label as `smoke-run-v1`; retired 2026-09-19 per PR #141 after cold-adopter-1 smoke exposed the label-hardcoding trap. Label now derives from the release version — `smoke-run-<version>` — and auto-creates on first publish per release.)
 - **F2 — Two personas.** Operator-Release + Operator-Diagnose. `smoke-assert-hooks.sh --only <check-name>` and `smoke-assert-skills.sh --only <check-name>` serve Operator-Diagnose. New AssertionResult variant `<check-name>-only.json`.
-- **F4 — Publish idempotent.** PublisherController now runs a search-first step: `gh issue list --label smoke-run-v1 --state open --search "<version>"`. When open issue exists on same date, updates body via `gh issue edit` instead of creating. `--new` flag forces fresh create.
+- **F4 — Publish idempotent.** PublisherController now runs a label-ensure step (`gh label create smoke-run-<version> --force`) plus a search-first step: `gh issue list --label smoke-run-<version> --state open --search "<version>"`. When open issue exists on same date, updates body via `gh issue edit` instead of creating. `--new` flag forces fresh create.
 - **F6 — Reset snapshotted.** New Snapshot entity under `~/tmp/bassclef-smoke-reset-backups/<ISO-timestamp>/`. ResetController writes snapshot before clear; `--restore <ISO-timestamp>` reads snapshot. Auto-expires after 7 days.
 
 ## References

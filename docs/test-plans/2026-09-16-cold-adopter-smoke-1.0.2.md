@@ -203,7 +203,10 @@ bassclef migrate --help
 Steps 5, 6, 7 above are eyeball checks. As of 2026-09-18 they have an
 automated counterpart that captures per-hook + per-skill output to
 files, runs four checks per capture, writes one report, and posts as a
-GitHub issue on `sunj-labs/bassclef-cli` with the `smoke-run-v1` label.
+GitHub issue on `sunj-labs/bassclef-cli` with a `smoke-run-<version>`
+label (auto-created on first publish per release). Prior to PR #141
+(2026-09-19), the label was the static `smoke-run-v1`; retired in
+favor of the derived form to remove hardcoded label brittleness.
 
 The automated version does NOT replace the eyeball checks yet — the
 plan doc keeps Steps 5-7 for operators who want to eyeball. The
@@ -219,7 +222,9 @@ Ship (from goal 2026-09-18a):
   writes one file per skill under `docs/smoke-captures/<date>/skills/`
 - `scripts/smoke-assert-skills.sh` — runs same four checks per skill
 - `scripts/smoke-report.sh` — builds report; optional `--publish` posts
-  as GitHub issue with `smoke-run-v1` label; idempotent per version+date
+  as GitHub issue with `smoke-run-<version>` label (auto-created via
+  `gh label create --force`); idempotent per version+date; requires
+  `--version-tag`
 - `scripts/smoke-reset-whole.sh` — reset with snapshot + `--restore`
 
 To use them after Step 4 above:
