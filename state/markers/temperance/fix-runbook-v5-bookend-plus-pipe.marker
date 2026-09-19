@@ -1,0 +1,7 @@
+# Temperance marker — fix-runbook-v5-bookend-plus-pipe
+- date: 2026-09-19
+- branch: fix/runbook-v5-bookend-plus-pipe
+- scope-decision: right thing = port content from stale #114 + #115 into one fresh PR against current runbook v4; ship as v5 with combined change log entry
+- right-way: one runbook file edited; markers touched; no code touched
+- drift-trigger: if scope touches smoke scripts or bootstrap.sh, PAUSE (belongs in a separate scope)
+- brute-force-check: no. One doc, one PR. Right shape.

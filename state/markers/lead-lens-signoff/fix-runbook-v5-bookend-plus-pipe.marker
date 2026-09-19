@@ -1,0 +1,12 @@
+# Lead-lens sign-off — fix-runbook-v5-bookend-plus-pipe
+- date: 2026-09-19
+- branch: fix/runbook-v5-bookend-plus-pipe
+- lead: donald-norman
+- signoff: PASS — no findings
+- rationale:
+  1. Does the pipe callout stop the observed cold-adopter failure? YES — bold ⚠ callout above the code block plus verify step (ls check) plus troubleshooting entry for the observed case.
+  2. Does the bookend banner section reduce first-adopter confusion? YES — names the two banner lines, shows a full example run, calls out the slow-step case explicitly.
+  3. Does the change log entry cite the port from #114 + #115? YES — names both closed PRs plus the reason they were stale.
+  4. Any content drift from the original PRs? NO — content ported verbatim; only reflowed for insertion into current runbook v4 anchors.
+- red/amber findings cleared: none
+- source content preserved: PR #114 bookend section verbatim + PR #115 pipe callout + verify step + troubleshooting entries verbatim

@@ -1,0 +1,8 @@
+# Luminary marker — fix-runbook-v5-bookend-plus-pipe
+- date: 2026-09-19
+- branch: fix/runbook-v5-bookend-plus-pipe
+- lead: donald-norman
+- supporting:
+  - alan-cooper
+  - michael-nygard
+- rationale: Norman lens — signifier + feedback (bookend banners are feedback the operator needs to signal running-vs-hung; pipe callout is a signifier that the copy-paste line has a required tail). Cooper — operator persona (what does a first-time cold-adopter miss). Nygard — stability pattern (trap-EXIT bookend + troubleshooting entries help operator recover).
