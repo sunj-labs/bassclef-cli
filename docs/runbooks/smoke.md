@@ -32,6 +32,28 @@ Runs Layer 1 of the smoke test system against whatever is currently `latest` on 
 
 No git clone needed. The bootstrap curls everything.
 
+## Pre-flight (every run — belt on top of prereqs)
+
+gh on this profile has more than one logged-in account. The default active one can flip between sessions. When the wrong account fires, the smoke report body captures it in the `gh auth:` line — audit trail, not prevention. This pre-flight is the prevention.
+
+Paste this before the one-liner. It fails loud if the active account is not `kingofrock`:
+
+```bash
+gh auth status --active 2>&1 | grep -q "account kingofrock" || {
+  echo "ERROR: active gh account is not kingofrock"
+  echo "Run: gh auth switch --user kingofrock"
+  echo "Then re-run this check."
+  exit 1
+}
+echo "OK: gh active account is kingofrock"
+```
+
+Fixes when the check fails:
+
+- **Case A — kingofrock is logged in but not active:** `gh auth switch --user kingofrock`
+- **Case B — kingofrock is not logged in on this profile:** `gh auth login` (pick GitHub.com, HTTPS, browser, kingofrock)
+- Confirm either way: `gh auth status --active`
+
 ## Setup — one-curl bootstrap
 
 Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`:
