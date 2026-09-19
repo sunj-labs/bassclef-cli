@@ -3,7 +3,7 @@ tier: project
 title: Runbook — cold-adopter smoke against @thebassclef/lite
 id: runbook-smoke
 status: living
-last_updated: 2026-09-18 (v4 — pinned to 1.2.0 substrate + .version manifest field cure)
+last_updated: 2026-09-19 (v5 — bookend banner explainer + pipe callout + troubleshooting)
 audience: operator (kingofrock) or agent on the cold-adopter Mac profile
 ---
 
@@ -56,12 +56,22 @@ Fixes when the check fails:
 
 ## Setup — one-curl bootstrap
 
-Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`:
+Fetches the ten smoke scripts into `~/tmp/bassclef-smoke/scripts/` from `main`.
+
+**⚠ The `| bash` at the end is what runs it.** Without the pipe, curl just prints the script to your terminal and nothing happens on disk.
 
 ```bash
 curl -sfL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-bootstrap.sh | bash
 export BCLI=~/tmp/bassclef-smoke
 ```
+
+Verify the bootstrap ran:
+
+```bash
+ls $BCLI/scripts/  # should list 8 smoke-*.sh files + a lib/ dir
+```
+
+If you see the files, you're good. If the `ls` says "No such file or directory," re-run the curl command with `| bash` included.
 
 Idempotent — re-run any time to pull the latest scripts.
 
@@ -216,6 +226,30 @@ The leading `cd ~` is defensive. When reset deletes `~/tmp/bassclef-smoke-test`,
 
 The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and the report still needs to run.
 
+## What you'll see in the terminal
+
+Every smoke script prints two banner lines to stderr:
+
+- `>>> smoke-<name> starting` — the script has begun work
+- `<<< smoke-<name> done (exit N)` — the script finished; N is the exit code
+
+The end banner fires from a `trap ... EXIT` hook, so it prints on any exit path — success, failure, or error mid-run. When you run the one-liner, six banner pairs march down your terminal:
+
+```
+>>> smoke-capture starting
+smoke-capture: found 24 SessionStart hook(s)
+smoke-capture: captured 24 hook(s) to docs/smoke-captures/...
+<<< smoke-capture done (exit 0)
+>>> smoke-drive-skills starting
+smoke-drive-skills: driving 5 skill(s) via /opt/homebrew/bin/claude
+...
+<<< smoke-drive-skills done (exit 0)
+>>> smoke-assert-hooks starting
+...
+```
+
+A slow step (like `smoke-drive-skills` waiting on `claude -p`) shows the start banner right away, so you know it's running and not hung.
+
 ## What to expect on the first real run
 
 **`paths-exist` may fire more RED rows than you want.** Real hook output carries many absolute paths that exist on the machine that produced them but not on yours. Treat `paths-exist` FAILs as advisory unless they cluster on one hook. Layer 2 will likely tighten the check or add an allowlist for system paths.
@@ -223,6 +257,10 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 **cli#106 and cli#107 fire no check.** Both fall outside the V1 four-check surface. Follow-on tickets planned for a 5th check (message quality) and a 6th check (repeat warning).
 
 ## Troubleshooting
+
+**Bootstrap printed the script but nothing ran.** You forgot `| bash` on the curl command. Re-run the full line — `curl ... | bash`. First observed 2026-09-18 on cold-adopter-1.
+
+**`bash $BCLI/scripts/smoke-reset-whole.sh --dry-run` says "No such file or directory."** Bootstrap did not populate `$BCLI/scripts/`. Confirm with `ls $BCLI/scripts/`. If empty, re-run the bootstrap curl command with `| bash` at the end.
 
 **`gh` auth fails at publish.** Run `gh auth status`. Re-run `gh auth login` if needed.
 
@@ -252,6 +290,8 @@ The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and t
 - New in 1.2.0: cli#129 (.version manifest field), cli#131 (migrate.ts fix), cli#134 (stdout blocking fix)
 
 ## Change log
+
+**2026-09-19 v5 — bookend banner explainer + pipe callout + troubleshooting.** New "What you'll see in the terminal" section explains the `>>> starting` / `<<< done (exit N)` bookend banners every smoke script emits via `trap EXIT`. Bold callout above the bootstrap curl block names `| bash` as what runs the fetch; new `ls $BCLI/scripts/` verify step below. Two Troubleshooting entries added — one for the "printed but did not run" case, one for the "empty scripts dir" case. First observed 2026-09-18 on cold-adopter-1. Combines the content of the closed PRs #114 (bookend banner section) + #115 (pipe callout) which were rebased-stale after PR #136 shipped v4. Reference: bassclef-cli goal doc 2026-09-19a launch-prep.
 
 **2026-09-18 v4 — pinned to 1.2.0 substrate.** Step 3 banner expectations updated: ~445 files (was ~379) and 28 hooks armed (was 24) after the v0.45.0 substrate pull. Added a jq check for the new top-level `.version` field in `.bassclef/init.manifest.json` — required for the v0.45.0 drift hook to compare installed vs npm-latest (cli#129, bassclef-upstream#1749). References gain 1.2.0 fixture pins (cli#129, #131, #134). Also corrected Step 5 timeout: `smoke-drive-skills.sh` default is 120s per call (was documented as 30s in v1-v3 by mistake — script default at L41 has always been 120s since PR #125 shipped it).
 
