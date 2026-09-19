@@ -3,8 +3,9 @@
   "schema_version": 1,
   "referenced_by_files": [
     "docs/risk-ledgers/2026-09-16-cli-1.1.0-lite-catalog.md",
-    "docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md"
+    "docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md",
+    "docs/iteration-bets/2026-09-19a-launch-prep-os-contract-plus-docs-merge.md"
   ],
-  "last_scanned": "2026-09-17T23:05:56Z",
+  "last_scanned": "2026-09-19T14:01:01Z",
   "scanner_version": "1.0"
 }
