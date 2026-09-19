@@ -13,7 +13,7 @@ Living doc. Update whenever the smoke shape changes. Every release runs this onc
 
 ## What this runbook does
 
-Runs Layer 1 of the smoke test system against whatever is currently `latest` on npm for `@thebassclef/lite`. Captures per-hook output. Fires 5 skills. Runs 4 checks per surface. Posts one issue with the `smoke-run-v1` label so the agent can pick up RED rows on demand.
+Runs Layer 1 of the smoke test system against whatever is currently `latest` on npm for `@thebassclef/lite`. Captures per-hook output. Fires 5 skills. Runs 4 checks per surface. Posts one issue tagged with a version-stamped label (`smoke-run-<version>`, e.g. `smoke-run-1.2.0`) so the agent can pick up RED rows on demand. The script auto-creates the label on first publish per release — no manual label setup needed.
 
 ## What it does NOT do yet
 
