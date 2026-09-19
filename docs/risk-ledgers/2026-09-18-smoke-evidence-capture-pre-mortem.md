@@ -126,6 +126,8 @@ Any moving part fails. The smoke has many.
 
 **Risk:** `gh issue list --label smoke-run-v1` output shape changes between versions. Idempotency search breaks silently.
 
+(Note 2026-09-19 per PR #141: label is now `smoke-run-<version>`, not `smoke-run-v1`; substance of the risk unchanged.)
+
 **Mitigation:** Use `gh issue list --json number,body --jq '...'` for parse-stable output. Never scrape human text. **Fold-in-Step-6.**
 
 ## Lens 3 — martin-fowler (refactoring risks + test design)

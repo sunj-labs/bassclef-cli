@@ -93,7 +93,7 @@ Raw capture files land on disk even when assertions or publishing fail. The oper
 13. Operator runs `bash scripts/smoke-assert-skills.sh`.
 14. System reads each skill capture, runs the same four checks per skill, writes `skills-assertions.json`.
 15. Operator runs `bash scripts/smoke-report.sh --publish`.
-16. System reads both assertion JSON files, writes `docs/smoke-captures/<date>/report.md` with the pass/fail matrix, and posts a GitHub issue on `sunj-labs/bassclef-cli` with the `smoke-run-v1` label. When an open `smoke-run-v1` issue exists for the same `<version>` on the same date, the system updates that issue's body instead of creating a new one. Returns the issue number to stdout.
+16. System reads both assertion JSON files, writes `docs/smoke-captures/<date>/report.md` with the pass/fail matrix, and posts a GitHub issue on `sunj-labs/bassclef-cli` with the version-stamped `smoke-run-<version>` label (auto-created on first publish per release; e.g. `smoke-run-1.2.0`). When an open `smoke-run-<version>` issue exists for the same version on the same date, the system updates that issue's body instead of creating a new one. Returns the issue number to stdout. `--publish` without `--version-tag` exits 1.
 17. Operator pastes the issue link to the agent.
 18. Agent runs `gh issue view <N>` and reads the report body.
 19. For each RED row, agent runs `/diagnose` and files or updates a ticket.
@@ -173,8 +173,8 @@ Raw capture files land on disk even when assertions or publishing fail. The oper
 
 ### 15c. Same-day-same-version re-run (RFC F4 fold)
 
-15c1. Operator ran `--publish` earlier today for the same version. Issue #N exists with the `smoke-run-v1` label.
-15c2. System detects the open issue via `gh issue list --label smoke-run-v1 --state open --search "<version>"`.
+15c1. Operator ran `--publish` earlier today for the same version. Issue #N exists with the `smoke-run-<version>` label.
+15c2. System detects the open issue via `gh issue list --label smoke-run-<version> --state open --search "<version>"`.
 15c3. System updates issue #N's body via `gh issue edit #N --body-file <report.md>` instead of creating a new issue.
 15c4. Returns issue #N to stdout with a `(updated)` marker.
 

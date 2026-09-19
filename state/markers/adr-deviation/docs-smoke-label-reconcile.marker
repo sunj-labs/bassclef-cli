@@ -1,0 +1,5 @@
+# ADR-deviation marker — docs-smoke-label-reconcile
+- date: 2026-09-19
+- branch: docs/smoke-label-reconcile
+- adr_governing: none — confirmed no ADR coverage; label naming convention is not ADR-governed; report body shape versioning stays governed by report frontmatter (`report_shape_version: 1`) per prior spec design, unchanged by this reconciliation
+- outcome: ADR-honored

@@ -77,6 +77,8 @@ Four outside luminaries. Excluded because they sit in the effective authoring se
 
 **Disposition:** **fold-in-now.** Add to spec §Postconditions: "Report body shape is versioned. `smoke-run-v1` label carries V1 shape. Future format changes ship as `smoke-run-v2` with a grace window per ADR-031." One label per version; agents pick by label. Small cost; large future headroom.
 
+**Superseded 2026-09-19 per PR #141:** the label-carries-shape-version design was retired after cold-adopter-1 smoke on 2026-09-18 exposed the label-hardcoding trap. Shape version now lives in report frontmatter (`report_shape_version: 1`); label derives from the release version (`smoke-run-<version>`) and auto-creates on first publish. See current spec at `docs/specs/smoke-evidence-capture.md` § Postconditions.
+
 ### F2 — Cold profile is a fictional persona (severity HIGH)
 
 **Lens:** alan-cooper.
