@@ -1,0 +1,6 @@
+# Luminary marker — release/v1.2.1
+- date: 2026-09-19
+- branch: release/v1.2.1
+- lead: linus-torvalds
+- supporting: [saltzer-schroeder, michael-nygard]
+- rationale: linus (we-don't-break-adopters — release blast radius); saltzer-schroeder (defensive publish surface per iteration goal's primary triad); nygard (release as stability event)

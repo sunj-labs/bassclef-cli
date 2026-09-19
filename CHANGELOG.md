@@ -24,6 +24,27 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.2.1] - 2026-09-19
+### Added
+
+- **Bundled substrate at bassclef v0.46.0** (from v0.45.0). Ships the cli-side dispatcher cure this project filed as cli#140 — the substrate dispatcher now checks `$CWD/lib/` as the second probe path when resolving `bassclef-dir-resolver.sh`, so cli sessions started outside `~/src/sunj-labs/` no longer hit resolver-missing errors (bassclef-upstream PR #1796). Also lands: pre-commit auto-regen manifest hook (reduces manifest-drift friction on local commits per bassclef-upstream #1752), workflow-metrics library (Module B4 measurement infrastructure per bassclef-upstream #1307), harness fixture consolidation Steps 1-3 (bassclef-upstream #1789), and two new luminaries — david-farley + jez-humble.
+
+### Changed
+
+- **Runbook Step 5 timeout 30s → 120s** (bassclef-cli#138 → PR merged as `5dcbe8e`). Docs matched the script default. Slower cold-adopter hardware needed the headroom for the smoke drive step.
+
+### Fixed
+
+- **Smoke bootstrap one-liner leads with `cd ~`** (bassclef-cli#146 → PR merged as `480a339`). Adopters land in their home dir before running `bassclef init`. Matches the runbook v4 shape. Sister guard: reset flow can delete the current working dir, so bootstrap warns on deleted-CWD after reset (bassclef-cli#144 → PR `4025a2f`).
+- **Smoke script auto-creates the release label + surfaces `gh` errors** (bassclef-cli#141 → PR `ee77819`). Label derives per release; script creates it if missing instead of failing silently. `gh` CLI errors now surface to the operator rather than being swallowed.
+- **Runbook adds `gh` account pre-flight** (bassclef-cli#143 → PR `95bd89f`). Runbook asserts `kingofrock` is the active `gh` account before hitting `sunj-labs`. Catches wrong-account authorization failures before the smoke starts.
+
+### Notes
+
+- **Install:** `npm install -g @thebassclef/lite@latest`. Verify: `bassclef --version` → `1.2.1`.
+- **Migration path:** no migration required. PATCH bump. Existing adopters re-running `bassclef init` (or a fresh install) pick up the v0.46.0 substrate bundle.
+- **First widely publicized release.** Public launch is 2026-09-20; this release ships the smoke bootstrap fixes cold-adopter runs surfaced plus the latest substrate.
+
 ## [1.2.0] — 2026-09-18
 
 Additive minor release. Rolls up alpha.0 + alpha.1 (both shipped as preview at `@next` on npm) into a clean release at `@latest`. Diff from 1.1.1 is fully additive: no breaking changes, no schema shape change adopters must migrate. Existing adopters get the update on next `npm install -g @thebassclef/lite@latest`.

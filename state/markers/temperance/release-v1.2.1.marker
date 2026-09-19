@@ -1,0 +1,7 @@
+# Temperance marker — release/v1.2.1
+- date: 2026-09-19
+- branch: release/v1.2.1
+- scope-decision: PATCH bump 1.2.0→1.2.1 bundling v0.46.0 substrate + cli-side smoke bootstrap fixes; new release notes file; no source/API change
+- right-thing: ship the accumulated smoke fixes + latest substrate before tomorrow's launch
+- right-way: single PATCH on release/ branch off fresh main; bump script handles version + CHANGELOG + README; prepublish bundles v0.46.0 from sibling
+- drift-trigger: if any smoke or build step surfaces new failure classes, halt release and file separate ticket

@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
@@ -42,12 +42,12 @@
     "LICENSE"
   ],
   "bassclef": {
-    "upstream_tag": "v0.45.0",
+    "upstream_tag": "v0.46.0",
     "wiring_manifest_schema_major": 2,
     "bundle_paths": [
       "dist/lite/"
     ],
-    "phase_note": "cli 1.2.0 (2026-09-18) — additive minor release. Adds the top-level `.version` field to `.bassclef/init.manifest.json` so v0.45.0's `91-npm-version-drift.sh` hook can compare installed vs npm-latest. Bundles bassclef v0.45.0 substrate (7 adopter cures + drift hook). Ships the stdout-blocking fix at cli entry (Node async-pipe-write dropped writes on process.exit under CI pipes). Rolls up 1.2.0-alpha.0 + alpha.1 which shipped as previews at @next. Per bassclef-upstream#1749; cli PRs #129, #131, #134."
+    "phase_note": "cli 1.2.1 (2026-09-19) — PATCH release. Bundles bassclef v0.46.0 substrate — the substrate dispatcher now checks `$CWD/lib/` as the second probe path for `bassclef-dir-resolver.sh` (cli#140 cure landed at bassclef-upstream PR #1796), pre-commit auto-regen manifest hook reduces manifest-drift friction on local commits (bassclef-upstream #1752), workflow-metrics library lands Module B4 measurement infrastructure (bassclef-upstream #1307), plus two new luminaries (david-farley, jez-humble). Also ships four smoke bootstrap fixes cold-adopter runs surfaced: `cd ~` one-liner + deleted-CWD guard (cli#146, #144), auto-create release label + gh error surface (cli#141), gh account pre-flight (cli#143), Step 5 timeout 30s→120s (cli#138). First widely publicized release for public launch 2026-09-20."
   },
   "os": [
     "darwin",
