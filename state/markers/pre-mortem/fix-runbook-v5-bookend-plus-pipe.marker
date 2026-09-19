@@ -1,0 +1,5 @@
+# Pre-mortem light marker — fix-runbook-v5-bookend-plus-pipe
+- date: 2026-09-19
+- mode: skip (doc-only edit; scope small; content ported verbatim from PR #114 + #115 which had their own pre-mortem)
+- prior-lens-work: PR #114 + #115 shipped with Norman + Cooper + Nygard lens at author time
+- risk-ledger: not authored — under Cockburn skip tier per .claude/rules/oo-ad-entry-point.md (docs-only edit, no code)
