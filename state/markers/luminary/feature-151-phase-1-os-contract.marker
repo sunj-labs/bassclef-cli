@@ -1,0 +1,10 @@
+# Luminary marker — feature-151-phase-1-os-contract
+- date: 2026-09-19
+- branch: feature/151-phase-1-os-contract
+- lead: linus-torvalds
+- supporting:
+  - jerome-saltzer-and-michael-schroeder
+  - hyrum-wright
+  - donald-norman
+  - gary-klein
+- rationale: Linus lens is the balancing check on the adopter contract. Saltzer-Schroeder anchors fail-fast on Windows PowerShell. Hyrum anchors the observable-becomes-contract framing (declare os before adopters do). Norman anchors signifier + mapping match (README = package.json). Klein drives pre-mortem light.

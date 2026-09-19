@@ -34,6 +34,9 @@
 // [x] refuseIfDirty — allows dirty on src/index.ts (bump script writes it too)
 // [x] writeIndexTsVersion — replaces the version literal
 // [x] writeIndexTsVersion — refuses when the constant is missing
+// [x] writeReadmeVersion — replaces the version marker
+// [x] writeReadmeVersion — refuses when the marker is missing
+// [x] writeReadmeVersion — leaves surrounding markdown intact
 
 import { describe, it, expect } from 'vitest';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
@@ -45,6 +48,7 @@ import {
   renameUnreleasedBlock,
   refuseIfDirty,
   writeIndexTsVersion,
+  writeReadmeVersion,
   ArgvError,
   RefusedError,
 } from '../scripts/bump-version.mjs';
@@ -258,6 +262,51 @@ describe('writeIndexTsVersion', () => {
     writeFileSync(path, `// no version constant here\n`, 'utf8');
     try {
       expect(() => writeIndexTsVersion(path, '0.0.2')).toThrow(RefusedError);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('writeReadmeVersion', () => {
+  it('replaces the version marker', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bump-readme-'));
+    const path = join(dir, 'README.md');
+    const before = `# Package\n\n## Current release\n\n<!-- version-start -->1.2.0<!-- version-end -->\n\nSee CHANGELOG.\n`;
+    writeFileSync(path, before, 'utf8');
+    try {
+      writeReadmeVersion(path, '1.3.0');
+      const after = readFileSync(path, 'utf8');
+      expect(after).toContain('<!-- version-start -->1.3.0<!-- version-end -->');
+      expect(after).not.toContain('<!-- version-start -->1.2.0<!-- version-end -->');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses when the marker is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bump-readme-'));
+    const path = join(dir, 'README.md');
+    writeFileSync(path, `# Package\n\nno version marker here\n`, 'utf8');
+    try {
+      expect(() => writeReadmeVersion(path, '1.3.0')).toThrow(RefusedError);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves surrounding markdown intact', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bump-readme-'));
+    const path = join(dir, 'README.md');
+    const before = `# Header\n\nParagraph before.\n\n<!-- version-start -->0.1.0<!-- version-end -->\n\nParagraph after.\n`;
+    writeFileSync(path, before, 'utf8');
+    try {
+      writeReadmeVersion(path, '2.0.0');
+      const after = readFileSync(path, 'utf8');
+      expect(after).toContain('# Header');
+      expect(after).toContain('Paragraph before.');
+      expect(after).toContain('Paragraph after.');
+      expect(after).toContain('<!-- version-start -->2.0.0<!-- version-end -->');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
