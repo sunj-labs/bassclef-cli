@@ -1,1 +1,5 @@
-converged
+# /longrun preset marker — main
+- date: 2026-09-19
+- preset: exploratory
+- signal: no fresh plan-doc converged pick — 2026-09-17 plan Option e SHIPPED per goal 2026-09-18a + commit 307bbb0 + follow-ons; fresh smoke on 1.2.0 (#147) surfaces 5 FAIL; launch tomorrow 2026-09-20 per #151
+- shipped-state-check: DONE (see prep body)
