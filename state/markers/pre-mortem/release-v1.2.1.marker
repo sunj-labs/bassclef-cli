@@ -1,0 +1,8 @@
+# Pre-mortem marker — release/v1.2.1
+- date: 2026-09-19
+- branch: release/v1.2.1
+- mode: light (3 lenses, 30 min budget)
+- lens-1 (linus-torvalds): npm publish blast radius — every existing @thebassclef/lite adopter gets 1.2.1 on next install. Risk: bundled v0.46.0 substrate could regress an adopter workflow that worked on v0.45.0. Mitigation: PATCH bump signals no-migration; adopters can pin @1.2.0 if regression surfaces.
+- lens-2 (saltzer-schroeder): publish workflow is trusted-publisher + provenance per publish.yml; two-job gate (checks + publish). Risk: workflow rebuilds from tag at CI, but local prepublish already ran successfully with sibling at v0.46.0 (68 hooks + 28 settings entries bundled). Mitigation: CI runs same script; smoke coverage in tarball-audit tests pins the strict allowlist.
+- lens-3 (michael-nygard): stability — no code change, no API change, additive substrate bundle. Risk: launch-tomorrow timing means adopter-observable regression discovered post-publish costs public-launch trust. Mitigation: cold-adopter-1 terminal smoke ran on 1.2.0 basis; 1.2.1 fixes surface the 4 issues those runs found. If smoke on 1.2.1 uncovers new class, halt release, patch, republish 1.2.2 before launch window.
+- verdict: proceed. Risks are known and bounded. Launch-eve timing is the only elevated concern; monitor cold-adopter smoke on 1.2.1 before public announcement.
