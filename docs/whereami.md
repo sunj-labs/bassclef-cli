@@ -14,12 +14,14 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-18T10:30:00Z
-iteration_bet: goal 2026-09-18a Layer 1 smoke evidence SHIPPED via 4 merged PRs (#110 + #111 + #112 + #113); cold-profile smoke ran end-to-end; 3 follow-on tickets filed (#116 + #117 + #118); 2 runbook PRs open (#114 + #115); upstream cures pending in bassclef-upstream#1728
-iteration_started: 2026-09-18
-session: docs/session-logs/2026-09-18b-cold-profile-smoke-followon.md (post-Layer-1 polish; ~30 turns; ~2h)
+last_updated: 2026-09-19T16:55:00Z
+iteration_bet: goal 2026-09-19a launch-prep sweep — 3 PRs open awaiting operator merge (#152 OS contract + README rewrite; #153 runbook v5 port; this session-end PR); #119 merged mid-session; #114 + #115 closed as stale; #151 amendment landed; launch scheduled tomorrow 2026-09-20
+iteration_started: 2026-09-19
+session: docs/session-logs/2026-09-19a-launch-prep-os-contract-plus-runbook-v5.md (~55 turns; ~3h)
 
-**operator_recap 2026-09-18 (second half):** Cold-profile smoke ran end-to-end on cold-adopter-1. Structural flow held — bootstrap (10 files), reset (with snapshot), install, init (379 files + 24 hooks armed), capture (2 SessionStart hooks), drive (5 skills), assert-hooks + assert-skills, report (22 pass, 6 fail). Publish failed at gh — `giveisusfree` account may lack write access to `sunj-labs/bassclef-cli`. 6 hook fails classified: 4-5 are cli#101-#108 class (upstream #1728 cures pending), rest is paths-exist regex noise. All 5 skills hit 30-sec timeout — pre-mortem F3 fired first run. TIMEOUT captures passed all 4 checks — pre-mortem V1 gap (assert scripts don't read exit code). Filed cli#116 (timeout bump to 120), cli#117 (TIMEOUT/CRASH row), cli#118 (paths-exist regex tightening). Also filed 2 runbook PRs — #114 banner-note (v4) + #115 pipe-callout (v5) — both awaiting merge. Drafted upstream prompt asking for #1728 cure-progress table + adopter drift-detection design. Fixture-pin design paid off — smoke caught the exact signals fixtures for cli#102/#105/#108 predicted.
+**operator_recap 2026-09-19:** Launch-eve session against 2026-09-20 bassclef-lite ship. Started with `/longrun prep` which correctly reshaped from converged to exploratory — the 2026-09-17 plan doc's Option e (smoke evidence capture) had SHIPPED via goal 2026-09-18a. Fresh scope surfaced from #147 fresh smoke report (5 FAIL / 33 PASS on 1.2.0) plus #151 Phase 1 launch blocker (no `"os"` field in package.json). Operator picked exploratory Option a+b — Phase 1 OS contract plus merging 3 docs PRs. Mid-session discovery reshaped scope from A to B — README top was stale (`@thebassclef/core@0.0.1 scaffold only`) since 2026-08 rename. Full README rewrite folded into the same PR plus a dynamic version marker via `writeReadmeVersion` in `bump-version.mjs`. Pin decision — `["darwin", "linux"]` not just `["darwin"]` — matches operator launch copy + unblocks WSL 2 + preserves fail-fast on Windows PowerShell. #151 Phase 1 acceptance amended via comment 5742446859. PR #152 opens with 5 new Tier 0 tests (`writeReadmeVersion` × 3 + `package.json.os` × 2); suite 428 → 433 GREEN; typecheck clean. Docs PR merges hit conflict — #114 + #115 rebased-stale after PR #136 shipped v4 on main. Closed both as superseded; ported content into single fresh PR #153 (bookend banner explainer + pipe callout + 2 troubleshooting entries + change log). #119 merged first (whereami baseline). Missed a `/promote` filing for the auto-save-on-main hook that made rogue checkpoint commit `b0274d8` — operator caught the miss at session close; discipline note in session log; ticket next session. Real hook error from #147 smoke (BASSCLEF_DIR = $HOME on lite-only install) is already tracked at cli#140; pickup prompt drafted this session. Turns ~55 vs 25-50 budget — the README rewrite plus bump-version mechanism plus stale-PR reshape drove the overrun.
+
+**prior_operator_recap 2026-09-18 (second half):** Cold-profile smoke ran end-to-end on cold-adopter-1. Structural flow held — bootstrap (10 files), reset (with snapshot), install, init (379 files + 24 hooks armed), capture (2 SessionStart hooks), drive (5 skills), assert-hooks + assert-skills, report (22 pass, 6 fail). Publish failed at gh — `giveisusfree` account may lack write access to `sunj-labs/bassclef-cli`. 6 hook fails classified: 4-5 are cli#101-#108 class (upstream #1728 cures pending), rest is paths-exist regex noise. All 5 skills hit 30-sec timeout — pre-mortem F3 fired first run. TIMEOUT captures passed all 4 checks — pre-mortem V1 gap (assert scripts don't read exit code). Filed cli#116 (timeout bump to 120), cli#117 (TIMEOUT/CRASH row), cli#118 (paths-exist regex tightening). Also filed 2 runbook PRs — #114 banner-note (v4) + #115 pipe-callout (v5) — both awaiting merge. Drafted upstream prompt asking for #1728 cure-progress table + adopter drift-detection design. Fixture-pin design paid off — smoke caught the exact signals fixtures for cli#102/#105/#108 predicted.
 
 prior_operator_recap 2026-09-18 (first half):
 
@@ -289,7 +291,13 @@ next_bet: 2026-08-29-npm-lite-scope-e (migration + follow-ons; see docs/next-lon
 
 ## Last updated
 
-2026-09-15T07:48:00Z — session-end (wait state; no code shipped; cold-adopter-1 profile reset cleanly; ~7 turns; cli 1.0.2 still blocked on upstream v0.41.1)
+2026-09-19T16:55:00Z — session-end (launch-eve; 3 PRs open pending review: #152 OS contract + README rewrite, #153 runbook v5 port, this session-end PR; #119 merged mid-session; #114 + #115 closed as stale; #151 amendment landed; 5 new Tier 0 tests; suite 433 GREEN; ~55 turns; ~3h)
+session: docs/session-logs/2026-09-19a-launch-prep-os-contract-plus-runbook-v5.md
+
+prior_session: 2026-09-18T10:30:00Z — session-end (cold-profile smoke first-run; 4 merged PRs #110/#111/#112/#113; 2 PRs open #114/#115; 3 follow-ons #116/#117/#118; ~30 turns; ~2h)
+session: docs/session-logs/2026-09-18b-cold-profile-smoke-followon.md
+
+prior_session: 2026-09-15T07:48:00Z — session-end (wait state; no code shipped; cold-adopter-1 profile reset cleanly; ~7 turns; cli 1.0.2 still blocked on upstream v0.41.1)
 session: docs/session-logs/2026-09-15-wait-state-cold-adopter-cleanup.md
 
 prior_session: 2026-09-13T01:10:00Z — session-end (cli#25 Phase 2 shipped via PR #75 → main commit 0212a152; ticket #25 closed; version 0.2.0 MINOR; suite 238/238 GREEN; 6 substantive edits landed; agent-merges-within-scope per operator directive; ~55 turns)
