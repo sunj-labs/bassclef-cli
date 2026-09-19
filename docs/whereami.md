@@ -14,10 +14,14 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-18T05:00:00Z
-iteration_bet: goal 2026-09-18a Layer 1 smoke evidence — shipped to PR; awaits operator review + cold-profile smoke
+last_updated: 2026-09-18T10:30:00Z
+iteration_bet: goal 2026-09-18a Layer 1 smoke evidence SHIPPED via 4 merged PRs (#110 + #111 + #112 + #113); cold-profile smoke ran end-to-end; 3 follow-on tickets filed (#116 + #117 + #118); 2 runbook PRs open (#114 + #115); upstream cures pending in bassclef-upstream#1728
 iteration_started: 2026-09-18
-session: docs/session-logs/2026-09-18-goal-2026-09-18a-smoke-evidence-capture-layer-1.md (~150 turns, ~9h, 14 commits on feat/109 + 10 on main)
+session: docs/session-logs/2026-09-18b-cold-profile-smoke-followon.md (post-Layer-1 polish; ~30 turns; ~2h)
+
+**operator_recap 2026-09-18 (second half):** Cold-profile smoke ran end-to-end on cold-adopter-1. Structural flow held — bootstrap (10 files), reset (with snapshot), install, init (379 files + 24 hooks armed), capture (2 SessionStart hooks), drive (5 skills), assert-hooks + assert-skills, report (22 pass, 6 fail). Publish failed at gh — `giveisusfree` account may lack write access to `sunj-labs/bassclef-cli`. 6 hook fails classified: 4-5 are cli#101-#108 class (upstream #1728 cures pending), rest is paths-exist regex noise. All 5 skills hit 30-sec timeout — pre-mortem F3 fired first run. TIMEOUT captures passed all 4 checks — pre-mortem V1 gap (assert scripts don't read exit code). Filed cli#116 (timeout bump to 120), cli#117 (TIMEOUT/CRASH row), cli#118 (paths-exist regex tightening). Also filed 2 runbook PRs — #114 banner-note (v4) + #115 pipe-callout (v5) — both awaiting merge. Drafted upstream prompt asking for #1728 cure-progress table + adopter drift-detection design. Fixture-pin design paid off — smoke caught the exact signals fixtures for cli#102/#105/#108 predicted.
+
+prior_operator_recap 2026-09-18 (first half):
 
 **operator_recap 2026-09-18:** Goal 2026-09-18a Layer 1 shipped end to end. PR against main pending push + open. Six new scripts under `scripts/` cover capture + assert + drive + report + reset with snapshot. Two shared libs under `scripts/lib/` hold the check contracts + JSON schema. Six defect fixtures pin cli#101 through #108 (six mapped; cli#106 + #107 outside V1 check surface — documented). 41 new Tier 0 tests; full suite 355 to 396 all GREEN. Design chain complete before code: spec + UC fully-dressed + decomposition + BCE + intent audit + RFC adversarial + pre-mortem light. 18 pre-mortem risks folded across Steps 1 through 7. 4 RFC findings folded pre-code. Turn count ~150 vs 90-140 budget — overrun accepted at prep. What broke: bash 3.2 `mapfile` gap, `set -e` exit-code capture kill, `paths-exist` false-positive on capture-header slugs — all caught by Tier 0 tests first pass. What held: four checks per surface (Saltzer-Schroeder), BCE split, shared lib pattern paid off at Step 5 skill assert reuse. Layer 2 next — drive /launch + /build to produce a mock app.
 

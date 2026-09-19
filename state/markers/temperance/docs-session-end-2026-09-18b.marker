@@ -1,0 +1,7 @@
+# Temperance marker — docs/session-end-2026-09-18b
+- date: 2026-09-18
+- branch: docs/session-end-2026-09-18b
+- scope-decision:
+  - right thing: close the session — write session log + update whereami
+  - right way: docs-only PR against main; no code touched
+  - drift trigger: expanding scope beyond session-end artifacts
