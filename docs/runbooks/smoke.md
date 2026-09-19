@@ -200,7 +200,8 @@ Paste the issue link into a Claude session. Agent runs `gh issue view <N>` then 
 Reset stays separate — you decide when to nuke the profile.
 
 ```bash
-LITE_VER=$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r .version) && \
+cd ~ && \
+  LITE_VER=$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r .version) && \
   npm install -g "@thebassclef/lite@${LITE_VER}" && \
   mkdir -p ~/tmp/bassclef-smoke-test && cd ~/tmp/bassclef-smoke-test && \
   git init -q && bassclef init && \
@@ -210,6 +211,8 @@ LITE_VER=$(curl -sf https://registry.npmjs.org/@thebassclef/lite/latest | jq -r 
   bash $BCLI/scripts/smoke-assert-skills.sh; \
   bash $BCLI/scripts/smoke-report.sh --version-tag "${LITE_VER}" --publish
 ```
+
+The leading `cd ~` is defensive. When reset deletes `~/tmp/bassclef-smoke-test`, your shell's CWD is left pointing at a deleted inode. Any subsequent command that reads `process.cwd()` (npm does, at startup) crashes with `ENOENT: process.cwd failed`. `cd ~` before anything else recovers the shell before npm runs.
 
 The `;` after each assert is on purpose. Asserts may exit non-zero on RED, and the report still needs to run.
 

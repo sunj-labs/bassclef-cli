@@ -47,6 +47,10 @@ PRUNE_DAYS=7
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Capture operator's original CWD so we can warn if reset deletes it out from
+# under their shell. Falls back gracefully when PWD is already unresolvable.
+INITIAL_PWD="${PWD:-}"
+
 usage() {
   sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
@@ -165,6 +169,16 @@ fi
 if [ -x "${SCRIPT_DIR}/smoke-reset.sh" ]; then
   echo "smoke-reset-whole: delegating to smoke-reset.sh --cold" >&2
   bash "${SCRIPT_DIR}/smoke-reset.sh" --cold
+
+  # CWD-trap warning — reset may have deleted the operator's shell CWD out
+  # from under them. Subsequent commands that read process.cwd() (npm at
+  # startup, for one) will fail with ENOENT. Surfaces the fix inline.
+  if [ -n "$INITIAL_PWD" ] && [ ! -d "$INITIAL_PWD" ]; then
+    echo "" >&2
+    echo "⚠ smoke-reset-whole: your shell's CWD (${INITIAL_PWD}) was deleted by the reset." >&2
+    echo "  Run 'cd ~' before your next command." >&2
+    echo "  Otherwise npm and other tools fail with 'ENOENT: process.cwd failed'." >&2
+  fi
 else
   echo "smoke-reset-whole: smoke-reset.sh not found at ${SCRIPT_DIR}/" >&2
   exit 1
