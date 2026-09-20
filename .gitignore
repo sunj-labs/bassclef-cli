@@ -85,3 +85,7 @@ state/events/test-runs/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# Vitest coverage output (cli#165)
+coverage/
+*.lcov

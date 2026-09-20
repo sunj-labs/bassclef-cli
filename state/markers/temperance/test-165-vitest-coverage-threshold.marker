@@ -1,0 +1,16 @@
+# Temperance marker — test/165-vitest-coverage-threshold
+
+- date: 2026-09-20
+- branch: test/165-vitest-coverage-threshold
+- goal_id: cli#165 vitest coverage config
+
+## Scope decision
+
+Add vitest coverage config + npm test:coverage script + @vitest/coverage-v8 devDep per architect-review 2026-09-20 finding M3.
+
+- **Right thing?** Yes — no coverage measurement today; future refactors have no coverage-regression guard.
+- **Simplest?** Yes — one config edit + one dep + one script; no test-content changes.
+- **Brute force?** No — v8 provider matches vitest ^2.0.0; thresholds set below current actuals so tests still pass.
+- **Blast radius?** Low — adds a dev-only measurement lane; production behavior unchanged.
+- **Verification?** Run `npm run test:coverage` locally; check PR body for actuals.
+- **Reversible?** Fully — one revert removes the config, script, and dep.
