@@ -37,7 +37,9 @@ import {
 import { manifestTemplate } from './init-templates/manifest-json.js';
 import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifest-io.js';
-import { copySubstrate, CopyFailure } from '../lib/copy-substrate.js';
+import { copySubstrate, CopyFailure, resolveBundleRoot } from '../lib/copy-substrate.js';
+import { installStatusline, type InstallStatuslineReport } from '../lib/install-statusline.js';
+import { resolveHome } from '../lib/resolve-home.js';
 import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
 import { buildInitReport, renderJsonReport, type InitReport } from '../lib/init-report.js';
 import type { CopyResult } from '../lib/copy-substrate.js';
@@ -175,6 +177,22 @@ export function runInit(argv: readonly string[]): number {
     const outcome = dispatchSubstrateCopy(
       targetDir, args.force || upgradeApproved, args.verbose, true, args.allowRoot, say
     );
+    // Report the statusline install plan even under --dry-run so the
+    // banner shows the two targets adopters would see written. Under
+    // dry-run, treat any existing settings.json as preservable when
+    // --force is not set — matches walker semantics.
+    const dryRunSettingsPreserved =
+      !(args.force || upgradeApproved) &&
+      existsSync(join(targetDir, '.claude', 'settings.json'));
+    maybeEmitStatuslinePlan({
+      dryRun: true,
+      force: args.force || upgradeApproved,
+      skip: args.skipStatusline,
+      allowRoot: args.allowRoot,
+      targetDir,
+      say,
+      settingsPreserved: dryRunSettingsPreserved,
+    });
     if (args.json) {
       // A dry run writes no manifest (RFC-0004 M-3) but still reports
       // what it would have written, so a script can preview the shape.
@@ -198,7 +216,7 @@ export function runInit(argv: readonly string[]): number {
   // runReal writes the cli-composed plans (substrate.config.md) then
   // dispatches the walker for dist/lite/. Manifest is written last with
   // the union of both results so `bassclef sync` sees every managed file.
-  return runReal(plans, args.force || upgradeApproved, args.verbose, targetDir, args.allowRoot, args.json, say);
+  return runReal(plans, args.force || upgradeApproved, args.verbose, targetDir, args.allowRoot, args.json, args.skipStatusline, say);
 }
 
 /**
@@ -529,7 +547,7 @@ function runDryRun(plans: readonly FilePlan[], say: Say): number {
   return 0;
 }
 
-function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string, allowRoot: boolean, json: boolean, say: Say): number {
+function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, targetDir: string, allowRoot: boolean, json: boolean, skipStatusline: boolean, say: Say): number {
   const results: FileResult[] = [];
   let anyRefused = false;
   let anyError = false;
@@ -662,6 +680,37 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
         `Add .claude/ to .gitignore if you have not.\n`
     );
   }
+
+  // Statusline install — cli-side pair to bassclef-upstream#1860. Runs
+  // after the walker so the bundled dispatcher is in place at
+  // <package>/dist/lite/presence/cli/. Copies the thin-pointer dispatcher
+  // to ~/.claude/bassclef-statusline.sh and merges the statusLine field
+  // into <project>/.claude/settings.json. Preserves adopter edits by
+  // default; --force overrides; --skip-statusline skips entirely. When
+  // the walker refused to write settings.json (existing file, no --force),
+  // the settings merge is skipped so init's preservation discipline holds.
+  // Walker returns refused as string[] (adopter-relative paths per
+  // CopyResult in src/lib/copy-substrate.ts L107). Handle both string
+  // and legacy { path } object shapes for robustness across future
+  // shape changes.
+  const settingsRefused = (walker.result?.refused ?? []).some((r) => {
+    const p = typeof r === 'string' ? r : (r as { path?: unknown }).path;
+    if (typeof p !== 'string') return false;
+    return (
+      p === join('.claude', 'settings.json') ||
+      p === '.claude/settings.json' ||
+      p.endsWith('/.claude/settings.json')
+    );
+  });
+  maybeEmitStatuslinePlan({
+    dryRun: false,
+    force,
+    skip: skipStatusline,
+    allowRoot,
+    targetDir,
+    say,
+    settingsPreserved: settingsRefused,
+  });
 
   // Last thing written, and under --json the only thing on stdout.
   if (json) {
@@ -849,5 +898,102 @@ function readDeclaredCommandLeaves(settingsPath: string): Set<string> {
     return leaves;
   } catch {
     return new Set();
+  }
+}
+
+// -----------------------------------------------------------------------
+// Statusline install helper — bassclef-upstream#1860 cli-side pair.
+// -----------------------------------------------------------------------
+
+interface StatuslinePlanOpts {
+  dryRun: boolean;
+  force: boolean;
+  skip: boolean;
+  allowRoot: boolean;
+  targetDir: string;
+  say: Say;
+  /**
+   * Set by runReal when the walker refused to write .claude/settings.json
+   * (existing file, --force not passed). Passed through to installStatusline
+   * so the statusLine merge is skipped and adopter content is preserved.
+   */
+  settingsPreserved?: boolean;
+}
+
+/**
+ * Fire installStatusline and surface its per-target outcomes in the
+ * banner. Silent-on-failure — if HOME cannot resolve or the bundled
+ * dispatcher is missing, emit an advisory line and continue. Statusline
+ * is a cosmetic surface; a broken install must not fail the init.
+ */
+function maybeEmitStatuslinePlan(opts: StatuslinePlanOpts): void {
+  const packageDir = dirname(dirname(resolveBundleRoot(undefined)));
+  // Silent no-op when the bundled dispatcher is absent — that shape shows
+  // up in dev checkouts before `npm run prepublishOnly` populates dist/lite/
+  // presence/cli/. Adopters installing via `npm install @thebassclef/lite`
+  // always carry the bundle, so this silent branch never fires there.
+  const dispatcherSource = join(
+    packageDir, 'dist', 'lite', 'presence', 'cli', 'bassclef-statusline.dispatcher.sh'
+  );
+  if (!existsSync(dispatcherSource)) {
+    return;
+  }
+
+  let home: string;
+  try {
+    home = resolveHome({ allowRoot: opts.allowRoot });
+  } catch {
+    // HOME resolution errors are surfaced by the caller (writeSafely and
+    // resolveTargetDir already exercise the same guards). Silent-skip
+    // keeps statusline install a cosmetic add-on that never blocks init.
+    return;
+  }
+
+  let report: InstallStatuslineReport;
+  try {
+    report = installStatusline({
+      home,
+      projectDir: opts.targetDir,
+      packageDir,
+      force: opts.force,
+      dryRun: opts.dryRun,
+      skip: opts.skip,
+      settingsPreserved: opts.settingsPreserved,
+    });
+  } catch {
+    // Silent skip on any other install-time exception. Statusline is
+    // cosmetic; init should always succeed on the substrate write.
+    return;
+  }
+
+  const dv = report.dispatcher.kind;
+  const sv = report.settings.kind;
+
+  if (dv === 'skipped' && sv === 'skipped') {
+    opts.say(`bassclef init: statusline install skipped (--skip-statusline).\n`);
+    return;
+  }
+
+  if (opts.dryRun) {
+    opts.say(
+      `bassclef init: would install statusline dispatcher at ${report.dispatcher.path} ` +
+        `and set statusLine in ${report.settings.path}.\n`
+    );
+    return;
+  }
+
+  const parts: string[] = [];
+  if (dv === 'installed') parts.push(`wrote ${report.dispatcher.path}`);
+  else if (dv === 'replaced') parts.push(`replaced ${report.dispatcher.path} (--force)`);
+  else if (dv === 'preserved') parts.push(`preserved ${report.dispatcher.path} (pass --force to overwrite)`);
+  else if (dv === 'unchanged') parts.push(`${report.dispatcher.path} already matches bundle`);
+
+  if (sv === 'installed') parts.push(`set statusLine in ${report.settings.path}`);
+  else if (sv === 'replaced') parts.push(`replaced statusLine in ${report.settings.path} (--force)`);
+  else if (sv === 'preserved') parts.push(`preserved statusLine in ${report.settings.path} (pass --force to overwrite)`);
+  else if (sv === 'unchanged') parts.push(`statusLine in ${report.settings.path} already matches`);
+
+  if (parts.length > 0) {
+    opts.say(`bassclef init: statusline — ${parts.join('; ')}.\n`);
   }
 }

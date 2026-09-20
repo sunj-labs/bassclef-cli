@@ -470,7 +470,13 @@ function copyOne(
   }
 }
 
-function resolveBundleRoot(explicit: string | undefined): string {
+/**
+ * Resolve the bundled substrate root — `<package>/dist/lite/`. Walks up from
+ * this module's file URL to `package.json`, then descends into `dist/lite/`.
+ * Exported so other init-time steps (e.g. install-statusline) can locate the
+ * bundle without duplicating the walk-up.
+ */
+export function resolveBundleRoot(explicit: string | undefined): string {
   if (explicit && explicit.length > 0) return resolve(explicit);
   // Walk up from the compiled dist/cli.js OR test-mode src/lib/*.ts to
   // package.json, then descend into dist/lite/.

@@ -1,0 +1,8 @@
+# Temperance marker — feature/statusline-tarball-adopter
+- date: 2026-09-20
+- branch: feature/statusline-tarball-adopter
+- scope: enable Claude Code statusLine for @thebassclef/lite tarball adopters
+- right-thing: ship cli-side pair to bassclef-upstream#1860 — bundle presence/cli/*.sh + bassclef-version.json into dist/lite/, and have bassclef init write statusLine field in .claude/settings.json + copy dispatcher to ~/.claude/bassclef-statusline.sh
+- right-way: Tier 0 strict TDD per testing-tier-config.md; ADR-002 safety contract preserved (resolveHome guards); stagable PR — no npm publish this session
+- drift-trigger: adding upstream fallback-path fix to cli (that's upstream #1860 scope); npm publish before operator review; scope creep to a bassclef statusline subcommand (deferred as follow-on per prior chat)
+- upstream-dependency: bassclef-upstream#1860 must land before adopter's statusline renders correctly; this PR ships stagable pieces

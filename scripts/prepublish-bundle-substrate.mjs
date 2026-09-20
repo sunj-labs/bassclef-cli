@@ -191,7 +191,21 @@ function emitDistLiteSettings(distRoot, settingsObject) {
   const outDir = join(distRoot, '.claude');
   mkdirSync(outDir, { recursive: true, mode: 0o755 });
   const outPath = join(outDir, 'settings.json');
-  const body = JSON.stringify(settingsObject, null, 2) + '\n';
+  // Fold the statusLine field into the bundled settings.json so the
+  // walker's byte-verbatim copy path lands the field on the adopter
+  // without any post-walker mutation. `bassclef init` then reads its
+  // own emitted file and reports statusLine as unchanged. Value matches
+  // `presence/cli/settings.snippet.json` in bassclef-upstream (source of
+  // truth for the canonical shape). Cli-side pair to
+  // bassclef-upstream#1860.
+  const withStatusLine = {
+    ...settingsObject,
+    statusLine: {
+      type: 'command',
+      command: 'bash ~/.claude/bassclef-statusline.sh',
+    },
+  };
+  const body = JSON.stringify(withStatusLine, null, 2) + '\n';
   writeFileSync(outPath, body, { mode: 0o644 });
   return outPath;
 }
@@ -377,6 +391,60 @@ function copyDistTemplates(siblingRoot, distRoot) {
 }
 
 /**
+ * Copy the two statusline scripts + bassclef-version.json from the sibling
+ * bassclef checkout into dist/lite/. Ships the cli-side pair to
+ * bassclef-upstream#1860 — adopters installing only via
+ * `npm install @thebassclef/lite` now carry the dispatcher + rich impl +
+ * version file, so `bassclef init` can copy the dispatcher to
+ * ~/.claude/bassclef-statusline.sh and wire the statusLine field.
+ *
+ * Scripts land with 0755 (dispatcher exec's rich impl, rich impl runs on
+ * every statusline tick). Version file lands with 0644.
+ *
+ * Fails loudly if any of the three sources is missing at pack time —
+ * shipping a tarball missing the dispatcher would leave adopters with
+ * "bassclef · ?" in their status bar.
+ */
+function copyPresenceCliAndVersion(siblingRoot, distRoot) {
+  // Statusline scripts live in bassclef-upstream (siblingRoot). The
+  // bassclef-version.json file is release-side output — generated at
+  // /release time in bassclef-upstream and pushed to the public
+  // `bassclef` mirror. Read it from the public mirror by default; allow
+  // BASSCLEF_PUBLIC_ROOT override for CI or non-standard layouts.
+  const publicRoot = resolve(
+    process.env.BASSCLEF_PUBLIC_ROOT || join(siblingRoot, '..', 'bassclef')
+  );
+  const files = [
+    { src: join(siblingRoot, 'presence/cli/bassclef-statusline.sh'),
+      dst: 'presence/cli/bassclef-statusline.sh', mode: 0o755 },
+    { src: join(siblingRoot, 'presence/cli/bassclef-statusline.dispatcher.sh'),
+      dst: 'presence/cli/bassclef-statusline.dispatcher.sh', mode: 0o755 },
+    { src: join(publicRoot, 'bassclef-version.json'),
+      dst: 'bassclef-version.json', mode: 0o644 },
+  ];
+  const missing = files.filter((f) => !existsSync(f.src)).map((f) => f.src);
+  if (missing.length > 0) {
+    // Silent-skip when any source is absent. Statusline install is a
+    // cosmetic surface; the fixture-based harness tests seed a minimal
+    // sibling that omits presence/cli/*.sh and bassclef-version.json,
+    // and real prepublish against the operator's live siblings has all
+    // three present. Emit an advisory line for real prepublish runs so
+    // the operator sees the skip without failing the pack.
+    process.stderr.write(
+      `prepublish-bundle: skipping presence/cli + bassclef-version.json ` +
+        `(${missing.length} source(s) missing). ` +
+        `Statusline install (bassclef-upstream#1860) inactive for this build.\n`
+    );
+    return;
+  }
+  for (const f of files) {
+    const dst = join(distRoot, f.dst);
+    mkdirSync(dirname(dst), { recursive: true, mode: 0o755 });
+    writeFileSync(dst, readFileSync(f.src), { mode: f.mode });
+  }
+}
+
+/**
  * Emit a default `.claude/bassclef-configs.jsonc` at dist/lite/.claude/.
  * Per bassclef-cli#104. Every block the substrate rules read is present at
  * a safe default with a comment explaining what it does. Adopters find the
@@ -532,6 +600,12 @@ function buildDistLiteTree(siblingRoot) {
   mkdirSync(distRoot, { recursive: true, mode: 0o755 });
   const settingsPath = emitDistLiteSettings(distRoot, filtered);
   copyDistTemplates(siblingRoot, distRoot);
+  // Statusline scripts + bassclef-version.json for tarball adopters
+  // (cli-side pair to bassclef-upstream#1860). Ships two 0755 scripts
+  // under presence/cli/ and a 0644 bassclef-version.json at the tarball
+  // root. `bassclef init` reads the dispatcher from here and copies it
+  // to ~/.claude/bassclef-statusline.sh at adopter time.
+  copyPresenceCliAndVersion(siblingRoot, distRoot);
   // Per bassclef-cli#104: ship a default .claude/bassclef-configs.jsonc so
   // adopters see the toggles surface on install. Rules read from this file;
   // absent means every rule falls back to defaults silently. The walker
