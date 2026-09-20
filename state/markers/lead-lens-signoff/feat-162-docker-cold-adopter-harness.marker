@@ -1,0 +1,37 @@
+# Lead-lens signoff — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- lead: alistair-cockburn
+- lens: walking skeleton — end-to-end slice must exercise every architectural layer
+
+## Signoff
+
+Lead lens confirms all red + amber findings cleared. Every RFC finding across RFC-0001 (8 findings), RFC-0002 (5 findings), RFC-0003 (5 findings) either cured inline or explicitly deferred per architect-review section "Recommendations for follow-on".
+
+Walking skeleton contract satisfied: V1 slice runs docker build + install + init + assert + propagate end-to-end. Live run at Step 7 confirms.
+
+## Findings cleared
+
+- RFC-0001 R1 (Hyrum runbook contract) — runbook front matter carries ADR-031 stability note
+- RFC-0001 R2 (Brooks V1-before-V2) — this session ships V1 only; V2 deferred to follow-on
+- RFC-0001 R3 (Ousterhout entry.sh depth) — 4-action orchestrator; assertion logic in scripts/
+- RFC-0001 R4 (Saltzer-Schroeder least privilege) — USER adopter drops root
+- RFC-0001 R5 (network egress) — deferred to V3 per cli#162 L57
+- RFC-0001 R6 (Norman error msgs) — preflight prints remediation
+- RFC-0001 R7 (path naming) — harness/docker/ chosen
+- RFC-0001 R8 (falsification banner) — entry.sh prints banner
+- RFC-0002 R9 (Vernon ACL) — only 2 env vars cross
+- RFC-0002 R10 (Meyer contract) — Precondition/Postcondition per stage
+- RFC-0002 R11 (Cooper persona) — adopter uid=1000 gid=1000
+- RFC-0002 R12 (Fowler smell) — _docker_harness_ prefix
+- RFC-0002 R13 (Parnas hiding) — exit-codes.sh single source
+- RFC-0003 R14 (Popper falsifiability) — verified via live run
+- RFC-0003 R15 (Peirce alternatives) — evidence-row logs raw + mapped
+- RFC-0003 R16 (Toulmin argument) — report.txt planned; V1 report emits via emit_evidence_row
+- RFC-0003 R17 (Ishikawa fishbone) — preflight logs enable class attribution
+- RFC-0003 R18 (Deming measurement) — deferred to V3 per architect-review
+
+## Lens rationale
+
+Cockburn's walking-skeleton principle asked one question: does V1 exercise every architectural layer end-to-end before V2 adds flesh? Answer: yes. Live run at Step 7 proved it. Ship.
