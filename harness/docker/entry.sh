@@ -294,6 +294,16 @@ _docker_harness_run_v2() {
   echo ">>> V2 skill drive starting" >&2
   echo "captures dir: $captures_root" >&2
 
+  # V2 prep — mark the container's throwaway workspace as trusted so
+  # claude -p does not block on the interactive trust dialog.
+  # Scope: only /adopter/test (container path). Adopters running claude
+  # in their own project still see the dialog on first run.
+  # Per pre-mortem 09-20d cure — least-privilege trust at the caller.
+  local workspace="${ADOPTER_CWD:-/adopter/test}"
+  local claude_config="$HOME/.claude.json"
+  jq -n --arg ws "$workspace" '{projects: {($ws): {hasTrustDialogAccepted: true}}}' > "$claude_config" 2>/dev/null || true
+  echo "workspace trusted: $workspace" >&2
+
   # V2 Step 1 — smoke-capture (SessionStart hook output)
   if [[ -f "$scripts_dir/smoke-capture.sh" ]]; then
     set +e

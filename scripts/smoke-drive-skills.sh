@@ -109,6 +109,12 @@ while IFS= read -r skill; do
   # Perl alarm-based timeout wrapper.
   # Exit 142 (128+14, SIGALRM) when the alarm fires. Any other non-zero is
   # the skill's own exit; downstream assertion suite writes CRASH row.
+  #
+  # Stdin cure (2026-09-20d): the outer while loop uses `<<< "$SKILLS"` as
+  # a here-string. Without redirecting the child's stdin, `claude -p`
+  # inherits and consumes it — the loop then reads EOF after 1 iteration
+  # and only 1 skill fires. `< /dev/null` on the perl call closes the
+  # child stdin so the here-string stays intact for the outer read.
   {
     echo "=== skill: ${skill}"
     echo "=== claude_bin: ${CLAUDE_BIN}"
@@ -121,7 +127,7 @@ while IFS= read -r skill; do
       $SIG{ALRM} = sub { exit 142 };
       alarm $t;
       exec @cmd or exit 127
-    ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "$skill" 2>&1
+    ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "$skill" < /dev/null 2>&1
     exit_code=$?
     set -e
     echo "=== exit: ${exit_code}"
