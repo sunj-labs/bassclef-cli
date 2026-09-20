@@ -82,10 +82,10 @@ state/events/test-runs/
 .claude/bassclef-orientation.md
 .claude/*.bak.*
 /lib/
-# >>> bassclef-sync managed symlinks (do not edit) >>>
-CLAUDE.md.bak.*
-# <<< bassclef-sync managed symlinks <<<
 
 # Vitest coverage output (cli#165)
 coverage/
 *.lcov
+# >>> bassclef-sync managed symlinks (do not edit) >>>
+CLAUDE.md.bak.*
+# <<< bassclef-sync managed symlinks <<<
