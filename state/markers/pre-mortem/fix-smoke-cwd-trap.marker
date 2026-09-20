@@ -1,0 +1,20 @@
+# Pre-mortem light — fix/smoke-cwd-trap
+- date: 2026-09-19
+- risk-ledger-path: (inline — light mode, 3 lenses × 3-5 risks)
+
+## Lens 1 — michael-nygard (stability + fail-soft)
+- R1: `cd ~` masks a legit "operator is elsewhere on purpose" case. Impact: LOW — smoke test is scripted for a fixed dir; operator doesn't run from arbitrary CWDs.
+- R2: warning line prints even when reset was operator-scoped (--skip-delegate). Impact: LOW — the check gates on delegate branch only.
+- R3: `INITIAL_PWD` capture happens after set -euo pipefail. If PWD is already broken at entry, capture returns empty; check then no-ops. Fail-soft holds.
+
+## Lens 2 — saltzer-schroeder (defense in depth)
+- R4: two independent layers (runbook one-liner + script warning) cover the same class. Belt + suspenders. When one fails (operator not using the one-liner, running commands ad-hoc), the other catches.
+- R5: neither layer requires operator config; both self-heal. Complete-mediation at both surfaces.
+- R6: warning is stderr not stdout; doesn't corrupt any downstream pipe. Least common mechanism preserved.
+
+## Lens 3 — michael-feathers (characterization)
+- R7: no test file for smoke-reset-whole.sh at Tier 1 today (scripts/*.sh is Tier 1 WARN). Adding tests deferred; the change is a defensive log-only branch with no state mutation.
+- R8: the one-liner is prose in a runbook, not code. Testable only via manual smoke on cold-adopter. Deferred to smoke-run itself.
+
+## Strongest concerns folded into plan
+- R1 accepted as trivial. R7+R8 deferred (Tier 1 scripts don't require tests).

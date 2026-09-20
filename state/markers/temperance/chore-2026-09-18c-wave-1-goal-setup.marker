@@ -1,0 +1,5 @@
+# Temperance marker — 2026-09-18c wave-1 goal setup
+- date: 2026-09-18
+- branch: chore/2026-09-18c-wave-1-goal-setup
+- scope-decision: right-thing = ship goal-doc + 4-PR stack of visible first-run cures (operator explicit ask 2026-09-18); right-way = orchestrator-gated with full OOAD/pre-mortem/loop discipline per operator directive; drift-trigger = if any step exceeds turn budget × 1.5 pause + re-anchor
+- brute-force-check: not doing brute-force; each step reads sources + tests before edits

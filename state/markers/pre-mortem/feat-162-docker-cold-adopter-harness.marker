@@ -1,0 +1,25 @@
+# Pre-mortem marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- mode: pre-mortem-light
+- lenses: [michael-nygard, linus-torvalds, alistair-cockburn]
+
+## Ledger path
+
+docs/risk-ledgers/2026-09-20b-docker-cold-adopter-harness-pre-mortem-1.md
+
+## Risks named
+
+- Nygard: 8 (2 med, 6 low + 1 high overlap with Cockburn C-set)
+- Linus: 7 (1 high, 3 med, 3 low)
+- Cockburn: 8 (2 high, 4 med, 2 low)
+- Total: 23 risks; 3 HIGH; 8 MEDIUM; 12 LOW
+
+## Strongest folded before code
+
+- N2 (arch mismatch) — pin `--platform=linux/amd64` in Dockerfile FROM + docker build
+- L6 (release cadence) — harness pinned to 1.2.1; falsification test expects red today; 1.2.2 next
+- C1 + C3 (skeleton half-completion) — workflow file + Tier 0 test are Step 3-4 required deliverables
+
+Handoff 1 pre-mortem light complete.

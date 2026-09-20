@@ -1,0 +1,22 @@
+# Thread-walk marker (legacy path arc-walk) — 2026-09-20b Docker cold-adopter harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- goal_id: 2026-09-20b-docker-cold-adopter-harness
+
+## Walk
+
+- parent_ticket: bassclef-cli#162 — Docker-based cold-adopter smoke; Linux coverage + zero operator state
+- parent_goal: null — top-level goal for cli launch backlog; no upstream iteration doc
+- parent_roadmap: null — cli sits under bassclef-upstream Goal A per docs/whereami.md L13
+
+## Union of drivers, open acceptance, out_of_scope from ancestors
+
+- **Drivers** — cli 1.2.1 shipped with 12 hooks wired-but-missing; account swap smoke on 2026-09-19a proved not-self-contained; launch delayed 24h pending 4 upstream cures (whereami L18-22)
+- **Open acceptance** — self-contained lite tier per cli README; every future release publishes only after Docker smoke passes on both macOS + Linux (cli#162 L92-95)
+- **Out of scope** — Windows-native; interactive claude sessions; persistent volumes; K8s integration (cli#162 L88-91)
+
+## Verdict
+
+Chain root reached: parent_ticket cli#162 IS the root — no parent iteration goal or roadmap above.
+No conflicting sequence detected between whereami next_bet suggestion and this session's fresh analysis.

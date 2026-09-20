@@ -1,0 +1,12 @@
+# Pre-mortem light — fix/smoke-bootstrap-cd-tilde
+- date: 2026-09-19
+
+## Lens 1 — michael-nygard (stability)
+- R1: cd ~ in the printed one-liner masks a user's on-purpose CWD. Impact: LOW — bootstrap is for cold-adopter smoke; operator paths are fixed.
+- R2: heredoc quoting bug could break if `\\` escapes drift. Impact: LOW — visually checked.
+
+## Lens 2 — saltzer-schroeder (defense in depth)
+- R3: the fix aligns bootstrap with runbook; both surfaces now carry the same one-liner. Belt + suspenders holds.
+
+## Lens 3 — david-parnas (information hiding)
+- R4: two copies of the same command is the real defect. This PR patches; follow-on ticket (Path B) retires the duplicate.

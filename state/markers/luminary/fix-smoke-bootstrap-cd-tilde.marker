@@ -1,0 +1,10 @@
+# Luminary marker — fix/smoke-bootstrap-cd-tilde
+- date: 2026-09-19
+- lead: michael-nygard
+- supporting: [david-parnas]
+
+## Lead rationale
+Stability + fail-soft: cd ~ prefix is idempotent, matches runbook, self-heals against deleted-CWD trap.
+
+## Supporting
+Parnas: this cure IS a workaround for information-hiding failure (two copies of one-liner). Follow-on ticket removes the duplicate.

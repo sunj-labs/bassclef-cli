@@ -1,0 +1,25 @@
+# Temperance marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- goal_id: 2026-09-20b-docker-cold-adopter-harness
+
+## Scope decision
+
+Ship the cli#162 Docker cold-adopter harness as V1 walking skeleton + V2 skill drive against published cli 1.2.1 first, then re-run against cli 1.2.2 once upstream cures land — right thing per whereami L18-22 pollution class; right way per Cockburn walking skeleton + Beck tests-first + Zeller falsification test.
+
+## Six checks
+
+- **0. Right thing?** Yes — cli 1.2.1 shipped a 12-hook cascade class that the current operator-machine smoke did not catch pre-ship. cli#162 filed with `/extract-intent` LIVE at 0.92 confidence. Ticket exists.
+- **1. Simplest?** Yes — V1 wraps 6 existing bash scripts under `scripts/smoke-*` in a Debian slim container. No new assertion logic. Ousterhout deep-module reuse.
+- **2. Brute force?** No — the design draws on Cockburn/Beck/Zeller anchors + Nygard stability + Linus adopter contract. Pre-mortem light with 23 named risks fired before this marker. Understanding first.
+- **3. Blast radius?** Low. Harness is additive — adds `harness/docker/**` + one workflow + one runbook. Zero source-code changes to cli itself. Falsification-test framing means failures are expected and diagnostic, not regressive.
+- **4. Verification?** Multi-layered. Tier 0 tests on entry.sh path handling. V1 exit 3 on cli 1.2.1 (proves detection). V1 exit 0 on cli 1.2.2 (proves cure). V2 exit red on skill hardcodes then green post-cure.
+- **5. Reversible?** Fully. Harness lives under `harness/docker/**` — deleting the folder reverts the whole surface. Workflow file removal reverts CI wiring.
+
+## Drift triggers
+
+- Time budget exceeds 165 turns × 1.5 = 247 turns → pause, re-anchor
+- Any step touches auth / schema / prod-deploy → hard-ceiling, pause
+- V1 base image drift changes assertion behavior mid-session → pause + upgrade pin
+- Upstream cures for #1822/#1824/#1825/#1827 land mid-session → replan V2 falsification tests

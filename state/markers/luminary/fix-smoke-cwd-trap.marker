@@ -1,0 +1,13 @@
+# Luminary marker — fix/smoke-cwd-trap
+- date: 2026-09-19
+- lead: michael-nygard
+- supporting: [saltzer-schroeder, michael-feathers]
+
+## Lead lens rationale
+Nygard's stability pattern applies at both surfaces:
+- Fail-soft warning in reset (doesn't crash; surfaces the issue for the operator).
+- Defensive `cd ~` in the one-liner (recovery-first shape).
+
+## Supporting rationale
+- Saltzer-Schroeder: defense-in-depth via two independent layers covering the same class.
+- Feathers: characterized failure from real cold-adopter-1 output before writing the fix.

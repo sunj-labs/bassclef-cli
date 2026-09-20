@@ -1,0 +1,6 @@
+# Pre-mortem light — 2026-09-18c wave-1 goal setup
+- date: 2026-09-18
+- mode: light (3 lenses × 5-8 risks)
+- lenses: linus-torvalds, michael-feathers, alan-cooper
+- risk-ledger: docs/pre-mortems/2026-09-18c-wave-1-first-5-min-cures.md (to be authored in same PR)
+- highest-risk: Step 4 #103 whereami path change (adopters with existing root file get drift) — mitigation ADR-031 compat symlink + release-notes callout

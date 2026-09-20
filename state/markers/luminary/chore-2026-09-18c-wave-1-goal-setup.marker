@@ -1,0 +1,10 @@
+# Luminary marker — 2026-09-18c wave-1 goal setup
+- date: 2026-09-18
+- branch: chore/2026-09-18c-wave-1-goal-setup
+- lead: alan-cooper — CLI operator experience (per package.json primary_luminaries triad)
+- supporting:
+  - john-ousterhout — deep modules for init refactor
+  - saltzer-schroeder — 7 defensive disciplines on src/ changes
+  - don-norman — signifier / feedback loop discipline on banners
+  - michael-nygard — stability pattern on adopter contract (ADR-031)
+  - michael-feathers — characterization tests on Tier 0 src/ code
