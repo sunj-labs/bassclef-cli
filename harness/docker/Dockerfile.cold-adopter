@@ -1,0 +1,53 @@
+# tier: standard
+# Docker cold-adopter smoke harness image per cli#162.
+#
+# Base image pinned per pre-mortem-1 N1 (base-image drift class).
+# Platform pinned per pre-mortem-1 N2 (arch mismatch class) — arm64 hosts use Rosetta emulation.
+# Unprivileged adopter user per RFC-0002 R11 (Cooper persona) + R4 (Saltzer-Schroeder least privilege).
+# Anticorruption layer per RFC-0002 R9 — no operator env leaks except CLI_VERSION + ANTHROPIC_API_KEY at run time.
+
+FROM --platform=linux/amd64 debian:12-slim
+
+# System deps needed by cli init + smoke-assert scripts.
+# python3 for text processing, jq for JSON parsing, git for repo init, curl for install fallback.
+# procps for command-v checks. ca-certificates for TLS to npm registry + Anthropic API.
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    procps \
+    python3 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Node 20 via NodeSource (bassclef-cli requires node >= 20 per package.json)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install --no-install-recommends -y nodejs \
+  && rm -rf /var/lib/apt/lists/*
+
+# Create unprivileged adopter user (RFC-0002 R11)
+RUN groupadd -g 1000 adopter && useradd -m -u 1000 -g adopter -s /bin/bash adopter
+
+# Copy harness scripts into image
+# Adopter home holds the smoke playing field
+WORKDIR /adopter
+COPY --chown=adopter:adopter harness/docker/entry.sh /adopter/entry.sh
+COPY --chown=adopter:adopter harness/docker/exit-codes.sh /adopter/exit-codes.sh
+COPY --chown=adopter:adopter scripts/ /adopter/scripts/
+
+# Make entry.sh executable
+RUN chmod +x /adopter/entry.sh /adopter/exit-codes.sh /adopter/scripts/*.sh 2>/dev/null || true
+
+# Drop root
+USER adopter
+
+# Default env vars — overridden at run time via -e flags
+ENV CLI_VERSION=latest \
+    HARNESS_EVENT_LOG=/adopter/state/events/evidence-status-changed.jsonl \
+    SMOKE_SCRIPTS_DIR=/adopter/scripts
+
+# Ensure evidence log dir exists at container start
+RUN mkdir -p /adopter/state/events /adopter/state/harness-runs
+
+ENTRYPOINT ["/adopter/entry.sh"]
