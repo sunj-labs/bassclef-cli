@@ -1,0 +1,10 @@
+# Architect-review marker — 2026-09-20
+
+- date: 2026-09-20
+- report: docs/architecture/reviews/2026-09-20.md
+- primary_lens: linus-torvalds
+- verdict: READY
+- coverage: 12 covered + 2 N/A + 0 deferred
+- findings: 0 significant + 3 moderate + 4 trivial
+- tickets: cli#164 (CLAUDE.md ADR list), cli#165 (vitest coverage), cli#166 (typescript sibling promote)
+- session: 2026-09-20b (feat/162-docker-cold-adopter-harness)
