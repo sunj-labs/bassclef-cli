@@ -24,6 +24,23 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.2.2] - 2026-09-20
+### Added
+
+- **Vitest test-run history + flake detection aggregator** (bassclef-cli#169 → PR #172 → `14db575`). Vitest emits per-run JSON to `state/events/test-runs/` (local, gitignored). `scripts/aggregate-test-runs.sh` reads records and emits duration histogram + flake list. `npm run test:report` invokes the aggregator. Vernon anticorruption boundary — `parse_vitest_record` translates vitest 2.0.0 JSON shape to CanonicalRecord; Control operates on CanonicalRecords never on raw vitest JSON. 38 Tier 0 tests GREEN. Maintainer-side only; adopter tarball unchanged. Full OOAD chain shipped design → RFC-0006 adversarial council (5 outside luminaries) → pre-mortem light (15 risks) → RED/GREEN Beck TDD → architect-review READY.
+- **Docker cold-adopter smoke harness V1 walking skeleton** (bassclef-cli#162 → PR #163 → `2a31709`). New `harness/docker/` — Dockerfile + entry.sh + exit-codes.sh + Tier 0 tests (18 GREEN). New workflow `.github/workflows/docker-smoke.yml` runs the harness against `@thebassclef/lite@latest` on every PR touching `src/**` or `harness/**`. Container starts from a clean Debian slim base — zero operator artifacts. Runbook at `docs/runbook/docker-smoke.md` documents local invocation. Full 4-handoff SDLC ceremony (pre-mortem light × 4 + adversarial RFC × 3 + architect-review at Handoff 4). Maintainer-side smoke; adopter tarball unchanged.
+- **Vitest coverage config with istanbul provider** (bassclef-cli#165 → PR #168 → `8299bde`). `vitest.config.ts` adds `coverage: { provider: 'istanbul', reporter: ['text', 'json-summary', 'html'], thresholds: { lines: 40, functions: 45, branches: 25, statements: 35 } }`. `npm run test:coverage` script emits per-file coverage. Istanbul chosen over v8 because v8 sets `NODE_V8_COVERAGE` which propagates to subprocess-spawning tests (`runCli`) and breaks their exit codes. Baseline thresholds at current actuals; follow-on tickets to backfill migrate.ts + sync.ts + sync-argv.ts.
+
+### Changed
+
+- **CLAUDE.md architecture-decisions list extended with 8 ADRs** (bassclef-cli#164 → PR #167 → `0220e4d`). Adds ADR-004 through ADR-010 + ADR-057 to the CLAUDE.md ADR reference list. Prior list only named ADR-001 through ADR-003. New session context loads all 10 ADRs on `@import`. No behavior change; documentation-only.
+
+### Fixed
+
+### Notes
+
+- **Cross-version install harness ticket** (bassclef-cli#173) filed as follow-on. Cli has no way to install last N npm versions and compare their test runs side-by-side; single-version harnesses (#100, #162) cover only one version at a time. #173 proposes extending Docker harness for N-version compare via `scripts/compare-versions.sh` or a scheduled CI workflow.
+
 ## [1.2.1] - 2026-09-19
 ### Added
 
