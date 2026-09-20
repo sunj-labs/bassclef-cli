@@ -9,8 +9,9 @@
     "docs/adrs/ADR-057-lite-catalog-destination-path-invariant.md",
     "docs/proposed-upstream/standards--distribution-preflight.md",
     "docs/proposed-upstream/rules--distribution-preflight-check.md",
-    "docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md"
+    "docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md",
+    "docs/operator-private/2026-09-20-traceability-schema-ai-council-research.md"
   ],
-  "last_scanned": "2026-09-17T23:05:56Z",
+  "last_scanned": "2026-09-20T11:08:58Z",
   "scanner_version": "1.0"
 }
