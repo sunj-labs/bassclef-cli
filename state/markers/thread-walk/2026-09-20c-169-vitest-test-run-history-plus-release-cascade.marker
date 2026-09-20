@@ -1,0 +1,8 @@
+# Thread-walk marker — 2026-09-20c
+- date: 2026-09-20
+- branch: feat/169-vitest-test-run-history
+- parent_goal_ids: []
+- walk: no parent goal — fresh session goal shipping cli#169 + release cascade v1.2.2
+- drivers: cli#169 (test-run history) + cli#163/#167/#168 (open PRs ready to ship in v1.2.2)
+- open_acceptance: same as goal doc §Acceptance
+- out_of_scope: cli#170 (DORA metrics), cli#171 (adopter telemetry) — deferred to next session

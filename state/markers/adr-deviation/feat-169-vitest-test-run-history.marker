@@ -1,0 +1,5 @@
+# ADR-deviation marker — feat/169-vitest-test-run-history
+- date: 2026-09-20
+- branch: feat/169-vitest-test-run-history
+- adr_governing: ADR-049 (bassclef-upstream — telemetry opt-in default off) — honored (local-only, no adopter surface). No cli-side ADR governs this scope; scripts/aggregate-test-runs.sh + vitest reporter config are additive
+- outcome: ADR-honored

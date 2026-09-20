@@ -1,0 +1,7 @@
+# Temperance marker — 2026-09-20c cli#169 vitest test-run history + release cascade
+- date: 2026-09-20
+- branch: feat/169-vitest-test-run-history
+- scope-decision: ship #169 (local vitest test-run history) then cascade release v1.2.2 (merges #163 Docker harness + #167 CLAUDE.md ADRs + #168 vitest coverage). NOT shipping: adopter telemetry (#171), DORA metrics (#170), web UI, historical backfill.
+- right-thing: instrumentation surface bassclef-cli maintenance needs; release cascade closes 4 open PRs and gets Docker harness live for adopters.
+- right-way: RED-first Beck TDD; BCE-split Boundary + Control layers per Jacobson; pre-mortem light + adversarial RFC council pre-code; architect-review post-code; agent-merges-within-scope for #169 + cascade PRs; Touch ID gate at npm publish stays operator.
+- drift-trigger: any step exceeds time budget × 1.5; RFC council surfaces a HIGH finding that reshapes scope; release cascade publish workflow fails twice with the same signal.
