@@ -1,0 +1,25 @@
+# Luminary marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+
+## Lead lens
+
+alistair-cockburn — walking skeleton discipline. V1 slice must exercise every architectural layer (build, run, install, init, assert, report, exit) end-to-end before V2 adds skill drive on top.
+
+## Supporting lenses
+
+- kent-beck — tests-first client; Tier 0 RED before entry.sh code
+- andreas-zeller — hypothesis-test falsification; harness intentionally red on 1.2.1
+- michael-feathers — characterization tests; wrapping 6 existing bash scripts in Docker becomes their first characterization surface
+- michael-nygard — stability under base-image drift + arch mismatch
+- linus-torvalds — adopter contract; Docker as new surface must not break non-Docker adopter paths
+- jane-cleland-huang — live-traceability + augmentation; harness feeds evidence rows to existing schema for future ML-driven trace maintenance
+
+## Adversarial council (RFC-0001)
+
+- linus-torvalds (adopter compatibility)
+- hyrum-wright (observable behavior binding)
+- frederick-brooks (second-system effect)
+- michael-nygard (stability)
+- john-ousterhout (deep modules, narrow interface for entry.sh)

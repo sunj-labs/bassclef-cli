@@ -1,0 +1,21 @@
+# ADR-deviation marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- adr_governing: none — confirmed no ADR coverage for testing-infrastructure surfaces (ADR-001 = npm build toolchain; ADR-002 = init safety; ADR-003 = sync safety; ADR-004 = publish pipeline; ADR-005 = Model C; ADR-007 = dist bundle path; ADR-009 = ADR-055 pointer). Docker harness sits in `harness/docker/**` under a new top-level directory that does not touch any of these surfaces.
+- outcome: ADR-honored
+
+## Rationale
+
+The Docker cold-adopter harness is additive testing infrastructure. It does not modify:
+
+- Init writer behavior (ADR-002 preserved)
+- Sync command safety (ADR-003 preserved)
+- Publish pipeline (ADR-004 preserved)
+- Dist bundle path (ADR-007 preserved)
+
+The harness installs `@thebassclef/lite` from the public npm registry — same install path any adopter uses. It runs `bassclef init` verbatim without modification.
+
+New top-level path `harness/docker/` per RFC-0001 R7 cure (Brooks conceptual integrity — harness is a distinct concern from `scripts/`).
+
+No pinned architectural decision constrains this change. No deviation.

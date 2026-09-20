@@ -1,0 +1,31 @@
+# Decompose marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- decomposition_doc: docs/decompositions/2026-09-20b-docker-cold-adopter-harness.md
+- use_case_doc: docs/use-cases/UC-docker-cold-adopter-harness.md
+
+## Cockburn tier
+
+Fully-dressed use case (new hook + new lib + new script surface per oo-ad-entry-point matrix)
+
+## Method
+
+Jacobson BCE + Ousterhout deep modules + GRASP responsibility assignment.
+
+## Modules identified
+
+- 4 Boundary (Dockerfile, entry.sh, workflow, runbook)
+- 6 Control (Orchestrator, ExitCodeMapper, BackoffRetrier, EvidenceRowEmitter, ReportWriter, PreflightChecker)
+- 5 Entity (EvidenceRow, HarnessRunReport, InstallManifest, SettingsHookList, OnDiskHookFileSet)
+
+## Patterns instantiated
+
+- gof/facade (Orchestrator)
+- gof/strategy (ExitCodeMapper)
+- gof/observer (EvidenceRowEmitter)
+- nygard/circuit-breaker (BackoffRetrier)
+
+## Cross-cutting decisions folded
+
+14 findings from pre-mortem + RFC folded into module shape (see decomposition doc § "Cross-cutting decisions folded").

@@ -19,8 +19,9 @@
     "docs/proposed-upstream/standards--distribution-preflight.md",
     "docs/proposed-upstream/rules--distribution-preflight-check.md",
     "docs/iteration-bets/2026-09-19a-launch-prep-os-contract-plus-docs-merge.md",
-    "docs/risk-ledgers/2026-09-19a-launch-prep-pre-mortem.md"
+    "docs/risk-ledgers/2026-09-19a-launch-prep-pre-mortem.md",
+    "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md"
   ],
-  "last_scanned": "2026-09-19T14:15:31Z",
+  "last_scanned": "2026-09-20T11:34:13Z",
   "scanner_version": "1.0"
 }

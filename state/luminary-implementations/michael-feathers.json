@@ -12,8 +12,9 @@
     "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
     "docs/risk-ledgers/2026-09-16-cli-1.1.0-lite-catalog.md",
     "docs/iteration-bets/2026-09-18a-smoke-evidence-capture.md",
-    "tests/init-reporting-characterization.test.ts"
+    "tests/init-reporting-characterization.test.ts",
+    "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md"
   ],
-  "last_scanned": "2026-09-18T11:42:54Z",
+  "last_scanned": "2026-09-20T11:34:13Z",
   "scanner_version": "1.0"
 }

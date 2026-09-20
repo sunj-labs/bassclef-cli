@@ -1,0 +1,19 @@
+# RFC marker — feat/162-docker-cold-adopter-harness
+
+- date: 2026-09-20
+- branch: feat/162-docker-cold-adopter-harness
+- rfc_id: RFC-0001
+- doc: docs/rfcs/RFC-0001-docker-cold-adopter-harness.md
+- disposition: Revised A
+
+## Council (outside authoring set)
+
+Hyrum Wright, Frederick Brooks, John Ousterhout, Saltzer + Schroeder, Donald Norman
+
+## Findings
+
+- HIGH: 3 (R1 Hyrum runbook contract; R2 Brooks V2 scope creep; R3 Ousterhout entry.sh depth)
+- MEDIUM: 3 (R4 root user; R5 network egress; R6 runbook error msgs)
+- LOW: 2 (R7 harness path naming; R8 falsification-test banner)
+
+All 8 findings cured inline. Zero deferrals.
