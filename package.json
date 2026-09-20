@@ -60,6 +60,7 @@
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:report": "bash scripts/aggregate-test-runs.sh",
     "typecheck": "tsc --noEmit",
     "bump": "node scripts/bump-version.mjs",
     "harness:npm-install": "vitest run --config vitest.harness.config.ts",

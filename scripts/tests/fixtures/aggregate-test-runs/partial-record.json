@@ -1,0 +1,17 @@
+{
+  "numFailedTests": 0,
+  "numPassedTests": 1,
+  "numTotalTests": 2,
+  "success": true,
+  "startTime": 1789910000000,
+  "testResults": [
+    {
+      "name": "tests/synthetic/partial.test.ts",
+      "status": "passed",
+      "assertionResults": [
+        {"fullName": "partial > has status", "title": "has status", "status": "passed", "duration": 5.0},
+        {"fullName": "partial > missing status", "title": "missing status", "duration": 7.0}
+      ]
+    }
+  ]
+}

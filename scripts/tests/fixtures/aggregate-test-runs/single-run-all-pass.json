@@ -1,0 +1,17 @@
+{
+  "numFailedTests": 0,
+  "numPassedTests": 2,
+  "numTotalTests": 2,
+  "success": true,
+  "startTime": 1789910000000,
+  "testResults": [
+    {
+      "name": "tests/synthetic/A.test.ts",
+      "status": "passed",
+      "assertionResults": [
+        {"fullName": "A > passes 1", "title": "passes 1", "status": "passed", "duration": 10.0},
+        {"fullName": "A > passes 2", "title": "passes 2", "status": "passed", "duration": 20.0}
+      ]
+    }
+  ]
+}
