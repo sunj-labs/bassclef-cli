@@ -119,13 +119,36 @@ Full SDLC ceremony at 4 handoffs per operator directive of `/pre-mortem` + `/rfc
 - 7 evidence rows emitted on state/events/evidence-status-changed.jsonl
 - 18/18 Tier 0 tests GREEN
 
+## Wave 3 — architect-review + 3 follow-on PRs + 3 instrumentation tickets (~30 turns)
+
+Operator asked whether /architect-review had been dispatched properly. My earlier session-scoped review at `docs/architecture/reviews/2026-09-20b-docker-cold-adopter-harness.md` was authored inline; the SKILL itself had not been dispatched. Fresh /architect-review SKILL call ran the full 10-step procedure over the whole codebase.
+
+**Verdict READY.** 0 significant + 3 moderate + 4 trivial findings. 7 ADRs current. 433 vitest + 18 Tier 0 tests GREEN. Report at `docs/architecture/reviews/2026-09-20.md`. Primary lens Linus (adopter contract).
+
+**3 moderate findings became tickets + 2 landed as PRs:**
+
+- **cli#164** — CLAUDE.md § Architecture decisions missed 8 ADRs. → PR #167 (docs/164-claude-md-adr-list-extension) extends the list from 3 to 11 bullets.
+- **cli#165** — Vitest coverage not measured. → PR #168 (test/165-vitest-coverage-threshold) adds istanbul provider + baseline thresholds. Actuals: 41.22 lines / 50 functions / 27.66 branches / 39.17 statements. v8 provider broke 8 subprocess-spawning tests via NODE_V8_COVERAGE env; swapped to istanbul; 433/433 stay GREEN.
+- **cli#166** — Missing typescript-npm-cli sibling for architect-review-discipline. Filed as `/promote bassclef-evolution`; authoring lands in a separate upstream session.
+
+Then operator asked whether instrumentation + metrics tracking was in place for deployments, testing runtime, and outcomes. Audit found: bassclef-upstream ships `lib/telemetry.sh` under ADR-049 (opt-in default off) but cli-side wiring is largely absent. `/extract-intent` LIVE at 0.92 confidence picked DORA Team + Tony Ulwick as lenses; Nygard already anchored via ADR-049. 3 instrumentation tickets filed:
+
+- **cli#169** — Vitest JSON reporter + test-run aggregation for flake detection (Kent Beck + Nygard)
+- **cli#170** — DORA metrics via publish.yml + lib/telemetry.sh (DORA Team + Nygard)
+- **cli#171** — Opt-in adopter outcome telemetry for `bassclef init` first-invocation success rate (Tony Ulwick + Cooper + Norman + Nygard)
+
+Sequence recommended: B (test-run history, teaches emit pattern) → A (DORA deploys) → C (adopter outcome) per Cockburn walking-skeleton discipline.
+
 ## Next moves for the operator
 
-1. Review PR #163 for the Docker harness V1
-2. Decide on the launch calculus in light of the surprising finding
-3. Consider filing a re-triage comment on bassclef-upstream#1827 with the Docker evidence
-4. Merge PR #161 (settings-hooks-present) — cli PR #163 rebases cleanly
-5. V2 skill drive follow-on session for cli#162 V2 spec
+1. Review PR #163 (Docker harness V1) — the session's primary ship
+2. Review PR #167 (CLAUDE.md ADR list) — trivial, 1 file changed
+3. Review PR #168 (vitest coverage config) — non-trivial, adds istanbul dep + threshold config
+4. Merge sibling PR #161 (settings-hooks-present) — cli PR #163 rebases cleanly regardless of order
+5. Decide launch calculus per session's surprising finding (whereami 12-hook claim uncertain in cold conditions)
+6. Consider re-triage comment on bassclef-upstream#1827 with the Docker + host-side evidence
+7. Next /longrun session picks up instrumentation cli#169 → cli#170 → cli#171 (B → A → C)
+8. Follow-on session for cli#162 V2 skill drive after V1 lands
 
 ## Refs
 

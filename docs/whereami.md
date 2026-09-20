@@ -14,8 +14,8 @@ note: Execution home for Goal A — build + launch `@thebassclef/core` on npm. B
 
 ## Active iteration
 
-last_updated: 2026-09-20T13:00:00Z
-iteration_bet: goal 2026-09-20b — cli#162 Docker cold-adopter harness V1 shipped as PR #163 (13 files; 18/18 Tier 0 tests GREEN; live run against cli 1.2.1 exits 0). Session paper on traceability schema extension proposal attached as bassclef-upstream#1182 issuecomment-5749419113. Whereami's 12-hook cascade claim did NOT reproduce in two independent cold shapes — Docker + fresh operator-Mac tmp dir both report 28/28/0. Upstream may re-triage #1827 based on this evidence.
+last_updated: 2026-09-20T14:15:00Z
+iteration_bet: goal 2026-09-20b — cli#162 Docker cold-adopter harness V1 shipped as PR #163 (13 files; 18/18 Tier 0 tests GREEN; live run against cli 1.2.1 exits 0). Wave 3 added /architect-review whole-codebase dispatch + 2 follow-on PRs (#167 CLAUDE.md ADR list + #168 vitest coverage config) + 3 instrumentation tickets (cli#169 test-run history, #170 DORA deploy metrics, #171 adopter outcome telemetry). 4 PRs open (#161, #163, #167, #168). Session paper on traceability schema extension attached as bassclef-upstream#1182 issuecomment-5749419113. Whereami's 12-hook cascade claim did NOT reproduce in two independent cold shapes — Docker + fresh operator-Mac tmp dir both report 28/28/0. Upstream may re-triage #1827 based on this evidence.
 iteration_started: 2026-09-20
 session: docs/session-logs/2026-09-20b-docker-cold-adopter-harness-v1-plus-traceability-research.md (~180 turns; ~2h)
 
