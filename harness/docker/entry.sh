@@ -371,6 +371,26 @@ _docker_harness_run_v2() {
     fi
   fi
 
+  # V2 Step 6 — smoke-drive-onboard-repo (per operator ask 2026-09-20 wrap)
+  # Runs AFTER the 5-skill drive in its own scratch dir. Owns setup + drive
+  # + assert + teardown so /onboard-repo's side effects never leak into the
+  # main /adopter/test workspace. Exit codes: 0 pass, 3 assertion fail,
+  # 5 timeout — folded into worst_code like the other V2 steps.
+  if [[ -f "$scripts_dir/smoke-drive-onboard-repo.sh" ]]; then
+    echo ">>> V2 Step 6 — /onboard-repo drive in fresh scratch dir" >&2
+    set +e
+    bash "$scripts_dir/smoke-drive-onboard-repo.sh" \
+      --out "$captures_root/onboard" \
+      --scratch "${HOME:-/tmp}/onboard-test" \
+      --timeout 180
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    _docker_harness_emit_evidence_row "v2_onboard_repo" "exit=${raw}"
+    (( raw > worst_code )) && worst_code=$raw
+  else
+    echo "WARN: smoke-drive-onboard-repo.sh not found; skipping V2 Step 6" >&2
+  fi
+
   echo "<<< V2 skill drive done (worst mapped code=${worst_code})" >&2
   return "$worst_code"
 }
