@@ -134,3 +134,33 @@ Per cli#162 body L88-91:
 - `.claude/rules/oo-ad-entry-point.md` — fully-dressed UC required per Cockburn tier
 - `bassclef-upstream/standards/state-spine/schemas/evidence.schema.json` — traceability schema reused this session
 - Session paper — `docs/operator-private/2026-09-20-traceability-schema-ai-council-research.md`
+
+---
+
+## Amendment 2026-09-20d — V2 skill drive execution
+
+V1 shipped as PR #163 on 2026-09-20b. Steps 8-9 (V2 skill drive) were declared but never executed in the same session. Continuation branch `feat/162-docker-harness-v2` picks up V2 in a new session (2026-09-20d).
+
+**Lift-heavy scope**:
+
+Existing OOAD applies as-is:
+- `docs/use-cases/UC-docker-cold-adopter-harness.md` — main success scenario extends naturally (Steps 12-15 already name the skill drive)
+- `docs/use-cases/UC-hook-docker-harness-entry.md` — Action 4-8 slots reserved
+- `docs/decompositions/2026-09-20b-docker-cold-adopter-harness.md` — SkillDriver + AssertHooks + AssertSkills + ReportWriter Control units already declared
+- RFC-0001 (design), RFC-0002 (code shape), RFC-0003 (testing) — all findings still apply
+- Pre-mortems 1-4 — V1 shape + Handoff 4 delivery still hold
+
+**V2 delta pre-mortem** at `docs/risk-ledgers/2026-09-20d-cli-162-v2-pre-mortem-light.md` — 3 lenses × 3 risks focused on Claude CLI in container + non-tty + API key handling.
+
+**V2 delta folds baked into design edits**:
+
+- Dockerfile pins `@anthropic-ai/claude-code` version + adds `perl` (smoke-drive-skills needs it)
+- Entry.sh preflight adds API key check; missing → V2 skipped gracefully, V1 still runs (N2 fold)
+- Never bake API key in Dockerfile ENV (N1 fold — pass via `-e` at run time only)
+- Tier 0 test scans image for API key leak pattern (N1 fold)
+- Assert-skills recognizes 429 rate-limit output as distinct signal (Z2 fold)
+- V2 result documented as "Docker cold-Linux dimension" — not universal (Z1 fold)
+
+**Executes**: Steps 8-9 from original goal doc + closeout of the V2 half.
+
+**Follow-on tickets already filed**: cli#173 (multi-version compare — extends V2), cli#174 (walker tag sweep — root-cause upstream fix).

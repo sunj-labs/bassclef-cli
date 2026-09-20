@@ -1,0 +1,7 @@
+# Temperance marker — 2026-09-20d cli#162 V2 skill drive
+- date: 2026-09-20
+- branch: feat/162-docker-harness-v2
+- scope-decision: extend V1 with Claude CLI + smoke-drive-skills + smoke-assert-hooks + smoke-assert-skills + smoke-report. Reproduce the 12-hook cascade class inside Docker per Zeller falsification framing. NOT re-authoring V1; NOT changing existing exit code map behavior; NOT adding N-version compare (that's cli#173).
+- right-thing: V2 was scoped in 09-20b goal doc as Steps 8-9 but never shipped; ships the falsification test that catches the paths-exist findings V1 doesn't reach.
+- right-way: extend existing entry.sh + Dockerfile; lift 09-20b OOAD (UC + decomposition + 3 RFCs + 4 pre-mortems) as still-applying; add V2 amendment addendum; new Tier 0 tests cover new action code paths only.
+- drift-trigger: any step exceeds 1.5x its time budget; Docker build breaks on the claude CLI install; V2 baseline against 1.2.0 fails to reproduce any paths-exist findings (would falsify the whole cure premise); scope creeps into cli#173 multi-version compare.

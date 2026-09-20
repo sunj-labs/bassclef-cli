@@ -1,0 +1,5 @@
+# ADR-deviation marker — feat/162-docker-harness-v2
+- date: 2026-09-20
+- branch: feat/162-docker-harness-v2
+- adr_governing: ADR-006 (install harness contract). V2 extension is additive — doesn't change Decision 3 (local pack + published fetch) or Decision 4 (release-published + workflow_dispatch triggers). Docker smoke is a separate workflow per docker-smoke.yml.
+- outcome: ADR-honored

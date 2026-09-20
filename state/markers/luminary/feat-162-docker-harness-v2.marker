@@ -1,0 +1,7 @@
+# Luminary marker — 2026-09-20d cli#162 V2
+- date: 2026-09-20
+- branch: feat/162-docker-harness-v2
+- lead: alistair-cockburn
+- supporting: [kent-beck, andreas-zeller, michael-feathers]
+- what-lead-catches: walking skeleton V2 discipline — extend V1 slice with one more end-to-end thread (claude drive + assert); don't build the whole 5-skill matrix speculatively
+- what-supporting-catches: Beck — RED-first on new action code paths; Zeller — V2 IS the falsification test for the 12-hook cascade class (if it doesn't reproduce paths-exist findings, whereami L18-22 claim is wrong dimension); Feathers — characterize the actual `claude -p` output shape before writing assertions

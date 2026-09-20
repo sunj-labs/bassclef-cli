@@ -165,3 +165,48 @@ Tier 0 tests owed at Step 4 per `.claude/rules/testing-tier-config.md` for the `
 - Baking ANTHROPIC_API_KEY into the image (Saltzer-Schroeder violation)
 - Persistent volume between runs (defeats the fresh-install purpose)
 - V2 skill drive as part of Step 4 (V1 skeleton lands green FIRST, per Cockburn + Brooks R2 cure)
+
+---
+
+## V2 delta (2026-09-20d)
+
+Continuation of the same decomposition for V2 skill drive additions. All V1 Control units + Entity split still apply.
+
+**Added Actions in entry.sh (Facade extension)**:
+
+| Action | Delegates to | Preconditions | Postconditions |
+|---|---|---|---|
+| 4 — Capture Session-Start | SessionCapture (Control) | claude on PATH; workspace initialized | `state/harness-runs/session-capture.txt` written; exit propagated to map |
+| 5 — Drive skills | SkillDriver (Control) | claude on PATH; API key set | per-skill capture files under `state/harness-runs/skills/`; exit propagated |
+| 6 — Assert hooks | AssertHooks (Control) | session capture exists | pass/fail per hook check; exit code propagated |
+| 7 — Assert skills | AssertSkills (Control) | skill captures exist | pass/fail per skill; exit code propagated |
+| 8 — Report | ReportWriter (Control) | prior asserts complete | summary emitted to stdout; exit = max single-check code |
+
+**New failure paths** (extend existing table):
+
+| Precondition violation | Where handled | Exit code |
+|---|---|---|
+| `claude` binary missing after install | Boundary preflight | 22 (NEW — infra: cli install ok but claude install failed) |
+| ANTHROPIC_API_KEY unset | Boundary preflight | 0 with warn (V1 only mode; N2 fold) |
+| API 429 rate limit | AssertSkills classifier | 25 (NEW — retry-eligible signal per Z2 fold) |
+| SessionCapture timeout | Boundary retry-with-backoff | 26 (NEW — capture timeout) |
+
+**V2 test-list additions (extends existing 18 Tier 0 tests)**:
+
+```bash
+# test-list extensions for V2:
+# [ ] preflight passes when ANTHROPIC_API_KEY present
+# [ ] preflight warns + degrades to V1-only when ANTHROPIC_API_KEY unset (N2 fold)
+# [ ] image scan finds no ANTHROPIC_API_KEY value in ENV block (N1 fold)
+# [ ] capture step writes session-capture.txt to expected path
+# [ ] assert-hooks parses paths-exist findings from capture
+# [ ] assert-skills recognizes 429 signal as retry-eligible (Z2 fold)
+# [ ] report exits with max single-check code (C3 fold — preserves V1 exit semantics)
+```
+
+7 new tests. Combined 25 tests cover V1 + V2 code paths.
+
+**@pattern annotations added**:
+
+- `@pattern patterns/code/gof/facade.md` — entry.sh Facade extended with 4 new Actions
+- `@pattern patterns/code/eip/pipeline.md` — Actions 3-8 form a pipeline; each action's output feeds the next

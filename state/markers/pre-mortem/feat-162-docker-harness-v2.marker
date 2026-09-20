@@ -1,0 +1,6 @@
+# Pre-mortem marker — 2026-09-20d cli#162 V2
+- date: 2026-09-20
+- branch: feat/162-docker-harness-v2
+- ledger: docs/risk-ledgers/2026-09-20d-cli-162-v2-pre-mortem-light.md (written Step 1)
+- mode: light — 3 lenses × 3 risks, focused on V2-specific delta (Claude CLI + non-tty + API key handling)
+- prior-context: pre-mortems 1-4 from 09-20b cover V1 shape + Handoff 4 delivery; V2 delta gets its own short ledger
