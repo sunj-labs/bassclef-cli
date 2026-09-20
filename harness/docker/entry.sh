@@ -164,6 +164,7 @@ _docker_harness_map_exit_code() {
     smoke-assert-skills)
       case "$raw_code" in
         0) return "$EXIT_OK" ;;
+        3) return "$EXIT_HOOKS_MISSING" ;;  # generic "one or more checks failed" per script contract
         4) return "$EXIT_SKILL_HARDCODE" ;;
         5) return "$EXIT_SKILL_TIMEOUT" ;;
         *) return "$EXIT_UNKNOWN" ;;
@@ -172,6 +173,7 @@ _docker_harness_map_exit_code() {
     smoke-assert-hooks)
       case "$raw_code" in
         0) return "$EXIT_OK" ;;
+        3) return "$EXIT_HOOKS_MISSING" ;;  # generic "one or more checks failed" per script contract (cascade detected)
         6) return "$EXIT_MANIFEST_MISMATCH" ;;
         *) return "$EXIT_UNKNOWN" ;;
       esac
