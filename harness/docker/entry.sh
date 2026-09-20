@@ -80,17 +80,10 @@ _docker_harness_signal_handler() {
 # Postcondition: return 0 if V1 preflight passes; specific non-zero exit code otherwise
 # ---------------------------------------------------------------------------
 _docker_harness_preflight_all() {
-  # V1 preflight: minimal checks. Docker daemon check skipped in test mode.
-  if [[ "${HARNESS_TEST_MODE:-0}" != "1" ]]; then
-    if ! command -v docker >/dev/null 2>&1; then
-      echo "ERROR: docker not on PATH. Install OrbStack (macOS) or Docker Engine (Linux)." >&2
-      return 20
-    fi
-    if ! docker info >/dev/null 2>&1; then
-      echo "ERROR: docker daemon not responding. Start OrbStack or Docker Desktop." >&2
-      return 20
-    fi
-  fi
+  # V1 preflight (inside-container concerns only).
+  # Docker daemon check lives on the HOST (runbook L18-24 + workflow); not repeated here.
+  # V1 has no in-container preflight — install stage validates its own preconditions.
+  # This function exists so tests can characterize the preflight path shape.
   return 0
 }
 
@@ -213,6 +206,44 @@ _docker_harness_install_cli() {
 }
 
 # ---------------------------------------------------------------------------
+# _docker_harness_init_adopter
+# Precondition: cli installed globally; ADOPTER_TEST_DIR unset defaults to /adopter/test
+# Postcondition: fresh git repo + bassclef init landed OR return EXIT_INIT_FAIL (23)
+# ---------------------------------------------------------------------------
+_docker_harness_init_adopter() {
+  # Default to $HOME/test so bassclef init's home-guard passes without --allow-any-dir.
+  local test_dir="${ADOPTER_TEST_DIR:-${HOME:-/home/adopter}/test}"
+
+  if [[ "${HARNESS_DRY_RUN:-0}" == "1" ]]; then
+    echo "DRY_RUN: would create $test_dir + git init + bassclef init"
+    return 0
+  fi
+
+  if [[ "${HARNESS_TEST_MODE:-0}" == "1" ]]; then
+    echo "TEST_MODE: skipping init"
+    return 0
+  fi
+
+  mkdir -p "$test_dir"
+  cd "$test_dir" || return "$EXIT_INIT_FAIL"
+
+  git init -q 2>&1 || return "$EXIT_INIT_FAIL"
+
+  # bassclef init needs git config user.email + user.name set; container has none.
+  # Adopter machines usually have git config. Set fallback here.
+  git config user.email "adopter@harness.local"
+  git config user.name "Adopter Harness"
+
+  if ! bassclef init 2>&1; then
+    return "$EXIT_INIT_FAIL"
+  fi
+
+  # Export the test dir so smoke-assert can find .claude/settings.json
+  export ADOPTER_CWD="$test_dir"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # _docker_harness_run_smoke
 # Precondition: cli installed; /adopter/test exists
 # Postcondition: smoke-assert scripts invoked; captured exit codes emitted; final code returned
@@ -275,7 +306,16 @@ main() {
     exit "$code"
   fi
 
-  # Action 3: smoke
+  # Action 2b: init the adopter workspace (UC steps 6-7)
+  if ! _docker_harness_init_adopter; then
+    local code=$?
+    _docker_harness_emit_evidence_row "init_fail" "bassclef init failed with code $code"
+    exit "$code"
+  fi
+
+  # Action 3: smoke — invoked from the initialized adopter workspace
+  cd "${ADOPTER_CWD:-/adopter/test}" || exit "$EXIT_INIT_FAIL"
+
   set +e
   _docker_harness_run_smoke
   local smoke_code=$?

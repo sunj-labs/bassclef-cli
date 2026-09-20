@@ -29,6 +29,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Create unprivileged adopter user (RFC-0002 R11)
 RUN groupadd -g 1000 adopter && useradd -m -u 1000 -g adopter -s /bin/bash adopter
 
+# User-scoped npm prefix so `npm install -g` works without root.
+# Prefix + bin on PATH for the adopter user.
+ENV NPM_CONFIG_PREFIX=/home/adopter/.npm-global \
+    PATH=/home/adopter/.npm-global/bin:$PATH
+RUN mkdir -p /home/adopter/.npm-global && chown -R adopter:adopter /home/adopter/.npm-global
+
 # Copy harness scripts into image
 # Adopter home holds the smoke playing field
 WORKDIR /adopter
@@ -36,18 +42,17 @@ COPY --chown=adopter:adopter harness/docker/entry.sh /adopter/entry.sh
 COPY --chown=adopter:adopter harness/docker/exit-codes.sh /adopter/exit-codes.sh
 COPY --chown=adopter:adopter scripts/ /adopter/scripts/
 
-# Make entry.sh executable
-RUN chmod +x /adopter/entry.sh /adopter/exit-codes.sh /adopter/scripts/*.sh 2>/dev/null || true
-
-# Drop root
-USER adopter
+# Make entry.sh executable + ensure evidence log dirs exist (still root)
+RUN chmod +x /adopter/entry.sh /adopter/exit-codes.sh /adopter/scripts/*.sh 2>/dev/null || true \
+  && mkdir -p /adopter/state/events /adopter/state/harness-runs \
+  && chown -R adopter:adopter /adopter
 
 # Default env vars — overridden at run time via -e flags
 ENV CLI_VERSION=latest \
     HARNESS_EVENT_LOG=/adopter/state/events/evidence-status-changed.jsonl \
     SMOKE_SCRIPTS_DIR=/adopter/scripts
 
-# Ensure evidence log dir exists at container start
-RUN mkdir -p /adopter/state/events /adopter/state/harness-runs
+# Drop root AFTER state dirs exist (RFC-0002 R4 cure)
+USER adopter
 
 ENTRYPOINT ["/adopter/entry.sh"]
