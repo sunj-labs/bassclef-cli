@@ -11,12 +11,14 @@ FROM --platform=linux/amd64 debian:12-slim
 # System deps needed by cli init + smoke-assert scripts.
 # python3 for text processing, jq for JSON parsing, git for repo init, curl for install fallback.
 # procps for command-v checks. ca-certificates for TLS to npm registry + Anthropic API.
+# perl for smoke-drive-skills.sh timeout wrapper (V2).
 RUN apt-get update && apt-get install --no-install-recommends -y \
     bash \
     ca-certificates \
     curl \
     git \
     jq \
+    perl \
     procps \
     python3 \
   && rm -rf /var/lib/apt/lists/*
@@ -34,6 +36,13 @@ RUN groupadd -g 1000 adopter && useradd -m -u 1000 -g adopter -s /bin/bash adopt
 ENV NPM_CONFIG_PREFIX=/home/adopter/.npm-global \
     PATH=/home/adopter/.npm-global/bin:$PATH
 RUN mkdir -p /home/adopter/.npm-global && chown -R adopter:adopter /home/adopter/.npm-global
+
+# V2 — install Claude Code CLI (pinned to major @2 per pre-mortem N3 fold).
+# Runs as adopter user so it lands under NPM_CONFIG_PREFIX.
+# Version pin: @2 matches current maintainer machine (2.1.258+). Bump deliberately.
+USER adopter
+RUN npm install -g @anthropic-ai/claude-code@2 && claude --version
+USER root
 
 # Copy harness scripts into image
 # Adopter home holds the smoke playing field

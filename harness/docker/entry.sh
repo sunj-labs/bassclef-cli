@@ -120,7 +120,7 @@ _docker_harness_retry_with_backoff() {
     set +e
     bash -c "$cmd"
     last_code=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
 
     if (( last_code == 0 )); then
       return 0
@@ -164,6 +164,7 @@ _docker_harness_map_exit_code() {
     smoke-assert-skills)
       case "$raw_code" in
         0) return "$EXIT_OK" ;;
+        3) return "$EXIT_HOOKS_MISSING" ;;  # generic "one or more checks failed" per script contract
         4) return "$EXIT_SKILL_HARDCODE" ;;
         5) return "$EXIT_SKILL_TIMEOUT" ;;
         *) return "$EXIT_UNKNOWN" ;;
@@ -172,6 +173,7 @@ _docker_harness_map_exit_code() {
     smoke-assert-hooks)
       case "$raw_code" in
         0) return "$EXIT_OK" ;;
+        3) return "$EXIT_HOOKS_MISSING" ;;  # generic "one or more checks failed" per script contract (cascade detected)
         6) return "$EXIT_MANIFEST_MISMATCH" ;;
         *) return "$EXIT_UNKNOWN" ;;
       esac
@@ -258,7 +260,7 @@ _docker_harness_run_smoke() {
     set +e
     bash "$scripts_dir/smoke-assert-settings-hooks.sh"
     raw_code=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
 
     _docker_harness_map_exit_code "$raw_code" "smoke-assert-settings-hooks"
     final_code=$?
@@ -273,6 +275,104 @@ _docker_harness_run_smoke() {
   fi
 
   return 0
+}
+
+# ---------------------------------------------------------------------------
+# _docker_harness_run_v2
+# Precondition: V1 smoke passed; ANTHROPIC_API_KEY set; claude CLI on PATH
+# Postcondition: 4 V2 scripts invoked; captured exit codes emitted; final code returned
+#
+# Runs the V2 pipeline: capture SessionStart hook output, drive 5 skills,
+# assert on hook + skill captures, aggregate report. Each script's exit
+# maps via _docker_harness_map_exit_code. Highest single-check code wins
+# (C3 fold — preserves V1 exit code semantics).
+# ---------------------------------------------------------------------------
+_docker_harness_run_v2() {
+  local scripts_dir="${SMOKE_SCRIPTS_DIR:-/adopter/scripts}"
+  local captures_root="${V2_CAPTURES_DIR:-/adopter/state/harness-runs/$(date -u +%Y-%m-%dT%H-%M-%SZ)}"
+  local worst_code=0
+
+  mkdir -p "$captures_root/hooks" "$captures_root/skills"
+  echo ">>> V2 skill drive starting" >&2
+  echo "captures dir: $captures_root" >&2
+
+  # V2 prep — mark the container's throwaway workspace as trusted so
+  # claude -p does not block on the interactive trust dialog.
+  # Scope: only /adopter/test (container path). Adopters running claude
+  # in their own project still see the dialog on first run.
+  # Per pre-mortem 09-20d cure — least-privilege trust at the caller.
+  local workspace="${ADOPTER_CWD:-/adopter/test}"
+  local claude_config="$HOME/.claude.json"
+  jq -n --arg ws "$workspace" '{projects: {($ws): {hasTrustDialogAccepted: true}}}' > "$claude_config" 2>/dev/null || true
+  echo "workspace trusted: $workspace" >&2
+
+  # V2 Step 1 — smoke-capture (SessionStart hook output)
+  if [[ -f "$scripts_dir/smoke-capture.sh" ]]; then
+    set +e
+    bash "$scripts_dir/smoke-capture.sh" --out "$captures_root/hooks"
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    _docker_harness_emit_evidence_row "v2_capture" "exit=${raw}"
+    (( raw > worst_code )) && worst_code=$raw
+  else
+    echo "WARN: smoke-capture.sh not found; skipping V2 hook capture" >&2
+  fi
+
+  # V2 Step 2 — smoke-drive-skills
+  if [[ -f "$scripts_dir/smoke-drive-skills.sh" ]]; then
+    set +e
+    bash "$scripts_dir/smoke-drive-skills.sh" --out "$captures_root/skills" --timeout 120
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    _docker_harness_emit_evidence_row "v2_drive" "exit=${raw}"
+    (( raw > worst_code )) && worst_code=$raw
+  else
+    echo "WARN: smoke-drive-skills.sh not found; skipping V2 skill drive" >&2
+  fi
+
+  # V2 Step 3 — smoke-assert-hooks
+  if [[ -f "$scripts_dir/smoke-assert-hooks.sh" ]]; then
+    set +e
+    bash "$scripts_dir/smoke-assert-hooks.sh" --capture-dir "$captures_root/hooks" --out "$captures_root/hooks-assertions.json"
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    local final_code
+    _docker_harness_map_exit_code "$raw" "smoke-assert-hooks"
+    final_code=$?
+    _docker_harness_emit_evidence_row "v2_assert_hooks" "raw=${raw} mapped=${final_code}"
+    (( final_code > worst_code )) && worst_code=$final_code
+  fi
+
+  # V2 Step 4 — smoke-assert-skills
+  if [[ -f "$scripts_dir/smoke-assert-skills.sh" ]]; then
+    set +e
+    bash "$scripts_dir/smoke-assert-skills.sh" --capture-dir "$captures_root/skills" --out "$captures_root/skills-assertions.json"
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    local final_code
+    _docker_harness_map_exit_code "$raw" "smoke-assert-skills"
+    final_code=$?
+    _docker_harness_emit_evidence_row "v2_assert_skills" "raw=${raw} mapped=${final_code}"
+    (( final_code > worst_code )) && worst_code=$final_code
+  fi
+
+  # V2 Step 5 — smoke-report (no --publish; report to stdout via file)
+  if [[ -f "$scripts_dir/smoke-report.sh" ]]; then
+    set +e
+    bash "$scripts_dir/smoke-report.sh" --captures-dir "$captures_root" --out "$captures_root/report.md"
+    local raw=$?
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    _docker_harness_emit_evidence_row "v2_report" "exit=${raw}"
+    if [[ -f "$captures_root/report.md" ]]; then
+      echo ""
+      echo "===== V2 REPORT ====="
+      cat "$captures_root/report.md"
+      echo "===== end V2 report ====="
+    fi
+  fi
+
+  echo "<<< V2 skill drive done (worst mapped code=${worst_code})" >&2
+  return "$worst_code"
 }
 
 # ---------------------------------------------------------------------------
@@ -321,9 +421,33 @@ main() {
   local smoke_code=$?
   set -e 2>/dev/null || true
 
-  # Action 4: propagate
-  _docker_harness_emit_evidence_row "harness_complete" "final exit code $smoke_code"
-  exit "$smoke_code"
+  # V1 gate — if V1 red, exit now (don't proceed to V2)
+  if (( smoke_code != 0 )); then
+    _docker_harness_emit_evidence_row "harness_complete" "V1 red; final exit code $smoke_code"
+    exit "$smoke_code"
+  fi
+
+  # Action 4: V2 skill drive — only if API key set (N2 fold — degrade gracefully)
+  local v2_code=0
+  if _docker_harness_preflight_v2 2>/dev/null; then
+    if [[ "${HARNESS_TEST_MODE:-0}" != "1" ]]; then
+      set +e
+      _docker_harness_run_v2
+      v2_code=$?
+      # Deliberately keep set +e — V2 pipeline collects non-zero returns
+    fi
+  else
+    echo "" >&2
+    echo "WARN: ANTHROPIC_API_KEY not set; V2 skill drive skipped." >&2
+    echo "V1 result stands. To run V2, invoke with -e ANTHROPIC_API_KEY on docker run." >&2
+    _docker_harness_emit_evidence_row "v2_skipped" "ANTHROPIC_API_KEY unset"
+  fi
+
+  # Action 5: propagate worst of V1 + V2
+  local final_code=$smoke_code
+  (( v2_code > final_code )) && final_code=$v2_code
+  _docker_harness_emit_evidence_row "harness_complete" "V1=${smoke_code} V2=${v2_code} final=${final_code}"
+  exit "$final_code"
 }
 
 # Only run main when this file is invoked directly, not when sourced (test path).

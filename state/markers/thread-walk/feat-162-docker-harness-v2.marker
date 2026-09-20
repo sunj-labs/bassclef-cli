@@ -1,0 +1,8 @@
+# Thread-walk marker — 2026-09-20d
+- date: 2026-09-20
+- branch: feat/162-docker-harness-v2
+- parent_goal_ids: [2026-09-20b-docker-cold-adopter-harness]
+- walk: cli#162 V1 shipped as PR #163 (09-20b); V2 was Steps 8-9 in the goal doc that never got to; V2 branch continues on top of merged main
+- drivers: reproduce the 12-hook cascade class inside Docker; verify upstream cures in v0.46.0 (bundled in cli 1.2.2) land per bassclef-upstream#1728 predictions
+- open_acceptance: cli#162 V2 test plan items 3-4 (V1 red on 1.2.1; V2 clean after upstream cures)
+- out_of_scope: cli#173 (multi-version compare — different scope); cli#174 (walker tag sweep — different scope)
