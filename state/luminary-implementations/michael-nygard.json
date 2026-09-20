@@ -18,8 +18,9 @@
     "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
     "docs/use-cases/UC-init-lite-catalog.md",
     "docs/proposed-upstream/standards--distribution-preflight.md",
-    "docs/proposed-upstream/rules--distribution-preflight-check.md"
+    "docs/proposed-upstream/rules--distribution-preflight-check.md",
+    "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md"
   ],
-  "last_scanned": "2026-09-16T21:06:58Z",
+  "last_scanned": "2026-09-20T11:34:13Z",
   "scanner_version": "1.0"
 }
