@@ -74,6 +74,9 @@ Cli maintainers. Not adopters. The state lives at `state/events/test-runs/` and 
 - **Malformed JSON in a run file** — aggregator skips that file with `WARN: <path> is malformed; skipping.` on stderr. Continues with other files.
 - **Missing `jq` on operator machine** — aggregator prints `MISSING: jq required. Install with brew install jq.` on stderr. Exit 1.
 - **Vitest reporter write fails** — vitest's own error surfaces. No cli-side handling.
+- **Partial vitest record — missing `status` field on some entries** (RFC-0006 C1 fold) — aggregator counts records-WITH-status; if `records_with_status < total_records`, prints `WARN: <path> has <N> records missing status; skipped.` on stderr. Continues.
+- **Vitest 3.x shape drift** (RFC-0006 V2 fold) — `parse_vitest_record` checks for a known-2.0.0 field; if absent, prints `WARN: <path> may be from vitest > 2.0 — canonical parse may drop records.` Continues with best-effort parse.
+- **Same-millisecond filename collision** (pre-mortem Z5) — second run overwrites first. Documented, not fixed in V1.
 
 ## Bounded
 

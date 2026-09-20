@@ -59,15 +59,22 @@ authoring_luminaries:
 | `package.json` | Adds `"test:report": "bash scripts/aggregate-test-runs.sh"` script | edit |
 | `.gitignore` | Adds `state/events/test-runs/` | edit |
 
-## Interface between Boundary and Control
+## Interface between Boundary and Control (RFC-0006 folds applied)
 
-Boundary (entry script) calls Control (lib) via:
+Per RFC-0006 V1 + P1 + V2, the boundary between vitest's evolving JSON and cli's stable aggregate view is explicit — a `parse_vitest_record` function acts as the anticorruption layer (Vernon). Boundary reads files into `CanonicalRecord` shape before passing to Control (Parnas).
 
 ```bash
 # In scripts/aggregate-test-runs.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/aggregate-test-runs.sh"
 
-# Parse args (Boundary responsibility)
+# Boundary: check preconditions (Cockburn C2 fold)
+command -v jq >/dev/null 2>&1 || {
+  echo "MISSING: jq required. Install with brew install jq." >&2
+  exit 1
+}
+
+# Parse args
 LAST_N=20
 FORMAT="text"
 while [[ $# -gt 0 ]]; do
@@ -78,20 +85,40 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Delegate to Control
-enumerate_run_files "$RUNS_DIR" "$LAST_N"  # emits paths, one per line
-compute_duration_histogram "${FILES[@]}"    # emits (test, mean_ms) lines
-compute_flake_list "${FILES[@]}"            # emits (test, pass_rate) lines
+# Boundary: enumerate + canonicalize (Parnas P1 + Vernon V1)
+FILES=$(enumerate_run_files "$RUNS_DIR" "$LAST_N")
+CANONICAL_RECORDS=()
+for f in $FILES; do
+  # parse_vitest_record returns CanonicalRecord JSON or empty on parse fail
+  record=$(parse_vitest_record "$f" 2>>/dev/stderr) && CANONICAL_RECORDS+=("$record")
+done
+
+# Delegate to Control on CanonicalRecords, never raw vitest JSON
+HISTOGRAM=$(compute_duration_histogram "${CANONICAL_RECORDS[@]}")
+FLAKE=$(compute_flake_list "${CANONICAL_RECORDS[@]}")
 
 # Boundary formats output
 if [[ "$FORMAT" == "json" ]]; then
-  render_json ...
+  render_json "$HISTOGRAM" "$FLAKE"  # includes schema_version: 1 per P3
 else
-  render_text ...
+  render_text "$HISTOGRAM" "$FLAKE"
 fi
 ```
 
-Test file exercises Control functions directly via `source` + call. Boundary is exercised via subshell invocation with argv.
+**CanonicalRecord shape** (Vernon anticorruption boundary):
+
+```json
+{
+  "run_timestamp": "2026-09-20T14-30-00-123",
+  "tests": [
+    {"name": "path/to/test.ts > describe > it", "status": "pass", "duration_ms": 42}
+  ]
+}
+```
+
+Vitest 2.0.x → CanonicalRecord translation lives in `parse_vitest_record`. Vitest 3.x lands, `parse_vitest_record` grows a new branch. Control never changes.
+
+Test file exercises Control functions directly via `source` + call using synthetic CanonicalRecords. Boundary + parse_vitest_record exercised via subshell invocation with fixture files.
 
 ## Failure paths
 
@@ -103,10 +130,11 @@ Test file exercises Control functions directly via `source` + call. Boundary is 
 | ALL JSON malformed | Control — reports count-of-valid=0; Boundary exits with error | 2 |
 | Invalid `--last` value (non-integer) | Boundary — argv parser catches | 2 |
 
-## Test-list (Tier 0 per .claude/rules/test-sufficiency.md)
+## Test-list (Tier 0 per .claude/rules/test-sufficiency.md; RFC-0006 folds appended)
 
 ```bash
 # test-list: aggregate-test-runs.sh
+# --- Original 13 (Step 0 decomposition) ---
 # [ ] empty state (RunsDirectory absent) — prints friendly message, exits 0
 # [ ] empty state (RunsDirectory present but no *.json files) — same
 # [ ] single run — duration histogram lists every test; flake list empty (all pass)
@@ -120,9 +148,19 @@ Test file exercises Control functions directly via `source` + call. Boundary is 
 # [ ] duration histogram sorted desc; flake list sorted asc
 # [ ] argv rejects invalid --last value
 # [ ] argv rejects unknown flag
+# --- RFC-0006 folds (6 new) ---
+# [ ] parse_vitest_record returns canonical shape for valid vitest 2.0.0 input (V1)
+# [ ] parse_vitest_record warns on vitest 3.x shape (missing known-2.0.0 field) (V2)
+# [ ] parse_vitest_record handles partial records (missing status on one entry) with WARN, counts records-with-status (C1)
+# [ ] --json output includes schema_version: 1 field (P3)
+# [ ] golden-file: single-run fixture → expected text output byte-match (F2)
+# [ ] Tier 0 test greps vitest.config.ts for ['default', 'json'] and outputFile (L3)
+# [ ] .gitignore grep test verifies state/events/test-runs/ line present (N1)
+# [ ] filename uses UTC ISO timestamp pattern YYYY-MM-DDTHH-MM-SS-mmm.json (Z4)
+# [ ] test-never-in-record-window: pass_rate undefined, excluded from flake list (Z1)
 ```
 
-13 tests. Covers 4 exit codes, 8 branches, argv-boundary + control layers, both JSON parse failure classes.
+**22 tests** (13 original + 9 fold — pre-mortem Z1/Z4/N1 already surfaced, RFC-0006 adds 6 more). Covers 4 exit codes, 8+ branches, argv-boundary + parse layer + control layer + golden-output, both JSON parse failure classes plus canonical-shape drift class.
 
 ## Pattern annotations
 
@@ -131,15 +169,16 @@ Test file exercises Control functions directly via `source` + call. Boundary is 
 
 (If those catalog paths do not exist under `~/src/sunj-labs/bassclef/patterns/`, treat as informational — annotation ships regardless per pattern-annotation.md rule.)
 
-## Sequencing (RED first)
+## Sequencing (RED first; RFC-0006 F1 fold)
 
-1. Write 13 Tier 0 tests referring to fixtures — RED.
-2. Write `scripts/lib/aggregate-test-runs.sh` Control functions to satisfy per-function tests.
-3. Write `scripts/aggregate-test-runs.sh` Boundary — argv parse + delegate + render.
-4. Edit `vitest.config.ts` to add reporters. Verify one live run creates a JSON.
-5. Edit `package.json` scripts to add `test:report`. Verify `npm run test:report` invokes cleanly.
-6. Edit `.gitignore` to add `state/events/test-runs/`.
-7. Run full suite. GREEN.
+1. **Step A — Live vitest JSON capture** (RFC-0006 F1 + L1). Add a temporary reporters config to a scratch `vitest.config.ts.tmp`, run `npm test` against a minimal 2-test fixture (OR the full 433-test suite), capture the raw JSON to `scripts/tests/fixtures/aggregate-test-runs/live-capture-2026-09-20.json`. Also verify JSON does NOT leak to stdout/stderr (Linus L1). Delete tmp config.
+2. **Step B — 22 Tier 0 tests RED**. Fixtures include: minimal 2-test capture, synthetic 3-run flaky suite, malformed JSON, partial-record fixture, vitest-3.x-shape fixture (all synthetic — do not use the live capture directly). Test-list block heads the test file.
+3. **Step C — Write `scripts/lib/aggregate-test-runs.sh`**. `parse_vitest_record` first (Vernon V1). Then `enumerate_run_files`, `compute_duration_histogram`, `compute_flake_list`, `render_text`, `render_json`.
+4. **Step D — Write `scripts/aggregate-test-runs.sh`** — Boundary. jq check first (Cockburn C2). Argv parse. Delegate. Render.
+5. **Step E — Edit `vitest.config.ts`** to add `reporters: ['default', 'json']` + `outputFile`. Verify one live `npm test` run creates a real JSON in `state/events/test-runs/`.
+6. **Step F — Edit `package.json` scripts** to add `test:report`. Verify `npm run test:report` invokes cleanly.
+7. **Step G — Edit `.gitignore`** to add `state/events/test-runs/`. Verify Tier 0 test passes.
+8. **Step H — Run full suite** (both new Tier 0 + all existing). GREEN.
 
 ## What this does NOT decompose
 

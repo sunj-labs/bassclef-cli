@@ -74,8 +74,21 @@ Cli maintainer (developer).
 **anywhere. --json flag passed.**
 
 1. Aggregator writes machine-readable JSON summary to stdout instead of the two text sections.
-2. Shape: `{"generated_at": "<ISO>", "runs_read": N, "duration": [{"test": "...", "mean_ms": ...}, ...], "flake": [{"test": "...", "pass_rate": ...}, ...]}`.
+2. Shape: `{"schema_version": 1, "generated_at": "<ISO>", "runs_read": N, "duration": [{"test": "...", "mean_ms": ...}, ...], "flake": [{"test": "...", "pass_rate": ...}, ...]}` (schema_version added per RFC-0006 P3).
 3. Exit 0.
+
+**5b. Partial vitest record within a valid file (RFC-0006 C1 fold).**
+
+1. `parse_vitest_record` filters entries to `select(.status)` — entries missing `status` are dropped.
+2. Aggregator prints `WARN: <path> has <N> records missing status; skipped.` to stderr per file affected.
+3. Aggregator continues with the good entries. Aggregation shows counts of valid entries only.
+
+**5c. Vitest 3.x (or later) shape (RFC-0006 V2 fold).**
+
+1. `parse_vitest_record` checks for a known-2.0.0 field (`testResults` at record root).
+2. If absent, prints `WARN: <path> may be from vitest > 2.0 — canonical parse may drop records.` to stderr.
+3. Continues with best-effort jq parse.
+4. Silent success if the field IS present (assumed 2.0-compatible).
 
 ## Frequency
 
