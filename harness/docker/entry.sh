@@ -120,7 +120,7 @@ _docker_harness_retry_with_backoff() {
     set +e
     bash -c "$cmd"
     last_code=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
 
     if (( last_code == 0 )); then
       return 0
@@ -258,7 +258,7 @@ _docker_harness_run_smoke() {
     set +e
     bash "$scripts_dir/smoke-assert-settings-hooks.sh"
     raw_code=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
 
     _docker_harness_map_exit_code "$raw_code" "smoke-assert-settings-hooks"
     final_code=$?
@@ -299,7 +299,7 @@ _docker_harness_run_v2() {
     set +e
     bash "$scripts_dir/smoke-capture.sh" --out "$captures_root/hooks"
     local raw=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
     _docker_harness_emit_evidence_row "v2_capture" "exit=${raw}"
     (( raw > worst_code )) && worst_code=$raw
   else
@@ -311,7 +311,7 @@ _docker_harness_run_v2() {
     set +e
     bash "$scripts_dir/smoke-drive-skills.sh" --out "$captures_root/skills" --timeout 120
     local raw=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
     _docker_harness_emit_evidence_row "v2_drive" "exit=${raw}"
     (( raw > worst_code )) && worst_code=$raw
   else
@@ -323,7 +323,7 @@ _docker_harness_run_v2() {
     set +e
     bash "$scripts_dir/smoke-assert-hooks.sh" --capture-dir "$captures_root/hooks" --out "$captures_root/hooks-assertions.json"
     local raw=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
     local final_code
     _docker_harness_map_exit_code "$raw" "smoke-assert-hooks"
     final_code=$?
@@ -336,7 +336,7 @@ _docker_harness_run_v2() {
     set +e
     bash "$scripts_dir/smoke-assert-skills.sh" --capture-dir "$captures_root/skills" --out "$captures_root/skills-assertions.json"
     local raw=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
     local final_code
     _docker_harness_map_exit_code "$raw" "smoke-assert-skills"
     final_code=$?
@@ -349,7 +349,7 @@ _docker_harness_run_v2() {
     set +e
     bash "$scripts_dir/smoke-report.sh" --captures-dir "$captures_root" --out "$captures_root/report.md"
     local raw=$?
-    set -e 2>/dev/null || true
+    # Deliberately keep set +e — V2 pipeline collects non-zero returns
     _docker_harness_emit_evidence_row "v2_report" "exit=${raw}"
     if [[ -f "$captures_root/report.md" ]]; then
       echo ""
@@ -422,7 +422,7 @@ main() {
       set +e
       _docker_harness_run_v2
       v2_code=$?
-      set -e 2>/dev/null || true
+      # Deliberately keep set +e — V2 pipeline collects non-zero returns
     fi
   else
     echo "" >&2
