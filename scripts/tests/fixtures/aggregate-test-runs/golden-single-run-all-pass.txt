@@ -1,0 +1,8 @@
+## Duration — top 10 slowest tests (across 1 run)
+
+   20.00 ms  A > passes 2
+   10.00 ms  A > passes 1
+
+## Flake — tests with < 100% pass rate (across 1 run)
+
+  (no flaky tests found)

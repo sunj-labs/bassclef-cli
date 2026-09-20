@@ -1,0 +1,17 @@
+{
+  "numFailedTests": 1,
+  "numPassedTests": 1,
+  "numTotalTests": 2,
+  "success": false,
+  "startTime": 1789910000002,
+  "testResults": [
+    {
+      "name": "tests/synthetic/multi.test.ts",
+      "status": "failed",
+      "assertionResults": [
+        {"fullName": "multi > stable A", "title": "stable A", "status": "passed", "duration": 12.0},
+        {"fullName": "multi > flaky C", "title": "flaky C", "status": "failed", "duration": 30.0}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Pre-mortem marker — 2026-09-20c cli#169
+- date: 2026-09-20
+- branch: feat/169-vitest-test-run-history
+- ledger: docs/risk-ledgers/2026-09-20c-169-pre-mortem-light.md (written Step 1 of goal doc)
+- mode: light — 3 lenses × 5 risks each, 30 min per Klein shape
+- lenses-picked-below: kent-beck (RED-cycle risks), michael-nygard (release-cascade + operational risks), andreas-zeller (hypothesis-test pairing risks + flake calc correctness)

@@ -1,0 +1,17 @@
+{
+  "numFailedTests": 1,
+  "numPassedTests": 1,
+  "numTotalTests": 2,
+  "success": false,
+  "startTime": 1789910000000,
+  "testResults": [
+    {
+      "name": "tests/synthetic/B.test.ts",
+      "status": "failed",
+      "assertionResults": [
+        {"fullName": "B > passes", "title": "passes", "status": "passed", "duration": 5.0},
+        {"fullName": "B > fails", "title": "fails", "status": "failed", "duration": 8.0}
+      ]
+    }
+  ]
+}

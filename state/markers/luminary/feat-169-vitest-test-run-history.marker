@@ -1,0 +1,7 @@
+# Luminary marker — 2026-09-20c cli#169
+- date: 2026-09-20
+- branch: feat/169-vitest-test-run-history
+- lead: kent-beck
+- supporting: [michael-nygard, andreas-zeller]
+- what-lead-catches: test-runtime-health-as-first-class discipline; #169 puts the client (tests) in the spotlight, not just the code under test; RED-first cycle on the aggregator itself
+- what-supporting-catches: Nygard — feedback loops on every deploy/run; make traces first-class. Zeller — flake rate IS the falsifiable hypothesis; testable definition of "deterministic"

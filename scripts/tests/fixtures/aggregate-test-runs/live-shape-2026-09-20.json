@@ -1,0 +1,544 @@
+{
+  "numFailedTests": 0,
+  "numPassedTests": 433,
+  "numTotalTests": 433,
+  "success": true,
+  "startTime": 1789910959340,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T1: catches an absolute POSIX home path",
+          "status": "passed",
+          "title": "T1: catches an absolute POSIX home path",
+          "duration": 0.79849999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T2: catches an absolute Linux home path",
+          "status": "passed",
+          "title": "T2: catches an absolute Linux home path",
+          "duration": 0.5339160000000049,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T3: docs/operator-private/ mention in CONTENT passes (moved to path scan)",
+          "status": "passed",
+          "title": "T3: docs/operator-private/ mention in CONTENT passes (moved to path scan)",
+          "duration": 0.9662920000000099,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T4: passes clean content",
+          "status": "passed",
+          "title": "T4: passes clean content",
+          "duration": 0.09208399999999983,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T5: respects a per-file andon-allow header",
+          "status": "passed",
+          "title": "T5: respects a per-file andon-allow header",
+          "duration": 0.08954200000002288,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T6: reports line numbers on multi-hit content",
+          "status": "passed",
+          "title": "T6: reports line numbers on multi-hit content",
+          "duration": 0.10091699999998127,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T7: allows an email address in package.json (baseline allowlist)",
+          "status": "passed",
+          "title": "T7: allows an email address in package.json (baseline allowlist)",
+          "duration": 0.09549999999998704,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T8: allows an email address anywhere in LICENSE (baseline allowlist)",
+          "status": "passed",
+          "title": "T8: allows an email address anywhere in LICENSE (baseline allowlist)",
+          "duration": 0.05779200000000628,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T11: CODE_OF_CONDUCT.md allows conduct@bassclef.dev (per-file allowlist)",
+          "status": "passed",
+          "title": "T11: CODE_OF_CONDUCT.md allows conduct@bassclef.dev (per-file allowlist)",
+          "duration": 0.05012500000000841,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T12: CODE_OF_CONDUCT.md does NOT allow hello@bassclef.dev (regex-specific)",
+          "status": "passed",
+          "title": "T12: CODE_OF_CONDUCT.md does NOT allow hello@bassclef.dev (regex-specific)",
+          "duration": 0.09987499999999727,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T13: promote SKILL.md allows hello@bassclef.dev (per-file allowlist)",
+          "status": "passed",
+          "title": "T13: promote SKILL.md allows hello@bassclef.dev (per-file allowlist)",
+          "duration": 0.04545899999999392,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanContent"
+          ],
+          "fullName": "andon-scan scanContent T14: intentionality anchor — filename mention in prose passes (accepted risk)",
+          "status": "passed",
+          "title": "T14: intentionality anchor — filename mention in prose passes (accepted risk)",
+          "duration": 0.046666000000016084,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanPath"
+          ],
+          "fullName": "andon-scan scanPath T9: scanPath catches docs/operator-private/ in shipped file PATH",
+          "status": "passed",
+          "title": "T9: scanPath catches docs/operator-private/ in shipped file PATH",
+          "duration": 0.09604200000001129,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "andon-scan scanPath"
+          ],
+          "fullName": "andon-scan scanPath T10: scanPath ignores paths without the leak prefix",
+          "status": "passed",
+          "title": "T10: scanPath ignores paths without the leak prefix",
+          "duration": 0.11995899999999438,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1789910959938,
+      "endTime": 1789910959941.1199,
+      "status": "passed",
+      "message": "",
+      "name": "/Users/example/src/sunj-labs/bassclef-cli/tests/andon-scan.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs accepts patch",
+          "status": "passed",
+          "title": "accepts patch",
+          "duration": 0.8027079999999955,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs accepts minor",
+          "status": "passed",
+          "title": "accepts minor",
+          "duration": 0.28908400000000256,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs accepts major",
+          "status": "passed",
+          "title": "accepts major",
+          "duration": 0.1292500000000132,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs throws ArgvError when bump type missing",
+          "status": "passed",
+          "title": "throws ArgvError when bump type missing",
+          "duration": 0.3013750000000073,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs throws ArgvError on unknown arg",
+          "status": "passed",
+          "title": "throws ArgvError on unknown arg",
+          "duration": 0.14066700000000765,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs parses --allow-dirty",
+          "status": "passed",
+          "title": "parses --allow-dirty",
+          "duration": 0.1307090000000244,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs parses --date YYYY-MM-DD",
+          "status": "passed",
+          "title": "parses --date YYYY-MM-DD",
+          "duration": 0.1528750000000514,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "parseArgs"
+          ],
+          "fullName": "parseArgs throws ArgvError on malformed --date",
+          "status": "passed",
+          "title": "throws ArgvError on malformed --date",
+          "duration": 1.7370000000000232,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion patch 0.0.1 → 0.0.2",
+          "status": "passed",
+          "title": "patch 0.0.1 → 0.0.2",
+          "duration": 0.3168749999999818,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion minor 0.1.0 → 0.2.0",
+          "status": "passed",
+          "title": "minor 0.1.0 → 0.2.0",
+          "duration": 0.1500419999999849,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion major 0.1.0 → 1.0.0",
+          "status": "passed",
+          "title": "major 0.1.0 → 1.0.0",
+          "duration": 0.10599999999999454,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion patch on pre-release strips to base (0.1.0-rc.1 → 0.1.0)",
+          "status": "passed",
+          "title": "patch on pre-release strips to base (0.1.0-rc.1 → 0.1.0)",
+          "duration": 0.08816600000000108,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion minor on pre-release strips (0.1.0-rc.1 → 0.1.0)",
+          "status": "passed",
+          "title": "minor on pre-release strips (0.1.0-rc.1 → 0.1.0)",
+          "duration": 0.08266700000001492,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion major on pre-release strips (0.1.0-rc.1 → 0.1.0)",
+          "status": "passed",
+          "title": "major on pre-release strips (0.1.0-rc.1 → 0.1.0)",
+          "duration": 0.41774999999995543,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion major from stable 0.x lands on 1.0.0",
+          "status": "passed",
+          "title": "major from stable 0.x lands on 1.0.0",
+          "duration": 0.1119579999999587,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "computeNewVersion"
+          ],
+          "fullName": "computeNewVersion throws RefusedError on invalid current version",
+          "status": "passed",
+          "title": "throws RefusedError on invalid current version",
+          "duration": 0.19758300000000872,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock renames [Unreleased] header to versioned block",
+          "status": "passed",
+          "title": "renames [Unreleased] header to versioned block",
+          "duration": 0.7721250000000168,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock preserves the old Unreleased content in the versioned block",
+          "status": "passed",
+          "title": "preserves the old Unreleased content in the versioned block",
+          "duration": 0.33508299999999736,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock inserts fresh Unreleased block above the new version",
+          "status": "passed",
+          "title": "inserts fresh Unreleased block above the new version",
+          "duration": 0.10099999999999909,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock fresh Unreleased carries empty Added/Changed/Fixed/Notes subsections",
+          "status": "passed",
+          "title": "fresh Unreleased carries empty Added/Changed/Fixed/Notes subsections",
+          "duration": 0.08400000000000318,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock throws RefusedError on empty Unreleased block",
+          "status": "passed",
+          "title": "throws RefusedError on empty Unreleased block",
+          "duration": 0.05570800000003828,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock throws RefusedError when Unreleased block missing",
+          "status": "passed",
+          "title": "throws RefusedError when Unreleased block missing",
+          "duration": 0.04545899999999392,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "renameUnreleasedBlock"
+          ],
+          "fullName": "renameUnreleasedBlock updates compare links at the bottom",
+          "status": "passed",
+          "title": "updates compare links at the bottom",
+          "duration": 0.045541000000014265,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "refuseIfDirty"
+          ],
+          "fullName": "refuseIfDirty allows dirty when allowDirty is true",
+          "status": "passed",
+          "title": "allows dirty when allowDirty is true",
+          "duration": 5.485958000000039,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "refuseIfDirty"
+          ],
+          "fullName": "refuseIfDirty allows dirty on package.json + CHANGELOG.md only",
+          "status": "passed",
+          "title": "allows dirty on package.json + CHANGELOG.md only",
+          "duration": 0.37199999999995725,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "refuseIfDirty"
+          ],
+          "fullName": "refuseIfDirty refuses on unrelated modified file",
+          "status": "passed",
+          "title": "refuses on unrelated modified file",
+          "duration": 0.3917500000000018,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "refuseIfDirty"
+          ],
+          "fullName": "refuseIfDirty passes on clean tree",
+          "status": "passed",
+          "title": "passes on clean tree",
+          "duration": 0.0660829999999919,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "refuseIfDirty"
+          ],
+          "fullName": "refuseIfDirty allows dirty on src/index.ts (bump script writes it too)",
+          "status": "passed",
+          "title": "allows dirty on src/index.ts (bump script writes it too)",
+          "duration": 0.05595800000003237,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "writeIndexTsVersion"
+          ],
+          "fullName": "writeIndexTsVersion replaces the version literal",
+          "status": "passed",
+          "title": "replaces the version literal",
+          "duration": 3.0795420000000036,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "writeIndexTsVersion"
+          ],
+          "fullName": "writeIndexTsVersion refuses when the constant is missing",
+          "status": "passed",
+          "title": "refuses when the constant is missing",
+          "duration": 1.0992909999999938,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "writeReadmeVersion"
+          ],
+          "fullName": "writeReadmeVersion replaces the version marker",
+          "status": "passed",
+          "title": "replaces the version marker",
+          "duration": 0.6967920000000163,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "writeReadmeVersion"
+          ],
+          "fullName": "writeReadmeVersion refuses when the marker is missing",
+          "status": "passed",
+          "title": "refuses when the marker is missing",
+          "duration": 0.3104579999999828,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "writeReadmeVersion"
+          ],
+          "fullName": "writeReadmeVersion leaves surrounding markdown intact",
+          "status": "passed",
+          "title": "leaves surrounding markdown intact",
+          "duration": 0.45375000000001364,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1789910959663,
+      "endTime": 1789910959682.4539,
+      "status": "passed",
+      "message": "",
+      "name": "/Users/example/src/sunj-labs/bassclef-cli/tests/bump-version.test.ts"
+    }
+  ]
+}

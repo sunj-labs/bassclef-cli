@@ -38,6 +38,11 @@ state/markers/session-timing/
 state/markers/turn-grade/
 state/markers/turn-prose-flags/
 
+# cli#169 — vitest test-run history (local-only per ADR-049; never committed).
+# Vitest JSON reporter writes here on every `npm test`; `npm run test:report`
+# aggregates via scripts/aggregate-test-runs.sh.
+state/events/test-runs/
+
 # Bassclef-sync managed symlinks — subdirectories the top block missed
 # (session-reflection.d gets populated by user-scope sync too)
 .claude/hooks/session-reflection.d/
