@@ -2,8 +2,10 @@
   "luminary_slug": "tony-hoare",
   "schema_version": 1,
   "referenced_by_files": [
-    "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md"
+    "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
+    "tests/statusline-install.test.ts",
+    "src/lib/install-statusline.ts"
   ],
-  "last_scanned": "2026-09-16T16:04:05Z",
+  "last_scanned": "2026-09-20T23:13:10Z",
   "scanner_version": "1.0"
 }
