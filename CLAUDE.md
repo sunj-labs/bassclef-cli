@@ -46,6 +46,14 @@ Read `docs/whereami.md` at session-start for the live snapshot.
 - `docs/adrs/ADR-001-npm-package-build-toolchain.md` — Vite (library mode) + TypeScript + Vitest pinned.
 - `docs/adrs/ADR-002-bassclef-init-safety-contract.md` — init command's fail-safe defaults, atomic writes, path scoping, escape-hatch matrix. Semver-locked from 0.0.2.
 - `docs/adrs/ADR-003-bassclef-sync-safety-contract.md` — sync command's two-force-flag design, content-hash detection, SHA-256 normalization steps, single-writer assumption. Semver-locked from 0.0.2.
+- `docs/adrs/ADR-004-publish-pipeline-safety-contract.md` — publish workflow safety contract per WU-4 of the launch bet.
+- `docs/adrs/ADR-005-npm-distribution-architecture.md` — Model C open-core split between substrate and adopter-facing content.
+- `docs/adrs/ADR-006-install-harness.md` — install harness contract; 5 decision points for the tarball verification runbook.
+- `docs/adrs/ADR-007-npm-lite-substrate-bundling.md` — npm-lite substrate bundling pattern for the lite tier.
+- `docs/adrs/ADR-008-bassclef-migrate-subcommand.md` — `bassclef migrate` subcommand contract for 0.0.2 → 0.1.0 config preservation.
+- `docs/adrs/ADR-009-manifest-as-init-contract-source.md` — wiring manifest is the init contract source (points at upstream ADR-055).
+- `docs/adrs/ADR-010-init-reporting-contract.md` — init reporting contract; banner, `.bassclef/init.manifest.json`, `--json` mode all read one report object.
+- `docs/adrs/ADR-057-lite-catalog-destination-path-invariant.md` — lite catalog destination path invariant (proposed; per upstream ADR-056 self-containment).
 
 ## Primary luminary triad (per iteration bet)
 
