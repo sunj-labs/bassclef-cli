@@ -91,10 +91,8 @@ for f in "${FILES[@]}"; do
     # Also filter out records with empty tests array (e.g., malformed after jq empty passed)
     tcount=$(echo "$rec" | jq '.tests | length' 2>/dev/null || echo 0)
     if [[ "$tcount" -eq 0 ]]; then
-      # Check if it's malformed (no testResults) — that was already warned
-      # or a legitimately empty run — either way include or skip?
-      # A completely empty CanonicalRecord adds nothing; keep only if produced from valid input
-      # Include so runs_read count matches actual files parsed
+      # Record has no tests — either malformed input (already warned) or an
+      # empty run. Include so runs_read count matches actual files parsed.
       RECORDS+=("$rec")
     else
       RECORDS+=("$rec")
