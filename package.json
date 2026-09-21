@@ -65,7 +65,8 @@
     "typecheck": "tsc --noEmit",
     "bump": "node scripts/bump-version.mjs",
     "harness:npm-install": "vitest run --config vitest.harness.config.ts",
-    "prepublishOnly": "node scripts/prepublish-bundle-substrate.mjs"
+    "prepublishOnly": "node scripts/prepublish-bundle-substrate.mjs",
+    "install-hooks": "node scripts/install-git-hooks.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

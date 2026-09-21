@@ -1,0 +1,9 @@
+# RFC marker — feat/194-pre-tag-version-sync-guardrails
+- date: 2026-09-21
+- branch: feat/194-pre-tag-version-sync-guardrails
+- rfc-doc: docs/rfcs/2026-09-21-pre-tag-version-sync-council.md
+- council: [tony-hoare, david-parnas, frederick-brooks, alan-cooper, donald-norman]
+- authoring-set: [michael-nygard, kent-beck, saltzer-schroeder]
+- disposition: Revised A — accept scope, cure MEDIUM findings inline (F1 + F2), defer 2 LOW findings (F3 Parnas single-source, F5 Norman first-commit signifier)
+- findings-count: 0 HIGH, 2 MEDIUM, 3 LOW
+- preflight-skip: architect-review deferred to closeout Step 7.5 (nothing to review pre-code)

@@ -51,12 +51,16 @@ describe('workflow Node version invariant (#66)', () => {
     }
   });
 
-  it('the current set of pins matches the expected 3-pin footprint', () => {
+  it('the current set of pins matches the expected 4-pin footprint', () => {
     // Belt-and-suspenders: if a new workflow adds a Node pin without
     // updating this test's expected count, the author sees a signal to
     // review whether that new workflow also needs the version guard.
+    //
+    // Count bumped 3 → 4 in Epic #194 Story 1 when pr-checks.yml added
+    // a fourth Node pin. Ticket #193 will migrate all four to a shared
+    // matrix or common runner definition in one PR.
     const pins = collectNodeVersionPins();
-    expect(pins.length).toBe(3);
+    expect(pins.length).toBe(4);
   });
 
   it('no workflow references "Node 20" as a step name (stale label check)', () => {

@@ -1,0 +1,20 @@
+# ADR-deviation marker — feat/194-pre-tag-version-sync-guardrails
+- date: 2026-09-21
+- branch: feat/194-pre-tag-version-sync-guardrails
+- adr_governing: ADR-004 (publish pipeline safety contract)
+- outcome: ADR-honored
+
+The change extends ADR-004's pre-publish check surface earlier in the
+pipeline. The `release: published` trigger + two-job checks/publish shape
++ trusted-publisher OIDC path + `--ignore-scripts` discipline all remain
+intact. The new PR-CI workflow runs a NARROWER check (version-sync only)
+at PR time. The existing release-time checks still fire.
+
+Every invariant ADR-004 names holds:
+- Tag ancestry check at publish time — unchanged
+- dist/lite/ presence assertion at publish time — unchanged
+- Andon scan + tier filter at publish time — unchanged
+- Trusted publisher + provenance — unchanged
+- Environment gate on npm-publish — unchanged
+
+No new ADR filed. This is an additive earlier layer, not a decision change.
