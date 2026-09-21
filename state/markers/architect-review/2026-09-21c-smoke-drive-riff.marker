@@ -1,0 +1,8 @@
+# Architect-review marker — 2026-09-21c-smoke-drive-riff
+- date: 2026-09-21
+- primary_lens: michael-feathers
+- supporting_lenses: [kent-beck, jerome-saltzer-and-michael-schroeder, alistair-cockburn]
+- verdict: READY-with-followups
+- findings: 2 MODERATE (F-AR-1 token list narrowing → cure inline; F-AR-2 wire coverage → follow-on), 2 LOW (F-AR-3 smoke-report awareness → follow-on; F-AR-4 signal-teardown → deferred)
+- coverage: 12 covered, 4 skipped, 0 deferred (100% within applicable areas)
+- report: docs/architecture/reviews/2026-09-21c-smoke-drive-riff.md

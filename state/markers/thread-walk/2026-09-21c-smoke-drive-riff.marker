@@ -1,0 +1,8 @@
+# Thread-walk marker — 2026-09-21c-smoke-drive-riff
+- date: 2026-09-21
+- goal: 2026-09-21c-smoke-drive-riff
+- parent_bet: none (top-level story of Epic #199; sibling to #194 which just merged)
+- parent_roadmap: none
+- drivers: operator ask 2026-09-21 — extend V2 cold-adopter harness with the /riff /launch /build user journey; #194 shipped in same session
+- open_acceptance: n/a (Epic #199 filed as parent; this story is Story 1)
+- out_of_scope: Stories 2 (launch) + 3 (build) of Epic #199; Playwright MCP inclusion in Docker (research first)

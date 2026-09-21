@@ -391,6 +391,26 @@ _docker_harness_run_v2() {
     echo "WARN: smoke-drive-onboard-repo.sh not found; skipping V2 Step 6" >&2
   fi
 
+  # V2 Step 7 — smoke-drive-riff (Epic #199 Story 1)
+  # Runs AFTER Step 6 in its own scratch dir. Fires /riff and asserts HTML
+  # variants land under docs/prototypes/. Handles Playwright MCP absence with
+  # exit 6 (env-degraded) so the harness reports it separately from real
+  # skill regressions. Exit codes: 0 pass, 3 assert fail, 5 timeout,
+  # 6 env-degraded — all fold into worst_code.
+  if [[ -f "$scripts_dir/smoke-drive-riff.sh" ]]; then
+    echo ">>> V2 Step 7 — /riff drive in fresh scratch dir" >&2
+    set +e
+    bash "$scripts_dir/smoke-drive-riff.sh" \
+      --out "$captures_root/riff" \
+      --scratch "${HOME:-/tmp}/riff-test" \
+      --timeout 300
+    local raw_riff=$?
+    _docker_harness_emit_evidence_row "v2_riff" "exit=${raw_riff}"
+    (( raw_riff > worst_code )) && worst_code=$raw_riff
+  else
+    echo "WARN: smoke-drive-riff.sh not found; skipping V2 Step 7" >&2
+  fi
+
   echo "<<< V2 skill drive done (worst mapped code=${worst_code})" >&2
   return "$worst_code"
 }

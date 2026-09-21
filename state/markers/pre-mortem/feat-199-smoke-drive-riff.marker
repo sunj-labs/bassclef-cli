@@ -1,0 +1,8 @@
+# Pre-mortem light marker — feat/199-smoke-drive-riff
+- date: 2026-09-21
+- branch: feat/199-smoke-drive-riff
+- mode: light
+- lenses: [alistair-cockburn, andreas-zeller, michael-feathers]
+- ledger: docs/risk-ledgers/2026-09-21c-smoke-drive-riff.md
+- top-5-folded: R1 (fresh scratch dir), R2 (mirror Step 6 wire-in shape), R3 (exit 6 for env-degraded vs 3 for assertion), R4 (>100 bytes + <h2> check), R5 (300s default timeout)
+- always-fire: no

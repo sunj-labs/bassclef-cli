@@ -1,0 +1,9 @@
+# RFC marker — feat/199-smoke-drive-riff
+- date: 2026-09-21
+- branch: feat/199-smoke-drive-riff
+- rfc-doc: docs/rfcs/2026-09-21c-smoke-drive-riff-council.md
+- council: [michael-nygard, alan-cooper, saltzer-schroeder, donald-norman, linus-torvalds]
+- authoring-set: [alistair-cockburn, andreas-zeller, michael-feathers]
+- disposition: Revised A — accept scope; cure 1 HIGH (F1 path-traversal) + 3 MEDIUM (F2 sub-classes, F3 expanded tokens, F4 tag lines) inline; F5 acceptance item; F6 absorbed; F7 deferred
+- findings-count: 1 HIGH, 4 MEDIUM (F5 also MEDIUM), 2 LOW
+- preflight-skip: architect-review deferred to after code lands per operator direction
