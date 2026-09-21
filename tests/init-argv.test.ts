@@ -30,7 +30,12 @@ describe('parseInitArgs', () => {
       dir: undefined,
       yes: false,
       json: false,
+      skipStatusline: false,
     });
+  });
+
+  it('parses --skip-statusline as boolean true', () => {
+    expect(parseInitArgs(['--skip-statusline']).skipStatusline).toBe(true);
   });
 
   it('parses --force as boolean true', () => {

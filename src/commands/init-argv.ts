@@ -25,6 +25,12 @@ export interface InitArgs {
    * screen-scraping the prose. Added cli 1.0.1 per RFC-0002 H1 fold.
    */
   json: boolean;
+  /**
+   * Skip the statusline install step (both the ~/.claude/ dispatcher
+   * copy and the .claude/settings.json statusLine write). Added cli
+   * 1.2.3 per bassclef-upstream#1860 pair.
+   */
+  skipStatusline: boolean;
 }
 
 const DEFAULTS: InitArgs = {
@@ -36,6 +42,7 @@ const DEFAULTS: InitArgs = {
   dir: undefined,
   yes: false,
   json: false,
+  skipStatusline: false,
 };
 
 export class ArgvError extends Error {
@@ -79,6 +86,11 @@ export function parseInitArgs(argv: readonly string[]): InitArgs {
     }
     if (token === '--json') {
       out.json = true;
+      i += 1;
+      continue;
+    }
+    if (token === '--skip-statusline') {
+      out.skipStatusline = true;
       i += 1;
       continue;
     }
