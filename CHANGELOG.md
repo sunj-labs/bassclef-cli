@@ -24,6 +24,41 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.6.0] - 2026-09-22
+### Changed
+
+- Substrate pin bumped `v1.1.1` → `v1.2.0` in `.github/workflows/publish.yml`
+  (both `checks` and `publish` jobs). Bundled tarball now carries bassclef
+  substrate v1.2.0 (released 2026-09-21T22:32:51Z). Release notes:
+  <https://github.com/sunj-labs/bassclef/releases/tag/v1.2.0>.
+
+### Added
+
+- **Statusline for tarball adopters** (PR #181, merged into main first).
+  `bassclef init` now writes `~/.claude/bassclef-statusline.sh` and folds
+  the canonical `statusLine` field into the walker-copied settings.json.
+  Adopters running `@thebassclef/lite@1.6.0` see the bassclef statusline
+  the first time they open Claude Code. Pairs with `bassclef-upstream#1860`.
+- Substrate v1.2.0 cures bundled by the pin bump:
+  - `#1860` — statusline tarball fallback (dispatcher + rich impl learn
+    a script-relative candidate path).
+  - `#1877` — T3 inode check uses `ls -di` fallback (Linux CI flake gone).
+  - `#1878` — release-script target-dirty guard runs before source tag.
+  - `#1880` — hook classifier reads `NOT-WIRED-BY-DESIGN-EXCLUSIONS` from
+    `standards/hook-invocation-patterns.json` (JSON label, not source scan).
+  - `#1866` — Assertion 5 source-graph closure (opt-in via
+    `ADOPTER_SIM_SOURCE_GRAPH=1`).
+  - `#1875` — Assertion 6 tarball ref fidelity (opt-in via
+    `ADOPTER_SIM_TARBALL_PATH=<path>` + `ADOPTER_SIM_EXPECTED_TAG=<tag>`).
+  - `#1889` — source-graph walker rejects regex metachars in refs;
+    `BASSCLEF_SGW_REGEX_FILTER=0` restores prior.
+
+### Notes
+
+- No source changes under `src/` beyond the automatic `VERSION` constant
+  refresh via `npm run bump minor`. All substrate content comes from the
+  bumped tag under `sunj-labs/bassclef@v1.2.0`.
+
 ## [1.5.1] - 2026-09-21
 
 Patch on top of v1.5.0. The v1.5.0 publish attempt failed at

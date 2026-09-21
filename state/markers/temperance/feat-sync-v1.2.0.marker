@@ -1,0 +1,7 @@
+# Temperance marker — feat/sync-v1.2.0
+- date: 2026-09-22
+- branch: feat/sync-v1.2.0
+- scope-decision: Bump substrate pin v1.1.1 → v1.2.0 in publish.yml (6 occurrences) + npm run bump minor (1.5.1 → 1.6.0) + CHANGELOG. NO code edits under src/ except src/index.ts VERSION const via bump script. NO new SKILLs/rules/hooks.
+- right-thing: Ship v1.2.0 substrate cures to @thebassclef/lite adopters.
+- right-way: Mirror PR #190 pattern verbatim. Use npm run bump. Keep the surface small.
+- drift-trigger: If publish workflow surfaces a NEW class (not stale-marker), pause and re-anchor. If Docker harness reveals v1.2.0 bundle defect, file cli ticket, do not scope-creep the fix.
