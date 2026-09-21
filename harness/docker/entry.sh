@@ -379,9 +379,11 @@ _docker_harness_run_v2() {
   if [[ -f "$scripts_dir/smoke-drive-onboard-repo.sh" ]]; then
     echo ">>> V2 Step 6 — /onboard-repo drive in fresh scratch dir" >&2
     set +e
+    # --keep-scratch so Step 7 can chain onto this scaffold (Epic #199).
     bash "$scripts_dir/smoke-drive-onboard-repo.sh" \
       --out "$captures_root/onboard" \
       --scratch "${HOME:-/tmp}/onboard-test" \
+      --keep-scratch \
       --timeout 180
     local raw=$?
     # Deliberately keep set +e — V2 pipeline collects non-zero returns
@@ -392,17 +394,20 @@ _docker_harness_run_v2() {
   fi
 
   # V2 Step 7 — smoke-drive-riff (Epic #199 Story 1)
-  # Runs AFTER Step 6 in its own scratch dir. Fires /riff and asserts HTML
-  # variants land under docs/prototypes/. Handles Playwright MCP absence with
-  # exit 6 (env-degraded) so the harness reports it separately from real
-  # skill regressions. Exit codes: 0 pass, 3 assert fail, 5 timeout,
-  # 6 env-degraded — all fold into worst_code.
+  # Chains onto Step 6's scaffolded scratch. /riff dispatches only when
+  # .claude/skills/ is present in project scope. Default scratch shares
+  # Step 6's ${HOME}/onboard-test dir with --no-reset. If Step 6 failed
+  # to scaffold, Step 7 exits 1 SETUP_FAIL:not-scaffolded pointing
+  # upstream at /onboard-repo.
+  # Exit codes: 0 pass, 3 assert fail, 5 timeout, 6 env-degraded,
+  # 1 setup-fail — all fold into worst_code.
   if [[ -f "$scripts_dir/smoke-drive-riff.sh" ]]; then
-    echo ">>> V2 Step 7 — /riff drive in fresh scratch dir" >&2
+    echo ">>> V2 Step 7 — /riff drive chained onto Step 6's scratch" >&2
     set +e
     bash "$scripts_dir/smoke-drive-riff.sh" \
       --out "$captures_root/riff" \
-      --scratch "${HOME:-/tmp}/riff-test" \
+      --scratch "${HOME:-/tmp}/onboard-test" \
+      --no-reset \
       --timeout 300
     local raw_riff=$?
     _docker_harness_emit_evidence_row "v2_riff" "exit=${raw_riff}"

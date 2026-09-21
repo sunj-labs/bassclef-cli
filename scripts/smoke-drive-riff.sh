@@ -52,11 +52,14 @@ set -e
 
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 TIMEOUT_SEC="${RIFF_TIMEOUT_SEC:-300}"
-SCRATCH_DIR="${RIFF_SCRATCH:-${HOME:-/tmp}/riff-test}"
-# Default intent — hero band with inline email capture. Override via --intent or RIFF_INTENT.
+# Chain default: use Step 6 /onboard-repo scratch. /riff dispatches only when
+# .claude/skills/ is scaffolded per the adopter's onboard flow.
+SCRATCH_DIR="${RIFF_SCRATCH:-${HOME:-/tmp}/onboard-test}"
 DEFAULT_INTENT="a marketing landing hero band with inline email capture for a developer tools SaaS"
 RIFF_INTENT="${RIFF_INTENT:-$DEFAULT_INTENT}"
 KEEP_SCRATCH=0
+NO_RESET=1  # default chain — do NOT reset scratch; consume Step 6's scaffold
+SKIP_PRECONDITION=0  # tests only — skip scaffold-present check
 OUT_ROOT="${OUT_ROOT:-}"
 
 while [ "$#" -gt 0 ]; do
@@ -66,6 +69,9 @@ while [ "$#" -gt 0 ]; do
     --timeout) TIMEOUT_SEC="$2"; shift 2 ;;
     --scratch) SCRATCH_DIR="$2"; shift 2 ;;
     --intent) RIFF_INTENT="$2"; shift 2 ;;
+    --reset) NO_RESET=0; shift ;;
+    --no-reset) NO_RESET=1; shift ;;
+    --skip-precondition) SKIP_PRECONDITION=1; shift ;;
     --keep-scratch) KEEP_SCRATCH=1; shift ;;
     --help|-h) sed -n '2,50p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "smoke-drive-riff: SETUP_FAIL:unknown-arg $1" >&2; exit 1 ;;
@@ -131,25 +137,48 @@ mkdir -p "$OUT_ROOT"
 
 OUT_FILE="${OUT_ROOT}/riff.out"
 
-# Teardown closure — runs on any exit path so scratch never leaks
+# Teardown closure — runs on any exit path so drive-owned scratch never leaks.
+# When --no-reset is set (chain mode), the caller owns scratch lifecycle;
+# the drive does NOT tear down. --keep-scratch always preserves.
 teardown() {
   local rc=$?
   cd / 2>/dev/null || true
-  if [ "$KEEP_SCRATCH" -eq 0 ] && [ -d "$SCRATCH_DIR" ]; then
+  if [ "$KEEP_SCRATCH" -eq 0 ] && [ "$NO_RESET" -eq 0 ] && [ -d "$SCRATCH_DIR" ]; then
     rm -rf "$SCRATCH_DIR" 2>/dev/null || true
   fi
   exit "$rc"
 }
 trap teardown EXIT INT TERM
 
-# Setup — fresh scratch dir, fresh git repo
-echo "smoke-drive-riff: scratch dir ${SCRATCH_DIR}" >&2
-rm -rf "$SCRATCH_DIR"
-mkdir -p "$SCRATCH_DIR"
-cd "$SCRATCH_DIR"
-git init -q
-git config user.email "riff-smoke@harness.local"
-git config user.name "Riff Smoke Harness"
+# Setup — chain semantics per operator (2026-09-21 correction).
+# /riff dispatches only when the scratch's .claude/skills/ is scaffolded
+# (either by prior /onboard-repo drive OR by manual bassclef init).
+# Default is --no-reset (consume Step 6's scaffold). --reset for isolated runs.
+echo "smoke-drive-riff: scratch dir ${SCRATCH_DIR} (no-reset=${NO_RESET})" >&2
+if [ "$NO_RESET" -eq 0 ]; then
+  rm -rf "$SCRATCH_DIR"
+  mkdir -p "$SCRATCH_DIR"
+  cd "$SCRATCH_DIR"
+  git init -q
+  git config user.email "riff-smoke@harness.local"
+  git config user.name "Riff Smoke Harness"
+elif [ ! -d "$SCRATCH_DIR" ]; then
+  echo "smoke-drive-riff: SETUP_FAIL:scratch-missing $SCRATCH_DIR (chain broke — /onboard-repo did not scaffold)" >&2
+  exit 1
+else
+  cd "$SCRATCH_DIR"
+fi
+
+# Precondition — /riff needs .claude/skills/riff/SKILL.md in project scope
+# to be dispatchable via `claude -p`. If missing, the drive exits early
+# with a clear message pointing at the upstream pre-req. Skip in tests
+# where fixture claude mocks bypass the real registry.
+if [ "$SKIP_PRECONDITION" -eq 0 ] && [ ! -f "$SCRATCH_DIR/.claude/skills/riff/SKILL.md" ]; then
+  echo "smoke-drive-riff: SETUP_FAIL:not-scaffolded (missing .claude/skills/riff/SKILL.md — run /onboard-repo or bassclef init first)" >&2
+  echo "smoke-drive-riff: scratch contents:" >&2
+  ls -la "$SCRATCH_DIR" >&2 2>&1 || true
+  exit 1
+fi
 
 # Drive — fire /riff with alarm-based timeout, capture stdout+stderr
 echo "smoke-drive-riff: firing /riff (timeout ${TIMEOUT_SEC}s)" >&2
@@ -190,7 +219,10 @@ _check_env_miss() {
   local capture="$1"
   # Case-insensitive grep across expanded token list.
   # Tokens per RFC F3: playwright, mcp, screenshot, puppeteer, chromium, browser
-  if grep -qiE 'playwright|mcp|screenshot|puppeteer|chromium|browser' "$capture"; then
+  # Plus API-limit tokens surfaced during 2026-09-21 verification run
+  # (Anthropic API returns 400 with "usage limits" text when the key's
+  # budget is exhausted; belongs in env-degraded, not skill-regression).
+  if grep -qiE 'playwright|mcp|screenshot|puppeteer|chromium|browser|usage limit|rate limit|api limit|429 |api error: 4' "$capture"; then
     return 0
   fi
   return 1
@@ -237,7 +269,7 @@ _assert_variants() {
 if [ "$exit_code" -ne 0 ]; then
   if _check_env_miss "$OUT_FILE"; then
     # Grab a token from the capture for the tag.
-    tok=$(grep -oiE 'playwright|mcp|screenshot|puppeteer|chromium|browser' "$OUT_FILE" | head -1 | tr '[:upper:]' '[:lower:]')
+    tok=$(grep -oiE 'playwright|mcp|screenshot|puppeteer|chromium|browser|usage limit|rate limit|api limit|api error' "$OUT_FILE" | head -1 | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
     [ -z "$tok" ] && tok="unknown"
     echo "smoke-drive-riff: ENV_DEGRADED:${tok} — /riff blocked on missing ${tok}" >&2
     echo "capture: ${OUT_FILE}" >&2
