@@ -7,21 +7,27 @@
 # tests/version-sync.test.ts + tests/version-set-check.test.ts.
 #
 # Scope discipline per RFC F2 (Brooks · conceptual integrity):
-#   PR time: `npm test` + `npm run typecheck` only.
-#   Release time (publish.yml): tag validation + dist/lite bundling +
-#   andon scan + tier filter + npm publish.
-# The two phases share nothing beyond a common test suite. Running the
-# full release checks on every PR would waste ~5min per PR — the tag
-# does not exist yet.
+#   PR time: build + `npm test` + `npm run typecheck`.
+#   Release time (publish.yml): PR-time checks + tag validation +
+#   pack + andon scan + tier filter + npm publish.
+# Running the full release checks on every PR would waste ~5min per
+# PR — the tag does not exist yet.
 #
-# No `paths:` filter — fires on every PR. A hand-edit of `src/index.ts`
-# alone (no `.github/**` touched) still trips this check when it
-# desyncs from package.json + README + CHANGELOG. See pre-mortem
-# R3 (Nygard · path-filter miss) at
+# Bundling: mirrors publish.yml's install-build-bundle-test order.
+# `dist/lite/` must be populated before `npm test` fires because
+# init tests dispatch runInit which reads the bundled manifest per
+# ADR-055 D1. Without the bundle step, 70+ tests fail with
+# ManifestMissing (exit code 4).
+#
+# Sibling pin at v1.1.1 matches publish.yml. Ticket #193 will unify
+# the four Node pins + `ubuntu-latest` migration across every
+# workflow in one PR later.
+#
+# No `paths:` filter — fires on every PR. A hand-edit of
+# `src/index.ts` alone (no `.github/**` touched) still trips this
+# check when it desyncs from package.json + README + CHANGELOG.
+# Per pre-mortem R3 (Nygard · path-filter miss) at
 # docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md.
-#
-# Env pins match publish.yml deliberately. Ticket #193 will migrate
-# node + ubuntu-latest across every workflow in one PR.
 
 name: pr-checks
 
@@ -51,12 +57,37 @@ jobs:
         # Match publish.yml discipline per ADR-004 §Ordered steps 3.
         run: npm ci --ignore-scripts
 
+      - name: Build
+        run: npm run build
+
+      - name: Checkout sibling bassclef at pinned tag (for substrate source)
+        # Matches publish.yml pin. See ADR-007 §Amendment 2026-09-13c
+        # for the source-of-truth policy. Bundling needs a checkout of
+        # sunj-labs/bassclef to read the wiring manifest + presence
+        # dist-templates + source graph closure.
+        uses: actions/checkout@v4
+        with:
+          repository: sunj-labs/bassclef
+          ref: v1.1.1
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
+          fetch-depth: 1
+
+      - name: Bundle dist/lite/ via prepublish script
+        # Init tests dispatch runInit which reads dist/lite/ per
+        # ADR-055 D1. Without this step, 70+ tests fail with
+        # ManifestMissing (exit 4).
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
+        run: node scripts/prepublish-bundle-substrate.mjs
+
       - name: Test
-        # Full vitest suite. Includes:
+        # Full vitest suite — 458 tests as of 2026-09-21.
+        # Includes:
         # - tests/version-sync.test.ts (real files agree at HEAD)
-        # - tests/version-set-check.test.ts (pure function coverage)
+        # - tests/version-set-check.test.ts (12 pure-function tests)
         # - tests/check-version-set.integration.test.ts (spawn-based)
-        # - 51 other test files covering init + sync + walker + harness
+        # - 53 other test files covering init + sync + walker + harness
         run: npm test
 
       - name: Typecheck
