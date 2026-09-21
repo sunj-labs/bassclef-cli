@@ -1,0 +1,6 @@
+# Loop marker — feat/sync-v1.2.0
+- date: 2026-09-22
+- branch: feat/sync-v1.2.0
+- wu_id: goal 2026-09-22a Step 2
+- iteration_count: 0 (pre-work; will bump to 1 on first RED or GREEN)
+- lens_used: [linus-torvalds, michael-nygard, kent-beck]

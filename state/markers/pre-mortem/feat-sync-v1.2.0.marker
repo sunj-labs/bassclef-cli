@@ -1,0 +1,5 @@
+# Pre-mortem marker — feat/sync-v1.2.0
+- date: 2026-09-22
+- branch: feat/sync-v1.2.0
+- outcome: SKIPPED
+- reason: Data-only sync + config bumps. No code path changes. npm run bump handles all four version-carrying files mechanically. Per .claude/rules/loop-discipline.md Step 0.5 — pre-mortem light fires when work ships CODE or SUBSTRATE. Config bumps are neither.

@@ -1,0 +1,6 @@
+# Luminary marker — feat/sync-v1.2.0
+- date: 2026-09-22
+- branch: feat/sync-v1.2.0
+- lead: linus-torvalds
+- supporting: [michael-nygard, kent-beck]
+- rationale: linus — adopter contract; v1.5.1 stays working while v1.6.0 ships on top. nygard — release-cascade fail-forward; publish steps assert intermediate state (RESOLVED_TAG guard, dist/lite/ floor). beck — Tier 0 tests if any code surfaces; sync is data-only so no TDD cycle expected.
