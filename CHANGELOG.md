@@ -24,6 +24,35 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.5.0] - 2026-09-21
+
+Substrate sync to public bassclef v1.1.1. Adopters running `npm install
+-g @thebassclef/lite` and refreshing get two adopter-visible fixes plus
+wider auto-regen coverage on tier:lite substrate edits.
+
+### Changed
+
+- Bundled substrate now sources from `sunj-labs/bassclef@v1.1.1` (was
+  `v1.1.0`). Six `ref:` and assertion strings in `.github/workflows/publish.yml`
+  bumped in one commit.
+- Bassclef v1.1.1 ships two adopter-visible cures. The classifier now
+  reads `template-hook-exclusions.txt` so legitimately excluded hooks
+  no longer trip warnings (bassclef-upstream#1867 / PR #1870). The
+  auto-regen path filter widened to seven gap classes covering `lib/`,
+  `scripts/`, `templates/`, `presence/install/`, root-docs,
+  `.claude/hooks/*.sh`, and `standards/*.md` (bassclef-upstream#1872 /
+  PR #1874).
+- Bundled manifest hash updates automatically at publish time via
+  `scripts/prepublish-bundle-substrate.mjs`.
+
+### Notes
+
+- Statusline PR #181 stays held for the paired v1.1.2 sync (upstream
+  #1860 not in v1.1.1 per peer confirmation).
+- V2 Docker cold-adopter harness will run against v1.5.0 after publish
+  to verify the classifier tail cure works for adopters, not just for
+  bassclef's own CI. Peer asked for that signal specifically.
+
 ## [1.4.1] - 2026-09-21
 ### Added
 
