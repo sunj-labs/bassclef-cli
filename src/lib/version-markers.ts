@@ -96,26 +96,28 @@ export function parseVersionMarker(
       const match = content.match(
         /export const version = '([^']+)' as const;/,
       );
-      if (!match) {
+      const captured = match?.[1];
+      if (!captured) {
         throw new VersionMarkerNotFound(
           source,
           "src/index.ts is missing `export const version = 'X.Y.Z' as const;`",
         );
       }
-      return match[1];
+      return captured;
     }
 
     case 'README.md': {
       const match = content.match(
         /<!-- version-start -->([^<]+)<!-- version-end -->/,
       );
-      if (!match) {
+      const captured = match?.[1];
+      if (!captured) {
         throw new VersionMarkerNotFound(
           source,
           'README.md is missing the `<!-- version-start -->X.Y.Z<!-- version-end -->` marker.',
         );
       }
-      return match[1];
+      return captured;
     }
 
     case 'CHANGELOG.md': {
@@ -128,7 +130,8 @@ export function parseVersionMarker(
         }
         if (seenUnreleased) {
           const match = line.match(/^## \[(\d+\.\d+\.\d+)\]/);
-          if (match) return match[1];
+          const captured = match?.[1];
+          if (captured) return captured;
         }
       }
       throw new VersionMarkerNotFound(
@@ -160,7 +163,13 @@ export function readVersionSet(repoRoot: string): VersionSet {
  */
 export function checkVersionSet(set: VersionSet): DriftFinding {
   const entries = Object.entries(set) as Array<[VersionSource, string]>;
-  const first = entries[0][1];
+  const firstEntry = entries[0];
+  if (!firstEntry) {
+    // Unreachable — VersionSet is always fully populated by readVersionSet.
+    // Belt-and-suspenders per Nygard fail-loud.
+    throw new Error('checkVersionSet received an empty VersionSet.');
+  }
+  const first = firstEntry[1];
   const allAgree = entries.every(([, value]) => value === first);
   if (allAgree) {
     return { drift: false, version: first };
