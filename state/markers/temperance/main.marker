@@ -1,5 +1,7 @@
-# Temperance marker — cli 1.0.1 hook routing
-- date: 2026-09-13
+# Temperance marker — session-2026-09-20f wait-mode + V2 docker drive
+- date: 2026-09-20
 - branch: main
-- scope-decision: right thing — cli 1.0.1 pins v0.40.0 + routes hook binaries per settings.json prefix ($HOME vs $CLAUDE_PROJECT_DIR); right way — full OOAD chain (10 steps) + Tier 0 RED harness before code touch; drift trigger — any risk not folded into an engineering action by Step 9 → pause + escalate to operator
-- operator-confirmed at: session 2026-09-13d turn "yes that's fine and add an /rfc once plan is developed"
+- scope: run Docker cold-adopter harness against @thebassclef/lite@1.2.2 (V2 if ANTHROPIC_API_KEY available; V1 baseline otherwise); park in wait mode for upstream v2.0.0 signal
+- right-thing: close V2 skill drive gap named in whereami L22; smoke pipeline before v2.0.0 cascade lands
+- right-way: reuse harness/docker/entry.sh + scripts/smoke-drive-skills.sh; no code change unless failures require a cure
+- drift-trigger: touching cli substrate code before v2.0.0 lands; any ceremony work beyond the harness run

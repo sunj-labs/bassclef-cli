@@ -24,6 +24,24 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.3.0] - 2026-09-21
+### Added
+
+### Changed
+
+- **Bundled substrate refreshed to public bassclef v1.0.0** (paired with bassclef-upstream v1.0.0 Ship 1 — install-class boundary + cold-adopter unblock). `dist/lite/` rebuilt from public bassclef `1fcd6ed9`. Adopters running `npm install -g @thebassclef/lite@1.3.0` receive the v1.0.0 substrate. Prior release (1.2.2) shipped v0.46.0 substrate.
+- **Install-class boundary lands in the lite tarball.** Operator-only skills (`.claude/skills/release/`, `.claude/skills/journal-export/`) and operator-only hooks (`.claude/hooks/bassclef-sync.sh`) no longer ship in `dist/lite/`. Adopter tarball is leaner; operator-only surfaces stay in the operator repo. Filter is enforced by Gate B in `scripts/generate-lite-manifest.sh` on the upstream side.
+
+### Fixed
+
+- **30 hardcoded operator paths sanitized** in bundled substrate (per bassclef-upstream v1.0.0 Ship 1). Prior tarballs shipped substrate files carrying operator-machine paths (`/Users/<name>/src/...`). v1.3.0 tarball has none.
+- **33 dead hook wirings pruned** from bundled `settings.json` template (per bassclef-upstream v1.0.0 Ship 1). Adopters no longer see settings entries referencing hooks that were retired.
+
+### Notes
+
+- **Known findings deferred to v1.1.0 substrate.** Four V2 Docker harness findings (bassclef-upstream#1861) filed against `@thebassclef/lite@1.2.2` are partially addressed in v1.0.0. Peer signal: F1b cure (`_lib/wirings.sh` inclusion) lands in bassclef v1.1.0, F1a + F4 stay open pending further diagnosis. Adopters running v1.3.0 may still see F1b + F4 in fresh Docker installs.
+- **Statusline PR #181 held for v1.1.0 pairing.** Cli-side statusline install (dispatcher copy to `~/.claude/bassclef-statusline.sh` + `statusLine` config field) waits for its upstream pair (bassclef-upstream#1860 — rich-impl fallback path). Ships together when both land.
+
 ## [1.2.2] - 2026-09-20
 ### Added
 
