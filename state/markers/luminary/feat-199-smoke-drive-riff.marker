@@ -1,0 +1,7 @@
+# Luminary marker — feat/199-smoke-drive-riff
+- date: 2026-09-21
+- branch: feat/199-smoke-drive-riff
+- primary: alistair-cockburn
+- supporting: [andreas-zeller, michael-feathers]
+- lens-role: primary — walking skeleton discipline (thinnest end-to-end slice exercising claude -p + assertion + teardown + harness wiring)
+- intent-matcher: LIVE 0.82 confidence

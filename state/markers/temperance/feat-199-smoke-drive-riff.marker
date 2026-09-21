@@ -1,0 +1,9 @@
+# Temperance marker — feat/199-smoke-drive-riff
+- date: 2026-09-21
+- branch: feat/199-smoke-drive-riff
+- scope-decision: Ship Epic #199 Story 1 only — scripts/smoke-drive-riff.sh + Tier 0 characterization test + wire into harness/docker/entry.sh V2 Step 7. Stories 2 (launch) + 3 (build) + shared-lib refactor (Story 4) stay separate scope.
+- right-thing: Epic #199 filed with 6 stories; Story 1 is smallest scope + unblocks the sequence
+- right-way: model on scripts/smoke-drive-onboard-repo.sh (142-line proven template); Beck TDD RED-first; RFC council outside authoring set (Cockburn + Zeller + Feathers)
+- drift-trigger: any step exceeds 1.5× estimate OR RFC surfaces Playwright design deviation requiring ADR
+- pre-mortem: docs/risk-ledgers/2026-09-21c-smoke-drive-riff.md
+- estimate: 100-150 turns (grounded per PR #196 which was similar scope; that shipped at ~180 turns; smoke drive is smaller)

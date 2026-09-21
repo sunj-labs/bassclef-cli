@@ -1,0 +1,5 @@
+# ADR-deviation marker — feat/199-smoke-drive-riff
+- date: 2026-09-21
+- branch: feat/199-smoke-drive-riff
+- adr_governing: none — new smoke-drive script; no ADR governs adopter-facing scripts under scripts/
+- outcome: ADR-honored
