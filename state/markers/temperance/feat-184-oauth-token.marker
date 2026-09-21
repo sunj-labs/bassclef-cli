@@ -1,0 +1,7 @@
+# Temperance marker — feat/184-oauth-token
+- date: 2026-09-21
+- branch: feat/184-oauth-token
+- scope-decision: Wire the harness to accept CLAUDE_CODE_OAUTH_TOKEN alongside ANTHROPIC_API_KEY per #184. Prefer OAuth when both set. Unset API_KEY inside container so claude routes to subscription. Update docker-smoke.yml + entry.sh + tests + runbook. ~20 lines total.
+- right-thing: #184 filed with exact spec; operator holds Claude subscription + wants to stop metered billing on harness runs
+- right-way: mirror ticket's implementation plan verbatim; add 2 new Tier 0 tests (oauth-only + both-set-prefers-oauth); backward-compat preserved
+- drift-trigger: any change beyond entry.sh preflight + workflow env + tests + runbook

@@ -30,9 +30,14 @@ docker info >/dev/null 2>&1 || {
   exit 1
 }
 
-# 3. Anthropic key set? (V2 skill drive only; V1 tolerates missing)
-[[ -n "${ANTHROPIC_API_KEY:-}" ]] || {
-  echo "WARN: ANTHROPIC_API_KEY not set. V1 harness runs; V2 skill drive will exit 25."
+# 3. Claude auth set? (V2 skill drive only; V1 tolerates missing)
+# Per #184: V2 accepts EITHER ANTHROPIC_API_KEY (metered) OR
+# CLAUDE_CODE_OAUTH_TOKEN (Claude subscription). Prefer OAuth when both set.
+[[ -n "${ANTHROPIC_API_KEY:-}" || -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]] || {
+  echo "WARN: neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN is set."
+  echo "      V1 harness runs; V2 skill drive will exit 25."
+  echo "      Subscription path: run 'claude setup-token' on host + export CLAUDE_CODE_OAUTH_TOKEN."
+  echo "      Metered path: export ANTHROPIC_API_KEY=<key>."
 }
 ```
 
@@ -49,13 +54,37 @@ docker build \
   .
 
 # Run against a specific cli version (default: latest on npm)
+# Pass BOTH auth env vars. Harness preflight prefers OAuth (subscription)
+# when both are set; runs bill against the Claude subscription, not metered API.
 docker run \
   --rm \
   --platform=linux/amd64 \
   -e CLI_VERSION="${CLI_VERSION:-latest}" \
   -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" \
+  -e CLAUDE_CODE_OAUTH_TOKEN="${CLAUDE_CODE_OAUTH_TOKEN:-}" \
   bassclef-cli-cold-adopter
 ```
+
+## Auth paths (V2 skill drive)
+
+Two paths, prefer OAuth. Per #184.
+
+**Path A — Claude subscription (recommended when you hold one).**
+
+1. On the host, one-time: `claude setup-token` — opens a browser flow, prints a long-lived token.
+2. `export CLAUDE_CODE_OAUTH_TOKEN=<token>` in your shell (or add to `~/.zshrc` / `~/.bashrc`).
+3. Run the container as above. Harness prints `INFO: V2 auth via CLAUDE_CODE_OAUTH_TOKEN (Claude subscription).`
+4. Runs bill against your subscription quota, not metered API.
+
+**Path B — Metered API key (fallback).**
+
+1. `export ANTHROPIC_API_KEY=<sk-ant-...>`.
+2. Run the container. Harness prints `INFO: V2 auth via ANTHROPIC_API_KEY (metered).`
+3. Runs bill against your metered API usage.
+
+**Both set?** Harness prefers OAuth. It unsets `ANTHROPIC_API_KEY` inside the container so `claude` routes to subscription per `claude config list` precedence. You see `INFO: both ... set. Preferring OAuth ...`.
+
+**Adding to CI:** create a repo secret named `CLAUDE_CODE_OAUTH_TOKEN` with the token from `claude setup-token`. The `docker-smoke.yml` workflow already passes it when set.
 
 ## Exit-code vocabulary
 
@@ -73,7 +102,7 @@ Read the exit code to know what the container detected.
 | 22 | INFRA — target version not on registry | Check the CLI_VERSION value; try `latest` |
 | 23 | INFRA — bassclef init failed | Cli defect; open ticket |
 | 24 | INFRA — smoke-assert script not found | Repository state defect; check `scripts/` |
-| 25 | PREFLIGHT — ANTHROPIC_API_KEY missing (V2 only) | Export the key |
+| 25 | PREFLIGHT — neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN set (V2 only) | Export one (OAuth preferred; see Auth paths section) |
 | 26 | INFRA — report path not writable | Check container filesystem |
 | 99 | UNKNOWN — unmapped exit code fell through | ExitCodeMapper bug; open ticket |
 

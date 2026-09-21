@@ -20,8 +20,9 @@
     "docs/proposed-upstream/standards--distribution-preflight.md",
     "docs/proposed-upstream/rules--distribution-preflight-check.md",
     "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md",
-    "docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md"
+    "docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md",
+    "docs/rfcs/2026-09-21c-smoke-drive-riff-council.md"
   ],
-  "last_scanned": "2026-09-21T19:03:18Z",
+  "last_scanned": "2026-09-21T20:18:32Z",
   "scanner_version": "1.0"
 }

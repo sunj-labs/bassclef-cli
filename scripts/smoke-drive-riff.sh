@@ -53,6 +53,9 @@ set -e
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 TIMEOUT_SEC="${RIFF_TIMEOUT_SEC:-300}"
 SCRATCH_DIR="${RIFF_SCRATCH:-${HOME:-/tmp}/riff-test}"
+# Default intent — hero band with inline email capture. Override via --intent or RIFF_INTENT.
+DEFAULT_INTENT="a marketing landing hero band with inline email capture for a developer tools SaaS"
+RIFF_INTENT="${RIFF_INTENT:-$DEFAULT_INTENT}"
 KEEP_SCRATCH=0
 OUT_ROOT="${OUT_ROOT:-}"
 
@@ -62,6 +65,7 @@ while [ "$#" -gt 0 ]; do
     --claude) CLAUDE_BIN="$2"; shift 2 ;;
     --timeout) TIMEOUT_SEC="$2"; shift 2 ;;
     --scratch) SCRATCH_DIR="$2"; shift 2 ;;
+    --intent) RIFF_INTENT="$2"; shift 2 ;;
     --keep-scratch) KEEP_SCRATCH=1; shift ;;
     --help|-h) sed -n '2,50p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "smoke-drive-riff: SETUP_FAIL:unknown-arg $1" >&2; exit 1 ;;
@@ -163,7 +167,7 @@ exit_code=0
     $SIG{ALRM} = sub { exit 142 };
     alarm $t;
     exec @cmd or exit 127
-  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/riff riff a marketing landing hero" < /dev/null 2>&1
+  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/riff $RIFF_INTENT" < /dev/null 2>&1
   exit_code=$?
   set -e
   echo "=== exit: ${exit_code}"

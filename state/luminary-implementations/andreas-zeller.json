@@ -2,8 +2,11 @@
   "luminary_slug": "andreas-zeller",
   "schema_version": 1,
   "referenced_by_files": [
-    "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md"
+    "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md",
+    "docs/risk-ledgers/2026-09-21c-smoke-drive-riff.md",
+    "docs/specs/2026-09-21c-smoke-drive-riff.md",
+    "docs/decompositions/2026-09-21c-smoke-drive-riff.md"
   ],
-  "last_scanned": "2026-09-20T11:34:13Z",
+  "last_scanned": "2026-09-21T20:16:46Z",
   "scanner_version": "1.0"
 }

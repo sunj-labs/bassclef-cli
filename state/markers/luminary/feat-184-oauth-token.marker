@@ -1,0 +1,6 @@
+session: 015tAiPFTjxmWALL3t6HLWbF
+branch: feat/184-oauth-token
+primary_lens: linus-torvalds
+compatibility_anchor: hyrum-wright
+supporting_lenses: [saltzer-schroeder, kent-beck]
+reason: Accept BOTH ANTHROPIC_API_KEY and CLAUDE_CODE_OAUTH_TOKEN so existing setups keep working while OAuth path lands. CLAUDE_CODE_OAUTH_TOKEN is Claude Code's documented env var (Hyrum-observable behavior).

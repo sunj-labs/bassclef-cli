@@ -17,11 +17,14 @@
 # No assertion logic in this file. Assertions live in scripts/smoke-*.sh.
 #
 # ENV VARS (per RFC-0002 R9 anticorruption layer):
-#   CLI_VERSION         — target cli version (default: latest)
-#   ANTHROPIC_API_KEY   — for V2 skill drive only; unused in V1
-#   HARNESS_EVENT_LOG   — path to append evidence rows (default: state/events/evidence-status-changed.jsonl)
-#   HARNESS_TEST_MODE   — set to 1 in Tier 0 tests to skip actual docker calls
-#   HARNESS_DRY_RUN     — set to 1 to log operations without executing
+#   CLI_VERSION               — target cli version (default: latest)
+#   ANTHROPIC_API_KEY         — V2 skill drive auth (metered API path); unused in V1
+#   CLAUDE_CODE_OAUTH_TOKEN   — V2 skill drive auth (Claude subscription path); per #184
+#                               When both are set, OAuth wins and API key is unset so
+#                               claude routes to subscription quota, not metered API.
+#   HARNESS_EVENT_LOG         — path to append evidence rows (default: state/events/evidence-status-changed.jsonl)
+#   HARNESS_TEST_MODE         — set to 1 in Tier 0 tests to skip actual docker calls
+#   HARNESS_DRY_RUN           — set to 1 to log operations without executing
 
 # Locate the harness directory and source shared exit-code constants
 _docker_harness_source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -93,10 +96,30 @@ _docker_harness_preflight_all() {
 # Postcondition: return 0 if V2 preflight passes; EXIT_ENV_MISSING (25) otherwise
 # ---------------------------------------------------------------------------
 _docker_harness_preflight_v2() {
-  if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
-    echo "ERROR: ANTHROPIC_API_KEY not set. V2 skill drive requires it." >&2
-    echo "Remediation: export ANTHROPIC_API_KEY=<your-key> before invoking the harness." >&2
+  # Per #184: V2 accepts EITHER ANTHROPIC_API_KEY (metered) OR
+  # CLAUDE_CODE_OAUTH_TOKEN (subscription). When both are set, OAuth wins.
+  # We also unset the API key so `claude` inside the container routes to
+  # subscription quota — otherwise `ANTHROPIC_API_KEY` takes precedence
+  # per `claude config list`.
+  local has_api="${ANTHROPIC_API_KEY:-}"
+  local has_oauth="${CLAUDE_CODE_OAUTH_TOKEN:-}"
+
+  if [[ -z "$has_api" && -z "$has_oauth" ]]; then
+    echo "ERROR: neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN is set. V2 skill drive requires one." >&2
+    echo "Remediation: run 'claude setup-token' on the host + export CLAUDE_CODE_OAUTH_TOKEN (subscription)," >&2
+    echo "            OR export ANTHROPIC_API_KEY=<your-key> (metered) before invoking the harness." >&2
     return "$EXIT_ENV_MISSING"
+  fi
+
+  if [[ -n "$has_oauth" ]]; then
+    if [[ -n "$has_api" ]]; then
+      echo "INFO: both CLAUDE_CODE_OAUTH_TOKEN and ANTHROPIC_API_KEY set. Preferring OAuth (subscription); unsetting API key so claude routes to subscription quota." >&2
+      unset ANTHROPIC_API_KEY
+    else
+      echo "INFO: V2 auth via CLAUDE_CODE_OAUTH_TOKEN (Claude subscription)." >&2
+    fi
+  else
+    echo "INFO: V2 auth via ANTHROPIC_API_KEY (metered)." >&2
   fi
   return 0
 }

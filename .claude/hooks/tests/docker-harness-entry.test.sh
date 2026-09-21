@@ -101,9 +101,10 @@ test_preflight_passes_when_env_present() {
 
 test_preflight_fails_env_missing_v2() {
   echo "TEST test_preflight_fails_env_missing_v2"
-  bash -c "export HARNESS_TEST_MODE=1; unset ANTHROPIC_API_KEY; source '$ENTRY_SH' && _docker_harness_preflight_v2" >/dev/null 2>&1
+  # Per #184: fails only when BOTH ANTHROPIC_API_KEY AND CLAUDE_CODE_OAUTH_TOKEN are unset.
+  bash -c "export HARNESS_TEST_MODE=1; unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN; source '$ENTRY_SH' && _docker_harness_preflight_v2" >/dev/null 2>&1
   local exit_code=$?
-  assert_eq "25" "$exit_code" "preflight V2 fails with EXIT_ENV_MISSING (25) when ANTHROPIC_API_KEY unset"
+  assert_eq "25" "$exit_code" "preflight V2 fails with EXIT_ENV_MISSING (25) when both auth vars unset"
 }
 
 test_backoff_retries_n_times() {
@@ -267,13 +268,13 @@ test_v2_preflight_missing_key_returns_env_missing() {
   echo "TEST test_v2_preflight_missing_key_returns_env_missing"
   local ec
   ec=$(bash -c "
-    unset ANTHROPIC_API_KEY
+    unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
     source '$ENTRY_SH'
     _docker_harness_preflight_v2 >/dev/null 2>&1
     echo \$?
   ")
   # EXIT_ENV_MISSING is 25 per exit-codes.sh
-  assert_eq "25" "$ec" "V2 preflight fails EXIT_ENV_MISSING when key unset"
+  assert_eq "25" "$ec" "V2 preflight fails EXIT_ENV_MISSING when both auth vars unset"
 }
 
 test_v2_preflight_present_key_passes() {
@@ -281,11 +282,41 @@ test_v2_preflight_present_key_passes() {
   local ec
   ec=$(bash -c "
     export ANTHROPIC_API_KEY=test-key-not-used
+    unset CLAUDE_CODE_OAUTH_TOKEN
     source '$ENTRY_SH'
     _docker_harness_preflight_v2 >/dev/null 2>&1
     echo \$?
   ")
-  assert_eq "0" "$ec" "V2 preflight passes when key set"
+  assert_eq "0" "$ec" "V2 preflight passes when ANTHROPIC_API_KEY only is set"
+}
+
+test_v2_preflight_oauth_only_passes() {
+  echo "TEST test_v2_preflight_oauth_only_passes"
+  # Per #184: CLAUDE_CODE_OAUTH_TOKEN alone is sufficient (subscription path).
+  local ec
+  ec=$(bash -c "
+    unset ANTHROPIC_API_KEY
+    export CLAUDE_CODE_OAUTH_TOKEN=test-oauth-not-used
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+    echo \$?
+  ")
+  assert_eq "0" "$ec" "V2 preflight passes when CLAUDE_CODE_OAUTH_TOKEN only is set"
+}
+
+test_v2_preflight_prefers_oauth_when_both_set() {
+  echo "TEST test_v2_preflight_prefers_oauth_when_both_set"
+  # Per #184: when both are set, OAuth wins and API key is unset so claude
+  # routes to subscription quota (per `claude config list` precedence rule).
+  local api_after
+  api_after=$(bash -c "
+    export ANTHROPIC_API_KEY=test-api-key
+    export CLAUDE_CODE_OAUTH_TOKEN=test-oauth
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+    echo \"\${ANTHROPIC_API_KEY:-UNSET}\"
+  ")
+  assert_eq "UNSET" "$api_after" "preflight unsets ANTHROPIC_API_KEY when both auth vars present (OAuth wins)"
 }
 
 test_dockerfile_does_not_bake_api_key() {
@@ -339,6 +370,8 @@ main() {
   test_v2_run_returns_zero_when_all_scripts_absent
   test_v2_preflight_missing_key_returns_env_missing
   test_v2_preflight_present_key_passes
+  test_v2_preflight_oauth_only_passes
+  test_v2_preflight_prefers_oauth_when_both_set
   test_dockerfile_does_not_bake_api_key
   test_dockerfile_installs_claude_cli
 
