@@ -1,0 +1,63 @@
+# PR-CI check surface for @thebassclef/lite.
+#
+# @requirement R-NPM-007 (extension per Epic #194 Stories 1-3)
+#
+# Fires on every pull_request. Runs the Tier 0 test suite + typecheck.
+# The version-sync assertion rides inside `npm test` — see
+# tests/version-sync.test.ts + tests/version-set-check.test.ts.
+#
+# Scope discipline per RFC F2 (Brooks · conceptual integrity):
+#   PR time: `npm test` + `npm run typecheck` only.
+#   Release time (publish.yml): tag validation + dist/lite bundling +
+#   andon scan + tier filter + npm publish.
+# The two phases share nothing beyond a common test suite. Running the
+# full release checks on every PR would waste ~5min per PR — the tag
+# does not exist yet.
+#
+# No `paths:` filter — fires on every PR. A hand-edit of `src/index.ts`
+# alone (no `.github/**` touched) still trips this check when it
+# desyncs from package.json + README + CHANGELOG. See pre-mortem
+# R3 (Nygard · path-filter miss) at
+# docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md.
+#
+# Env pins match publish.yml deliberately. Ticket #193 will migrate
+# node + ubuntu-latest across every workflow in one PR.
+
+name: pr-checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test + typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR HEAD
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install with --ignore-scripts
+        # Match publish.yml discipline per ADR-004 §Ordered steps 3.
+        run: npm ci --ignore-scripts
+
+      - name: Test
+        # Full vitest suite. Includes:
+        # - tests/version-sync.test.ts (real files agree at HEAD)
+        # - tests/version-set-check.test.ts (pure function coverage)
+        # - tests/check-version-set.integration.test.ts (spawn-based)
+        # - 51 other test files covering init + sync + walker + harness
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
