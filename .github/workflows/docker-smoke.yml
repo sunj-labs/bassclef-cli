@@ -7,7 +7,9 @@
 #   - docs/runbook/docker-smoke.md (local operator counterpart)
 #
 # Contract stability (RFC-0001 R1 cure): invocation shape frozen per ADR-031.
-# Anticorruption layer (RFC-0002 R9 cure): only CLI_VERSION + ANTHROPIC_API_KEY cross into the container.
+# Anticorruption layer (RFC-0002 R9 cure): only CLI_VERSION + auth token(s) cross into the container.
+# Per #184: pass BOTH ANTHROPIC_API_KEY + CLAUDE_CODE_OAUTH_TOKEN when configured.
+# Harness prefers OAuth when both are present so runs bill against subscription, not metered API.
 
 name: docker-smoke
 
@@ -52,15 +54,19 @@ jobs:
         env:
           CLI_VERSION: ${{ github.event.inputs.cli_version || 'latest' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          # Anticorruption layer — pass ONLY the two documented env vars.
+          # Anticorruption layer — pass ONLY the three documented env vars.
           # Never use bare --env; never pass the full runner env into the container.
+          # Per #184: pass both auth tokens. Harness's preflight_v2 prefers OAuth
+          # (subscription) when both are set so runs don't bill metered API.
           set +e
           docker run \
             --rm \
             --platform=linux/amd64 \
             -e CLI_VERSION="$CLI_VERSION" \
             -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+            -e CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_CODE_OAUTH_TOKEN" \
             bassclef-cli-cold-adopter:pr
           EXIT_CODE=$?
           echo "smoke_exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"

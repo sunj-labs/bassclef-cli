@@ -1,0 +1,15 @@
+# ADR-deviation marker — feat/184-oauth-token
+- date: 2026-09-21
+- branch: feat/184-oauth-token
+- adr_governing: none — confirmed no ADR governs harness auth env vars
+- outcome: ADR-honored
+
+Change extends `_docker_harness_preflight_v2` to accept EITHER
+ANTHROPIC_API_KEY OR CLAUDE_CODE_OAUTH_TOKEN per #184. No ADR pins
+the auth env var set. RFC-0002 R9 anticorruption layer (documented
+in entry.sh L19) names the pass-through env vars — this change ADDS
+one, does not remove or repurpose. Adopter-compat preserved:
+API-key-only setups still pass preflight (backward-compat test
+covers).
+
+No new ADR filed. Change is additive per the ticket spec.
