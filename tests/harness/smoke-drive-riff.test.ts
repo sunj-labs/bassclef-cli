@@ -128,6 +128,30 @@ describe('scripts/smoke-drive-riff.sh — characterization', () => {
     expect(r.stderr.toLowerCase()).toContain('playwright');
   });
 
+  it('MCP generic block — mcp token alone triggers exit 6 (F-AR-1 cure)', () => {
+    const { scratch, outDir } = makeWorkDir();
+    const r = runDrive({
+      claude: resolve(FIXTURES, 'claude-mcp-generic.sh'),
+      scratch,
+      outDir,
+    });
+    expect(r.status).toBe(6);
+    expect(r.stderr).toContain('smoke-drive-riff: ENV_DEGRADED');
+    expect(r.stderr.toLowerCase()).toContain('mcp');
+  });
+
+  it('Browser launch error — browser token triggers exit 6 (F-AR-1 cure)', () => {
+    const { scratch, outDir } = makeWorkDir();
+    const r = runDrive({
+      claude: resolve(FIXTURES, 'claude-browser-error.sh'),
+      scratch,
+      outDir,
+    });
+    expect(r.status).toBe(6);
+    expect(r.stderr).toContain('smoke-drive-riff: ENV_DEGRADED');
+    expect(r.stderr.toLowerCase()).toContain('browser');
+  });
+
   it('timeout — fixture sleeps past timeout; exit 5 TIMEOUT', () => {
     const { scratch, outDir } = makeWorkDir();
     const r = runDrive({

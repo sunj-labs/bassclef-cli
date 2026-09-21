@@ -178,11 +178,15 @@ fi
 
 # F3 (Nygard) — env-miss detection.
 # Called before assertion because Playwright BLOCK can leave zero HTML.
+# Token list expanded per architect-review finding F-AR-1 to match the
+# RFC F3 spec — was 'playwright|mcp not enabled|cannot screenshot|puppeteer|chromium'
+# which narrowed `mcp` and dropped `browser`. Real /riff BLOCK messages
+# vary in wording; the wider set catches more real-world signatures.
 _check_env_miss() {
   local capture="$1"
   # Case-insensitive grep across expanded token list.
-  # Tokens: playwright, mcp, screenshot, puppeteer, chromium, browser
-  if grep -qiE 'playwright|mcp not enabled|cannot screenshot|puppeteer|chromium' "$capture"; then
+  # Tokens per RFC F3: playwright, mcp, screenshot, puppeteer, chromium, browser
+  if grep -qiE 'playwright|mcp|screenshot|puppeteer|chromium|browser' "$capture"; then
     return 0
   fi
   return 1
@@ -229,7 +233,7 @@ _assert_variants() {
 if [ "$exit_code" -ne 0 ]; then
   if _check_env_miss "$OUT_FILE"; then
     # Grab a token from the capture for the tag.
-    tok=$(grep -oiE 'playwright|mcp|screenshot|puppeteer|chromium' "$OUT_FILE" | head -1 | tr '[:upper:]' '[:lower:]')
+    tok=$(grep -oiE 'playwright|mcp|screenshot|puppeteer|chromium|browser' "$OUT_FILE" | head -1 | tr '[:upper:]' '[:lower:]')
     [ -z "$tok" ] && tok="unknown"
     echo "smoke-drive-riff: ENV_DEGRADED:${tok} — /riff blocked on missing ${tok}" >&2
     echo "capture: ${OUT_FILE}" >&2
