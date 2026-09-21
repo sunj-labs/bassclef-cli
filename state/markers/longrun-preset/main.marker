@@ -1,5 +1,5 @@
-# /longrun preset marker — main
-- date: 2026-09-19
-- preset: exploratory
-- signal: no fresh plan-doc converged pick — 2026-09-17 plan Option e SHIPPED per goal 2026-09-18a + commit 307bbb0 + follow-ons; fresh smoke on 1.2.0 (#147) surfaces 5 FAIL; launch tomorrow 2026-09-20 per #151
-- shipped-state-check: DONE (see prep body)
+# Preset picker marker — bassclef-cli main branch 2026-09-22
+- date: 2026-09-22
+- branch: main
+- preset: converged
+- signal: plan doc docs/next-session-plan-2026-09-22-bassclef-v1.2.0-sync.md modified 2026-09-22 (mtime 00:38); carries `## Recommended session sequence`
