@@ -24,6 +24,20 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.4.1] - 2026-09-21
+### Added
+
+### Changed
+
+### Fixed
+
+- **Publish workflow substrate pin bumped v0.45.0 → v1.1.0.** `.github/workflows/publish.yml` hardcoded `ref: v0.45.0` on the bassclef sibling checkout (both sibling checkouts at L125 + L268, plus the assertion at L140). Every prior publish this session bundled v0.45.0 substrate, not the v1.0.0 (1.3.0) or v1.1.0 (1.4.0) substrate the CHANGELOG entries claimed. This release ships actual v1.1.0 substrate. Verified: published 1.4.0 tarball at inspection had `release/SKILL.md`, `journal-export/SKILL.md`, 10 runtime `/Users/` hits, no `_lib/wirings.sh`. See bassclef-upstream#1861 comment 5758242378 for the retraction of the v1.0.0 /diagnose report.
+
+### Notes
+
+- **1.4.0 was mis-shipped.** Adopters running `@thebassclef/lite@1.4.0` do NOT have v1.1.0 substrate — they have v0.45.0. Ship 1 install-class boundary cures, the F1b cure, path sanitization, and dead-wire pruning all did NOT reach adopters. Upgrade to `@thebassclef/lite@1.4.1` (or later) for the cures.
+- **F1a + F4 stay open** at v1.1.0 substrate per bassclef-upstream#1861. V2 harness re-run against 1.4.1 tarball will confirm.
+
 ## [1.4.0] - 2026-09-21
 ### Added
 
