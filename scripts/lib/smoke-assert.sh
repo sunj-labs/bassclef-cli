@@ -133,8 +133,19 @@ check_paths_exist() {
       fi
     fi
   done <<< "$paths"
+  # Any-match semantics per bassclef-cli#187:
+  #   - All paths exist (0 missing) → PASS
+  #   - At least 1 path exists (missing < total) → PASS (OR-fallback hooks
+  #     like bassclef-sync log "trying candidate A, using candidate B" —
+  #     the fallthrough is intentional; ALL-must-exist over-strict).
+  #   - No paths exist (all missing) → FAIL
   if [ "$missing" -eq 0 ]; then
     echo "PASS|paths-exist|${total} paths checked"
+    return 0
+  fi
+  if [ "$missing" -lt "$total" ]; then
+    local exists=$((total - missing))
+    echo "PASS|paths-exist|${exists} of ${total} exists (any-match; ${missing} missing: ${missing_list})"
     return 0
   fi
   echo "FAIL|paths-exist|${missing} of ${total} missing: ${missing_list}"

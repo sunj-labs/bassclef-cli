@@ -1,0 +1,9 @@
+# Temperance marker — v1.1.1 substrate sync
+
+- date: 2026-09-21
+- branch: fix/sync-v1.1.1-substrate
+- scope-decision:
+  - right-thing: sync public bassclef v1.1.1 into a new @thebassclef/lite tarball as v1.5.0
+  - right-way: bump publish.yml pin (6 refs), bump package.json, update CHANGELOG, ship as PR; operator approves at npm gate
+  - drift-trigger: any change beyond the v1.1.0 sync pattern; anything touching statusline PR #181 (held for v1.1.2)
+- prior-cycle-cost: last cycle wasted one publish because publish.yml stayed pinned to v0.45.0 (PR #186 fixed). This cycle bumps pin 6 lines up front to avoid same stumble.
