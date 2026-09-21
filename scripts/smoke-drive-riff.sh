@@ -163,7 +163,7 @@ exit_code=0
     $SIG{ALRM} = sub { exit 142 };
     alarm $t;
     exec @cmd or exit 127
-  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/riff riff a marketing landing hero" < /dev/null 2>&1
+  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/riff a marketing landing hero for a developer tools SaaS with a clear pricing CTA" < /dev/null 2>&1
   exit_code=$?
   set -e
   echo "=== exit: ${exit_code}"
