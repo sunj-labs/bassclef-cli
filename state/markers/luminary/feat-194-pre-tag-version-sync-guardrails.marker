@@ -1,0 +1,7 @@
+# Luminary marker — feat/194-pre-tag-version-sync-guardrails
+- date: 2026-09-21
+- branch: feat/194-pre-tag-version-sync-guardrails
+- primary: michael-nygard
+- supporting: [kent-beck, saltzer-schroeder]
+- lens-role: primary — fail loud earlier in the pipeline (the class of cure this goal ships)
+- rfc-council: [tony-hoare, david-parnas, frederick-brooks, alan-cooper, donald-norman] — outside authoring set, findings at docs/rfcs/2026-09-21-pre-tag-version-sync-council.md

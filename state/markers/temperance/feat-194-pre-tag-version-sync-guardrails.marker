@@ -1,0 +1,8 @@
+# Temperance marker — feat/194-pre-tag-version-sync-guardrails
+- date: 2026-09-21
+- branch: feat/194-pre-tag-version-sync-guardrails
+- scope-decision: Ship Epic #194 Stories 1-3 as one PR — pre-commit hook + PR-CI pre-publish check + CONTRIBUTING note enforcing npm run bump. Mediation surface is all four version-bearing files. Test-first Beck TDD RED characterizes commit 12d7153 (v1.5.0 mis-ship) before the hook lands.
+- right-thing: v1.5.0 mis-ship is a real class witnessed 2026-09-21; Epic #194 filed same session
+- right-way: fully-dressed use case for the new pre-commit hook (per oo-ad-entry-point matrix); brief use case for the workflow edit + CONTRIBUTING doc; Beck TDD RED before source
+- drift-trigger: any step exceeds 1.5× estimate OR any risk R1-R5 materializes during implementation
+- pre-mortem: docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md (3 lenses, 21 risks, top-5 folded)

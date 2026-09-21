@@ -1,0 +1,8 @@
+# Thread-walk marker — 2026-09-21-pre-tag-version-sync
+- date: 2026-09-21
+- goal: 2026-09-21-pre-tag-version-sync
+- parent_bet: none (top-level goal; no parent chain)
+- parent_roadmap: none
+- drivers: v1.5.0 mis-ship this session per docs/session-logs/2026-09-21-longrun-v1.1.1-sync-cascade.md L28-38
+- open_acceptance: n/a (no parent to inherit from)
+- out_of_scope: v1.1.2 substrate sync (waits on peer signal); Epic #194 Stories 4-5 (see ticket #192); Epic #195 (Docker harness); ticket #193 (env modernization)

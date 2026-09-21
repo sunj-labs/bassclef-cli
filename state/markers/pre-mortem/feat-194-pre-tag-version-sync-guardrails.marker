@@ -1,0 +1,8 @@
+# Pre-mortem light marker — feat/194-pre-tag-version-sync-guardrails
+- date: 2026-09-21
+- branch: feat/194-pre-tag-version-sync-guardrails
+- mode: light
+- lenses: [michael-nygard, kent-beck, saltzer-schroeder]
+- ledger: docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md
+- top-5-folded: R1 (mediation surface = all 4 files), R2 (Beck RED characterization test replays commit 12d7153), R3 (PR-CI unconditional trigger, no paths filter), R4 (jq defensive-bash check), R5 (PR-CI as safety net for --no-verify)
+- always-fire: yes (deploy pipeline changes)
