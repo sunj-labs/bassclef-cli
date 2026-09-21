@@ -1,0 +1,11 @@
+# Temperance marker — sync/v1.1.0-substrate
+
+- date: 2026-09-21
+- branch: sync/v1.1.0-substrate
+- scope-decision: Refresh `dist/lite/` from public bassclef v1.1.0 (commit `b7613c5f`), bump `@thebassclef/lite` from 1.3.0 to 1.4.0, stage PR for operator merge + tag + publish.
+- right-thing: Yes. Public bassclef v1.1.0 shipped 2026-09-21T06:33Z with the F1b cure (`_lib/wirings.sh` retagged tier:lite; manifest 429 → 430). Adopters at 1.3.0 still hit F1b per this session's harness run.
+- right-way: Rebuild dist/lite from public v1.1.0 sibling. Verify `_lib/wirings.sh` now in bundle. Tests green. Version bump 1.4.0. Commit. Stage PR. Operator merges + tags. Publish workflow fires. Docker harness picks up new tarball. Post updated /diagnose to #1861.
+- blast-radius: Adopter-observable. New tarball reaches every fresh `npm install -g @thebassclef/lite` adopter. Reversible via `npm deprecate` or bump-and-fix within 72h window.
+- drift-trigger: If _lib/wirings.sh is still missing after rebuild, pause and diagnose (means the v1.1.0 sibling isn't actually on v1.1.0). If test suite regresses, pause and diagnose before commit.
+- upstream-dependency: Public bassclef b7613c5f (tag v1.1.0). No dependency on unmerged upstream work. F1a + F4 stay open for v1.1.1.
+- statusline-scope: PR #181 still held. Sync stays orthogonal to statusline. Not merging #181 into this branch.
