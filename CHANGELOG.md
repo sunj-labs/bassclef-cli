@@ -24,6 +24,21 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.5.1] - 2026-09-21
+
+Patch on top of v1.5.0. The v1.5.0 publish attempt failed at
+pre-publish checks because `src/index.ts` and `README.md` still
+carried the prior version string. The GitHub v1.5.0 release stays
+as an audit record but no npm tarball ships under that version.
+v1.5.1 ships the same substrate content plus the version-sync fix.
+
+### Fixed
+
+- `src/index.ts` `export const version` now matches package.json.
+- `README.md` version marker now matches package.json.
+- Both files got missed in PR #190 because I hand-edited package.json
+  instead of running `npm run bump minor` (which touches all three).
+
 ## [1.5.0] - 2026-09-21
 
 Substrate sync to public bassclef v1.1.1. Adopters running `npm install
