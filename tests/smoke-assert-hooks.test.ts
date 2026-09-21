@@ -19,6 +19,8 @@
 // [x] allowlist entry lets a BLOCKED line pass
 // [x] capture naming a nonexistent path fails paths-exist
 // [x] capture naming an existing path passes paths-exist
+// [x] paths-exist any-match: 1 of 2 exists → PASS (bassclef-cli#187)
+// [x] paths-exist any-match: 0 of 2 exists → FAIL (bassclef-cli#187)
 // [x] --only no-not-found runs only that check (single result per hook)
 // [x] --only rejects unknown check name (exit 1)
 // [x] output JSON is a valid array of AssertionResult objects
@@ -170,6 +172,41 @@ describe('smoke-assert-hooks — paths-exist check', () => {
     const results = JSON.parse(readFileSync(outFile, 'utf8'));
     const row = results.find((r: { check: string }) => r.check === 'paths-exist');
     expect(row.status).toBe('PASS');
+  });
+
+  // Any-match semantics per bassclef-cli#187 — OR-fallback hooks like
+  // bassclef-sync log "trying candidate A, using candidate B". Old ALL-
+  // must-exist semantics false-positive-FAILed. New any-match: at least
+  // one path exists → PASS.
+  it('any-match: 1 of 2 paths exists → PASS (bassclef-cli#187)', () => {
+    // /etc/hosts exists on macOS + Linux. /tmp/nope-9876543 does not.
+    // "using X" and "trying Y" mimics bassclef-sync resolver output.
+    writeCapture(
+      'h1',
+      '=== output ===\ntrying /tmp/nope-9876543-a/foo\nusing /etc/hosts\n=== exit: 0\n'
+    );
+    const r = run(['--only', 'paths-exist']);
+    expect(r.status).toBe(0);
+    const onlyOut = join(workDir, 'hooks-assertions-paths-exist.json');
+    const results = JSON.parse(readFileSync(onlyOut, 'utf8'));
+    const row = results.find((r: { check: string }) => r.check === 'paths-exist');
+    expect(row.status).toBe('PASS');
+    expect(row.message).toMatch(/any-match/);
+  });
+
+  it('any-match: 0 of 2 paths exist → FAIL (bassclef-cli#187)', () => {
+    // Both paths nonexistent. Use --only to isolate paths-exist from
+    // no-not-found (which would match on the "here" fragment otherwise).
+    writeCapture(
+      'h1',
+      '=== output ===\ntrying /tmp/nope-9876543-a/foo\ntrying /tmp/nope-9876543-b/foo\n=== exit: 1\n'
+    );
+    const r = run(['--only', 'paths-exist']);
+    expect(r.status).toBe(3);
+    const onlyOut = join(workDir, 'hooks-assertions-paths-exist.json');
+    const results = JSON.parse(readFileSync(onlyOut, 'utf8'));
+    const row = results.find((r: { check: string }) => r.check === 'paths-exist');
+    expect(row.status).toBe('FAIL');
   });
 });
 

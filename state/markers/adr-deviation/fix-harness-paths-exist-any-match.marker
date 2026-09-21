@@ -1,0 +1,8 @@
+# ADR-deviation marker — fix/harness-paths-exist-any-match
+
+- date: 2026-09-21
+- branch: fix/harness-paths-exist-any-match
+- adr_governing: none — confirmed no ADR coverage (grep of docs/adrs/*.md for "paths-exist", "any-match", "harness assertion" returned 0 hits; ADR-006 covers install harness but not assertion semantics)
+- outcome: ADR-honored
+
+The paths-exist check semantics are an internal harness detail. No ADR pins the all-match vs any-match choice. Change is fully within cli-side substrate. Blast radius named in temperance marker; trade-off documented in bassclef-cli#187.

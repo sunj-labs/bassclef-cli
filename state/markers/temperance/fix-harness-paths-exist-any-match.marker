@@ -1,0 +1,10 @@
+# Temperance marker — fix/harness-paths-exist-any-match
+
+- date: 2026-09-21
+- branch: fix/harness-paths-exist-any-match
+- scope-decision: Relax `check_paths_exist` in `scripts/lib/smoke-assert.sh` from all-match to any-match semantics. PASS when at least 1 candidate exists. FAIL only when 0 candidates exist. Closes bassclef-cli#187.
+- right-thing: Yes. Current check false-positives on OR-fallback hooks like bassclef-sync which log "trying candidate A, using candidate B" — check sees both, requires both, FAILs. Tarball adopters don't have `../bassclef` sibling; graceful fallthrough is correct behavior.
+- right-way: Change `if [ "$missing" -eq 0 ]` to `if [ "$missing" -lt "$total" ]` (at least one exists). Update `.claude/hooks/tests/smoke-assert-hooks.test.sh` fixtures + assertions. Add test cases for 1-of-2 and 0-of-2 patterns.
+- blast-radius: Weakens the check — hooks that legitimately require ALL paths could slip past. Trade-off is documented in the ticket. Alternative shapes (per-hook config, marker in capture) deferred as follow-on if this proves too weak in practice.
+- drift-trigger: If tests fail after the semantics change, pause and check whether existing fixtures assume all-match semantics. Update fixture expectations, don't relax the tests.
+- upstream-dependency: None. All change is cli-side.
