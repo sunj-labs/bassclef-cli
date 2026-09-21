@@ -24,6 +24,22 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.4.0] - 2026-09-21
+### Added
+
+### Changed
+
+- **Bundled substrate refreshed to public bassclef v1.1.0** (paired with bassclef-upstream v1.1.0 — F1b cure + `/longrun` prep converged shape lock). `dist/lite/` rebuilt from public bassclef `b7613c5f`. Adopters running `npm install -g @thebassclef/lite@1.4.0` receive the v1.1.0 substrate. Prior release (1.3.0) shipped v1.0.0 substrate.
+
+### Fixed
+
+- **F1b cured — `_lib/wirings.sh` now ships in the lite tarball** (per bassclef-upstream#1861 + PR #1865). Prior tarballs at v1.3.0 and earlier omitted `_lib/wirings.sh`; the file is sourced by `session-reflection.d/08-settings-drift.sh` and its absence caused silent-skip in adopters. Verified by V2 Docker harness against v1.3.0 which reproduced the failure (see bassclef-upstream#1861 comment 5757054527). Lite manifest grew 429 → 430 entries.
+
+### Notes
+
+- **F1a + F4 stay open at v1.1.0 substrate.** Walker path mismatch (`bassclef-hook-connect.sh` under `presence/install/`) and `/onboard-repo` empty scratch dir under SDK dispatch are deferred to bassclef v1.1.1. V2 harness run against v1.4.0 will confirm these still reproduce.
+- **Statusline PR #181 still held** for its upstream pair (bassclef-upstream#1860). Ships together when both land.
+
 ## [1.3.0] - 2026-09-21
 ### Added
 
