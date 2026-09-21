@@ -1,0 +1,9 @@
+# Temperance marker — v1.5.1 patch (src/index.ts + README version sync)
+
+- date: 2026-09-21
+- branch: fix/version-sync-src-index-1.5.1
+- scope-decision:
+  - right-thing: bump src/index.ts + README.md + package.json + CHANGELOG to 1.5.1; ship v1.5.1 as the actual first-published v1.5.x tarball
+  - right-way: single patch commit; use scripts/bump-version.mjs would be cleaner but state is partial (package.json already at 1.5.0); do the manual edit and note in the commit
+  - drift-trigger: any change beyond the version-sync fix; anything touching substrate content itself
+- prior-cycle-cost: I bumped package.json alone in the v1.5.0 sync PR; missed src/index.ts and README.md; CI caught it 30s in via tests/version-sync.test.ts. Next time use `npm run bump minor` instead of manual edit.
