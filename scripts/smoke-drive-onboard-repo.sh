@@ -110,7 +110,7 @@ exit_code=0
     $SIG{ALRM} = sub { exit 142 };
     alarm $t;
     exec @cmd or exit 127
-  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/onboard-repo" < /dev/null 2>&1
+  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "run the /onboard-repo skill on this repo. show me the output." < /dev/null 2>&1
   exit_code=$?
   set -e
   echo "=== exit: ${exit_code}"

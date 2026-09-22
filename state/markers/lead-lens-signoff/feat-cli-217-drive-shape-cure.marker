@@ -1,0 +1,8 @@
+# Lead-lens sign-off marker
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- lead: michael-feathers
+- signoff: no red or amber findings remain
+- cited_findings: F1 (positive-artifact primary — FOLDED), B2 (unknown-command fixture — FOLDED), S1 (fail-safe on missing dir — FOLDED), S2 (exact grep — FOLDED), N3 (AND-semantics — FOLDED)
+- deferred_with_ticket: N1 (remediation prose → cli #215); C4 (substrate read verification → post-merge smoke)
+- rationale: cure IS the characterization cycle — read what happens, pin behavior, cure legacy scripts one at a time. All 8 new lib functions have Tier 0 tests. Beck RED confirmed via test-run logs. Suite went 483 → 489 GREEN.

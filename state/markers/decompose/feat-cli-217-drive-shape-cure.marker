@@ -1,0 +1,5 @@
+# Decompose marker — feat-cli-217-drive-shape-cure
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- decomposition_doc: docs/decompositions/2026-09-22c-cli-217-drive-shape-cure.md
+- entry-point: State 2 (spec + current code) — cure of existing scripts

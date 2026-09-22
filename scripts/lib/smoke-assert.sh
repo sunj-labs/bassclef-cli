@@ -203,3 +203,126 @@ check_no_crash() {
   echo "FAIL|no-crash|skill exited ${exit_code}"
   return 1
 }
+
+# check_no_unknown_command — capture must not carry "Unknown command:"
+# lines. Per bassclef-cli#217: `claude -p "/slashname"` routes leading-
+# slash strings to Claude Code's CLI slash-command matcher (not the
+# Skill tool). The failure message is "Unknown command: /X" with exit 0.
+# The other content checks (no-not-found, no-crash) all pass; nothing
+# catches this class today. RFC S2 fold: exact grep "Unknown command:"
+# anchored to line start OR word boundary to avoid false-positives on
+# prose that mentions "unknown" or "unknown command" in general.
+check_no_unknown_command() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  local matches
+  matches=$(grep -cE '(^|[[:space:]])Unknown command:' "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
+  [ -z "$matches" ] && matches=0
+  if [ "$matches" -eq 0 ]; then
+    echo "PASS|no-unknown-command|0 matches"
+    return 0
+  fi
+  echo "FAIL|no-unknown-command|${matches} match(es) — cli #217 class"
+  return 1
+}
+
+# check_output_contains — generic positive-artifact check. Capture must
+# contain the given needle. Callers pass a label so the STATUS row
+# names which check fired. Per bassclef-cli#217 decomposition: sits
+# behind per-skill wrappers that name concrete phrases.
+check_output_contains() {
+  local capture_file="$1"
+  local needle="$2"
+  local label="${3:-generic}"
+  _smoke_assert_precheck "$capture_file" || return 1
+  if grep -qF "$needle" "$capture_file" 2>/dev/null; then
+    echo "PASS|contains-${label}|${needle} found"
+    return 0
+  fi
+  echo "FAIL|contains-${label}|${needle} missing"
+  return 1
+}
+
+# check_temperance_marker — /temperance skill's positive artifact.
+# When the skill fires, it writes a marker under state/markers/temperance/
+# in the CWD it ran from. This check inspects the given workdir for
+# any *.marker file under state/markers/temperance/.
+# Per RFC S1 fold: fail-safe when marker dir does not exist (missing
+# dir = no marker = FAIL, not PASS-by-skip).
+check_temperance_marker() {
+  local capture_file="$1"
+  local workdir="${2:-.}"
+  _smoke_assert_precheck "$capture_file" || return 1
+  local marker_dir="${workdir}/state/markers/temperance"
+  if [ ! -d "$marker_dir" ]; then
+    echo "FAIL|temperance-marker|marker dir absent: ${marker_dir}"
+    return 1
+  fi
+  local marker_count
+  marker_count=$(find "$marker_dir" -maxdepth 1 -type f -name '*.marker' 2>/dev/null | wc -l | tr -d ' \n' || echo 0)
+  [ -z "$marker_count" ] && marker_count=0
+  if [ "$marker_count" -gt 0 ]; then
+    echo "PASS|temperance-marker|${marker_count} marker(s) in ${marker_dir}"
+    return 0
+  fi
+  echo "FAIL|temperance-marker|no marker in ${marker_dir}"
+  return 1
+}
+
+# check_luminary_norman_artifact — /luminary don-norman positive artifact.
+# The skill loads Norman's lens; output should reference him by name.
+# Case-insensitive grep for "Norman".
+check_luminary_norman_artifact() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  if grep -qiE '(don norman|norman)' "$capture_file" 2>/dev/null; then
+    echo "PASS|luminary-norman-artifact|Norman referenced"
+    return 0
+  fi
+  echo "FAIL|luminary-norman-artifact|no Norman reference"
+  return 1
+}
+
+# check_kiss_words_artifact — /kiss words --rewrite positive artifact.
+# Per RFC N3 fold: requires ≥2 of [rewritten, grade, words] (AND-semantics)
+# because any one token alone false-positives on natural prose.
+check_kiss_words_artifact() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  local hits=0
+  grep -qi 'rewritten' "$capture_file" 2>/dev/null && hits=$((hits + 1))
+  grep -qi 'grade' "$capture_file" 2>/dev/null && hits=$((hits + 1))
+  grep -qi 'words' "$capture_file" 2>/dev/null && hits=$((hits + 1))
+  if [ "$hits" -ge 2 ]; then
+    echo "PASS|kiss-words-artifact|${hits} of 3 tokens matched"
+    return 0
+  fi
+  echo "FAIL|kiss-words-artifact|only ${hits} of 3 tokens (need ≥2)"
+  return 1
+}
+
+# check_state_a_problem_artifact — /state-a-problem brief positive artifact.
+# Framework tokens: Problem:, Who:, What:. Any one matches.
+check_state_a_problem_artifact() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  if grep -qE '(Problem:|Who:|What:)' "$capture_file" 2>/dev/null; then
+    echo "PASS|state-a-problem-artifact|framework token present"
+    return 0
+  fi
+  echo "FAIL|state-a-problem-artifact|no framework token (Problem:/Who:/What:)"
+  return 1
+}
+
+# check_whats_the_plan_artifact — /whats-the-plan positive artifact.
+# Tokens: Plan:, Step, chain. Any one matches.
+check_whats_the_plan_artifact() {
+  local capture_file="$1"
+  _smoke_assert_precheck "$capture_file" || return 1
+  if grep -qE '(Plan:|Step|chain)' "$capture_file" 2>/dev/null; then
+    echo "PASS|whats-the-plan-artifact|plan token present"
+    return 0
+  fi
+  echo "FAIL|whats-the-plan-artifact|no plan token (Plan:/Step/chain)"
+  return 1
+}

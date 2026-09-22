@@ -68,7 +68,7 @@ ISO_DATE=$(date -u +"%Y-%m-%d")
 # --only validation
 if [ -n "$ONLY_CHECK" ]; then
   case "$ONLY_CHECK" in
-    no-not-found|no-silent-skip|no-unexpected-blocked|paths-exist|no-timeout|no-crash) ;;
+    no-not-found|no-silent-skip|no-unexpected-blocked|paths-exist|no-timeout|no-crash|no-unknown-command) ;;
     *) echo "smoke-assert-skills: unknown check '$ONLY_CHECK'" >&2; exit 1 ;;
   esac
   OUT_FILE="$(dirname "$OUT_FILE")/skills-assertions-${ONLY_CHECK}.json"
@@ -91,6 +91,9 @@ if [ -z "$CAPTURE_FILES" ]; then
 fi
 
 # checks list
+# no-unknown-command added per cli #217 — catches `claude -p "/slashname"`
+# regression to CLI slash-command dispatch (returns "Unknown command:" and
+# exit 0; falls through every existing negative check).
 if [ -n "$ONLY_CHECK" ]; then
   CHECKS="$ONLY_CHECK"
 else
@@ -99,8 +102,28 @@ no-silent-skip
 no-unexpected-blocked
 paths-exist
 no-timeout
-no-crash"
+no-crash
+no-unknown-command"
 fi
+
+# Per-skill positive-artifact checks — cli #217 cure. Keyed on the
+# capture filename (basename minus .out); each key maps to a check
+# function that fires ONLY on the matching capture.
+#
+# The generic checks above catch failures orthogonally (crash, timeout,
+# unknown command). These per-skill checks confirm the skill actually
+# produced its declared side-effect — a marker file or a phrase in output.
+per_skill_check_fn() {
+  local hook_name="$1"
+  case "$hook_name" in
+    temperance)               echo "check_temperance_marker" ;;
+    luminary-don-norman)      echo "check_luminary_norman_artifact" ;;
+    kiss-words-this-is-verbose-corporate-sounding-text) echo "check_kiss_words_artifact" ;;
+    state-a-problem-brief-a-sample-problem-for-the-smoke-run) echo "check_state_a_problem_artifact" ;;
+    whats-the-plan)           echo "check_whats_the_plan_artifact" ;;
+    *) echo "" ;;
+  esac
+}
 
 # accumulate
 mkdir -p "$(dirname "$OUT_FILE")"
@@ -128,6 +151,32 @@ while IFS= read -r cap; do
       any_fail=1
     fi
   done <<< "$CHECKS"
+
+  # Per-skill positive-artifact check (cli #217 cure). Fires only when:
+  #  - SMOKE_PER_SKILL_CHECKS=1 in env (opt-in; keeps existing tests green)
+  #  - --only was not passed
+  #  - the capture filename matches a known skill in the per-skill map
+  # Workdir for filesystem-based asserts is the parent of $CAPTURE_DIR —
+  # captures live at $workdir/docs/smoke-captures/<date>/skills/*.out and
+  # markers land at $workdir/state/markers/temperance/*.marker.
+  skill_fn=""
+  if [ "${SMOKE_PER_SKILL_CHECKS:-0}" = "1" ]; then
+    skill_fn=$(per_skill_check_fn "$hook_name")
+  fi
+  if [ -n "$skill_fn" ] && [ -z "$ONLY_CHECK" ]; then
+    workdir=$(cd "$CAPTURE_DIR/../../.." 2>/dev/null && pwd || echo ".")
+    set +e
+    result=$("$skill_fn" "$cap" "$workdir")
+    rc=$?
+    set -e
+    check_name=$(printf '%s' "$result" | awk -F'|' '{print $2}')
+    status_field=$(printf '%s' "$result" | awk -F'|' '{print $1}')
+    msg_field=$(printf '%s' "$result" | awk -F'|' '{print $3}')
+    assertion_result_json "$hook_name" "$check_name" "$status_field" "$msg_field" "$cap" >> "${OUT_FILE}.tmp"
+    if [ "$rc" -ne 0 ]; then
+      any_fail=1
+    fi
+  fi
 done <<< "$CAPTURE_FILES"
 
 # wrap into JSON array

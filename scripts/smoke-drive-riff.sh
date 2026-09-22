@@ -167,7 +167,7 @@ exit_code=0
     $SIG{ALRM} = sub { exit 142 };
     alarm $t;
     exec @cmd or exit 127
-  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "/riff $RIFF_INTENT" < /dev/null 2>&1
+  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "run the /riff skill with this intent: $RIFF_INTENT. show me the output." < /dev/null 2>&1
   exit_code=$?
   set -e
   echo "=== exit: ${exit_code}"
