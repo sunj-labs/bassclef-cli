@@ -1,0 +1,15 @@
+# Lead-lens sign-off — feat-212-docker-smoke-exit-capture
+- date: 2026-09-22
+- branch: feat/212-docker-smoke-exit-capture
+- lead-luminary: michael-feathers
+- supporting-luminaries: [kent-beck, tony-hoare]
+- rfc-findings-cleared:
+  - F1 hyrum-wright MEDIUM: PASS — no consumer relied on false-green as a signal (peer's revised stance confirms)
+  - F2 linus-torvalds LOW: PASS — entry.sh not on adopter surface
+  - F3 saltzer-schroeder HIGH: DEFERRED — write-time lint for `if ! func + $?` pattern; separate ticket (file at PR-open)
+  - F4 don-norman MEDIUM: FOLDED INLINE — docker-smoke.yml case statement extended with meaningful messages for codes 20, 21, 22, 23, 25
+  - F5 don-norman LOW: DEFERRED — evidence-row plain-English tags; separate ticket (file at PR-open)
+- verdict: all HIGH + MEDIUM findings addressed; 2 LOW deferrals filed as follow-ons
+- Beck TDD cycle: RED (3 tests fail with [21]/[23]/[25] expected got [0]) → GREEN (30/30 tests pass after 3-guard fix + 483/483 vitest + typecheck clean)
+- Feathers characterization: tests pin actual pre-fix behavior via function override, satisfy postcondition contract after fix
+- lead-signoff-rationale: primary lens (Feathers) confirms characterization tests fail against unfixed source AND pass against fixed source. Fix minimally restores the postcondition contract (main() exit == action func return code) that current code breaks via the `if ! func + $?` bash gotcha. No characterization drift. No sister-file spillover. Ship.

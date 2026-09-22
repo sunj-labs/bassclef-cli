@@ -1,0 +1,10 @@
+# Temperance marker — feat/212-docker-smoke-exit-capture
+
+- date: 2026-09-22
+- branch: feat/212-docker-smoke-exit-capture
+- scope-decision: right thing = fix the 3 `if ! func; then local code=$?` action guards in harness/docker/entry.sh (preflight L456, install L466, init L473) so real exit codes propagate instead of being swallowed by the bash gotcha; right way = full ceremony chain (Cockburn brief UC + /decompose + /pre-mortem light + Beck TDD RED-GREEN + /architect-review + /rfc adversarial) since this is Tier 0 substrate code with adopter-observable install path; drift trigger = if I catch myself editing hooks beyond entry.sh OR skipping tests-first OR merging without operator review, stop and re-anchor.
+- brute-force-check: read cli #212 body I wrote (source-cited to L465-470, 472-477, 456-462); read entry.sh functions _docker_harness_install_cli + _docker_harness_retry_with_backoff; verified 3× 404 → CODE=0 pattern in run 35738172011 + 35738984982 logs. Not guessing about the bug shape.
+- blast-radius: contained — one file (entry.sh) + one test file. Adopter path IS docker-smoke workflow, which is bassclef-cli-only tooling not vendored to lite tarball. Sister hooks may share the pattern (audit at /decompose step will surface).
+- verification: Tier 0 tests written FIRST assert wrapper exits with function's real code, not 0. Full npm test suite + typecheck before push. CI on PR. Architect-review verifies under both install classes. RFC adversarial checks the fix design.
+- reversible: fully — bug fix; if wrong the test suite catches it; revert clean via git; no adopter contract change; no schema change; no auth surface.
+- authoring_luminaries: primary michael-feathers (characterization tests pin actual behavior); supporting kent-beck (TDD RED-GREEN), tony-hoare (postcondition contract on retry).

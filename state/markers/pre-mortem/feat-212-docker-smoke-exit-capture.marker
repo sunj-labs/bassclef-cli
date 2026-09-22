@@ -1,0 +1,11 @@
+# Pre-mortem light marker — feat-212-docker-smoke-exit-capture
+- date: 2026-09-22
+- branch: feat/212-docker-smoke-exit-capture
+- ledger: inline in session transcript (this /longrun turn; no separate risk-ledger file — brief tier)
+- lenses: [michael-feathers, kent-beck, tony-hoare]
+- risks-total: 15
+- top-3-folded:
+  - A3+B1 RED-phase mandatory (tests land + fail before source edit)
+  - B2 one test per site (preflight + install + init named separately)
+  - C6 function-override pattern in tests (not HARNESS_TEST_MODE unset)
+- mode: light (30 min shape)
