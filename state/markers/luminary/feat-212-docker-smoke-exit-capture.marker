@@ -1,0 +1,6 @@
+session: /longrun 2026-09-22 (cli #212 full ceremony)
+branch: feat/212-docker-smoke-exit-capture
+primary_lens: michael-feathers
+compatibility_anchor: kent-beck
+supporting_lenses: [tony-hoare]
+reason: Feathers primary — characterization tests pin actual current behavior (main() exits 0 despite install returning 21) before touching source, per legacy-code retrofit shape. Beck compatibility anchor — TDD RED-GREEN with tests written first, source edited to make them go green. Hoare supporting — the fix restores the postcondition contract (main() exit code == action function's real return code) which the current guards break via the `if ! func; then $?` bash gotcha.

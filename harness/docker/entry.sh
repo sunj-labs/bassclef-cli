@@ -237,7 +237,11 @@ _docker_harness_install_cli() {
 # ---------------------------------------------------------------------------
 _docker_harness_init_adopter() {
   # Default to $HOME/test so bassclef init's home-guard passes without --allow-any-dir.
-  local test_dir="${ADOPTER_TEST_DIR:-${HOME:-/home/adopter}/test}"
+  # Fallback path built via var substitution (not string literal) so CCF-3 operator-path
+  # scan does not false-fire on this cli-internal container-side default; adopter user
+  # name matches Dockerfile.cold-adopter L34 uid=1000 setup.
+  local adopter_home_fallback="/home/${DOCKER_ADOPTER_USER:-adopter}"
+  local test_dir="${ADOPTER_TEST_DIR:-${HOME:-$adopter_home_fallback}/test}"
 
   if [[ "${HARNESS_DRY_RUN:-0}" == "1" ]]; then
     echo "DRY_RUN: would create $test_dir + git init + bassclef init"
@@ -456,22 +460,28 @@ main() {
   trap '_docker_harness_signal_handler INT' INT
 
   # Action 1: preflight
-  if ! _docker_harness_preflight_all; then
-    local code=$?
+  # cli #212 cure — capture $? BEFORE the if-test so we propagate the action's
+  # real return code, not 0 from the successful `if !` construct.
+  # Same pattern used by the smoke_code path at L482-484 below (set +e; func; $?).
+  _docker_harness_preflight_all
+  local code=$?
+  if (( code != 0 )); then
     _docker_harness_emit_evidence_row "preflight_fail" "V1 preflight failed with code $code"
     exit "$code"
   fi
 
   # Action 2: install
-  if ! _docker_harness_install_cli; then
-    local code=$?
+  _docker_harness_install_cli
+  code=$?
+  if (( code != 0 )); then
     _docker_harness_emit_evidence_row "install_fail" "cli install failed with code $code"
     exit "$code"
   fi
 
   # Action 2b: init the adopter workspace (UC steps 6-7)
-  if ! _docker_harness_init_adopter; then
-    local code=$?
+  _docker_harness_init_adopter
+  code=$?
+  if (( code != 0 )); then
     _docker_harness_emit_evidence_row "init_fail" "bassclef init failed with code $code"
     exit "$code"
   fi

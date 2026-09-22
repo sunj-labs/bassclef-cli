@@ -20,6 +20,14 @@
 # [x] Signal handling: SIGTERM trap emits evidence row before exit
 # [x] Override path: HARNESS_DRY_RUN=1 bypasses actual docker/npm calls (logged)
 # [~] Container-level integration test — deferred to CI workflow (Docker required; not in Tier 0 bash surface)
+#
+# cli #212 — docker-smoke false-green cure (2026-09-22)
+# Postcondition contract: main() exits with the action function's real return code
+# (per @luminary tony-hoare postcondition + @luminary michael-feathers characterization).
+# Bug shape: `if ! func; then local code=$?` captures 0 from the if-test, not func's return.
+# [x] Postcondition: main exits with install func's real code (21) when install fails
+# [x] Postcondition: main exits with init func's real code (23) when init fails
+# [x] Postcondition: main exits with preflight func's real code (25) when preflight fails
 
 set -uo pipefail
 
@@ -336,6 +344,60 @@ test_dockerfile_installs_claude_cli() {
   assert_contains "$content" "perl" "Dockerfile installs perl for smoke-drive-skills timeout wrapper"
 }
 
+# ---- cli #212 additions (2026-09-22) ----
+# Postcondition contract: main() exits with the action function's real return code.
+# Bug shape (pre-fix): `if ! _docker_harness_action; then local code=$?; exit "$code"`
+# captures $?=0 from the successful `if` test, not the action's real code.
+# These tests force each action function to return a non-zero code via function
+# override in a subshell; assert main() exits with that code, not 0.
+
+_test_212_run_main_with_action_override() {
+  # Helper: run main() with one of the action functions overridden to return a code.
+  # $1 = function name to override
+  # $2 = code the override returns
+  # Prints main's exit code on stdout (via bash -c's own exit propagation;
+  # main calls `exit` so a trailing `echo $?` inside bash -c would never fire).
+  local func_name="$1" ret_code="$2"
+  bash -c "
+    set +u
+    export HARNESS_TEST_MODE=1
+    export HARNESS_EVENT_LOG=\"$(mktemp -d)/ev.jsonl\"
+    export CLI_VERSION='test-version'
+    export ANTHROPIC_API_KEY='test-key-not-used'
+    source '$ENTRY_SH'
+    ${func_name}() { return ${ret_code}; }
+    main
+  " >/dev/null 2>&1
+  echo "$?"
+}
+
+test_212_install_guard_propagates_real_code() {
+  echo "TEST test_212_install_guard_propagates_real_code"
+  setup_test_env
+  local exit_code
+  exit_code=$(_test_212_run_main_with_action_override "_docker_harness_install_cli" "21")
+  assert_eq "21" "$exit_code" "main exits 21 (EXIT_INSTALL_FAIL) when install function returns 21, not 0"
+  teardown_test_env
+}
+
+test_212_init_guard_propagates_real_code() {
+  echo "TEST test_212_init_guard_propagates_real_code"
+  setup_test_env
+  local exit_code
+  exit_code=$(_test_212_run_main_with_action_override "_docker_harness_init_adopter" "23")
+  assert_eq "23" "$exit_code" "main exits 23 (EXIT_INIT_FAIL) when init function returns 23, not 0"
+  teardown_test_env
+}
+
+test_212_preflight_guard_propagates_real_code() {
+  echo "TEST test_212_preflight_guard_propagates_real_code"
+  setup_test_env
+  local exit_code
+  exit_code=$(_test_212_run_main_with_action_override "_docker_harness_preflight_all" "25")
+  assert_eq "25" "$exit_code" "main exits 25 when preflight function returns 25, not 0"
+  teardown_test_env
+}
+
 main() {
   echo "=========================================="
   echo "Tier 0 tests — docker-harness-entry.test.sh"
@@ -374,6 +436,11 @@ main() {
   test_v2_preflight_prefers_oauth_when_both_set
   test_dockerfile_does_not_bake_api_key
   test_dockerfile_installs_claude_cli
+
+  # cli #212 additions (2026-09-22) — exit-code propagation contract
+  test_212_install_guard_propagates_real_code
+  test_212_init_guard_propagates_real_code
+  test_212_preflight_guard_propagates_real_code
 
   echo "=========================================="
   echo "Total: $_tests_total | Pass: $_tests_passed | Fail: $_tests_failed"

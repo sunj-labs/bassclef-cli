@@ -4,8 +4,9 @@
   "referenced_by_files": [
     "docs/iteration-bets/2026-09-16-cli-1.1.0-lite-catalog.md",
     "tests/statusline-install.test.ts",
-    "src/lib/install-statusline.ts"
+    "src/lib/install-statusline.ts",
+    ".claude/hooks/tests/docker-harness-entry.test.sh"
   ],
-  "last_scanned": "2026-09-20T23:13:10Z",
+  "last_scanned": "2026-09-22T18:57:26Z",
   "scanner_version": "1.0"
 }

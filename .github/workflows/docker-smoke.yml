@@ -86,7 +86,11 @@ jobs:
             3)  echo "DETECT — hooks wired but missing (bassclef-upstream#1827 class). Falsification-test success on 1.2.1." >> "$GITHUB_STEP_SUMMARY" ;;
             4)  echo "DETECT — skill hardcoded operator paths (bassclef-upstream#1824 class)." >> "$GITHUB_STEP_SUMMARY" ;;
             5)  echo "DETECT — skill drive timeout." >> "$GITHUB_STEP_SUMMARY" ;;
-            25) echo "PREFLIGHT FAIL — ANTHROPIC_API_KEY missing (V2 skill drive only)." >> "$GITHUB_STEP_SUMMARY" ;;
+            20) echo "INFRA FAIL — Docker build failed after retries (EXIT_BUILD_FAIL). Check base image + apt sources." >> "$GITHUB_STEP_SUMMARY" ;;
+            21) echo "INFRA FAIL — npm install -g @thebassclef/lite failed after 3 retries (EXIT_INSTALL_FAIL). Likely tarball CDN lag right after publish OR network. Wait 5-10 min post-publish before re-running." >> "$GITHUB_STEP_SUMMARY" ;;
+            22) echo "INFRA FAIL — target CLI_VERSION not on npm registry (EXIT_VERSION_NOT_FOUND). Confirm the version is published: npm view @thebassclef/lite@\$CLI_VERSION" >> "$GITHUB_STEP_SUMMARY" ;;
+            23) echo "INFRA FAIL — bassclef init failed inside container (EXIT_INIT_FAIL). Check container logs for init stderr." >> "$GITHUB_STEP_SUMMARY" ;;
+            25) echo "PREFLIGHT FAIL — neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN set (V2 skill drive only)." >> "$GITHUB_STEP_SUMMARY" ;;
             *)  echo "See exit-codes.sh vocabulary for code $CODE." >> "$GITHUB_STEP_SUMMARY" ;;
           esac
 

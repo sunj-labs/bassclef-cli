@@ -1,0 +1,7 @@
+# ADR-deviation marker — feat-212-docker-smoke-exit-capture
+
+- date: 2026-09-22
+- branch: feat/212-docker-smoke-exit-capture
+- adr_governing: none — confirmed no ADR under docs/adrs/ directly governs harness/docker/entry.sh action-guard exit-code propagation. Grep of docs/adrs/*.md for "docker" + "entry.sh" + "cold-adopter" returned zero matches on the exit-code contract. RFC-0001 + RFC-0002 (docs/rfcs/) shape the docker harness code but do not fix exit-code capture semantics.
+- outcome: ADR-honored
+- rationale: The fix restores the exit-code contract defined in harness/docker/exit-codes.sh (Parnas single source of truth per that file's L3 comment). Current code violates the contract by capturing $?=0 from `if ! func` bash construct instead of the function's real return code. Fix moves capture BEFORE the `if` test, honoring the contract. No architectural decision changes.
