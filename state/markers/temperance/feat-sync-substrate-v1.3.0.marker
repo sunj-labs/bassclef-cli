@@ -1,0 +1,9 @@
+# Temperance marker — feat/sync-substrate-v1.3.0
+
+- date: 2026-09-22
+- branch: feat/sync-substrate-v1.3.0
+- scope-decision: right thing = bump publish.yml substrate pin v1.2.0 → v1.3.0 + coordinated cli version bump 1.6.0 → 1.7.0 + open PR + park for operator Touch ID; right way = mirror the tonight-shipped 1.5.1→1.6.0 pattern from whereami L18; drift trigger = if I catch myself editing anything outside publish.yml/CHANGELOG/version markers/session log, stop and re-anchor.
+- brute-force-check: read v1.3.0 tag exists at upstream (gh api verified 2026-09-22T11:06:47Z); read all v1.2.0 pin locations (only in publish.yml); read merge-mode config (operator-gated default). Not guessing.
+- blast-radius: contained — publish.yml + CHANGELOG + package.json + src/index.ts + README only. No publish fires without operator Touch ID. Parking at PR-open under operator-gated default.
+- verification: local npm test + typecheck + build before push; CI on PR; operator reviews before merge.
+- reversible: fully — PR unopened ships nothing; PR closed unmerged reverses cleanly; post-merge revertable on main; publish gates on Touch ID.

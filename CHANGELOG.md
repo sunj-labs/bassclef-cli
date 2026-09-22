@@ -24,6 +24,35 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.7.0] - 2026-09-22
+### Added
+
+### Changed
+
+- Substrate pin bumped `v1.2.0` → `v1.3.0` in `.github/workflows/publish.yml`
+  (both `checks` and `publish` jobs, plus the tag-resolves guard). Bundled
+  tarball now carries bassclef substrate v1.3.0 (released 2026-09-22T11:06:47Z).
+  Scope: Q1 first-5-10-min UX cures — `blocked_banner` severity arg (advisory
+  tone for normal-state fragments), `bassclef-version.json` at release-cut
+  carries the actual git tag not the internal release name, fresh-install
+  manifest gate (`81-hook-manifest-staleness` guards on install-time mtimes),
+  `95-settings-hook-verify` caller cure (missing-hooks list surfaces at
+  banner), `/longrun prep` reads whereami primary queue as third converged
+  signal, adopter git safety docs in `.claude/bassclef-orientation.md`.
+  Release notes: <https://github.com/sunj-labs/bassclef/releases/tag/v1.3.0>.
+
+### Fixed
+
+### Notes
+
+- **Slice B partial only.** The every-Bash-call PreToolUse error flood on
+  lite adopters is NOT fully cured by v1.3.0. Deep cure — tier-template
+  split of `settings.json` so the lite bundle ships lite-only wiring —
+  deferred to bassclef-upstream #1901 (post-v1.3.0). Related install-path
+  split ($HOME vs $CLAUDE_PROJECT_DIR) deferred to bassclef-upstream #1902.
+  Adopter-facing effect: banner shape improves; underlying flood persists
+  until #1901 ships. Tracked at cli #208.
+
 ## [1.6.0] - 2026-09-22
 ### Changed
 
