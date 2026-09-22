@@ -50,21 +50,22 @@ describe('smoke-assert-skills — uses skills-specific paths', () => {
     expect(r.stdout).toContain('smoke-assert-skills.sh');
   });
 
-  it('happy path — clean skill capture; exits 0; JSON has 6 rows (base 4 + timeout + crash per bassclef-cli#117)', () => {
+  it('happy path — clean skill capture; exits 0; JSON has 7 rows (base 4 + timeout + crash + no-unknown-command per cli #117 + #217)', () => {
     writeCapture('temperance', '=== skill: /temperance\n=== output ===\nok\n=== exit: 0\n');
     const outFile = join(workDir, 'skills-assertions.json');
     const r = spawnSync('bash', [SCRIPT, '--capture-dir', captureDir, '--out', outFile], { encoding: 'utf8' });
     expect(r.status).toBe(0);
     const results = JSON.parse(readFileSync(outFile, 'utf8'));
-    expect(results).toHaveLength(6);
+    expect(results).toHaveLength(7);
     for (const row of results) {
       expect(row.source).toBe('temperance');
       expect(row.status).toBe('PASS');
     }
-    // Assert the new checks are named per bassclef-cli#117
+    // Assert every check is present, including cli #217's no-unknown-command
     const checkNames = results.map((r: { check: string }) => r.check).sort();
     expect(checkNames).toContain('no-timeout');
     expect(checkNames).toContain('no-crash');
+    expect(checkNames).toContain('no-unknown-command');
   });
 
   it('default OUT_FILE lands as skills-assertions.json under captures parent', () => {

@@ -1,0 +1,9 @@
+# Luminary marker — feat-cli-217-drive-shape-cure
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- lead: michael-feathers
+- rationale: cure IS a characterization cycle — read what actually happens (Unknown command, exit 0), pin behavior with tests before edits, cure legacy scripts one at a time
+- supporting: [kent-beck, alan-cooper]
+- kent-beck: Tier 0 RED-first for new asserts; small green steps; refactor only after green
+- alan-cooper: prompt shape matches adopter mental model — real adopter types /temperance interactively; container drive should mirror the natural-language shape the LLM sees
+- adversarial: [hyrum-wright, linus-torvalds, saltzer-schroeder, don-norman]

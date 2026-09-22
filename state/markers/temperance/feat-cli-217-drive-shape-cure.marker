@@ -1,0 +1,7 @@
+# Temperance marker — feat-cli-217-drive-shape-cure
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- goal: cli #217 drive-shape cure
+- scope-decision: right thing = fix drive shape so smoke stops lying; right way = natural-language prompts + positive-artifact assertions + generic guard in lib
+- drift-trigger: pull toward "also cure individual skill defects surfaced when real dispatch happens" — those are separate tickets per out_of_scope; also pull toward "reshape docker-smoke.yml further" — cli #212 already extended it
+- blast radius: 🟢 low — test infrastructure, no adopter impact

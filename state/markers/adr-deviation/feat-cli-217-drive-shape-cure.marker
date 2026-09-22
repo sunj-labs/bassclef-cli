@@ -1,0 +1,5 @@
+# ADR-deviation marker — feat-cli-217-drive-shape-cure
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- adr_governing: none — no ADR governs docker-smoke drive shape
+- outcome: ADR-honored

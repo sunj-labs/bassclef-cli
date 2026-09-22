@@ -1,0 +1,7 @@
+# /loop marker
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- iteration_count: 1 (single RED → GREEN cycle)
+- red_evidence: state/events/test-runs/2026-09-22T21-52-29-780Z.json (3 vitest fails) + bash test 26/26 fails at exit 127
+- green_evidence: state/events/test-runs/2026-09-22T21-56-05-079Z.json (489/489 vitest) + bash 26/26 pass
+- ceremony: pre-mortem light (3 lenses × 5-8 risks each) + RFC council (4 outside lenses) + architect-review (4 lenses)

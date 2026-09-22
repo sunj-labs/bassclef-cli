@@ -1,0 +1,11 @@
+# Pre-mortem marker — feat-cli-217-drive-shape-cure
+- date: 2026-09-22
+- branch: feat-cli-217-drive-shape-cure
+- mode: light (3 lenses × 5-8 risks)
+- lenses: michael-feathers, kent-beck, alan-cooper
+- risks_total: 18
+- top_3_folded:
+  - F1: filesystem artifact is load-bearing; phrase-based is secondary
+  - B2: RED-first mock includes Unknown-command fixture
+  - C1: prompt template specifies full scenario; no clarifying question possible
+- ledger_path: docs/risk-ledgers/2026-09-22c-cli-217-drive-shape-pre-mortem.md
