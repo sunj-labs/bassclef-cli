@@ -35,7 +35,7 @@ See [`standards/os-support.md`](standards/os-support.md) for the full policy.
 
 ## Current release
 
-<!-- version-start -->1.6.0<!-- version-end -->
+<!-- version-start -->1.7.0<!-- version-end -->
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
