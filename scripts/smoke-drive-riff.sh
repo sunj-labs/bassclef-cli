@@ -151,6 +151,22 @@ git init -q
 git config user.email "riff-smoke@harness.local"
 git config user.name "Riff Smoke Harness"
 
+# cli #223 cure — make bassclef skills + rules visible in the scratch dir's
+# project scope. Otherwise Claude replies "no /riff skill" because npm install
+# of @thebassclef/lite dual-writes hooks to ~/.claude/hooks but skills stay
+# project-scope only (per copy-substrate.ts:decisionsForFile + memory
+# feedback_hooks_dual_write_skills_project_only). The bassclef-init'd
+# /adopter/test at Step 3 IS the source of the symlinks.
+SUBSTRATE_SOURCE="${BASSCLEF_SUBSTRATE_SOURCE:-${ADOPTER_TEST_DIR:-${HOME:-/home/adopter}/test}/.claude}"
+if [ -d "$SUBSTRATE_SOURCE/skills" ] && [ -d "$SUBSTRATE_SOURCE/rules" ]; then
+  mkdir -p "$SCRATCH_DIR/.claude"
+  ln -sfn "$SUBSTRATE_SOURCE/skills" "$SCRATCH_DIR/.claude/skills"
+  ln -sfn "$SUBSTRATE_SOURCE/rules"  "$SCRATCH_DIR/.claude/rules"
+  echo "smoke-drive-riff: linked bassclef substrate from ${SUBSTRATE_SOURCE}" >&2
+else
+  echo "smoke-drive-riff: WARN — ${SUBSTRATE_SOURCE} missing; /riff will report skill-not-found" >&2
+fi
+
 # Drive — fire /riff with alarm-based timeout, capture stdout+stderr
 echo "smoke-drive-riff: firing /riff (timeout ${TIMEOUT_SEC}s)" >&2
 
