@@ -94,6 +94,24 @@ git init -q
 git config user.email "onboard-smoke@harness.local"
 git config user.name "Onboard Smoke Harness"
 
+# cli #223 cure — make bassclef skills + rules visible in the scratch dir's
+# project scope. Otherwise Claude replies "no /onboard-repo skill registered"
+# because npm install of @thebassclef/lite dual-writes hooks to ~/.claude/hooks
+# but skills stay project-scope only (per copy-substrate.ts:decisionsForFile
+# + memory feedback_hooks_dual_write_skills_project_only). The bassclef-init'd
+# /adopter/test at Step 3 IS the source of the symlinks. This tests "adopter
+# has bassclef available AND runs /onboard-repo on a fresh empty repo" — NOT
+# the "npm install alone" scenario (that needs a separate cli-side cure).
+SUBSTRATE_SOURCE="${BASSCLEF_SUBSTRATE_SOURCE:-${ADOPTER_TEST_DIR:-${HOME:-/home/adopter}/test}/.claude}"
+if [ -d "$SUBSTRATE_SOURCE/skills" ] && [ -d "$SUBSTRATE_SOURCE/rules" ]; then
+  mkdir -p "$SCRATCH_DIR/.claude"
+  ln -sfn "$SUBSTRATE_SOURCE/skills" "$SCRATCH_DIR/.claude/skills"
+  ln -sfn "$SUBSTRATE_SOURCE/rules"  "$SCRATCH_DIR/.claude/rules"
+  echo "smoke-drive-onboard-repo: linked bassclef substrate from ${SUBSTRATE_SOURCE}" >&2
+else
+  echo "smoke-drive-onboard-repo: WARN — ${SUBSTRATE_SOURCE} missing; /onboard-repo will report skill-not-found" >&2
+fi
+
 # Drive — fire /onboard-repo with alarm-based timeout, capture stdout+stderr
 echo "smoke-drive-onboard-repo: firing /onboard-repo (timeout ${TIMEOUT_SEC}s)" >&2
 
