@@ -16,13 +16,19 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
-### Added
-
 ### Changed
 
-### Fixed
+- Bumped bassclef substrate pin `v1.3.0` → `v1.4.0` in `.github/workflows/publish.yml` (both checks + publish jobs). Bundled `dist/lite/` now ships v1.4.0 substrate with four Q1 Sam+Louis first-5-min friction cures.
 
 ### Notes
+
+- v1.4.0 substrate cures shipped by bassclef-upstream 2026-09-23T00:12Z:
+  - **#1895** — fresh-install gate uses time-based grace window (24h default; `FRESH_INSTALL_GRACE_SECONDS` env override)
+  - **#1849** — dispatcher recognizes bundled substrate (silent when `.claude/hooks` + `.claude/rules` + `.claude/skills` populated at CWD; `BASSCLEF_DISPATCHER_STRICT=1` env override)
+  - **#1902** — install.sh writes `$CLAUDE_PROJECT_DIR/.claude/hooks/bassclef-sync.sh` command in `settings.json` (was `$HOME`)
+  - **#1911** — source-side `bassclef-version.json` rewrite
+- All four cures additive with env overrides; MINOR bump per ADR-031 adopter contract.
+- Cross-post: bassclef-cli#219 (peer request from bassclef-upstream-48).
 
 ## [1.7.0] - 2026-09-22
 ### Added
