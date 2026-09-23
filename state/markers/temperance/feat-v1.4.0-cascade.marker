@@ -1,0 +1,7 @@
+# Temperance marker — feat-v1.4.0-cascade
+- date: 2026-09-23
+- branch: feat-v1.4.0-cascade
+- goal: v1.7.0 → v1.8.0 substrate sync cascade (bassclef v1.3.0 → v1.4.0 pin bump)
+- scope-decision: right thing = cascade the 4 Q1 Sam/Louis cures to npm adopters; right way = pin bump + npm run bump minor + PR + tag + operator publish
+- drift-trigger: pull toward adding scope to the cascade PR (e.g., extra fixes) — hold. Keep this PR narrow.
+- blast-radius: 🟡 med — republish hits every future @thebassclef/lite install; adopter contract per ADR-031 preserved (MINOR bump, all cures additive)
