@@ -39,8 +39,14 @@ function runDrive(opts: {
   scratch: string;
   outDir: string;
   timeoutSec?: number;
+  skipPrecondition?: boolean;
 }) {
-  const args = [DRIVE, '--out', opts.outDir];
+  // Tests default to --reset --skip-precondition. Production runs use
+  // chain semantics (--no-reset + scaffold-present check).
+  const args = [DRIVE, '--out', opts.outDir, '--reset'];
+  if (opts.skipPrecondition !== false) {
+    args.push('--skip-precondition');
+  }
   if (opts.timeoutSec !== undefined) {
     args.push('--timeout', String(opts.timeoutSec));
   }
@@ -152,6 +158,17 @@ describe('scripts/smoke-drive-riff.sh — characterization', () => {
     expect(r.stderr.toLowerCase()).toContain('browser');
   });
 
+  it('API usage limit — Anthropic 400 usage-limit triggers exit 6 (2026-09-21 verification)', () => {
+    const { scratch, outDir } = makeWorkDir();
+    const r = runDrive({
+      claude: resolve(FIXTURES, 'claude-api-limit.sh'),
+      scratch,
+      outDir,
+    });
+    expect(r.status).toBe(6);
+    expect(r.stderr).toContain('smoke-drive-riff: ENV_DEGRADED');
+  });
+
   it('timeout — fixture sleeps past timeout; exit 5 TIMEOUT', () => {
     const { scratch, outDir } = makeWorkDir();
     const r = runDrive({
@@ -203,5 +220,25 @@ describe('scripts/smoke-drive-riff.sh — characterization', () => {
       outDir,
     });
     expect(existsSync(scratch)).toBe(false);
+  });
+
+  it('precondition — chain mode + no scaffold → exit 1 SETUP_FAIL:not-scaffolded', () => {
+    // Real chain semantics: --no-reset + no .claude/skills/riff/SKILL.md
+    // in scratch. Simulates the case where /onboard-repo failed upstream.
+    const { scratch, outDir } = makeWorkDir();
+    // Make scratch dir but leave it un-scaffolded.
+    require('node:fs').mkdirSync(scratch, { recursive: true });
+
+    const args = [DRIVE, '--out', outDir, '--no-reset']; // no --skip-precondition
+    const r = spawnSync('bash', args, {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        CLAUDE_BIN: resolve(FIXTURES, 'claude-happy.sh'),
+        RIFF_SCRATCH: scratch,
+      },
+    });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('smoke-drive-riff: SETUP_FAIL:not-scaffolded');
   });
 });
