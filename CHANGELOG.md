@@ -16,6 +16,15 @@ bet 2026-08-06b.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+### Notes
+
+## [1.8.0] - 2026-09-23
 ### Changed
 
 - Bumped bassclef substrate pin `v1.3.0` → `v1.4.0` in `.github/workflows/publish.yml` (both checks + publish jobs). Bundled `dist/lite/` now ships v1.4.0 substrate with four Q1 Sam+Louis first-5-min friction cures.
