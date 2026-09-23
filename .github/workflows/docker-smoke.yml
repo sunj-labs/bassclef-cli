@@ -60,6 +60,14 @@ jobs:
           # Never use bare --env; never pass the full runner env into the container.
           # Per #184: pass both auth tokens. Harness's preflight_v2 prefers OAuth
           # (subscription) when both are set so runs don't bill metered API.
+          #
+          # Bind-mount for capture extraction (cli #221 cure):
+          # Container writes drive captures at /adopter/state/harness-runs/<ts>/.
+          # Runner mounts $GITHUB_WORKSPACE/harness-out to that path so captures
+          # land on the runner filesystem. chmod 777 covers uid mismatch between
+          # container `adopter` and runner `runner`. The next step uploads them.
+          mkdir -p "$GITHUB_WORKSPACE/harness-out"
+          chmod 777 "$GITHUB_WORKSPACE/harness-out"
           set +e
           docker run \
             --rm \
@@ -67,10 +75,20 @@ jobs:
             -e CLI_VERSION="$CLI_VERSION" \
             -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
             -e CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_CODE_OAUTH_TOKEN" \
+            -v "$GITHUB_WORKSPACE/harness-out":/adopter/state/harness-runs \
             bassclef-cli-cold-adopter:pr
           EXIT_CODE=$?
           echo "smoke_exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
           exit $EXIT_CODE
+
+      - name: Upload smoke captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-smoke-captures-${{ github.run_id }}
+          path: harness-out/
+          retention-days: 14
+          if-no-files-found: warn
 
       - name: Report smoke result
         if: always()
