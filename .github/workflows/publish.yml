@@ -108,14 +108,14 @@ jobs:
         # Read is auto-included). The repo is private per operator
         # setup.
         #
-        # Phase 2 (goal 2026-09-13b): tag pinned to v1.5.1 per
+        # Phase 2 (goal 2026-09-13b): tag pinned to v1.5.2 per
         # bassclef-upstream ADR-055 (accepted 2026-09-13). The pinned
         # tag ships standards/bassclef-wiring-manifest.json schema
         # major 2.x + presence/dist-templates/ which the extended
         # prepublish script reads to build dist/lite/. See ADR-007
         # §Acceptance delta 2026-09-13 for the pivot record.
         #
-        # Bump v1.3.0 → v1.5.1 lands Q1 Sam+Louis first-5-min friction
+        # Bump v1.3.0 → v1.5.2 lands Q1 Sam+Louis first-5-min friction
         # cures — #1895 fresh-install gate uses time-based grace window
         # (24h default; env FRESH_INSTALL_GRACE_SECONDS override); #1849
         # dispatcher recognizes bundled substrate (silent when hooks +
@@ -124,7 +124,7 @@ jobs:
         # settings.json (was HOME); #1911 source-side bassclef-version.json
         # rewrite. All additive with env overrides — MINOR bump per ADR-031
         # adopter contract. Release notes:
-        # https://github.com/sunj-labs/bassclef/releases/tag/v1.5.1
+        # https://github.com/sunj-labs/bassclef/releases/tag/v1.5.2
         #
         # Design note: we source from public bassclef, not
         # bassclef-upstream (R&D), so npm publishes ship the last
@@ -133,7 +133,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.5.1
+          ref: v1.5.2
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
@@ -148,8 +148,8 @@ jobs:
           RESOLVED_SHA=$(git rev-parse HEAD)
           RESOLVED_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "UNKNOWN")
           echo "Resolved: $RESOLVED_TAG at $RESOLVED_SHA"
-          if [ "$RESOLVED_TAG" != "v1.5.1" ]; then
-            echo "::error::Expected pinned tag v1.5.1 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
+          if [ "$RESOLVED_TAG" != "v1.5.2" ]; then
+            echo "::error::Expected pinned tag v1.5.2 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
             exit 1
           fi
 
@@ -270,15 +270,15 @@ jobs:
         # checks job). Source is sunj-labs/bassclef (public downstream)
         # so publishes ship the stable release surface, not R&D upstream.
         #
-        # Phase 2 (goal 2026-09-13b): tag pinned to v1.5.1 per
+        # Phase 2 (goal 2026-09-13b): tag pinned to v1.5.2 per
         # bassclef-upstream ADR-055 (accepted 2026-09-13). Matches the
         # checks job's pin so both jobs bundle the same source revision.
-        # Bump v1.3.0 → v1.5.1 lands Q1 Sam+Louis first-5-min friction
+        # Bump v1.3.0 → v1.5.2 lands Q1 Sam+Louis first-5-min friction
         # cures (see checks job comment for the four ticket refs).
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.5.1
+          ref: v1.5.2
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1

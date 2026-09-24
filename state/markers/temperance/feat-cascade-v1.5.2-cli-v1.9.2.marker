@@ -1,0 +1,14 @@
+# Temperance marker — cli v1.9.2 cascade of bassclef v1.5.2
+- date: 2026-09-24
+- branch: feat/cascade-v1.5.2-cli-v1.9.2
+- scope-decision: Cascade only — pin bump v1.5.1 → v1.5.2 in publish.yml (9 sites) + version bump v1.9.1 → v1.9.2 via bump-version.mjs + CHANGELOG entry. No new features, no substrate edits.
+- right-thing: Yes — closes #1938 end-to-end. Peer shipped v1.5.2 with dispatcher-shape hook in dist/lite/.claude/hooks/bassclef-sync.sh; cli must pin forward for the emitter cure (#1929) to reach cold-adopter smoke captures.
+- simplest: Yes — mechanical pin + version bump; no code change; identical shape to v1.5.0→v1.5.1 cascade shipped 2026-09-24 earlier tonight.
+- brute-force: No — verified peer's tag exists (v1.5.2 → 4407771 on public bassclef via git ls-remote) AND falsification test PASSED (extracted tarball; head of dist/lite/.claude/hooks/bassclef-sync.sh carries "# tier: lite" + "BASSCLEF_SYNC_VERSION=thin-pointer-2026-07-28a" — dispatcher shape, not operator-class).
+- blast-radius: Low — pin change reads a different upstream tag; version bump touches package.json + src/index.ts + README + CHANGELOG together via bump-version.mjs; existing 491 tests still pass; docker-smoke workflow_dispatch validates the emitter cure before adopters see it.
+- verification: (1) local build + npm test GREEN, (2) CI green on PR, (3) docker-smoke on cli_version=1.9.2 shows RESTORED + status:complete tokens on hooks/bassclef-sync.out capture, (4) tar tzf on published npm tarball shows bundled substrate carries dispatcher shape.
+- reversible: Yes — publish 1.9.3 with pin reverted OR `npm dist-tag add @thebassclef/lite@1.9.1 latest` in <5 min.
+- drift-trigger: Docker-smoke on v1.9.2 does NOT show RESTORED + status:complete tokens after publish. If missing → third leak surface not yet traced; halt cascade, message peer, /diagnose from smoke capture.
+- luminaries:
+  - primary: linus-torvalds — adopter contract (we don't break the emitter chain adopters depend on)
+  - supporting: michael-nygard — stability pattern (falsification test before ship; drift trigger named)
