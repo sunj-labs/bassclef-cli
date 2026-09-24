@@ -1,0 +1,13 @@
+# Temperance marker — feat/cascade-v1.5.1-cli-v1.9.1
+
+- date: 2026-09-24
+- branch: feat/cascade-v1.5.1-cli-v1.9.1
+- scope-decision: Bump cli publish workflow pin v1.5.0 → v1.5.1 (9 sites) + cli npm version v1.9.0 → v1.9.1 (patch, via `npm run bump patch`). Cascade the peer's #1929 emitter cure (bassclef public tag v1.5.1 @ 69261c12) into the cli tarball so docker-smoke on v1.9.1 shows RESTORED + status:complete tokens on the bassclef-sync capture.
+- right-thing: Adopters get the emitter cure via normal npm install path.
+- simplest: Matches the substrate cascade pattern used at PR #226 (v1.4.0→v1.5.0) and PR #220 (v1.3.0→v1.4.0). No new mechanism.
+- brute-force: No — pattern documented, mechanical bump.
+- blast-radius: Publish workflow + npm tarball only. CI on PR (491 tests). Docker-smoke on v1.9.1 after publish. Operator gates at Touch ID.
+- verification: (1) test suite GREEN post-bump, (2) CI green on PR, (3) docker-smoke workflow_dispatch on cli_version=1.9.1 shows RESTORED + status:complete in stdout capture.
+- reversible: Yes — PR revert; if v1.9.1 ships broken, forward-fix v1.9.2.
+- drift-trigger: Docker-smoke on v1.9.1 does NOT show RESTORED tokens after publish — that would falsify my read of the template architecture and require diagnose.
+- luminaries: linus-torvalds (adopter contract — cascade path holds), michael-nygard (stability pattern — pin bump preserves cadence)
