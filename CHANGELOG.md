@@ -24,6 +24,25 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.0] - 2026-09-24
+### Added
+
+### Changed
+
+- Bumped bassclef substrate pin `v1.4.0` → `v1.5.0` in `.github/workflows/publish.yml` (both checks + publish jobs). Bundled `dist/lite/` now ships v1.5.0 substrate with the Q1 tail — three first-5-10-min friction cures.
+
+### Fixed
+
+### Notes
+
+- v1.5.0 substrate cures shipped by bassclef-upstream 2026-09-23:
+  - **#1929** — bassclef-sync adopter template emits the same RESTORED/DEGRADED + JSON postcondition contract as the operator-side hook. v1.4.0 shipped this on operator scope only; adopter template kept the old ambiguous shape.
+  - **#1691 Cure 2** — new PreToolUse Bash hook `git-stash-u-guard.sh` fires ADVISORY when `git stash -u` runs in a repo where any substrate dir is gitignored. Never blocks. Skippable via `SKIP_GIT_STASH_U_GUARD=1`.
+  - **#1926** — new SessionStart fragment `01-adopter-message-channel.sh` prints welcome text on first-run adopters (all 3 state files absent). Points at `/onboard-repo`. Silent on onboarded installs.
+- Manifest `lite-manifest.json` at 1.11.0 (up from 1.10.0). 434 entries. Adopter-simulator-lite clean.
+- All three cures additive with env overrides; MINOR bump per ADR-031 adopter contract.
+- Peer request source: bassclef-upstream-d1 session; chronicle `chronicle/2026-09-23c-q1-tail-plus-v1.5.0-shipped.md`.
+
 ## [1.8.0] - 2026-09-23
 ### Changed
 
