@@ -24,6 +24,21 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.1] - 2026-09-24
+### Added
+
+### Changed
+
+- Bump bassclef pin `v1.5.0` → `v1.5.1` in publish workflow at 9 sites (both checks + publish jobs, ref + assertion + error message). Cascade of bassclef v1.5.1 substrate cure.
+
+### Fixed
+
+- Peer bassclef #1929 emitter now fires on cold-adopter clone-fail path. The `presence/install/bassclef-sync.template.sh` L586 branch emits `RESTORED — lite bundle in place.` + `{"status":"complete","installed":N}` on stdout before `exit 0`. Prior shape preempted the emitter, so docker-smoke saw silent success without postcondition tokens. Cascade pins the fix into the tarball via v1.5.1 pin bump.
+
+### Notes
+
+- Docker-smoke on v1.9.1 expected to show `RESTORED` + `status:complete` tokens on the bassclef-sync capture. Peer session `bassclef-upstream-12` shipped the upstream fix at `sunj-labs/bassclef-upstream` `c4fa9e65` (PR #1936) + public cascade at `sunj-labs/bassclef` `69261c12` (PR #1511 merged 2026-09-24T18:01:18Z).
+
 ## [1.9.0] - 2026-09-24
 ### Added
 
