@@ -8,7 +8,7 @@
     "cli",
     "scaffolding"
   ],
-  "homepage": "https://github.com/sunj-labs/bassclef-cli",
+  "homepage": "https://docs.bassclef.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sunj-labs/bassclef-cli.git"
