@@ -24,6 +24,21 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.2] - 2026-09-24
+### Added
+
+### Changed
+
+- Pin bassclef source from v1.5.1 → v1.5.2 in `.github/workflows/publish.yml` (9 sites). Cascade for `#1938` — bassclef-upstream removes operator-class hook from `dist/lite/.claude/hooks/bassclef-sync.sh`, replaces with dispatcher shape (`# tier: lite`, `BASSCLEF_SYNC_VERSION=thin-pointer-2026-07-28a`). Falsification test: tarball at v1.5.2 shows dispatcher head, not operator-class.
+
+### Fixed
+
+- End-to-end emitter cure now reaches cold-adopter smoke: v1.5.2 dispatcher chains into `presence/install/bassclef-sync.template.sh` which carries `#1929` `_template_emit_install_postcondition` (emits `RESTORED — lite bundle in place.` + `{"status":"complete","installed":N}` before `exit 0`). Expected on `hooks/bassclef-sync.out` capture at docker-smoke.
+
+### Notes
+
+- Peer bassclef-upstream cascade PRs: sunj-labs/bassclef-upstream#1940 (upstream) → sunj-labs/bassclef#1512 (public, merged 2026-09-24T21:31:04Z). Tags: upstream `v1.5.2` at 4dc71e87; public `v1.5.2` at 4407771.
+
 ## [1.9.1] - 2026-09-24
 ### Added
 
