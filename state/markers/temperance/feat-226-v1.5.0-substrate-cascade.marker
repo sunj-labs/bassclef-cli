@@ -1,0 +1,11 @@
+# Temperance marker — v1.5.0 substrate cascade
+- date: 2026-09-24
+- branch: feat/226-v1.5.0-substrate-cascade
+- scope-decision: bump publish.yml pin v1.4.0 → v1.5.0 + cli v1.8.0 → v1.9.0 via npm run bump minor + CHANGELOG entry. Nothing else.
+- right-thing: peer session request; matches tonight's proven v1.4.0 cascade shape verbatim
+- simplest: yes; one-line pin bump + bump script + one CHANGELOG entry
+- brute-force: no; using npm run bump minor per memory feedback_use_npm_run_bump_not_hand_edit
+- blast-radius: MINOR bump per ADR-031; three additive cures with opt-out env overrides; adopters keep working
+- verification: local vitest + typecheck + PR docker-smoke + post-publish live docker-smoke on v1.9.0
+- reversible: MINOR release; adopters pin prior version; 72h unpublish window
+- drift-trigger: pulling toward extra fixes in same PR OR reshaping the pin format
