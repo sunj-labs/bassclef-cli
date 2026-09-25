@@ -62,6 +62,12 @@ SCRIPT_NAME="$(basename "$0" .sh)"
 echo ">>> ${SCRIPT_NAME} starting" >&2
 trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
 
+# Defensive cd to $HOME up front. If the caller's cwd is under a dir
+# that smoke-reset.sh will delete (e.g. ~/tmp/bassclef-smoke-test),
+# subshells hit `getcwd: no such file or directory` and some terminals
+# (Ghostty, Kitty) kill the parent pane. Landing at $HOME sidesteps it.
+cd "${HOME}" || cd /
+
 CLI_VERSION_ARG=""
 DATE_ARG=""
 SKIP_SKILLS=0
