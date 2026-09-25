@@ -1,0 +1,8 @@
+# Temperance marker — cascade v1.6.0 substrate + cli v1.9.3
+
+- date: 2026-09-25
+- branch: feat/cascade-v1.6.0-cli-v1.9.3
+- scope-decision: Bump bassclef substrate pin v1.5.2 → v1.6.0 in .github/workflows/publish.yml (9 sites); patch-bump cli v1.9.2 → v1.9.3; ship the pair as a single PR. Same shape as the last two cascades (#228, #231). No feature work — pure cascade.
+- drift-trigger: v1.6.0 substrate lands the #1946 tier-filter cure that closes the 148-wire class we filed after cold-adopter smoke. Peer bassclef-upstream-5c asked us to run docker cold-adopter smoke against a fresh install to falsify. The cascade is the delivery mechanism.
+- luminaries: Linus (adopter contract — cure must reach adopters), Feathers (characterization test via docker smoke — 60 wires assertion), Beck (Tier 0 tests already green on cli main; no source changes here)
+- blast-radius: low — pin bump + version bump. No source changes to cli. Rollback = revert PR. npm publish gate stays on Touch ID at operator end.

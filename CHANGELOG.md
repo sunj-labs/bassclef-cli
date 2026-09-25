@@ -24,6 +24,17 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.3] - 2026-09-25
+### Added
+
+### Changed
+
+- Bump bassclef substrate pin v1.5.2 → v1.6.0 in `.github/workflows/publish.yml` (9 sites). The v1.6.0 substrate ships the tier filter cure at `presence/install/bassclef-hook-connect.sh` per bassclef-upstream#1946 + author-time tier-leak-check extension per #1945. Cold adopters on cli v1.9.3 now get `tier: lite` written to `.bassclef-source.json` at init time (via existing `[TIER]` placeholder substitution at `src/commands/init.ts:517`); the substrate filter reads that field on every session-start and drops off-tier entries silently. End-to-end effect: adopter session-start settings.json writes ~60 wires, not 148 (fallback preserved per ADR-031 grace).
+
+### Fixed
+
+### Notes
+
 ## [1.9.2] - 2026-09-24
 ### Added
 
