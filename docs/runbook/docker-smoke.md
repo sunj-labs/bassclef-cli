@@ -153,31 +153,38 @@ Docker smoke lives in CI. The **host smoke** chain lives on the operator's Mac. 
 
 ### Single-paste for cold-adopter profile
 
-Paste this whole block into a Claude Code session running on a **dedicated cold-adopter profile**. It nukes prior state, installs cli fresh, inits a test project, runs the smoke chain, and posts the report:
+Paste this whole block into a shell running on a **dedicated cold-adopter profile**. It nukes prior state, installs cli fresh, inits a test project, runs the smoke chain, and posts the report:
 
 ```bash
-# One-paste cold-adopter smoke — reset + install + smoke + publish
-# WARNING: --reset is destructive on dev machines. Cold-adopter profile only.
+# ─── COLD-ADOPTER SMOKE — one paste ──────────────────────────────────────
+# Nukes prior state, installs cli fresh, runs smoke, publishes report.
+# WARNING: destructive on dev machines. Cold-adopter profile only.
 # Requires: node 20+, npm, git, gh authenticated, and one of
 #           CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY exported.
 
-set -euo pipefail
+cd ~   # defensive — reset may delete your cwd
+
 VER=1.9.3
 SCRIPTS_DIR=~/tmp/bassclef-smoke-scripts
 
 # 1. Fetch smoke scripts from bassclef-cli main
 curl -fsSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-bootstrap.sh -o /tmp/smoke-bootstrap.sh
-bash /tmp/smoke-bootstrap.sh --target "$SCRIPTS_DIR"
+bash /tmp/smoke-bootstrap.sh --target $SCRIPTS_DIR
 
-# 2. Run the whole cycle from the fetched dir
-cd ~/tmp/bassclef-smoke-test 2>/dev/null || cd ~
-bash "$SCRIPTS_DIR/scripts/smoke-one-shot.sh" \
-  --reset \
-  --install \
-  --cli-version "$VER"
+# 2. Run the whole cycle
+bash $SCRIPTS_DIR/scripts/smoke-one-shot.sh --reset --install --cli-version $VER
 ```
 
-That's the paste. `--reset` fires `smoke-reset.sh --cold` (uninstall + purge workdir + back up ~/.claude/). `--install` installs cli fresh + inits a test project. Both compose with the smoke chain + publish.
+**What each phase does:**
+
+| Phase | Fires | Effect |
+|---|---|---|
+| Defensive cd | `cd ~` at paste + inside script | avoids `getcwd` errors that kill Ghostty/Kitty panes when reset deletes cwd |
+| Nuke | `smoke-reset.sh --cold` | `npm uninstall -g @thebassclef/lite`, purge `~/tmp/bassclef-smoke-test`, back up `~/.claude/` → `~/.claude.bak.<ts>/` |
+| Install | `npm install -g @thebassclef/lite@VER` | fresh install of the version under test |
+| Init | `bassclef init` in `~/tmp/bassclef-smoke-test` | writes `.bassclef-source.json` with `tier: lite` |
+| Smoke | preflight → capture → drive-skills → assert-hooks → assert-skills | captures under `docs/smoke-captures/<date>/` |
+| Publish | `smoke-report.sh --publish` | posts a GitHub issue with the `smoke-run-VER` label (auto-created) |
 
 ### Flags worth knowing
 
