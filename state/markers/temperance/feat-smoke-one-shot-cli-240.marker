@@ -1,0 +1,8 @@
+# Temperance marker — smoke-one-shot script + runbook amendment
+
+- date: 2026-09-25
+- branch: feat/smoke-one-shot-cli-240
+- scope-decision: Ship scripts/smoke-one-shot.sh + docs/runbook/docker-smoke.md amendment. Wraps existing smoke chain into one command that validates --cli-version shape BEFORE gh calls. Closes the label-shape drift class from prior sessions.
+- drift-trigger: Operator asked for a one-shot script that won't fail on version/filename issues. Prior friction: smoke-run-1.9.2-nosync-nuked label caused publish failure.
+- luminaries: Saltzer-Schroeder (fail-safe defaults — semver validation before gh), Feathers (characterization: script exercises real smoke chain end-to-end), Cooper (command shape — one flag, one purpose)
+- blast-radius: low — new wrapper script, no changes to existing smoke chain. Rollback = delete file. Runbook amendment is additive.

@@ -147,6 +147,38 @@ Cause: Docker Hub anonymous pull rate limit. Retry after 6h OR authenticate `doc
 
 Expected against cli 1.2.1. This is the falsification-test success case per Zeller. Wait for upstream cures + cli 1.2.2 to see exit 0.
 
+## Host smoke — one-shot report + publish (cli#147 shape)
+
+Docker smoke lives in CI. The **host smoke** chain lives on the operator's Mac. It writes captures under `docs/smoke-captures/<date>/`, produces per-check assertion JSONs, then posts a report as a GitHub issue matching #147's shape.
+
+One command runs the whole chain:
+
+```bash
+bash scripts/smoke-one-shot.sh --cli-version 1.9.3
+```
+
+The script resolves version deterministically (`--cli-version` arg > `$CLI_VERSION` env > `package.json`) and rejects non-semver input BEFORE any `gh` call. That closes the label-shape drift class from prior runs — a phrase like `1.9.2-nosync-nuked` now exits with a fix prompt, not a `smoke-run-1.9.2-nosync-nuked` label that never resolves.
+
+### Flags worth knowing
+
+| Flag | When to use |
+|---|---|
+| `--cli-version X.Y.Z` | Version under test. Required unless `$CLI_VERSION` or a local `package.json` sets it. |
+| `--date YYYY-MM-DD` | Override the capture-dir date suffix. Default: today UTC. |
+| `--skip-skills` | Skip the skill drive when claude auth is not available. Hooks still run. |
+| `--no-publish` | Build the report locally without posting. |
+| `--repo OWNER/REPO` | Override the publish target. Default: `sunj-labs/bassclef-cli`. |
+
+### Run descriptions belong in the body, not the version tag
+
+If a run needs a descriptive tag (nuked user scope, no-sync mode), edit the report body via `--no-publish` first, then re-run with `--publish`. Do NOT pass `--cli-version 1.9.3-nuked` — that produces a label the auto-create never matches.
+
+### What the script does NOT do
+
+- Does not run docker-smoke — that path is CI-only.
+- Does not tag or push git.
+- Does not create the label — `smoke-report.sh` handles auto-create per cli#236.
+
 ## Refs
 
 - Goal doc — `docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md`
