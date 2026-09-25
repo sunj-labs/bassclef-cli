@@ -178,22 +178,24 @@ if [ "$DO_RESET" -eq 1 ] || [ "$DO_INSTALL" -eq 1 ]; then
 else
   bash "${SCRIPT_DIR}/smoke-preflight.sh" --auto-reset
 fi
-bash "${SCRIPT_DIR}/smoke-capture.sh" --out "$CAPTURES_DIR"
+# All four scripts default to docs/smoke-captures/<today>/ with correct
+# hooks/ + skills/ subdirs. Passing --out to smoke-capture writes flat
+# (no hooks/ subdir), which desyncs smoke-assert-hooks default lookup.
+# Use defaults everywhere; smoke-capture puts hooks at <base>/hooks and
+# smoke-drive-skills puts skills at <base>/skills — matching what
+# smoke-assert-* read by default.
+bash "${SCRIPT_DIR}/smoke-capture.sh"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
-  bash "${SCRIPT_DIR}/smoke-drive-skills.sh" --out "${CAPTURES_DIR}/skills"
+  bash "${SCRIPT_DIR}/smoke-drive-skills.sh"
 else
   echo "${SCRIPT_NAME}: skipping smoke-drive-skills.sh (--skip-skills)" >&2
 fi
 
-bash "${SCRIPT_DIR}/smoke-assert-hooks.sh" \
-  --capture-dir "${CAPTURES_DIR}/hooks" \
-  --out "${CAPTURES_DIR}/hooks-assertions.json"
+bash "${SCRIPT_DIR}/smoke-assert-hooks.sh"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
-  bash "${SCRIPT_DIR}/smoke-assert-skills.sh" \
-    --capture-dir "${CAPTURES_DIR}/skills" \
-    --out "${CAPTURES_DIR}/skills-assertions.json"
+  bash "${SCRIPT_DIR}/smoke-assert-skills.sh"
 fi
 
 # --- build + publish report --------------------------------------------------
