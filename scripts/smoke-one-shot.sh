@@ -168,10 +168,16 @@ if [ "$DO_INSTALL" -eq 1 ]; then
 fi
 
 # --- run the chain -----------------------------------------------------------
-# --auto-reset skips smoke-preflight's interactive prompt. When we already
-# fired --reset + --install, the environment is fresh; preflight would just
-# ask for confirmation and stall the paste-flow.
-bash "${SCRIPT_DIR}/smoke-preflight.sh" --auto-reset
+# Skip smoke-preflight when we already fired --reset OR --install. Preflight's
+# whole job is to confirm state + optionally reset — redundant here, and
+# destructive because it will re-nuke the workdir we just init'd.
+# When neither flag fired, preflight runs with --auto-reset so it stays
+# non-interactive (still asks about clean-home; we accept its default).
+if [ "$DO_RESET" -eq 1 ] || [ "$DO_INSTALL" -eq 1 ]; then
+  echo "${SCRIPT_NAME}: skipping smoke-preflight (already reset + installed)" >&2
+else
+  bash "${SCRIPT_DIR}/smoke-preflight.sh" --auto-reset
+fi
 bash "${SCRIPT_DIR}/smoke-capture.sh" --out "$CAPTURES_DIR"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
