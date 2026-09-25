@@ -52,6 +52,12 @@
 
 set -euo pipefail
 
+# Resolve sibling script dir from BASH_SOURCE so the script works regardless
+# of the caller's cwd. Prior version used `bash scripts/foo.sh` (relative to
+# cwd) which failed when the script was fetched into ~/tmp/bassclef-smoke-scripts
+# and invoked from any dir other than the fake "repo root".
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 SCRIPT_NAME="$(basename "$0" .sh)"
 echo ">>> ${SCRIPT_NAME} starting" >&2
 trap 'echo "<<< ${SCRIPT_NAME} done (exit $?)" >&2' EXIT
@@ -131,7 +137,7 @@ echo "${SCRIPT_NAME}: version=${VER} date=${DATE} captures=${CAPTURES_DIR}" >&2
 # profile — destructive on dev machines.
 if [ "$DO_RESET" -eq 1 ]; then
   echo "${SCRIPT_NAME}: firing smoke-reset.sh --cold" >&2
-  bash scripts/smoke-reset.sh --cold
+  bash "${SCRIPT_DIR}/smoke-reset.sh" --cold
 fi
 
 # --- optional install (fresh cli install + test project) ---------------------
@@ -152,21 +158,21 @@ if [ "$DO_INSTALL" -eq 1 ]; then
 fi
 
 # --- run the chain -----------------------------------------------------------
-bash scripts/smoke-preflight.sh
-bash scripts/smoke-capture.sh --out "$CAPTURES_DIR"
+bash "${SCRIPT_DIR}/smoke-preflight.sh"
+bash "${SCRIPT_DIR}/smoke-capture.sh" --out "$CAPTURES_DIR"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
-  bash scripts/smoke-drive-skills.sh --out "${CAPTURES_DIR}/skills"
+  bash "${SCRIPT_DIR}/smoke-drive-skills.sh" --out "${CAPTURES_DIR}/skills"
 else
   echo "${SCRIPT_NAME}: skipping smoke-drive-skills.sh (--skip-skills)" >&2
 fi
 
-bash scripts/smoke-assert-hooks.sh \
+bash "${SCRIPT_DIR}/smoke-assert-hooks.sh" \
   --capture-dir "${CAPTURES_DIR}/hooks" \
   --out "${CAPTURES_DIR}/hooks-assertions.json"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
-  bash scripts/smoke-assert-skills.sh \
+  bash "${SCRIPT_DIR}/smoke-assert-skills.sh" \
     --capture-dir "${CAPTURES_DIR}/skills" \
     --out "${CAPTURES_DIR}/skills-assertions.json"
 fi
@@ -184,4 +190,4 @@ if [ "$DO_PUBLISH" -eq 1 ]; then
   fi
 fi
 
-bash scripts/smoke-report.sh "${REPORT_ARGS[@]}"
+bash "${SCRIPT_DIR}/smoke-report.sh" "${REPORT_ARGS[@]}"
