@@ -168,7 +168,10 @@ if [ "$DO_INSTALL" -eq 1 ]; then
 fi
 
 # --- run the chain -----------------------------------------------------------
-bash "${SCRIPT_DIR}/smoke-preflight.sh"
+# --auto-reset skips smoke-preflight's interactive prompt. When we already
+# fired --reset + --install, the environment is fresh; preflight would just
+# ask for confirmation and stall the paste-flow.
+bash "${SCRIPT_DIR}/smoke-preflight.sh" --auto-reset
 bash "${SCRIPT_DIR}/smoke-capture.sh" --out "$CAPTURES_DIR"
 
 if [ "$SKIP_SKILLS" -eq 0 ]; then
