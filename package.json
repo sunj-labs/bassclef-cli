@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
