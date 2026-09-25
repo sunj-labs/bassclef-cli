@@ -32,6 +32,11 @@
 #                           (use when claude auth is not available)
 #   --no-publish            build the report but do not publish to GitHub
 #   --repo OWNER/REPO       publish target (default: sunj-labs/bassclef-cli)
+#   --reset                 fire smoke-reset.sh --cold FIRST (uninstall cli,
+#                           purge workdir, back up + remove ~/.claude/). Cold-
+#                           adopter profiles only — destructive on dev machines.
+#   --install               after reset, `npm install -g @thebassclef/lite@VER`
+#                           + init a fresh test project. Composes with --reset.
 #   --help                  print this help
 #
 # Env:
@@ -56,6 +61,8 @@ DATE_ARG=""
 SKIP_SKILLS=0
 DO_PUBLISH=1
 REPO_TARGET_ARG=""
+DO_RESET=0
+DO_INSTALL=0
 
 usage() {
   sed -n '2,45p' "$0" | sed 's/^# \{0,1\}//'
@@ -69,6 +76,8 @@ while [ "$#" -gt 0 ]; do
     --skip-skills) SKIP_SKILLS=1; shift ;;
     --no-publish) DO_PUBLISH=0; shift ;;
     --repo) REPO_TARGET_ARG="$2"; shift 2 ;;
+    --reset) DO_RESET=1; shift ;;
+    --install) DO_INSTALL=1; shift ;;
     --help|-h) usage ;;
     *) echo "${SCRIPT_NAME}: unknown arg: $1" >&2; exit 1 ;;
   esac
@@ -115,6 +124,32 @@ DATE="${DATE_ARG:-$(date -u +%Y-%m-%d)}"
 CAPTURES_DIR="docs/smoke-captures/${DATE}"
 
 echo "${SCRIPT_NAME}: version=${VER} date=${DATE} captures=${CAPTURES_DIR}" >&2
+
+# --- optional reset (cold-adopter profile only) ------------------------------
+# smoke-reset.sh --cold uninstalls cli globally, purges the smoke workdir,
+# backs up ~/.claude/ then removes it. Only fire on a dedicated cold-adopter
+# profile — destructive on dev machines.
+if [ "$DO_RESET" -eq 1 ]; then
+  echo "${SCRIPT_NAME}: firing smoke-reset.sh --cold" >&2
+  bash scripts/smoke-reset.sh --cold
+fi
+
+# --- optional install (fresh cli install + test project) ---------------------
+# Runs `npm install -g @thebassclef/lite@VER` + inits a fresh test project
+# at ~/tmp/bassclef-smoke-test. Composes with --reset for a clean cycle.
+if [ "$DO_INSTALL" -eq 1 ]; then
+  echo "${SCRIPT_NAME}: installing @thebassclef/lite@${VER}" >&2
+  npm install -g "@thebassclef/lite@${VER}"
+  TESTDIR="${HOME}/tmp/bassclef-smoke-test"
+  mkdir -p "$TESTDIR"
+  cd "$TESTDIR"
+  if [ ! -d .git ]; then
+    git init -q
+    git commit --allow-empty -m "chore: smoke fixture" -q
+  fi
+  bassclef init
+  echo "${SCRIPT_NAME}: init landed tier=$(grep -oE '"tier"[[:space:]]*:[[:space:]]*"[^"]*"' .bassclef-source.json)" >&2
+fi
 
 # --- run the chain -----------------------------------------------------------
 bash scripts/smoke-preflight.sh

@@ -151,23 +151,49 @@ Expected against cli 1.2.1. This is the falsification-test success case per Zell
 
 Docker smoke lives in CI. The **host smoke** chain lives on the operator's Mac. It writes captures under `docs/smoke-captures/<date>/`, produces per-check assertion JSONs, then posts a report as a GitHub issue matching #147's shape.
 
-One command runs the whole chain:
+### Single-paste for cold-adopter profile
+
+Paste this whole block into a Claude Code session running on a **dedicated cold-adopter profile**. It nukes prior state, installs cli fresh, inits a test project, runs the smoke chain, and posts the report:
 
 ```bash
-bash scripts/smoke-one-shot.sh --cli-version 1.9.3
+# One-paste cold-adopter smoke — reset + install + smoke + publish
+# WARNING: --reset is destructive on dev machines. Cold-adopter profile only.
+# Requires: node 20+, npm, git, gh authenticated, and one of
+#           CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY exported.
+
+set -euo pipefail
+VER=1.9.3
+SCRIPTS_DIR=~/tmp/bassclef-smoke-scripts
+
+# 1. Fetch smoke scripts from bassclef-cli main
+curl -fsSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/smoke-bootstrap.sh -o /tmp/smoke-bootstrap.sh
+bash /tmp/smoke-bootstrap.sh --target "$SCRIPTS_DIR"
+
+# 2. Run the whole cycle from the fetched dir
+cd ~/tmp/bassclef-smoke-test 2>/dev/null || cd ~
+bash "$SCRIPTS_DIR/scripts/smoke-one-shot.sh" \
+  --reset \
+  --install \
+  --cli-version "$VER"
 ```
 
-The script resolves version deterministically (`--cli-version` arg > `$CLI_VERSION` env > `package.json`) and rejects non-semver input BEFORE any `gh` call. That closes the label-shape drift class from prior runs — a phrase like `1.9.2-nosync-nuked` now exits with a fix prompt, not a `smoke-run-1.9.2-nosync-nuked` label that never resolves.
+That's the paste. `--reset` fires `smoke-reset.sh --cold` (uninstall + purge workdir + back up ~/.claude/). `--install` installs cli fresh + inits a test project. Both compose with the smoke chain + publish.
 
 ### Flags worth knowing
 
 | Flag | When to use |
 |---|---|
 | `--cli-version X.Y.Z` | Version under test. Required unless `$CLI_VERSION` or a local `package.json` sets it. |
+| `--reset` | Nuke prior state via `smoke-reset.sh --cold`. Cold-adopter profile only — destructive on dev machines. |
+| `--install` | After reset, `npm install -g @thebassclef/lite@VER` + init a fresh test project. Composes with `--reset`. |
 | `--date YYYY-MM-DD` | Override the capture-dir date suffix. Default: today UTC. |
 | `--skip-skills` | Skip the skill drive when claude auth is not available. Hooks still run. |
 | `--no-publish` | Build the report locally without posting. |
 | `--repo OWNER/REPO` | Override the publish target. Default: `sunj-labs/bassclef-cli`. |
+
+### Failure classes closed
+
+The script validates `--cli-version` against a semver regex BEFORE any `gh` call. That closes the label-shape drift class from prior runs — a phrase like `1.9.2-nosync-nuked` exits with a fix prompt, not a `smoke-run-1.9.2-nosync-nuked` label that never resolves.
 
 ### Run descriptions belong in the body, not the version tag
 
