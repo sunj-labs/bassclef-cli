@@ -157,6 +157,10 @@ if [ "$DO_INSTALL" -eq 1 ]; then
   cd "$TESTDIR"
   if [ ! -d .git ]; then
     git init -q
+    # Empty fixture commit — inline identity so we do not require global
+    # git config on cold-adopter profiles (git commit exits 128 otherwise).
+    GIT_AUTHOR_NAME=smoke GIT_AUTHOR_EMAIL=smoke@local \
+    GIT_COMMITTER_NAME=smoke GIT_COMMITTER_EMAIL=smoke@local \
     git commit --allow-empty -m "chore: smoke fixture" -q
   fi
   bassclef init
