@@ -1,0 +1,20 @@
+# Lead lens sign-off — cli#254 sub-step 2 (/onboard-repo drive real body)
+- date: 2026-09-26
+- branch: feat/254-onboard-repo-drive-body
+- lead: john-ousterhout
+- findings-status: no findings (12/12 Tier 0 tests GREEN)
+- sibling-suite-status: 68/0 GREEN (smoke-expect 35, registry 16,
+  riff stub 9, launch stub 8)
+- ousterhout-lens verdict:
+  - DriveScript positional signature unchanged (SCRATCH_DIR,
+    CLI_VERSION, TIMEOUT_SEC — same as walking skeleton).
+  - No new globals introduced. State via env vars + smoke-expect
+    session file only.
+  - Env-var config keeps drive body narrow. Real-claude cutover at
+    sub-step 5/6 flips SMOKE_DRIVE_* patterns from fake defaults to
+    real-claude patterns without touching drive code.
+  - Bash 3.2 empty-array fold (O8) confirmed via test run —
+    SMOKE_DRIVE_SPAWN_ARGS unset drops through cleanly.
+- balancing-check result: aggregate GREEN AND interface stability
+  preserved AND real behavior verified against fake_claude fixture.
+- sign-off: GO — Step 6 merge cleared.

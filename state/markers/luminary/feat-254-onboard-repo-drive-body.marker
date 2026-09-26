@@ -1,0 +1,15 @@
+# Luminary marker — cli#254 sub-step 2 (/onboard-repo drive real body)
+- date: 2026-09-26
+- branch: feat/254-onboard-repo-drive-body
+- ceremony-class: (b) existing code extension (script body swap)
+- lead: john-ousterhout
+- supporting: [michael-feathers]
+- rationale:
+  - lead (Ousterhout) — interface stability. The 5-verb smoke-expect
+    interface + DriveScript positional args signature stay stable.
+    Extensions ride on env vars only. O1 fold from sub-step 1 holds.
+  - supporting (Feathers) — characterization tests pin actual
+    behavior against fake_claude fixture. Drive tests exercise
+    happy-path + timeout + session-artifact side effects.
+- balancing-check-role: lead (Ousterhout) confirms interface stayed
+  narrow + no new positional args + no new globals before Step 6 merge.

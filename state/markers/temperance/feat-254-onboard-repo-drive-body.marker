@@ -1,0 +1,26 @@
+# Temperance marker — cli#254 sub-step 2 (/onboard-repo drive real body)
+- date: 2026-09-26
+- branch: feat/254-onboard-repo-drive-body
+- parent-bet: cli#254 (interactive skill drives)
+- prior-substeps: 0 (PR #255), 1 (PR #256 merged 2d33dbd)
+- scope-decision:
+  - right-thing: replace stub main() in
+    scripts/smoke-drive-interactive-onboard-repo.sh with real body
+    that calls the 5 smoke-expect verbs against a spawn cmd.
+  - right-way: env-var-driven configuration for spawn cmd + patterns
+    (SMOKE_DRIVE_SPAWN_CMD, SMOKE_DRIVE_READY_PATTERN,
+    SMOKE_DRIVE_DONE_PATTERN). Tests use fake_claude fixture; real
+    claude wires at sub-step 5/6.
+  - drift-trigger: any edit that adds new positional args to main()
+    (breaks DriveScript interface per decompose doc) is drift.
+- blast-radius:
+  - inside scope: scripts/smoke-drive-interactive-onboard-repo.sh + its
+    Tier 0 test file. Zero touches to other drives.
+  - outside scope: /riff drive (sub-step 3), /launch drive (sub-step 4),
+    Dockerfile (5), entry.sh wire (6). Filesystem-artifact assertions
+    (settings.json etc.) deferred to sub-step 5/6 real-claude wire.
+  - hard ceiling untouched: auth, schema, security, prod-deploy.
+- ceremony-class: (b) existing code extension per oo-ad-entry-point.md.
+  Brief use case in commit body. Skip fully-dressed OOAD; interface
+  pinned by walking skeleton + smoke-expect 1.0.0.
+- authorization: agent-merges-within-scope (per operator overnight rescope).
