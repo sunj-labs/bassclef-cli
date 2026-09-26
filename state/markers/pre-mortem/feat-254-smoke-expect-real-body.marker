@@ -1,0 +1,83 @@
+# Pre-mortem marker — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- mode: /pre-mortem light (3 lenses × 5-8 risks each)
+- lenses: [john-ousterhout, michael-feathers, saltzer-schroeder]
+- parent-ledger: docs/risk-ledgers/2026-09-26-cli-254-interactive-drives.md
+  (walking-skeleton risks; still apply; not repeated here)
+- real-body-specific risks:
+
+## Ousterhout lens — deep module discipline
+
+Interface stability while implementation grows.
+
+- **O1** — verb interface widens under real-body pressure (drive_start
+  grows args to configure timeout / pid file / prompt marker). Cure:
+  pin the 5-verb signature from walking skeleton exactly; new args go
+  through env vars (SMOKE_EXPECT_TIMEOUT, SMOKE_EXPECT_LOG_DIR).
+- **O2** — expect Tcl quirks leak up through error messages the caller
+  reads. Cure: stderr from expect gets tagged prefix; drive_capture
+  strips prefix; caller sees bash-flavored errors only.
+- **O3** — session state escapes drive_end. Cure: drive_end kills the
+  spawned expect process AND deletes .smoke-drive-session AND drive.log
+  handle. Trap EXIT covers abrupt session death.
+- **O4** — bash 3.2 heredoc-into-expect fails on macOS (no `<<< $var`
+  under set -u). Cure: heredoc via `<<EOF` block; test against bash 3.2
+  before commit.
+- **O5** — deep module leaks state via global vars. Cure: all state in
+  session file + local vars only. No SMOKE_EXPECT_* globals except the
+  version constant + sentinel exit codes.
+
+## Feathers lens — characterization tests pin real behavior
+
+Fake claude fixture makes real expect run against a known responder.
+
+- **F7** — fixture uses actual `claude` binary; test suite depends on
+  claude auth in test env. Cure: ship a tiny fake_claude.sh (bash
+  script that reads stdin lines + emits scripted responses) as the
+  interactive process under test. `expect` doesn't know it isn't real
+  claude.
+- **F8** — fake_claude's response timing doesn't match real claude's
+  30-60s latency; tests pass with sub-second turnaround but real
+  claude times out. Cure: fixture supports SMOKE_FAKE_LATENCY env; a
+  characterization test at latency=15s verifies the wait path works.
+- **F9** — expect version drift between macOS (bundled) and Debian
+  (apt install). Cure: `expect -v` output pinned in test setup; test
+  suite records expect version at run; CI fixture pins both.
+- **F10** — test harness leaks tmpdir across runs. Cure: mktemp -d
+  per test; trap EXIT cleanup.
+
+## Saltzer-Schroeder lens — complete mediation + fail-safe
+
+Every callable path validates every precondition. Missing input =
+BLOCK, not silent success.
+
+- **S2** — drive_start called without SCRATCH_DIR arg exits 0 by
+  accident (skeleton returned 42; real body might return 0). Cure:
+  drive_start exits 13 on missing/invalid SCRATCH_DIR per exit-code
+  vocabulary.
+- **S3** — drive_send called before drive_start. Cure: check session
+  state file exists; exit 10 (expect bug — no session) if not.
+- **S4** — expect binary missing (adopter without expect installed;
+  smoke run outside container). Cure: drive_start probes `command -v
+  expect`; exits 13 (missing prereq) with clear stderr naming the
+  install cure (apt-get install expect).
+- **S5** — timeout not honored under load (expect silently waits
+  forever on stuck child). Cure: `expect_before { timeout 30 }` in
+  every drive_expect body; timeout exits 11.
+- **S6** — assertion pattern injection (caller passes untrusted regex
+  to drive_expect). Cure: escape Tcl special chars ($ [ ] { } \\) in
+  the pattern; document that patterns are Tcl regex not shell glob.
+
+## Folds landing pre-code (real-body scope)
+
+Six folds ship BEFORE the first real body:
+
+1. **O1 fold** — 5-verb signature locked; env-var config for extension.
+2. **O5 fold** — no new globals; state in session file + local vars.
+3. **F7 fold** — fake_claude.sh fixture ships in tests/fixtures/.
+4. **F10 fold** — mktemp + trap EXIT per test.
+5. **S2 fold** — every verb validates preconditions + exits per code
+   vocabulary (0/10/11/12/13/14).
+6. **S6 fold** — Tcl escape helper in smoke-expect.sh (private
+   function; not part of the 5-verb interface).

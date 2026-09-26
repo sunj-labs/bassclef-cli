@@ -48,10 +48,30 @@ scope_class: adopter-facing script per .claude/rules/oo-ad-entry-point.md
 - Exit code: worst class across all classes (existing pattern)
 - Log artifact uploaded to GitHub Actions
 
+## Sub-step 1 scope amendment (2026-09-26 overnight)
+
+The walking skeleton (PR #255, merged) landed the 5-verb interface with
+sentinel exit code 42. Sub-step 1 replaces sentinels with real bodies.
+
+- **In scope:** `scripts/lib/smoke-expect.sh` real bodies for
+  drive_start, drive_send, drive_expect, drive_capture, drive_end.
+- **Fixture:** `scripts/tests/fixtures/fake_claude.sh` (bash script
+  that reads stdin + emits scripted responses) makes tests deterministic
+  without requiring claude auth or Docker.
+- **RED-first:** tests in `scripts/tests/smoke-expect.test.sh` extend
+  from 16 skeleton-assertions to real behavior assertions. Failing
+  tests land BEFORE bodies per Fw1 fold.
+- **Out of scope for sub-step 1:** 3 drive script bodies (sub-steps 2-4),
+  Dockerfile expect install (sub-step 5), entry.sh Step 8 wire (sub-step 6).
+- **Interface locked:** 5-verb signature from walking skeleton stays
+  stable per Ousterhout O1 fold. Extension via env vars only.
+
 ## Refs
 
 - Plan doc: `docs/next-session-plan-2026-09-27-interactive-skill-drives.md`
 - Ticket: cli#254
+- Walking skeleton PR: #255 (merged)
+- Real-body ceremony: `state/markers/{temperance,luminary,pre-mortem,rfc,adr-deviation}/feat-254-smoke-expect-real-body.marker`
 - Risk ledger: `docs/risk-ledgers/2026-09-26-cli-254-interactive-drives.md`
 - Blocking: cli#241 (/riff MCP sandbox gap)
 - Sister UC: UC-cli-217 (drive-shape cure — headless V2)

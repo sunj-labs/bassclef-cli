@@ -1,0 +1,81 @@
+# RFC adversarial marker — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- mode: /rfc adversarial (3 outside lenses)
+- lenses: [tony-hoare, martin-fowler, w-edwards-deming]
+- rationale: outside the primary triad (Ousterhout/Beck/Feathers) so
+  their disciplines catch what the primary lenses accept.
+
+## Hoare lens — pre/postcondition contracts
+
+The 5 verbs are a contract. What is the {P} S {Q} triple per verb?
+
+- **H2** — drive_start's postcondition is "session state file exists
+  AND expect subprocess spawned AND pid recorded". If postcondition
+  fails halfway (file written, spawn failed), state is inconsistent.
+  Cure: atomic write via mktemp + rename; spawn happens BEFORE state
+  file write; failure at spawn = no state file.
+- **H3** — drive_expect's postcondition depends on pattern match. If
+  match succeeds, capture buffer has the matched region + timestamp.
+  If timeout, capture buffer has full transcript up to timeout. Cure:
+  return both channels via drive_capture verb; caller reads whichever.
+- **H4** — drive_end's postcondition is "expect subprocess killed AND
+  state file removed AND capture log closed". Trap EXIT covers abrupt
+  end. Cure: drive_end runs the same cleanup path as the trap; safe
+  to call twice (idempotent).
+
+Fold pre-code: **H2 fold** — drive_start writes state file AFTER spawn
+succeeds; spawn failure exits before state write.
+
+## Fowler lens — refactoring safety net
+
+Walking skeleton to real body IS a Refactoring Move (Fowler: Substitute
+Algorithm). Tests as safety net.
+
+- **Fw1** — refactor without matching test-first cycle. The current
+  58/0 tests pin the SKELETON interface; they exit 42. Real bodies
+  make them fail unless the tests are rewritten. Cure: rewrite tests
+  in same commit as bodies, but RED-first — tests fail first, then
+  bodies land, then tests pass.
+- **Fw2** — refactor scope creeps into interface change. Cure: 5-verb
+  signature LOCKED (O1 fold); only bodies change. Sub-step 2 (drive
+  cures) allowed to extend later.
+- **Fw3** — refactor breaks callers (3 drive stubs). Cure: drive stubs
+  return SMOKE_EXPECT_UNIMPLEMENTED=42 today; they don't call the 5
+  verbs yet. Real bodies don't affect them until sub-steps 2-4.
+
+Fold pre-code: **Fw1 fold** — commit N ships failing test rewrites +
+green real bodies together; commit is atomic; git bisect stays clean.
+
+## Deming lens — measurement system
+
+Does the test suite MEASURE what matters, or a proxy?
+
+- **D1** — tests measure "does the verb exit with expected code"
+  without verifying the SIDE EFFECT (expect subprocess actually
+  spawned + can be sent to). Proxy measurement. Cure: at least one
+  characterization test per verb reads the actual state file / capture
+  log / pid to confirm the side effect landed.
+- **D2** — tests use fake_claude fixture; tests pass; real claude in
+  Docker still fails. Cure: sub-step 5 adds a Dockerfile-time smoke
+  step (bash + expect + real claude auth) that runs against a known
+  prompt; V1 in this bet ships fake-only, V2 (sub-step 5) adds real
+  claude integration test.
+- **D3** — no measurement of variance across bash versions. macOS
+  bash 3.2 vs Debian bash 5. Cure: CI runs test suite under both;
+  bash 3.2 fixture in scripts/tests/ AND bash 5 in Docker container.
+
+Fold pre-code: **D1 fold** — every verb's test includes at least one
+side-effect assertion (file read, pid check, log content grep).
+
+## Folds landing pre-code (real-body scope, adversarial)
+
+Three additional folds ship BEFORE the first real body:
+
+7. **H2 fold** — drive_start writes state file AFTER spawn succeeds.
+8. **Fw1 fold** — RED-first commit shape; tests fail before bodies land.
+9. **D1 fold** — every verb-test asserts a side effect, not just an
+   exit code.
+
+Combined with the 6 folds from the Ousterhout/Feathers/Saltzer pre-
+mortem: 9 folds land pre-code.
