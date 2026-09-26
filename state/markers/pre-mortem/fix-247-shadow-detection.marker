@@ -1,0 +1,8 @@
+# Pre-mortem marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+- shape: light (2 lenses × 3-5 risks; top 2 folded)
+- ledger: docs/risk-ledgers/2026-09-26-247-shadow-detection.md
+- lenses: [donald-norman, michael-nygard]
+- folded: [N2, S1]

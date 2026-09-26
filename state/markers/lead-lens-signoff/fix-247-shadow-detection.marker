@@ -1,0 +1,16 @@
+# Lead-lens signoff marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+- lead: linus-torvalds
+- findings-cleared: no findings
+- notes: |
+    Adopter contract preserved. The check refuses cleanly when a shadow is present
+    and provides a clear bypass. Adopters running `bassclef init` outside the
+    smoke harness are not affected. Integration test verified — warning fires
+    with three options + literal path; bypass path proceeds with trace log.
+    S1 fold prevents false positive on non-bassclef adjacent directories.
+    N2 fold names the bypass flag inline in the warning.
+    Torvalds's "don't break userspace" lens verifies: adopter's smoke workflow
+    keeps working when no shadow is present. When one is present, it fails
+    loud with a message the operator can act on.

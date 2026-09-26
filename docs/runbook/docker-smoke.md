@@ -212,6 +212,51 @@ If a run needs a descriptive tag (nuked user scope, no-sync mode), edit the repo
 - Does not tag or push git.
 - Does not create the label — `smoke-report.sh` handles auto-create per cli#236.
 
+## Adjacent-shadow refusal (cli#247)
+
+The smoke harness refuses to run when an adjacent bassclef checkout at `$(dirname WORK_DIR)/bassclef` would shadow the npm install after Claude opens a session.
+
+### What triggers the refusal
+
+`smoke-reset.sh` and `harness/docker/entry.sh` both fire `detect_stale_bassclef_shadows` before doing any work. The function returns non-zero when both hold:
+
+1. A directory exists at `$(dirname WORK_DIR)/bassclef`
+2. The sentinel file `$(dirname WORK_DIR)/bassclef/presence/install/bassclef-hook-connect.sh` exists inside that directory
+
+For the host flow, `WORK_DIR = ${HOME}/tmp/bassclef-smoke-test`, so the shadow path is `${HOME}/tmp/bassclef`. For the docker flow, `WORK_DIR = ${ADOPTER_TEST_DIR:-/adopter/test}`, so the shadow path is `/adopter/bassclef`.
+
+### Why the class exists
+
+Peer trace at `bassclef-upstream#1953` and cure at `bassclef-upstream#1954`: the resolver `lib/bassclef-dir-resolver.sh` Check 1 tests `$CWD/../bassclef` before Check 3 tests the npm install path. If a stale bassclef clone sits next to the workdir, SessionStart resolves `BASSCLEF_DIR` to the stale clone and merges from its pre-v1.6.0 hook-connect fragment. Result: 44 phantom entries in `.claude/settings.json` at first Claude open.
+
+This runbook check is defense-in-depth. Peer's `#1954` fixes the resolver directly. This check catches the class at the harness surface before init even runs.
+
+### Three options when the refusal fires
+
+The warning lines the operator sees:
+
+```
+shadow-detection: WARN — adjacent bassclef checkout at <path> shadows the npm install.
+  This will corrupt settings.json when Claude opens (see bassclef-upstream#1954).
+  Options:
+    1. mv <path> <path>.aside   — recover the checkout later
+    2. rm -rf <path>            — destroy the stale checkout
+    3. SMOKE_ALLOW_SHADOW=1 <cmd>    — bypass this run (accept the risk)
+```
+
+Pick per situation:
+
+- **Recover later** — `mv ~/tmp/bassclef ~/tmp/bassclef.aside`. Non-destructive. Reversible.
+- **Destroy** — `rm -rf ~/tmp/bassclef`. The checkout gets removed. Use when you know the clone is stale and unwanted.
+- **Bypass** — `SMOKE_ALLOW_SHADOW=1 bash scripts/smoke-one-shot.sh --reset --install --cli-version X.Y.Z`. Run under override. The check emits a bypass log line to stderr but proceeds. Use only if you accept the risk of settings.json corruption at first Claude open.
+
+### Non-triggers (S1 fold — no false positives)
+
+- Directory at `$(dirname WORK_DIR)/bassclef` exists but sentinel file absent → check passes silently.
+- No adjacent directory at all → check passes silently.
+
+The check only fires on directories that carry the specific sentinel file. A random `~/tmp/bassclef/` scratch dir with no bassclef substrate inside does not block smoke.
+
 ## Refs
 
 - Goal doc — `docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md`

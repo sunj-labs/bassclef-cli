@@ -1,0 +1,16 @@
+# ADR-deviation marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+- adr_governing: ADR-002 (bassclef init safety contract); ADR-006 (install harness)
+- outcome: ADR-honored
+
+## Rationale
+
+The change extends existing scripts. It adds one shared defensive function and three call sites plus a runbook amendment. It does not touch `bassclef init` itself. It does not touch the safety contract's path scoping, atomic writes, or escape-hatch matrix per ADR-002.
+
+The check fires BEFORE init, in the smoke harness only. Adopters running `bassclef init` directly are not affected. The check is scoped to smoke-reset + smoke-one-shot + docker entry.sh — three harness surfaces owned by the CLI repo, not by adopter machines.
+
+ADR-006 install harness names the runbook as the operator surface; the amendment extends the runbook without contradicting its five decision points.
+
+No new ADR filed. Change stays within existing ADR envelope.

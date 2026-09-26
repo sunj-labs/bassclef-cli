@@ -31,6 +31,24 @@ _docker_harness_source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./exit-codes.sh
 source "${_docker_harness_source_dir}/exit-codes.sh"
 
+# Source shared adjacent-shadow detection (cli#247).
+# In-container layout: scripts/ is copied to /adopter/scripts/ per Dockerfile
+# L52 + SMOKE_SCRIPTS_DIR=/adopter/scripts is set at L62. Host layout: the lib
+# lives at ../../scripts/lib/ relative to entry.sh.
+_docker_harness_scripts_dir="${SMOKE_SCRIPTS_DIR:-${_docker_harness_source_dir}/../../scripts}"
+if [[ -f "${_docker_harness_scripts_dir}/lib/shadow-detection.sh" ]]; then
+  # shellcheck source=../../scripts/lib/shadow-detection.sh
+  source "${_docker_harness_scripts_dir}/lib/shadow-detection.sh"
+else
+  # Lib missing — define a no-op fallback so the check is a soft-skip.
+  # This preserves fail-loud in the Tier 0 tests (which fail if lib missing)
+  # while keeping the container path resilient.
+  detect_stale_bassclef_shadows() {
+    echo "shadow-detection: lib missing at ${_docker_harness_scripts_dir}/lib/shadow-detection.sh — skipping shadow check" >&2
+    return 0
+  }
+fi
+
 # ---------------------------------------------------------------------------
 # _docker_harness_emit_evidence_row
 # Precondition: HARNESS_EVENT_LOG is a writable path OR test mode default applies
@@ -473,6 +491,15 @@ main() {
   if (( code != 0 )); then
     _docker_harness_emit_evidence_row "preflight_fail" "V1 preflight failed with code $code"
     exit "$code"
+  fi
+
+  # Action 1b: adjacent-shadow check (cli#247) — refuse if a stale bassclef
+  # checkout at $(dirname WORKDIR)/bassclef would shadow the npm install.
+  # Set SMOKE_ALLOW_SHADOW=1 in the container env to bypass.
+  local _shadow_workdir="${ADOPTER_TEST_DIR:-/adopter/test}"
+  if ! detect_stale_bassclef_shadows "$_shadow_workdir"; then
+    _docker_harness_emit_evidence_row "shadow_detected" "adjacent bassclef shadow at $(dirname "$_shadow_workdir")/bassclef; set SMOKE_ALLOW_SHADOW=1 to bypass"
+    exit 1
   fi
 
   # Action 2: install

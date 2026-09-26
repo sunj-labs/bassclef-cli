@@ -18,8 +18,9 @@
     "docs/specs/2026-09-21c-smoke-drive-riff.md",
     "docs/decompositions/2026-09-21c-smoke-drive-riff.md",
     "docs/architecture/reviews/2026-09-21c-smoke-drive-riff.md",
-    ".claude/hooks/tests/docker-harness-entry.test.sh"
+    ".claude/hooks/tests/docker-harness-entry.test.sh",
+    "state/markers/luminary/fix-247-shadow-detection.marker"
   ],
-  "last_scanned": "2026-09-22T18:57:26Z",
+  "last_scanned": "2026-09-26T10:50:09Z",
   "scanner_version": "1.0"
 }
