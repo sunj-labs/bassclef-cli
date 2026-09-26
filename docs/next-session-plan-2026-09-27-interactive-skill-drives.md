@@ -85,3 +85,38 @@ Extrapolating: this scope shipped in ~200 turns as a single session (option a) o
 3. /riff last (dep on cli#241 MCP cure)
 
 If cli#241 blocks, ship the first two + defer /riff to a follow-on.
+
+---
+
+## Sub-step progress (overnight 2026-09-26)
+
+| Sub-step | Scope | Status | PR |
+|---|---|---|---|
+| 0 | Walking skeleton (5-verb interface + 3 drive stubs + registry) | shipped 2026-09-26 | #255 |
+| **1** | Real smoke-expect.sh bodies + fake_claude fixture + 35 Tier 0 tests | **shipped 2026-09-26 (overnight)** | **#256** |
+| 2 | Real /onboard-repo drive body (calls the 5 verbs; asserts .claude/settings.json + substrate.config.md) | pending next session | — |
+| 3 | Real /launch drive body (asserts docs/prototypes/ + docs/specs/) | pending | — |
+| 4 | Real /riff drive body (advisory skip when cli#241 blocks) | pending | — |
+| 5 | Dockerfile installs expect + real-claude integration test | pending | — |
+| 6 | entry.sh Step 8 wire + smoke-report interactive-class rows + docs/runbook/docker-smoke.md exit-code table extension | pending | — |
+
+## Pickup for next session (sub-step 2)
+
+**Scope:** real `scripts/smoke-drive-interactive-onboard-repo.sh` body.
+
+**Reads:**
+- `scripts/lib/smoke-expect.sh` (merged 2d33dbd) — the 5-verb interface + fake_claude fixture
+- `scripts/smoke-drive-onboard-repo.sh` — existing headless /onboard-repo drive (assertion shape reference)
+- `.claude/skills/onboard-repo/SKILL.md` — Phase sequence + prompts the drive needs to send/expect
+
+**Approach:**
+- Read the SKILL body to enumerate Phase 0 → N prompts + expected responses
+- Wire drive_start + sequence of drive_send/drive_expect per phase
+- Assert filesystem artifacts (`settings.json`, `substrate.config.md`, `docs/whereami.md`)
+- Test against fake_claude fixture with a scripted response map (extend fixture if needed)
+- Real-claude integration deferred to sub-step 5 wire
+
+**Estimated turns:** 60-100 (bounded by SKILL body complexity + assertion set size).
+
+**Ceremony:** Class (b) script extension per `.claude/rules/oo-ad-entry-point.md`. Brief use case + /decompose entry-point check. Lighter than sub-step 1's Class (c) since the interface is already pinned.
+
