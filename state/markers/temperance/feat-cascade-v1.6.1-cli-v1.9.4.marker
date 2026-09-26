@@ -1,0 +1,11 @@
+# Temperance marker — feat/cascade-v1.6.1-cli-v1.9.4
+- date: 2026-09-26
+- branch: feat/cascade-v1.6.1-cli-v1.9.4
+- scope-decision: Cascade bassclef v1.6.1 substrate → cli v1.9.4. Bumps publish.yml pin (2 sites) + version bump via `npm run bump patch` + CHANGELOG entries for v1.6.1 substrate + PR #248 + PR #249 + PR #250.
+- right-thing: v1.6.1 ships the #1954 resolver + filter-on-read cure; cli must pin the new tag to distribute it to adopters via npm.
+- right-way: match the prior v1.6.0 → cli v1.9.3 cascade pattern (single PR bundling pin bump + version bump + CHANGELOG); agent-merges-within-scope; operator Touch ID at npm publish env gate.
+- brute-force check: not guessing — pattern is well-established (v1.5.0, v1.5.1, v1.5.2, v1.6.0 all shipped identically per whereami L28-L31); this is pattern application, not novel scope.
+- blast-radius: LOW — pin bump + version bump only, no cli code changes; ADR-031 grace preserved by substrate's Nygard fail-through; adopters on v1.9.3 unaffected until they update.
+- verification: docker-smoke workflow_dispatch on v1.9.4 post-publish; expect PASS 43/0/43 or better with zero phantom BLOCKED banners.
+- reversible: version bump is forward-only (semver); rollback = deprecate v1.9.4 on npm + revert PR; adopters can stay on v1.9.3 until fixed.
+- drift-trigger: if publish workflow fails at env gate OR docker-smoke fails RED on v1.9.4 → pause + diagnose.

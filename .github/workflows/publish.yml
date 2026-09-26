@@ -133,7 +133,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.6.0
+          ref: v1.6.1
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
@@ -278,7 +278,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.6.0
+          ref: v1.6.1
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1

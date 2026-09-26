@@ -1,0 +1,7 @@
+# Temperance marker — goal 2026-09-26c
+- date: 2026-09-26
+- branch: main
+- scope-decision: b then c — ticket triage sweep (#219 + #217 + #227) then peer coord check on bassclef-upstream#1954 + #1955
+- right-thing: close stale tickets so sprint views match shipped reality; confirm peer's overnight cures landed
+- right-way: read PR + git log evidence per ticket before closing; comment with commit SHA + PR ref; do not close silently
+- drift-trigger: if scope expands to #244 smoke expansion or cli code work → pause + re-anchor
