@@ -1,0 +1,9 @@
+# Luminary marker — feat/254-interactive-skill-drives
+- date: 2026-09-26
+- branch: feat/254-interactive-skill-drives
+- lead: alistair-cockburn — walking skeleton discipline; end-to-end wiring before content; use case shape drives the scripts
+- supporting: [kent-beck, michael-feathers, michael-nygard]
+  - kent-beck — TDD RED-first; force-red validation; one assertion per artifact
+  - michael-feathers — characterization tests as fixtures; real expect binary against real claude output; assert on filesystem not prose
+  - michael-nygard — stability pattern for expect brittleness; retry pattern per drive; timeout discipline; distinct exit codes per failure class
+- rationale: cli#254 is walking-skeleton class per prior 3 PRs (2026-09-22b/c/21b). Cockburn matches the pattern. Beck + Feathers + Nygard fold in the tactical discipline layers.

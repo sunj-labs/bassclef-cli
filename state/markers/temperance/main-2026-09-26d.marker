@@ -1,0 +1,11 @@
+# Temperance marker — goal 2026-09-26d /longrun session
+- date: 2026-09-26
+- branch: main (pre-branch creation, then feat/254-interactive-skill-drives)
+- scope-decision: Option a from plan doc — expect-based interactive drives for /onboard-repo + /riff + /launch. Ships 3 new drive scripts + shared smoke-expect.sh lib + Dockerfile install of expect + entry.sh wire + smoke-assert.sh extensions. Fully-dressed OOAD ceremony per 2026-09-22b/c pattern.
+- right-thing: adopters running v1.9.4 need real signal on multi-phase skills; headless docker smoke misses the class where refuses and MCP gaps live
+- right-way: brief Cockburn UC → decompose (GRASP + BCE) → pre-mortem light 3 lenses → RFC council 4 outside lenses → Beck TDD RED-first → cure → GREEN → architect-review → PR (agent-merges-within-scope)
+- brute-force check: not guessing — pattern shipped 3x this month (2026-09-22b PR #216, 2026-09-22c PR #218, 2026-09-21b PR #196); this reuses infra + follows the same discipline
+- blast-radius: MEDIUM — new scripts in scripts/; Dockerfile install of expect (adds ~5MB to container); no cli src/ changes; no auth/schema/security touched; ADR-031 grace preserved (adopters not affected until they rebuild)
+- verification: docker-smoke workflow_dispatch on v1.9.4 post-merge; expect 46+ assertions all PASS (43 baseline + 3+ new drives with 1+ assertion each)
+- reversible: revert PR = drop new scripts + revert Dockerfile line; no adopter path affected
+- drift-trigger: if scope grows beyond the 3 named skills, if ceremony exceeds 250 turns, if a step blocks on cli#241 (MCP gap for /riff) — pause + re-scope

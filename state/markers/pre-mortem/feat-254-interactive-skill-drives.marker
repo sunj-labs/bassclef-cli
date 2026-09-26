@@ -1,0 +1,8 @@
+# Pre-mortem marker — feat/254-interactive-skill-drives
+- date: 2026-09-26
+- branch: feat/254-interactive-skill-drives
+- ledger: docs/risk-ledgers/2026-09-26-cli-254-interactive-drives.md
+- lenses: [michael-feathers, kent-beck, alistair-cockburn]
+- risk_count: 18 (6 per lens)
+- top_folds: 6 (F1 filesystem-not-prose; F5 dual-channel; B1 RED-first commit; B6 force-red; C3 retry pattern; C4 report row shape)
+- deferred: F3 (/riff MCP two-branch), C1 (skeleton-first split into 4 commits)
