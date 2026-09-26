@@ -1,0 +1,34 @@
+# Pre-mortem marker — cli#254 sub-step 2 (/onboard-repo drive real body)
+- date: 2026-09-26
+- branch: feat/254-onboard-repo-drive-body
+- mode: /pre-mortem light (class-b abbreviated; 2 lenses × 3-4 risks)
+- lenses: [john-ousterhout, michael-feathers]
+- parent-ledger: docs/risk-ledgers/2026-09-26-cli-254-interactive-drives.md
+- class-b-specific risks:
+
+## Ousterhout lens — interface stability under body swap
+
+- **O6** — drive main() adds a positional arg. Cure: env-var-driven
+  config; SPAWN_CMD + PATTERN + PROMPT_TEXT all env.
+- **O7** — env-var scope leaks between drive invocations in same
+  shell. Cure: tests `unset` between assertions; document env
+  contract in drive body comment.
+- **O8** — bash 3.2 empty-array under `set -u` bombs on spawn args.
+  Cure: use `${var:-}` + IFS split; skip drive_start's variadic when
+  args_str empty.
+
+## Feathers lens — characterization tests
+
+- **F11** — fake_claude latency doesn't match real claude; test
+  passes locally but times out in Docker with real claude on cold
+  cache. Cure: SMOKE_DRIVE_TIMEOUT env override + docs note that
+  Docker CI uses 300s vs test's 5s.
+- **F12** — pattern regex too tight; fake_claude echo shape
+  ("RESP: X") differs from real claude output. Cure: env-driven
+  patterns; defaults match fake fixture; sub-step 5/6 wires real
+  patterns.
+
+Folds landing pre-code:
+1. O6 — env-var-driven; no new positional args (baked into drive body)
+2. O8 — spawn args empty-safe under bash 3.2 (baked into drive body)
+3. F12 — env-driven patterns (baked into drive body)
