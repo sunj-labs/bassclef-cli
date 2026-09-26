@@ -93,12 +93,22 @@ If cli#241 blocks, ship the first two + defer /riff to a follow-on.
 | Sub-step | Scope | Status | PR |
 |---|---|---|---|
 | 0 | Walking skeleton (5-verb interface + 3 drive stubs + registry) | shipped 2026-09-26 | #255 |
-| **1** | Real smoke-expect.sh bodies + fake_claude fixture + 35 Tier 0 tests | **shipped 2026-09-26 (overnight)** | **#256** |
-| 2 | Real /onboard-repo drive body (calls the 5 verbs; asserts .claude/settings.json + substrate.config.md) | pending next session | — |
-| 3 | Real /launch drive body (asserts docs/prototypes/ + docs/specs/) | pending | — |
-| 4 | Real /riff drive body (advisory skip when cli#241 blocks) | pending | — |
-| 5 | Dockerfile installs expect + real-claude integration test | pending | — |
-| 6 | entry.sh Step 8 wire + smoke-report interactive-class rows + docs/runbook/docker-smoke.md exit-code table extension | pending | — |
+| 1 | Real smoke-expect.sh bodies + fake_claude fixture + 35 Tier 0 tests | shipped 2026-09-26 | #256 |
+| 2 | Real /onboard-repo drive body | shipped 2026-09-26 | #257 |
+| 3 | Real /launch drive body | shipped 2026-09-26 | #258 |
+| 4 | Real /riff drive body (SKIP_RIFF_INTERACTIVE preserved for cli#241) | shipped 2026-09-26 | #259 |
+| 5 | Dockerfile installs expect + real-claude integration test | pending next session | — |
+| 6 | entry.sh Step 8 wire + smoke-report interactive-class rows | pending | — |
+
+## Batch extension (per operator directive)
+
+| Batch | Skills | Status | PR |
+|---|---|---|---|
+| A | dev-flow: sprint / whereami / temperance / diagnose / verify / kiss / luminary | shipped 2026-09-26 | #260 |
+| B | SDLC-chain: shape / spec / decompose / build / architect-review / longrun-prep / session-end | shipped 2026-09-26 | #261 |
+| C | authoring: state-a-problem / value-prop / whats-the-plan / roadmap-reconcile / promote / interpret-input / use-case | shipped 2026-09-26 | #262 |
+
+Total: 21 skills interactive-drive-capable via generic driver + catalog. Excluded: /release, /release-notes, /deploy (production side effects; deferred to per-skill design).
 
 ## Pickup for next session (sub-step 2)
 
