@@ -86,6 +86,45 @@ Two paths, prefer OAuth. Per #184.
 
 **Adding to CI:** create a repo secret named `CLAUDE_CODE_OAUTH_TOKEN` with the token from `claude setup-token`. The `docker-smoke.yml` workflow already passes it when set.
 
+## Auth-path bifurcation (cli#245 + cli#227)
+
+If you use Claude Code's Remote Control on the same Mac that runs docker smoke, do NOT put `CLAUDE_CODE_OAUTH_TOKEN` in your shell profile. Long-lived tokens make interactive Claude sessions refuse `/remote-control` with "long-lived token limited to inference-only." Pick one of two isolation paths.
+
+### Path 1 — File-scoped token (recommended)
+
+Store the token in a file. The docker harness reads it as a fallback when the env var is absent.
+
+1. Run `claude setup-token` once to produce the token.
+2. Write it to `~/.config/claude/oauth-token`:
+   ```bash
+   mkdir -p ~/.config/claude
+   echo '<token>' > ~/.config/claude/oauth-token
+   chmod 600 ~/.config/claude/oauth-token
+   ```
+3. Do NOT export `CLAUDE_CODE_OAUTH_TOKEN` in `~/.zshrc` or `~/.bashrc`.
+4. Interactive `claude` sees no long-lived token; `/remote-control` arms cleanly.
+5. Docker harness reads from the file. Two ways:
+   - **Host inline** (any container invocation): `docker run -e CLAUDE_CODE_OAUTH_TOKEN=$(cat ~/.config/claude/oauth-token) ...` — token stays in the container process only.
+   - **Container-native fallback** (mount the config dir): `docker run -v ~/.config/claude:/root/.config/claude:ro ...`. Entry.sh's preflight_v2 reads it and logs `INFO: loaded CLAUDE_CODE_OAUTH_TOKEN from <path> (V2 file-fallback per cli#227)`.
+6. Custom location: set `CLAUDE_OAUTH_TOKEN_FILE=<path>` in the container env to override the default.
+
+### Path 2 — direnv-scoped token
+
+Store the token in an `.envrc` local to the repo where you run docker smoke.
+
+1. `echo 'export CLAUDE_CODE_OAUTH_TOKEN=<token>' >> ~/src/sunj-labs/bassclef-cli/.envrc`
+2. `direnv allow ~/src/sunj-labs/bassclef-cli`
+3. Add `.envrc` to your global gitignore or `~/src/sunj-labs/bassclef-cli/.git/info/exclude`.
+4. Every shell OUTSIDE that directory has no token. Interactive Claude in other paths works with Remote Control.
+5. Every shell INSIDE that directory has the token. Docker harness invocations there work.
+
+### Which path to pick
+
+- **Path 1** — most flexible. Works with any shell state. Container reads inline or via mount. Recommended for adopters who use Remote Control frequently.
+- **Path 2** — repo-scoped. Simpler for adopters who mostly work inside one repo. `.envrc` becomes the source of truth.
+
+Env var still takes precedence when set. File-fallback fires only when `CLAUDE_CODE_OAUTH_TOKEN` is absent from the environment. Empty or unreadable file falls through to the standard env-missing error path.
+
 ## Exit-code vocabulary
 
 Read the exit code to know what the container detected.

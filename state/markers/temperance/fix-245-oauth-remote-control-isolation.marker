@@ -1,0 +1,23 @@
+# Temperance marker — cli#245 (dup #227) OAuth vs Remote Control isolation
+
+- date: 2026-09-26
+- branch: fix/245-oauth-remote-control-isolation
+
+## Scope decision (one sentence)
+
+Add file-fallback path to `harness/docker/entry.sh` (reads `~/.config/claude/oauth-token` when env var unset), document the two auth paths in `docs/runbook/docker-smoke.md`, add Tier 0 tests characterizing the file-fallback path.
+
+## Answers to the six temperance questions
+
+0. **RIGHT THING?** Yes — reproduces on operator's Mac; #227 (S) + #245 (M) both open on this class; fix unblocks Remote Control + docker parallel use.
+1. **SIMPLEST?** Yes — file fallback in one function; two acceptance paths in one docs section; 3-4 Tier 0 tests.
+2. **BRUTE FORCE?** No — root cause named (same env var, conflicting semantics); cure named in #227 acceptance criteria.
+3. **BLAST RADIUS?** 🟢 low — harness change is additive fallback (only fires when env var absent); adopters with existing env-var setups keep working; docs section is new content.
+4. **VERIFICATION?** Tier 0 tests pin file-fallback path + env-var-wins-when-both-set + missing-file-and-env-fails behavior + docker harness dry-run confirms fallback.
+5. **REVERSIBLE?** Yes — pure additive fallback; revert to restore prior behavior.
+
+## Drift triggers
+
+- Any Edit touches auth backend semantics (long-lived vs session-scoped) → PAUSE (out of scope; upstream Claude Code).
+- Scope creep to `/onboard-repo` prompt → defer to follow-on per #227 out-of-scope.
+- Step count exceeds 90 turns on Step 5 → checkpoint + reassess.

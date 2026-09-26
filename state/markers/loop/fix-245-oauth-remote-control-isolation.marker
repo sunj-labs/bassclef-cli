@@ -1,0 +1,12 @@
+# Loop marker — cli#245 (dup #227) OAuth vs Remote Control isolation
+
+- date: 2026-09-26
+- branch: fix/245-oauth-remote-control-isolation
+- iteration_count: 1
+- outcome: GREEN
+- notes: |
+    Beck TDD RED-first — 2 new tests failed against unmodified entry.sh
+    (file-fallback default + custom path).
+    GREEN phase — file-fallback branch added to _docker_harness_preflight_v2;
+    35/35 Tier 0 tests pass (5 new + 30 existing).
+    No RED→GREEN cycles beyond the first.
