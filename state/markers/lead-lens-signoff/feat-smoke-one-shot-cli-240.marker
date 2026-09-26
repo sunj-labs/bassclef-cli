@@ -1,0 +1,4 @@
+# Lead-lens sign-off — smoke-one-shot script
+- lead: saltzer-schroeder
+- findings-cleared: no findings — new wrapper, additive, syntax-checked (bash -n), no changes to existing smoke chain
+- notes: rollback = delete file. Runbook amendment is additive.

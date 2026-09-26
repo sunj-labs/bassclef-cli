@@ -1,0 +1,7 @@
+# Pre-mortem light — smoke-one-shot script
+- branch: feat/smoke-one-shot-cli-240
+- lenses: Klein (blast radius), Nygard (fail-soft), Feathers (characterization)
+- top-3 risks folded:
+  1. Non-semver version accepted → labels never resolve (folded: strict regex validate before gh call)
+  2. Missing package.json + no CLI_VERSION env → falls through to (unspecified) label (folded: exit 1 with fix prompt)
+  3. CDN cold post-publish → smoke hits EXIT_INSTALL_FAIL (folded: curl registry probe warns but continues, chain runs against local install)

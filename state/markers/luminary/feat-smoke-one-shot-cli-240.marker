@@ -1,0 +1,4 @@
+# Luminary consult — smoke-one-shot script
+- lead: saltzer-schroeder (fail-safe defaults — validate BEFORE gh call, never after)
+- supporting: [feathers (characterization — script exercises real smoke chain end-to-end), cooper (command shape — one flag, one purpose)]
+- what the lead caught: prior label failures were fail-open — script accepted arbitrary version text and let gh reject downstream. Fix: validate first, refuse fast.
