@@ -1,0 +1,23 @@
+# Temperance marker — cli#254 Batch A drives (dev-flow skills)
+- date: 2026-09-26
+- branch: feat/254-batch-a-drives
+- ceremony-class: (b) existing code extension; adds shared driver + catalog
+- prior-substeps: 0-4 shipped (walking skeleton + 3 real drive bodies)
+- scope-decision:
+  - right-thing: ship a generic driver + catalog module that covers 7
+    high-frequency dev-flow skills — /sprint, /whereami, /temperance,
+    /diagnose, /verify, /kiss, /luminary. One driver + 7 catalog entries
+    replaces 7 near-identical drive files.
+  - right-way: keep existing 3 walking-skeleton drives untouched
+    (backward-compat per we-don't-break-adopters). Batch A adds NEW
+    surfaces only.
+  - drift-trigger: any change to existing drive files (onboard-repo,
+    launch, riff) is drift — those are pinned by sub-step 2/3/4 tests.
+- blast-radius:
+  - inside scope: scripts/smoke-drive-generic.sh (new),
+    scripts/lib/smoke-drive-catalog.sh (new), scripts/tests/
+    smoke-drive-generic.test.sh (new). 3 new files. Zero touches to
+    existing drives.
+  - outside scope: Batch B (SDLC skills), Dockerfile wire, entry.sh wire.
+- authorization: agent-merges-within-scope (per operator "expand driver
+  ... batches of 5-7 consequential skills").

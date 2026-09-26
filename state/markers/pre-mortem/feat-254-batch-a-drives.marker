@@ -1,0 +1,26 @@
+# Pre-mortem marker — cli#254 Batch A drives
+- date: 2026-09-26
+- branch: feat/254-batch-a-drives
+- lenses: [john-ousterhout, david-parnas, michael-feathers]
+- risks:
+  - **BA1** — catalog case statement grows unwieldy past 15 entries.
+    Cure: hard cap at ~15 skills per catalog module; if we need more,
+    split into per-batch catalog files (batch-a-catalog, batch-b-catalog).
+  - **BA2** — env var name collision with the 3 walking-skeleton drives.
+    Cure: SMOKE_DRIVE_* env vars are shared; per-skill overrides via
+    SKILL_NAME arg pass a catalog default.
+  - **BA3** — SKILL_NAME arg positional in generic driver differs from
+    walking-skeleton signature (SCRATCH_DIR first). Cure: document
+    interface as generic-specific; caller uses whichever driver fits.
+  - **BA4** — test iteration failure aborts remaining skill checks.
+    Cure: per-skill test blocks; failure counts continue; final PASS/FAIL
+    sums across all.
+  - **BA5** — catalog defaults drift from adopter reality; fake_claude
+    tests pass but real claude in Docker fails. Cure: default patterns
+    match fake_claude shape; sub-step 5/6 wires real-claude patterns
+    via SMOKE_DRIVE_*_PATTERN env for each skill separately.
+- folds landing pre-code:
+  1. BA1 fold — cap catalog per file at 15 entries (Batch A = 7, Batch B
+     = 7; total ~14, fits).
+  2. BA3 fold — generic driver signature documented distinctly.
+  3. BA4 fold — test file collects per-skill results into aggregate PASS/FAIL.
