@@ -1,0 +1,6 @@
+# Luminary marker — cli#254 sub-step 4
+- date: 2026-09-26
+- branch: feat/254-riff-drive-body
+- lead: john-ousterhout
+- supporting: [michael-feathers]
+- rationale: sub-steps 2+3 pattern; interface stability + characterization.

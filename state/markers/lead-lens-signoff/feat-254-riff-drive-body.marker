@@ -1,0 +1,8 @@
+# Lead lens sign-off — cli#254 sub-step 4 (/riff drive real body)
+- date: 2026-09-26
+- branch: feat/254-riff-drive-body
+- lead: john-ousterhout
+- findings-status: no findings (14/14 Tier 0 GREEN)
+- verdict: interface stable; SKIP_RIFF_INTERACTIVE=1 retains cli#241 skip
+  semantics; drive body ready for Docker CI wire at sub-step 6.
+- sign-off: GO.
