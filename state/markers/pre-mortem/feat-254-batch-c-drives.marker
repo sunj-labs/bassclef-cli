@@ -1,0 +1,14 @@
+# Pre-mortem marker — cli#254 Batch C drives
+- date: 2026-09-26
+- branch: feat/254-batch-c-drives
+- lenses: [john-ousterhout, michael-feathers]
+- risks:
+  - **BC1** — hyphen-heavy skill names may hit bash pattern edge case.
+    Cure: same as Batch B — verify with 116/116 GREEN test iteration.
+  - **BC2** — /promote fires a `gh issue create` in real claude; would
+    pollute bassclef-cli's ticket queue. Cure: sub-step 5/6 wire runs
+    in isolated Docker; local tests use fake_claude (no gh side effects).
+  - **BC3** — Batch C reaches 21-skill catalog total. Case statements
+    cross the ~15-entry cure threshold from Batch A pre-mortem BA1.
+    Cure: monitor for growth past 25; split catalog if it hits.
+- folds: identical to Batches A/B.

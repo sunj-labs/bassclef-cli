@@ -1,0 +1,7 @@
+# ADR-deviation marker — cli#254 Batch C drives
+- date: 2026-09-26
+- branch: feat/254-batch-c-drives
+- adr_governing: none — pure catalog extension
+- outcome: ADR-honored
+- rationale: 3rd batch extension of the Batch A pattern. No architectural
+  invariant crossed.

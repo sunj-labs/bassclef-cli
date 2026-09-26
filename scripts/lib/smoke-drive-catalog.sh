@@ -35,6 +35,14 @@ _catalog_prompt() {
     architect-review) echo "run /architect-review" ;;
     longrun-prep)     echo "run /longrun prep" ;;
     session-end)      echo "run /session-end" ;;
+    # Batch C — authoring / thought skills (safe smoke; no prod side effects)
+    state-a-problem)  echo "run /state-a-problem brief" ;;
+    value-prop)       echo "run /value-prop tweet" ;;
+    whats-the-plan)   echo "run /whats-the-plan" ;;
+    roadmap-reconcile) echo "run /roadmap-reconcile --dry-run" ;;
+    promote)          echo "run /promote bassclef-evolution" ;;
+    interpret-input)  echo "run /interpret-input" ;;
+    use-case)         echo "run /use-case brief" ;;
     *)                return 1 ;;
   esac
 }
@@ -46,7 +54,8 @@ _catalog_prompt() {
 _catalog_ready() {
   case "$1" in
     sprint|whereami|temperance|diagnose|verify|kiss|luminary|\
-    shape|spec|decompose|build|architect-review|longrun-prep|session-end)
+    shape|spec|decompose|build|architect-review|longrun-prep|session-end|\
+    state-a-problem|value-prop|whats-the-plan|roadmap-reconcile|promote|interpret-input|use-case)
       echo "READY>|>"
       ;;
     *) return 1 ;;
@@ -58,7 +67,8 @@ _catalog_ready() {
 _catalog_done() {
   case "$1" in
     sprint|whereami|temperance|diagnose|verify|kiss|luminary|\
-    shape|spec|decompose|build|architect-review|longrun-prep|session-end)
+    shape|spec|decompose|build|architect-review|longrun-prep|session-end|\
+    state-a-problem|value-prop|whats-the-plan|roadmap-reconcile|promote|interpret-input|use-case)
       echo "DONE>|complete|done"
       ;;
     *) return 1 ;;
@@ -85,6 +95,14 @@ _catalog_timeout() {
     build)            echo "300" ;;   # construction chain
     architect-review) echo "300" ;;   # audit
     longrun-prep)     echo "300" ;;   # meta-prep
+    # Batch C — authoring / thought skills; typically fast
+    value-prop)       echo "60"  ;;   # ≤280 chars tweet
+    whats-the-plan)   echo "60"  ;;   # plan declaration
+    state-a-problem)  echo "90"  ;;   # brief problem statement
+    interpret-input)  echo "120" ;;   # input classifier
+    use-case)         echo "120" ;;   # brief use case
+    promote)          echo "120" ;;   # promote candidate
+    roadmap-reconcile) echo "180" ;;  # canvas reconciliation
     *) return 1 ;;
   esac
 }
@@ -95,6 +113,7 @@ _catalog_list_batch() {
   case "$1" in
     batch-a) echo "sprint whereami temperance diagnose verify kiss luminary" ;;
     batch-b) echo "shape spec decompose build architect-review longrun-prep session-end" ;;
+    batch-c) echo "state-a-problem value-prop whats-the-plan roadmap-reconcile promote interpret-input use-case" ;;
     *) return 1 ;;
   esac
 }
@@ -102,8 +121,9 @@ _catalog_list_batch() {
 # _catalog_all_skills
 # Emits space-separated list of every skill in the catalog.
 _catalog_all_skills() {
-  local a b
+  local a b c
   a=$(_catalog_list_batch batch-a)
   b=$(_catalog_list_batch batch-b)
-  echo "$a $b"
+  c=$(_catalog_list_batch batch-c)
+  echo "$a $b $c"
 }

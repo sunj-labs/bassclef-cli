@@ -1,0 +1,7 @@
+# Luminary marker — cli#254 Batch C drives
+- date: 2026-09-26
+- branch: feat/254-batch-c-drives
+- lead: john-ousterhout
+- supporting: [david-parnas, michael-feathers]
+- rationale: same Ousterhout deep-module + Parnas information-hiding +
+  Feathers characterization triad as Batches A/B.
