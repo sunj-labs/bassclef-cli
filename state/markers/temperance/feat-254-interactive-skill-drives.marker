@@ -1,0 +1,11 @@
+# Temperance marker — feat/254-interactive-skill-drives
+- date: 2026-09-26
+- branch: feat/254-interactive-skill-drives
+- scope-decision: Ship cli#254 as one PR. 3 new drive scripts (interactive-onboard-repo, interactive-riff, launch) + new shared lib scripts/lib/smoke-expect.sh + Dockerfile install of expect + entry.sh wire.
+- right-thing: closes the headless-only gap in docker smoke
+- right-way: Beck TDD RED first; expect-fixture tests per drive; smoke-expect.sh gets Tier 0 test coverage per testing-tier-config.md
+- brute-force check: not guessing — plan doc L45-77 has the design; #254 body has acceptance
+- blast-radius: same as session marker
+- verification: local Tier 0 tests GREEN + CI docker-smoke GREEN + workflow_dispatch on v1.9.4 GREEN
+- reversible: revert PR
+- drift-trigger: if new drive misses positive-artifact assertion → catch at RED; if /riff drive blocks on cli#241 → ship as ADVISORY skip with comment
