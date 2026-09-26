@@ -24,6 +24,29 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.4] - 2026-09-26
+### Added
+
+- **cli#247 — smoke-reset shadow detection.** New `scripts/lib/shadow-detection.sh` module + `detect_stale_bassclef_shadows` function wired into `smoke-reset` Step 0 + `harness/docker/entry.sh` Action 1b. Warns when an adjacent bassclef checkout at `$HOME/tmp/bassclef` shadows the npm install; names three options (mv aside, rm -rf, `SMOKE_ALLOW_SHADOW` bypass). Cli-side defense-in-depth complement to substrate's Layer 1a resolver precedence swap. 11/11 Tier 0 GREEN. Shipped via PR #248.
+
+- **cli#245 + cli#227 — OAuth token file-fallback in preflight_v2.** `_docker_harness_preflight_v2` reads token from `${CLAUDE_OAUTH_TOKEN_FILE:-$HOME/.config/claude/oauth-token}` when `CLAUDE_CODE_OAUTH_TOKEN` env var is empty; env still wins when both are set. Runbook `docs/runbook/docker-smoke.md` gains "Auth-path bifurcation" section — Path 1 (file-scoped token, chmod 600) + Path 2 (direnv-scoped). Adopters running docker harness AND `/remote-control` in the same install no longer need to choose. Shipped via PR #249.
+
+### Changed
+
+- Bump bassclef substrate pin `v1.6.0` → `v1.6.1` in `.github/workflows/publish.yml` (both checks + publish jobs). The v1.6.1 substrate ships the resolver precedence + filter-on-read cure per bassclef-upstream#1954. Two layers land: (1) `lib/bassclef-dir-resolver.sh` swaps Check 3 (bundled walk from `HOOK_REAL_PATH`) above Check 1 (peer path) — npm install now wins over stale sibling checkouts at `$HOME/tmp/bassclef`; (2) `presence/install/bassclef-hook-connect.sh` filters out entries whose target hook file is missing at `$bassclef_root/.claude/hooks/<basename>` before merge, with per-skip stderr + warn banner over `BASSCLEF_HOOK_CONNECT_SKIP_WARN` threshold (default 5). Closes the #1953 shadow class end-to-end when combined with cli#247 host-side shadow detection.
+
+### Fixed
+
+- **cli harness test isolation (PR #250).** Two pre-existing hermetic tests broke on operator's Mac after saving OAuth token to `~/.config/claude/oauth-token` because `_docker_harness_preflight_v2` file-fallback path started reading it. Cured by setting `CLAUDE_OAUTH_TOKEN_FILE=/dev/null` in the affected `bash -c` blocks. Full harness suite 35/35 GREEN again.
+
+### Notes
+
+- Two-layer defense for the 44-hook Mac cold-adopter leak class now shipped:
+  - **Substrate side:** v1.6.1 resolver precedence + filter-on-read (bassclef-upstream#1954, closed 2026-09-26T11:47Z via PR #1956; released as public bassclef v1.6.1 same day at commit `972a2a48`).
+  - **Cli side:** smoke-reset + docker entry.sh shadow detection (cli#247, closed 2026-09-26 via PR #248).
+  - **Retroactive residue cleanup:** bassclef-upstream#1955 (bassclef doctor tool) still in flight; peer's next scope.
+- Docker cold-adopter smoke on v1.9.4 will exercise both layers simultaneously — expect PASS 43/0/43 or better with zero phantom BLOCKED banners on the interactive claude drive.
+
 ## [1.9.3] - 2026-09-25
 ### Added
 
