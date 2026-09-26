@@ -1,0 +1,7 @@
+# ADR-deviation marker — feat/254-interactive-skill-drives
+- date: 2026-09-26
+- branch: feat/254-interactive-skill-drives
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
+
+Rationale: cli#254 scope is docker cold-adopter smoke harness extension (new drive scripts + shared expect lib + Dockerfile install + entry.sh wire). Read ADR-001 through ADR-010; none govern the docker smoke harness path. Prior similar scopes (cli#162 V2 harness, cli#217 drive shape) shipped without ADR either. Not filing a new ADR — architectural intent aligns with existing harness patterns per PR #218 shape.
