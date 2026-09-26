@@ -1,0 +1,13 @@
+# Pre-mortem marker — cli#254 sub-step 3
+- date: 2026-09-26
+- branch: feat/254-launch-drive-body
+- lenses: [john-ousterhout, michael-feathers]
+- parent-ledger: docs/risk-ledgers/2026-09-26-cli-254-interactive-drives.md
+- risks (sub-step 3 specific):
+  - **O9** — /launch skill produces more artifacts than /onboard-repo
+    (docs/prototypes/, docs/specs/) and takes longer. Cure: default
+    timeout 240s (stub already had this); env override
+    SMOKE_DRIVE_TIMEOUT for tighter smoke runs.
+  - **F13** — /launch prompt wording variance across bassclef versions.
+    Cure: env SMOKE_DRIVE_PROMPT_TEXT + SMOKE_DRIVE_DONE_PATTERN.
+- folds: env-var-driven config identical to sub-step 2 (O6/O8/F12).
