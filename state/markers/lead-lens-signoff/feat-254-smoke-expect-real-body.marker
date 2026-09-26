@@ -1,0 +1,22 @@
+# Lead lens sign-off — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- lead: john-ousterhout
+- findings-status: no findings (35/35 Tier 0 tests GREEN)
+- sibling-suite-status: 42/0 GREEN (registry 16, onboard-repo 9, riff 9, launch 8)
+- ousterhout-lens verdict:
+  - Deep module preserved: 5-verb bash interface stable; all expect
+    Tcl quirks hidden behind private _smoke_expect_tcl_escape +
+    _smoke_expect_load_session helpers. Callers never touch Tcl.
+  - Interface stability confirmed: O1 fold held — no new positional
+    args on the 5 verbs; extension is env-var-only (SPAWN_CMD args
+    passed through drive_start's variadic $@).
+  - No new globals: O5 fold held — only SMOKE_EXPECT_VERSION (readonly)
+    and SMOKE_EXPECT_UNIMPLEMENTED (readonly, kept for stub tests).
+    Session state lives in $SCRATCH_DIR files + one env var
+    (_SMOKE_EXPECT_SESSION_STATE).
+  - Tcl injection safety verified end-to-end: `cost is $5 in [set]`
+    sent + echoed literally; no Tcl variable/command interpretation.
+- balancing-check result: aggregate GREEN AND real behavior verified
+  against fake_claude fixture (not just interface stubs).
+- sign-off: GO — Step 6 merge cleared.

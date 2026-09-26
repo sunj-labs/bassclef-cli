@@ -1,0 +1,32 @@
+# Reviewer pass — feat/254-smoke-expect-real-body
+
+mode: sequential (agent-merges-within-scope)
+reviewed_at: 2026-09-26T22:50Z
+source_files_changed: 4
+wu_id: cli#254 sub-step 1
+iteration_count: 1
+lens_used: [john-ousterhout, kent-beck, michael-feathers, tony-hoare, martin-fowler, w-edwards-deming, saltzer-schroeder]
+
+## Files reviewed
+
+- `scripts/lib/smoke-expect.sh` — real bodies for 5 verbs + 2 private helpers; SMOKE_EXPECT_VERSION bumped to 1.0.0
+- `scripts/tests/smoke-expect.test.sh` — extended from 16 skeleton assertions to 35 real-behavior assertions
+- `scripts/tests/fixtures/fake_claude.sh` — new deterministic stand-in for interactive claude
+- `docs/use-cases/UC-script-254-interactive-skill-drives.md` — sub-step 1 scope amendment section
+
+## Checks
+
+- spec acceptance criteria: PASS (35/35 Tier 0 tests GREEN)
+- tests present + green: PASS (5 sibling test files also GREEN: 42/0 across registry, onboard-repo stub, riff stub, launch stub)
+- test-after pattern check: NONE FOUND (test file rewritten with RED-first flow; skeleton returned 42 → tests failed 25/35 pre-body; bodies landed → 35/35 GREEN)
+- ADR compliance: N/A (ADR-deviation marker outcome=ADR-honored)
+- Designer sign-off: N/A (no UI surface)
+- architect-review: N/A (single-verb library; no architecture-crossing change)
+
+## Findings
+
+- **NOTE**: SMOKE_EXPECT_UNIMPLEMENTED=42 sentinel retained. Rationale: 3 drive stubs (onboard-repo, riff, launch) still return it. Removing would cascade into sub-steps 2-4 scope. Kept for backward-compat within cli#254 stack.
+- **NOTE**: `close` + `expect eof` conflict discovered mid-development. Cure: `close` + `catch wait` (no `expect eof`). Root cause: expect closes spawn_id on `close`, later `expect eof` fails "spawn id not open". Documented in smoke-expect.sh drive_end body comment.
+- **NOTE**: `set -euo pipefail` removed from smoke-expect.sh top level. Rationale: library shouldn't force flags on callers. Test file compensates with `set +e` post-source. Callers running under `set -e` should wrap smoke-expect calls with `|| rc=$?` for expected-non-zero returns per exit-code vocabulary.
+
+acknowledged: true
