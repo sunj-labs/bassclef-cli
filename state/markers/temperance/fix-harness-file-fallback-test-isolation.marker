@@ -1,0 +1,22 @@
+# Temperance marker — fix docker-harness tests broken by cli#245 file-fallback
+
+- date: 2026-09-26
+- branch: fix/harness-file-fallback-test-isolation
+
+## Scope decision
+
+Patch 2 tests in `.claude/hooks/tests/docker-harness-entry.test.sh` to set `CLAUDE_OAUTH_TOKEN_FILE=/dev/null` inside their bash -c blocks. Isolates from the file-fallback path added in PR #249.
+
+## Answers
+
+0. Right thing — yes; tests fail on operator Mac because the token file exists per PR #249 setup.
+1. Simplest — yes; 2-line change in test file only.
+2. Brute force — no; the fix follows the existing test pattern of overriding env.
+3. Blast radius — 🟢 low; test-only change; no adopter effect.
+4. Verification — re-run the test suite; expect 35/35 GREEN.
+5. Reversible — yes.
+
+## Drift triggers
+
+- Any Edit touches auth/schema/security → PAUSE.
+- Turn count above 20 → checkpoint.

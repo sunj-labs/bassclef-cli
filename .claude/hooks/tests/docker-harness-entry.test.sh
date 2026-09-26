@@ -110,7 +110,9 @@ test_preflight_passes_when_env_present() {
 test_preflight_fails_env_missing_v2() {
   echo "TEST test_preflight_fails_env_missing_v2"
   # Per #184: fails only when BOTH ANTHROPIC_API_KEY AND CLAUDE_CODE_OAUTH_TOKEN are unset.
-  bash -c "export HARNESS_TEST_MODE=1; unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN; source '$ENTRY_SH' && _docker_harness_preflight_v2" >/dev/null 2>&1
+  # Per cli#245: override CLAUDE_OAUTH_TOKEN_FILE so file-fallback misses when
+  # the runner's HOME has ~/.config/claude/oauth-token.
+  bash -c "export HARNESS_TEST_MODE=1; unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN; export CLAUDE_OAUTH_TOKEN_FILE=/dev/null; source '$ENTRY_SH' && _docker_harness_preflight_v2" >/dev/null 2>&1
   local exit_code=$?
   assert_eq "25" "$exit_code" "preflight V2 fails with EXIT_ENV_MISSING (25) when both auth vars unset"
 }
@@ -277,11 +279,13 @@ test_v2_preflight_missing_key_returns_env_missing() {
   local ec
   ec=$(bash -c "
     unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
+    export CLAUDE_OAUTH_TOKEN_FILE=/dev/null
     source '$ENTRY_SH'
     _docker_harness_preflight_v2 >/dev/null 2>&1
     echo \$?
   ")
   # EXIT_ENV_MISSING is 25 per exit-codes.sh
+  # Per cli#245: override CLAUDE_OAUTH_TOKEN_FILE so file-fallback misses.
   assert_eq "25" "$ec" "V2 preflight fails EXIT_ENV_MISSING when both auth vars unset"
 }
 

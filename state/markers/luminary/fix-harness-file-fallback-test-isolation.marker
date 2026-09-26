@@ -1,0 +1,17 @@
+# Luminary marker — fix harness tests broken by cli#245 file-fallback
+
+- date: 2026-09-26
+- branch: fix/harness-file-fallback-test-isolation
+- lead: michael-feathers
+- supporting: [kent-beck]
+- primary_lens: michael-feathers
+- compatibility_anchor: linus-torvalds
+- reason: test-side characterization needs to survive real runner state (file-fallback creates env drift the tests must isolate from)
+
+## Why these lenses
+
+**Lead — @luminary michael-feathers.** Characterization tests pin behavior. When a new code path (file-fallback) changes the env the existing tests read, the tests need to isolate their env explicitly. Set `CLAUDE_OAUTH_TOKEN_FILE=/dev/null` so the test controls the input rather than inheriting the runner's HOME state.
+
+**Supporting — @luminary kent-beck.** Tier 0 tests should be hermetic. The fix restores the hermetic property by overriding the fallback path.
+
+**Compatibility anchor — @luminary linus-torvalds.** Adopter contract stays intact — no runtime behavior changes, only tests get more isolated.
