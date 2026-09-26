@@ -1,0 +1,18 @@
+# Luminary marker — cli#245 (dup #227) OAuth vs Remote Control isolation
+
+- date: 2026-09-26
+- branch: fix/245-oauth-remote-control-isolation
+- lead: alan-cooper
+- supporting: [kent-beck]
+
+## Why these lenses (ultra-tier reasoning)
+
+**Lead — @luminary alan-cooper.** Cooper's persona lens applies at the friction point. The operator wants BOTH docker smoke AND `/remote-control` on the same Mac. The current runbook (`docs/runbook/docker-smoke.md` L75) recommends `export CLAUDE_CODE_OAUTH_TOKEN` in `~/.zshrc`. That breaks Remote Control silently — refusal message names the token type but not the fix. Cooper's frame: name the two personas + design paths that let both work without conflict.
+
+**Supporting — @luminary kent-beck.** Tier 0 strict TDD. Three cases characterize the file-fallback path — env var wins when set, file loads when env absent, missing both returns EXIT_ENV_MISSING. RED-first per `.claude/rules/testing-tier-config.md`.
+
+## Consulted alternatives (Peirce)
+
+- @luminary linus-torvalds — adopter contract lens. Considered lead. The change is additive fallback (env var still wins) so no adopter breaks; Cooper's persona lens fits better because the class is about user experience with two workflows.
+- @luminary michael-nygard — stability pattern (env-fallback graceful degradation). Considered supporting. Overlaps with Cooper's user-facing frame; Beck's TDD stays more actionable at the code layer.
+- @luminary david-parnas — information hiding (token source abstracted behind a resolver). Considered as design lens. Fits but adds abstraction weight beyond scope for this small change.

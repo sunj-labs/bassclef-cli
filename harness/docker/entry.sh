@@ -122,6 +122,27 @@ _docker_harness_preflight_v2() {
   local has_api="${ANTHROPIC_API_KEY:-}"
   local has_oauth="${CLAUDE_CODE_OAUTH_TOKEN:-}"
 
+  # cli #245 (dup #227) — file-fallback when CLAUDE_CODE_OAUTH_TOKEN
+  # env var is absent. Isolates docker harness from Remote Control on
+  # the operator's Mac (both paths use the same env var with conflicting
+  # semantics). Env var still wins when both are set (backward compat).
+  # Default path: $HOME/.config/claude/oauth-token. Override with
+  # CLAUDE_OAUTH_TOKEN_FILE. Empty or unreadable file falls through to
+  # the env-missing error path (S2 fold — fail-loud on real absence,
+  # fail-soft on ambiguous file state).
+  if [[ -z "$has_oauth" ]]; then
+    local token_file="${CLAUDE_OAUTH_TOKEN_FILE:-${HOME}/.config/claude/oauth-token}"
+    if [[ -r "$token_file" ]]; then
+      local file_token
+      file_token="$(cat "$token_file" 2>/dev/null | tr -d '\n\r ')"
+      if [[ -n "$file_token" ]]; then
+        has_oauth="$file_token"
+        export CLAUDE_CODE_OAUTH_TOKEN="$file_token"
+        echo "INFO: loaded CLAUDE_CODE_OAUTH_TOKEN from $token_file (V2 file-fallback per cli#227)." >&2
+      fi
+    fi
+  fi
+
   if [[ -z "$has_api" && -z "$has_oauth" ]]; then
     echo "ERROR: neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN is set. V2 skill drive requires one." >&2
     echo "Remediation: run 'claude setup-token' on the host + export CLAUDE_CODE_OAUTH_TOKEN (subscription)," >&2

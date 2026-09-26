@@ -1,0 +1,17 @@
+# Lead-lens signoff marker — cli#245 (dup #227) OAuth vs Remote Control isolation
+
+- date: 2026-09-26
+- branch: fix/245-oauth-remote-control-isolation
+- lead: alan-cooper
+- findings-cleared: no findings
+- notes: |
+    Both personas served. Operator running docker smoke uses Path 1 file-scoped
+    token; Interactive Claude Code with Remote Control sees no long-lived token
+    in env; both paths coexist without collision.
+    N1 fold — file-fallback log line names the exact source path so debug pain
+    stays low.
+    S2 fold — unreadable OR empty file falls through to env-missing error path
+    with three remediation options. Fail-loud on real absence.
+    Backward compat preserved — env var wins when both set. Existing adopter
+    setups keep working.
+    35/35 Tier 0 tests pass. Beck TDD RED→GREEN in one cycle.

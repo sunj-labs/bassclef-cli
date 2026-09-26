@@ -327,6 +327,108 @@ test_v2_preflight_prefers_oauth_when_both_set() {
   assert_eq "UNSET" "$api_after" "preflight unsets ANTHROPIC_API_KEY when both auth vars present (OAuth wins)"
 }
 
+# ---- cli #245 (dup #227) additions — file-fallback for OAuth token ----
+# Isolate docker harness token source from Remote Control's env var slot.
+# When CLAUDE_CODE_OAUTH_TOKEN env var is absent, preflight_v2 reads token
+# from ${CLAUDE_OAUTH_TOKEN_FILE:-$HOME/.config/claude/oauth-token}.
+# Env var still wins when both are set (backward compat).
+
+test_v2_preflight_file_fallback_loads_when_env_absent() {
+  echo "TEST test_v2_preflight_file_fallback_loads_when_env_absent"
+  local tmp_home; tmp_home=$(mktemp -d)
+  local tok_file="$tmp_home/.config/claude/oauth-token"
+  mkdir -p "$(dirname "$tok_file")"
+  echo "test-file-token-abc" > "$tok_file"
+  chmod 600 "$tok_file"
+
+  local ec loaded
+  loaded=$(bash -c "
+    unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
+    export HOME='$tmp_home'
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+    echo \"\${CLAUDE_CODE_OAUTH_TOKEN:-UNSET}\"
+  ")
+  ec=$?
+  assert_eq "test-file-token-abc" "$loaded" "file-fallback exports token from default location"
+  rm -rf "$tmp_home"
+}
+
+test_v2_preflight_env_wins_over_file() {
+  echo "TEST test_v2_preflight_env_wins_over_file"
+  local tmp_home; tmp_home=$(mktemp -d)
+  local tok_file="$tmp_home/.config/claude/oauth-token"
+  mkdir -p "$(dirname "$tok_file")"
+  echo "from-file-should-not-win" > "$tok_file"
+  chmod 600 "$tok_file"
+
+  local final
+  final=$(bash -c "
+    unset ANTHROPIC_API_KEY
+    export CLAUDE_CODE_OAUTH_TOKEN=from-env-should-win
+    export HOME='$tmp_home'
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+    echo \"\$CLAUDE_CODE_OAUTH_TOKEN\"
+  ")
+  assert_eq "from-env-should-win" "$final" "env var wins when both env + file present (backward compat)"
+  rm -rf "$tmp_home"
+}
+
+test_v2_preflight_file_absent_and_env_absent_fails() {
+  echo "TEST test_v2_preflight_file_absent_and_env_absent_fails"
+  local tmp_home; tmp_home=$(mktemp -d)
+  # No token file created
+
+  bash -c "
+    unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
+    export HOME='$tmp_home'
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+  "
+  local ec=$?
+  assert_eq "25" "$ec" "neither env nor file present returns EXIT_ENV_MISSING (25)"
+  rm -rf "$tmp_home"
+}
+
+test_v2_preflight_file_empty_treated_as_absent() {
+  echo "TEST test_v2_preflight_file_empty_treated_as_absent"
+  local tmp_home; tmp_home=$(mktemp -d)
+  local tok_file="$tmp_home/.config/claude/oauth-token"
+  mkdir -p "$(dirname "$tok_file")"
+  : > "$tok_file"  # empty file
+  chmod 600 "$tok_file"
+
+  bash -c "
+    unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
+    export HOME='$tmp_home'
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+  "
+  local ec=$?
+  assert_eq "25" "$ec" "empty file treated as absent; falls through to env-missing (S2 fold)"
+  rm -rf "$tmp_home"
+}
+
+test_v2_preflight_custom_file_path_via_env_var() {
+  echo "TEST test_v2_preflight_custom_file_path_via_env_var"
+  local tmp_dir; tmp_dir=$(mktemp -d)
+  local custom_file="$tmp_dir/my-token"
+  echo "custom-path-token" > "$custom_file"
+  chmod 600 "$custom_file"
+
+  local loaded
+  loaded=$(bash -c "
+    unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
+    export CLAUDE_OAUTH_TOKEN_FILE='$custom_file'
+    source '$ENTRY_SH'
+    _docker_harness_preflight_v2 >/dev/null 2>&1
+    echo \"\$CLAUDE_CODE_OAUTH_TOKEN\"
+  ")
+  assert_eq "custom-path-token" "$loaded" "CLAUDE_OAUTH_TOKEN_FILE override loads from custom path"
+  rm -rf "$tmp_dir"
+}
+
 test_dockerfile_does_not_bake_api_key() {
   echo "TEST test_dockerfile_does_not_bake_api_key"
   local dockerfile="$REPO_ROOT/harness/docker/Dockerfile.cold-adopter"
@@ -434,6 +536,14 @@ main() {
   test_v2_preflight_present_key_passes
   test_v2_preflight_oauth_only_passes
   test_v2_preflight_prefers_oauth_when_both_set
+
+  # cli #245 (dup #227) — file-fallback for OAuth token
+  test_v2_preflight_file_fallback_loads_when_env_absent
+  test_v2_preflight_env_wins_over_file
+  test_v2_preflight_file_absent_and_env_absent_fails
+  test_v2_preflight_file_empty_treated_as_absent
+  test_v2_preflight_custom_file_path_via_env_var
+
   test_dockerfile_does_not_bake_api_key
   test_dockerfile_installs_claude_cli
 

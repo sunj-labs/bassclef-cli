@@ -1,0 +1,14 @@
+# ADR-deviation marker — cli#245 OAuth vs Remote Control isolation
+
+- date: 2026-09-26
+- branch: fix/245-oauth-remote-control-isolation
+- adr_governing: ADR-006 (install harness); ADR-002 (init safety)
+- outcome: ADR-honored
+
+## Rationale
+
+Change extends `harness/docker/entry.sh` `_docker_harness_preflight_v2` with a file-fallback branch. Env var still wins when set; fallback only fires when env absent. Contract per ADR-006 install harness section 5 (5 decision points for token verification) unchanged — the change adds a new source for the token, not a new decision point.
+
+ADR-002 init safety contract untouched — no init changes.
+
+No new ADR filed.
