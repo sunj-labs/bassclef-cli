@@ -21,8 +21,9 @@
     "docs/iteration-bets/2026-09-19a-launch-prep-os-contract-plus-docs-merge.md",
     "docs/risk-ledgers/2026-09-19a-launch-prep-pre-mortem.md",
     "docs/iteration-bets/2026-09-20b-docker-cold-adopter-harness.md",
-    "docs/rfcs/2026-09-21c-smoke-drive-riff-council.md"
+    "docs/rfcs/2026-09-21c-smoke-drive-riff-council.md",
+    "state/markers/luminary/fix-247-shadow-detection.marker"
   ],
-  "last_scanned": "2026-09-21T20:18:32Z",
+  "last_scanned": "2026-09-26T10:50:09Z",
   "scanner_version": "1.0"
 }

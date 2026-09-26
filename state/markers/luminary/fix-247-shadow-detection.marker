@@ -1,0 +1,18 @@
+# Luminary marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+- lead: linus-torvalds
+- supporting: [kent-beck]
+
+## Why these lenses (ultra-tier reasoning)
+
+**Lead — @luminary linus-torvalds.** "Don't break userspace" applies at the smoke harness surface. The check must refuse cleanly when a shadow is present + exit with a clear message + provide the `--allow-shadow` bypass. Silent corruption of an operator's smoke run is the class this cure closes. Torvalds's stability contract with adopters — the operator's smoke workflow keeps working when no shadow is present, and fails loud when one is.
+
+**Supporting — @luminary kent-beck.** Tier 0 strict TDD per `.claude/rules/testing-tier-config.md`. Three cases writeable in one test file. RED-first: author tests before the shared function, watch them fail, then implement to GREEN. Beck's "red-green-refactor" rhythm applies at the function boundary.
+
+## Consulted alternatives (Peirce)
+
+- @luminary michael-nygard — stability pattern (guard rail + bypass). Considered as lead. Nygard's frame lands well on the bypass design but Torvalds's adopter contract lens is more load-bearing here because the pain surfaced on the operator's own cold-adopter Mac profile.
+- @luminary jerome-saltzer-and-michael-schroeder — complete mediation (all three call sites, not just one). Considered as supporting. Fits the "check fires at every call site" discipline but Beck's TDD is more actionable at the file layer.
+- @luminary michael-feathers — characterization tests. Considered as supporting. Overlaps with Beck; picking Beck since the tests are RED-first, not characterization of existing behavior.

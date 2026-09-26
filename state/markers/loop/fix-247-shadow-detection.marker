@@ -1,0 +1,12 @@
+# Loop marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+- iteration_count: 1
+- outcome: GREEN
+- notes: |
+    Beck TDD RED-first shipped as one cycle.
+    RED phase — tests refused with "detect_stale_bassclef_shadows not defined" (lib absent).
+    GREEN phase — after authoring `scripts/lib/shadow-detection.sh`, all 11 Tier 0 assertions passed.
+    Integration verified end-to-end via smoke-reset dry-run against three fixtures (shadow present, no bypass; shadow present + bypass; no shadow).
+    No RED→GREEN cycles beyond the first.

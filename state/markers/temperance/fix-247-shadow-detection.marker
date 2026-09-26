@@ -1,0 +1,23 @@
+# Temperance marker — cli#247 adjacent-shadow detection
+
+- date: 2026-09-26
+- branch: fix/247-shadow-detection
+
+## Scope decision (one sentence)
+
+Add one shared `detect_stale_bassclef_shadows` function to `scripts/smoke-reset.sh`, wire it into `smoke-one-shot.sh` via `--cold` and into `harness/docker/entry.sh` before init, cover three cases with Tier 0 tests, amend the runbook.
+
+## Answers to the six temperance questions
+
+0. **RIGHT THING?** Yes — traces to the real defect surfaced 2026-09-26 on cold-adopter Mac profile (per docs/whereami.md L23). Cure verified via `mv ~/tmp/bassclef aside`.
+1. **SIMPLEST?** Yes — one shared function, three call sites, one runbook edit, one test file. No new lib. No new hook. No new rule.
+2. **BRUTE FORCE?** No — root cause named at L23 of whereami; peer's upstream#1954 fixes the resolver side; this is defense-in-depth at the harness surface only.
+3. **BLAST RADIUS?** 🟢 low — defensive check only; no adopter-observable output change (adopters running `bassclef init` outside the harness never see it); scope stays inside `scripts/` + `harness/` + `docs/runbook/`.
+4. **VERIFICATION?** Tier 0 tests pin three cases + `/verify` runs pre-commit + docker-smoke CI job fires on PR + operator can re-run on cold-adopter Mac to falsify.
+5. **REVERSIBLE?** Yes — pure additive; revert the PR to restore prior behavior; `--allow-shadow` env bypass provided.
+
+## Drift triggers (pause and reassess)
+
+- Any Edit touches auth, schema, security, prod-deploy → PAUSE (hard ceiling).
+- Scope creep to retroactive settings.json cleanup → defer to follow-on ticket.
+- Step 5 implementation exceeds 90 turns → checkpoint + reassess.

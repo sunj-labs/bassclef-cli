@@ -33,6 +33,11 @@
 
 set -euo pipefail
 
+# Source shared adjacent-shadow detection (cli#247).
+_smoke_reset_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./lib/shadow-detection.sh
+source "${_smoke_reset_script_dir}/lib/shadow-detection.sh"
+
 WORK_DIR="${HOME}/tmp/bassclef-smoke-test"
 PRIMARY_PKG="@thebassclef/lite"
 LEGACY_PKG="@thebassclef/core"
@@ -79,6 +84,16 @@ confirm_or_exit() {
     *) log "aborted by user"; exit 1 ;;
   esac
 }
+
+# --- Step 0 — adjacent-shadow check (cli#247) -----------------------------
+#
+# Refuse to reset when a stale bassclef checkout at $(dirname WORK_DIR)/bassclef
+# would shadow the npm install after Claude opens (per upstream#1954).
+# Set SMOKE_ALLOW_SHADOW=1 to bypass. See docs/runbook/docker-smoke.md.
+
+if ! detect_stale_bassclef_shadows "${WORK_DIR}"; then
+  exit 1
+fi
 
 # --- Step 1 — global npm uninstall ----------------------------------------
 
