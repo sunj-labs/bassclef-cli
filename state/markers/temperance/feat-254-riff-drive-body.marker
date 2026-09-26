@@ -1,0 +1,10 @@
+# Temperance marker — cli#254 sub-step 4 (/riff drive real body)
+- date: 2026-09-26
+- branch: feat/254-riff-drive-body
+- ceremony-class: (b) existing code extension
+- scope: /riff drive real body; same shape as sub-steps 2+3. Default
+  timeout 300s (larger than /launch's 240 — /riff's Playwright MCP
+  path is heaviest).
+- cli#241 note: /riff full MCP path stays blocked. Drive body ships the
+  shape; SKIP_RIFF_INTERACTIVE=1 env retains skip semantics for Docker CI.
+- authorization: agent-merges-within-scope.

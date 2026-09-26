@@ -1,0 +1,10 @@
+# Pre-mortem marker — cli#254 sub-step 4
+- date: 2026-09-26
+- branch: feat/254-riff-drive-body
+- lenses: [john-ousterhout, michael-feathers]
+- risks:
+  - **O10** — /riff needs MCP; drive body without MCP-branch check hits
+    cli#241 immediately in Docker. Cure: SKIP_RIFF_INTERACTIVE=1 env
+    retained; drive body executes regardless; sub-step 6 wire supplies
+    the env for Docker CI until #241 lands.
+- folds: env-var driven config identical to sub-steps 2+3.
