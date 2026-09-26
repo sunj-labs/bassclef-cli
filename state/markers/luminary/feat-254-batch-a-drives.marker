@@ -1,0 +1,14 @@
+# Luminary marker — cli#254 Batch A drives
+- date: 2026-09-26
+- branch: feat/254-batch-a-drives
+- lead: john-ousterhout
+- supporting: [david-parnas, michael-feathers]
+- rationale:
+  - lead (Ousterhout) — one deep module (generic driver + catalog)
+    replaces 7 near-identical files. Interface (SKILL_NAME arg + env
+    overrides) narrower than 7 separate files.
+  - supporting (Parnas) — information hiding. Skills reference the
+    driver by SKILL_NAME. Adding/changing patterns per skill is a
+    catalog edit; consumers don't touch driver code.
+  - supporting (Feathers) — same fake_claude fixture pins actual
+    behavior. Iterated tests fire per skill in the catalog.

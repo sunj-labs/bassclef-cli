@@ -1,0 +1,10 @@
+# ADR-deviation marker — cli#254 Batch A drives
+- date: 2026-09-26
+- branch: feat/254-batch-a-drives
+- adr_governing: none — no ADR governs docker smoke path or per-skill drive pattern
+- outcome: ADR-honored
+- rationale: Batch A adds a generic driver + catalog module. Consumers
+  (scripts/smoke-drive-generic.sh + tests) use the catalog via named
+  accessor functions per Parnas information-hiding fold. No architectural
+  invariant crossed. ADR-031 (adopter contract) unaffected — drive files
+  are bassclef-internal smoke infrastructure with zero adopter consumers.
