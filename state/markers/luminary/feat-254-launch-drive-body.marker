@@ -1,0 +1,8 @@
+# Luminary marker — cli#254 sub-step 3
+- date: 2026-09-26
+- branch: feat/254-launch-drive-body
+- lead: john-ousterhout
+- supporting: [michael-feathers]
+- rationale: same shape as sub-step 2. Ousterhout interface-stability
+  fold + Feathers characterization-tests fold apply verbatim.
+- balancing-check-role: lead confirms interface preserved before merge.

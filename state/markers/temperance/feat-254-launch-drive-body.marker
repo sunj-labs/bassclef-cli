@@ -1,0 +1,9 @@
+# Temperance marker — cli#254 sub-step 3 (/launch drive real body)
+- date: 2026-09-26
+- branch: feat/254-launch-drive-body
+- ceremony-class: (b) existing code extension
+- prior-substeps: 0 (PR #255), 1 (PR #256), 2 (PR #257 merged 730a9f5)
+- scope-decision: identical shape to sub-step 2 with /launch defaults
+  (SMOKE_DRIVE_PROMPT_TEXT=`run /launch`, timeout default 240s).
+- drift-trigger: any positional arg change to main() interface.
+- authorization: agent-merges-within-scope.
