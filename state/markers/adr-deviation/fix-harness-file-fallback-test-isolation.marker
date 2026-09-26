@@ -1,0 +1,12 @@
+# ADR-deviation marker — fix harness tests broken by file-fallback
+
+- date: 2026-09-26
+- branch: fix/harness-file-fallback-test-isolation
+- adr_governing: ADR-006 (install harness); ADR-002 (init safety)
+- outcome: ADR-honored
+
+## Rationale
+
+Change patches 2 tests in `.claude/hooks/tests/docker-harness-entry.test.sh`. No runtime behavior change. No adopter effect. The file-fallback added in PR #249 stays as-shipped; only the test isolation gets tightened.
+
+ADR-006 harness contract preserved. ADR-002 init safety unchanged. No new ADR filed.
