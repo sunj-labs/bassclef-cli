@@ -1,0 +1,28 @@
+# Temperance marker — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- parent-bet: cli#254 (interactive skill drives)
+- parent-pr: #255 (walking skeleton merged)
+- scope-decision:
+  - right-thing: replace 5 SMOKE_EXPECT_UNIMPLEMENTED=42 stubs with real
+    expect-subprocess bodies; keep 5-verb bash interface stable per
+    Ousterhout deep-module discipline.
+  - right-way: Beck RED-first — Tier 0 tests land BEFORE source bodies;
+    each verb ships with 3-5 assertions per test-sufficiency criteria
+    1 (branch), 2 (exit code matrix), 6 (stdin contract), 7 (external
+    binary graceful-missing), 9 (stderr format).
+  - drift-trigger: any turn that starts editing smoke-expect.sh source
+    without a matching failing test in scripts/tests/smoke-expect.test.sh
+    is drift.
+- blast-radius:
+  - inside scope: scripts/lib/smoke-expect.sh (real bodies), scripts/tests/smoke-expect.test.sh (extended)
+  - outside scope: 3 drive scripts (/onboard-repo, /riff, /launch) stay
+    stub — those cure in sub-steps 2-4
+  - hard ceiling untouched: auth, schema, security, prod-deploy
+- brute-force check: no; the interface is walking-skeleton pinned; real
+  bodies are the SIMPLEST-thing-that-works form (single spawn + send +
+  expect + close per session).
+- authorization: agent-merges-within-scope (per operator directive
+  overnight rescope; PR merges within cli#254 sub-step 1 scope allowed).
+- next-step-if-drift: pause; ask operator; do not expand scope to
+  drive-body cures without explicit go.

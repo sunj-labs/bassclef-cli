@@ -1,0 +1,13 @@
+# ADR-deviation marker — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- adr_governing: none — no ADR governs docker smoke path (same result
+  as walking skeleton audit; feat-254-interactive-skill-drives marker
+  confirmed ADR-honored)
+- outcome: ADR-honored
+- rationale: real bodies preserve the 5-verb interface established by
+  walking skeleton PR #255. Anticorruption Layer (Vernon) + Template
+  Method (GoF) + Strategy (GoF) patterns per docs/decompositions/
+  2026-09-26-cli-254-interactive-drives.md stay intact. ADR-031
+  (adopter contract) untouched — smoke-expect.sh sits at tier: standard
+  and the interface has zero adopter consumers today.

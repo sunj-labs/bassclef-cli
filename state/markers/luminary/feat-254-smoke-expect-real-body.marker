@@ -1,0 +1,23 @@
+# Luminary marker — cli#254 sub-step 1 (real smoke-expect.sh)
+- date: 2026-09-26
+- branch: feat/254-smoke-expect-real-body
+- parent-pr: #255 (walking skeleton — Cockburn lead)
+- lead: john-ousterhout
+- supporting: [kent-beck, michael-feathers]
+- rationale:
+  - lead (Ousterhout) — smoke-expect.sh IS a deep module. Callers stay
+    in bash and get 5 verbs. Behind those verbs sits expect(1)'s Tcl
+    syntax, escape rules, buffer semantics, and subprocess lifetime.
+    Real bodies must keep the narrow interface stable while the
+    implementation hides every Tcl quirk. Ousterhout's deep-module
+    lens verifies the ship at Step 5.5.
+  - supporting (Beck) — RED-first TDD. Each verb ships with failing
+    tests first, then bodies. No source landing without a red test
+    that the body turns green.
+  - supporting (Feathers) — characterization tests. Pin the actual
+    behavior against a real expect fixture (fake claude that echoes)
+    before naming the fix. Tests grow into a safety net for the drive
+    cures in sub-steps 2-4.
+- balancing-check-role: lead (Ousterhout) confirms all findings cleared
+  before Step 6 merge per loop-discipline.md 5.5.
+- ship-form-verified: [ ] pending — set at Step 5.5.
