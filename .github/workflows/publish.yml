@@ -148,8 +148,8 @@ jobs:
           RESOLVED_SHA=$(git rev-parse HEAD)
           RESOLVED_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "UNKNOWN")
           echo "Resolved: $RESOLVED_TAG at $RESOLVED_SHA"
-          if [ "$RESOLVED_TAG" != "v1.6.0" ]; then
-            echo "::error::Expected pinned tag v1.6.0 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
+          if [ "$RESOLVED_TAG" != "v1.6.1" ]; then
+            echo "::error::Expected pinned tag v1.6.1 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
             exit 1
           fi
 
