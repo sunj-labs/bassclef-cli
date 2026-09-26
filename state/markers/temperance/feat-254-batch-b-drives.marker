@@ -1,0 +1,20 @@
+# Temperance marker — cli#254 Batch B drives (SDLC-chain skills)
+- date: 2026-09-26
+- branch: feat/254-batch-b-drives
+- ceremony-class: (b) catalog extension
+- prior-batches: A shipped (PR #260 merged f6cfd24)
+- scope-decision:
+  - right-thing: extend smoke-drive-catalog.sh with 7 SDLC-chain skills:
+    shape / spec / decompose / build / architect-review / longrun-prep /
+    session-end. Enable batch-b in _catalog_list_batch. Update
+    _catalog_all_skills. Extend generic-driver test to iterate batch-b.
+  - right-way: pure catalog addition. Zero touches to generic driver
+    body. Zero touches to Batch A skills.
+  - drift-trigger: any edit to scripts/smoke-drive-generic.sh main() is
+    drift.
+- blast-radius:
+  - inside scope: scripts/lib/smoke-drive-catalog.sh (extend cases +
+    enable batch-b), scripts/tests/smoke-drive-generic.test.sh (iterate
+    batch-b).
+  - outside scope: sub-steps 5+6 wire, Dockerfile.
+- authorization: agent-merges-within-scope.

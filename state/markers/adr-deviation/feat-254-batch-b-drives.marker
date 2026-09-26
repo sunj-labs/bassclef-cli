@@ -1,0 +1,8 @@
+# ADR-deviation marker — cli#254 Batch B drives
+- date: 2026-09-26
+- branch: feat/254-batch-b-drives
+- adr_governing: none — pure catalog extension of Batch A pattern
+- outcome: ADR-honored
+- rationale: extends smoke-drive-catalog.sh case statements with 7 new
+  skill entries. No architectural invariant crossed. Generic-driver
+  body unchanged.
