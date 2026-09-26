@@ -81,9 +81,11 @@ set +e  # catalog sources cleanly; retain flag state for tests
 # ============================================================
 BATCH_A_SKILLS=$(_catalog_list_batch batch-a)
 BATCH_B_SKILLS=$(_catalog_list_batch batch-b)
+BATCH_C_SKILLS=$(_catalog_list_batch batch-c)
 ALL_SKILLS=$(_catalog_all_skills)
 assert_true "batch-a list non-empty" "[ -n '$BATCH_A_SKILLS' ]"
 assert_true "batch-b list non-empty" "[ -n '$BATCH_B_SKILLS' ]"
+assert_true "batch-c list non-empty" "[ -n '$BATCH_C_SKILLS' ]"
 assert_true "all-skills list non-empty" "[ -n '$ALL_SKILLS' ]"
 
 for skill in $ALL_SKILLS; do

@@ -1,0 +1,17 @@
+# Temperance marker — cli#254 Batch C drives (authoring skills)
+- date: 2026-09-26
+- branch: feat/254-batch-c-drives
+- ceremony-class: (b) catalog extension
+- prior-batches: A shipped (PR #260), B shipped (PR #261)
+- scope-decision:
+  - right-thing: extend catalog with 7 authoring/thought skills:
+    state-a-problem / value-prop / whats-the-plan / roadmap-reconcile /
+    promote / interpret-input / use-case. Safe smoke targets (no
+    production side effects).
+  - right-way: pure catalog extension; identical pattern to Batch B.
+  - drift-trigger: any edit to generic-driver body.
+- excluded skills: /release, /release-notes, /deploy — those trigger
+  production cascade + require Touch ID. Not safe smoke targets in
+  Docker CI without careful gating; deferred to a later per-skill
+  design.
+- authorization: agent-merges-within-scope.
