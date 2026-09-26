@@ -1,0 +1,13 @@
+# Pre-mortem marker — cli#254 Batch B drives
+- date: 2026-09-26
+- branch: feat/254-batch-b-drives
+- lenses: [john-ousterhout, michael-feathers]
+- risks:
+  - **BB1** — SDLC skills (spec, decompose) have long-running phases;
+    default timeout too short. Cure: per-skill timeouts calibrated —
+    architect-review 300s; spec 240s; decompose 180s; shape 180s;
+    build 300s; longrun-prep 300s; session-end 120s.
+  - **BB2** — hyphen in skill name (longrun-prep, architect-review)
+    might break bash case patterns. Cure: patterns match literal
+    dashes; test suite verifies each resolves.
+- folds: identical to Batch A (env-driven config; iterated tests).

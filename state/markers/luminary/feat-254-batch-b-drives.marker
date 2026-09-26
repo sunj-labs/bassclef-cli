@@ -1,0 +1,7 @@
+# Luminary marker — cli#254 Batch B drives
+- date: 2026-09-26
+- branch: feat/254-batch-b-drives
+- lead: john-ousterhout
+- supporting: [david-parnas, michael-feathers]
+- rationale: identical shape to Batch A (Ousterhout deep module +
+  Parnas information hiding + Feathers characterization).

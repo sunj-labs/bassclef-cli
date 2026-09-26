@@ -80,9 +80,13 @@ set +e  # catalog sources cleanly; retain flag state for tests
 # Catalog lookup coverage — every Batch A skill resolves
 # ============================================================
 BATCH_A_SKILLS=$(_catalog_list_batch batch-a)
+BATCH_B_SKILLS=$(_catalog_list_batch batch-b)
+ALL_SKILLS=$(_catalog_all_skills)
 assert_true "batch-a list non-empty" "[ -n '$BATCH_A_SKILLS' ]"
+assert_true "batch-b list non-empty" "[ -n '$BATCH_B_SKILLS' ]"
+assert_true "all-skills list non-empty" "[ -n '$ALL_SKILLS' ]"
 
-for skill in $BATCH_A_SKILLS; do
+for skill in $ALL_SKILLS; do
   prompt=$(_catalog_prompt "$skill" 2>/dev/null || echo "")
   ready=$(_catalog_ready "$skill" 2>/dev/null || echo "")
   done_pat=$(_catalog_done "$skill" 2>/dev/null || echo "")
@@ -110,18 +114,18 @@ rc3=0; "$DRIVE" "sprint" "/tmp/test" 2>/dev/null || rc3=$?
 assert_true "main without CLI_VERSION fails" "[ '$rc3' -ne 0 ]"
 
 # ============================================================
-# Per-skill drive against fake_claude — every Batch A skill
+# Per-skill drive against fake_claude — every skill in the catalog
 # ============================================================
-for skill in $BATCH_A_SKILLS; do
+for skill in $ALL_SKILLS; do
   scratch=$(mkscratch)
   export SMOKE_DRIVE_SPAWN_CMD="$FAKE_CLAUDE"
   export SMOKE_DRIVE_READY_PATTERN="READY>"
   export SMOKE_DRIVE_PROMPT_TEXT="hello $skill"
   export SMOKE_DRIVE_DONE_PATTERN="RESP: hello $skill"
 
-  assert_exit "batch-a happy path — $skill" 0 "$DRIVE" "$skill" "$scratch" "1.9.4" "5"
-  assert_file "batch-a session file — $skill" "$scratch/.smoke-drive-session"
-  assert_file "batch-a log file — $skill" "$scratch/drive.log"
+  assert_exit "happy path — $skill" 0 "$DRIVE" "$skill" "$scratch" "1.9.4" "5"
+  assert_file "session file — $skill" "$scratch/.smoke-drive-session"
+  assert_file "log file — $skill" "$scratch/drive.log"
 
   unset SMOKE_DRIVE_SPAWN_CMD SMOKE_DRIVE_READY_PATTERN SMOKE_DRIVE_PROMPT_TEXT SMOKE_DRIVE_DONE_PATTERN
 done
