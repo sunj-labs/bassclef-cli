@@ -1,0 +1,24 @@
+# Temperance — V2i theme-picker cure (Path B)
+
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-theme-picker-seed
+- scope-decision: Ship the smallest edit that unblocks V2i drives — seed
+  ~/.claude/settings.json in Dockerfile with a theme value. One file, one
+  new fixture, one test. Not teaching V2i robot new expect patterns
+  (Path A, 60-90 turns) and not authoring an env-flag skip (Path C, not
+  available for interactive mode per --help).
+- drift-trigger: If a second onboarding gate appears in drive.log after
+  the seed lands, do NOT extend the fixture in the same PR. File a
+  follow-on, ship the theme cure standalone, characterize the next gate
+  in its own diagnose cycle.
+
+## Checklist
+- RIGHT THING? Yes — V2i is the only red in docker-smoke; seed clears it.
+- SIMPLEST? Yes — one fixture + one Dockerfile edit.
+- BRUTE FORCE? No — diagnosed via Path C probe; theme field is the picker's
+  own persistence surface (operator's settings.json shows the pattern).
+- BLAST RADIUS? Small — only /home/adopter/.claude/settings.json changes
+  inside the Docker image; no bassclef substrate touched; no adopter files
+  outside the harness image.
+- VERIFICATION? Rerun docker-smoke; V2i drives should hit READY> within 90s.
+- REVERSIBLE? Yes — one COPY line + one fixture file; delete both to revert.

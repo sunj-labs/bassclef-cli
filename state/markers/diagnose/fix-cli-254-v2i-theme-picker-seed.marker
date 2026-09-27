@@ -1,0 +1,47 @@
+# Diagnosis — V2i drives time out on real Claude in Docker
+
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-theme-picker-seed
+- diagnosed_via: Path C probe (5 turns) + PR #269 characterization run
+
+## Step 0 — Reproduce
+- Command: docker-smoke workflow run against v1.9.4 (baseline)
+- Observed: 3 interactive drives (/onboard-repo, /launch, /riff) exit 11
+  which maps to exit 31 (EXIT_INTERACTIVE_TIMEOUT) via entry.sh V2i wrapper.
+- Log source: harness-out/interactive-2026-09-27T14-03-59Z/interactive/drive.log
+- Reproducibility: every drive, every V2i run.
+
+## Step 1 — Is / Is Not
+- IS: Real Claude in Docker, freshly launched, first-run.
+- IS NOT: fake_claude.sh fixture (drives PASS against fixture per PR #260).
+- IS NOT: `claude -p` non-interactive mode (skips first-run onboarding).
+- Similar thing that WORKS: `claude -p "hello"` in the same container.
+
+## Step 2 — Five Whys
+1. Why do drives exit 11? expect timeout waits 90s for READY>; never appears.
+2. Why does READY> never appear? Claude never reaches REPL — blocks on prior UI.
+3. What does Claude show instead? "Welcome to Claude Code v2.1.197" then
+   "Choose a theme" picker (options 1-7).
+4. Why the picker? First-run of claude with no ~/.claude/settings.json (or
+   missing theme field) triggers it.
+5. Why fresh every run? Docker image builds a clean adopter home; no state
+   carries the theme choice forward.
+
+## Step 3 — Hypothesis
+Pre-seeding /home/adopter/.claude/settings.json with {"theme": "dark"} at
+Docker build time lets Claude skip the theme picker and drop straight to a
+REPL prompt.
+
+## Falsifiable test
+Build modified image; run V2i with SMOKE_GH_TOKEN set; read drive.log. If
+the log shows a REPL prompt within 90s, hypothesis is confirmed. If a
+second gate appears, hypothesis is partly confirmed and a second field
+is needed.
+
+## Alternative explanations (Peirce)
+- Alt-A: Auth failure — ruled out; `claude -p` works with same token.
+- Alt-B: TTY missing — ruled out; expect provides a pty; Claude renders
+  the picker UI (which needs a tty).
+- Alt-C: Theme picker plus a second gate. Possible. Falsification path:
+  read drive.log after seed lands; if second gate appears, extend
+  settings.json in a follow-on.

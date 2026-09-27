@@ -460,6 +460,38 @@ test_dockerfile_installs_expect() {
   assert_contains "$content" "command -v expect" "Dockerfile asserts expect present post-install"
 }
 
+# ---- cli#254 Path B: theme-picker seed (2026-09-27) ----
+
+test_dockerfile_seeds_claude_settings() {
+  echo "TEST test_dockerfile_seeds_claude_settings"
+  local dockerfile="$REPO_ROOT/harness/docker/Dockerfile.cold-adopter"
+  local content; content=$(cat "$dockerfile" 2>/dev/null)
+  assert_contains "$content" "adopter-claude-settings.json" \
+    "Dockerfile COPYs seeded settings.json fixture (Path B cure)"
+  assert_contains "$content" "/home/adopter/.claude/settings.json" \
+    "Dockerfile lands settings.json at adopter home path"
+  assert_contains "$content" "mkdir -p /home/adopter/.claude" \
+    "Dockerfile creates ~/.claude directory before COPY"
+}
+
+test_claude_settings_fixture_present() {
+  echo "TEST test_claude_settings_fixture_present"
+  local fixture="$REPO_ROOT/harness/docker/fixtures/adopter-claude-settings.json"
+  local exists=0
+  [ -f "$fixture" ] && exists=1
+  assert_eq "1" "$exists" "seed fixture exists at harness/docker/fixtures/adopter-claude-settings.json"
+  # Fixture parses as valid JSON
+  local rc=1
+  python3 -c "import json; json.load(open('$fixture'))" >/dev/null 2>&1 && rc=0
+  assert_eq "0" "$rc" "seed fixture parses as valid JSON"
+  # Fixture carries a theme field
+  local theme
+  theme=$(python3 -c "import json; print(json.load(open('$fixture')).get('theme', ''))" 2>/dev/null)
+  local has_theme=0
+  [ -n "$theme" ] && has_theme=1
+  assert_eq "1" "$has_theme" "seed fixture sets theme field (found: '$theme')"
+}
+
 # ---- cli#254 sub-step 6 additions (2026-09-27) ----
 
 test_exit_codes_interactive_defined() {
@@ -684,6 +716,8 @@ main() {
 
   # cli#254 sub-step 5+6 additions (2026-09-27) — Docker wire
   test_dockerfile_installs_expect
+  test_dockerfile_seeds_claude_settings
+  test_claude_settings_fixture_present
   test_exit_codes_interactive_defined
   test_v2i_function_defined
   test_v2i_test_mode_short_circuits

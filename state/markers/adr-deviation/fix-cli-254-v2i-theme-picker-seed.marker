@@ -1,0 +1,25 @@
+# ADR-deviation marker — V2i theme-picker seed
+- date: 2026-09-27
+- branch: fix-cli-254-v2i-theme-picker-seed
+- adr_governing: none — confirmed no ADR coverage of Docker harness Claude settings seed
+- outcome: ADR-honored
+
+## Notes
+
+Change scope: harness/docker/Dockerfile.cold-adopter + one JSON fixture +
+one Tier 0 test extension. No adopter-observable substrate surface is
+touched. The seed lives inside the Docker image only. Adopters running
+`claude` on their own machine are unaffected.
+
+Reviewed against `docs/adrs/`:
+- ADR-002 (bassclef init safety) — not touched (no init changes)
+- ADR-003 (bassclef sync safety) — not touched (no sync changes)
+- ADR-004 (publish pipeline) — not touched
+- ADR-005 (npm distribution) — not touched
+- ADR-006 (install harness) — Docker cold-adopter falls under this, but the
+  change (settings seed) does not alter any of ADR-006's five decision
+  points (image base, network policy, evidence log path, exit code
+  vocabulary, cleanup semantics). The seed is a pre-existing-file drop-in.
+
+No pinned ADR governs the Claude Code CLI's first-run onboarding surface
+inside a Docker container. The seed is a local test-harness cure.

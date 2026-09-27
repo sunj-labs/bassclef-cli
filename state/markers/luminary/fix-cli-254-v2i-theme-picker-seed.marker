@@ -1,0 +1,24 @@
+# Luminary — V2i theme-picker seed
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-theme-picker-seed
+- lead: alan-cooper
+- supporting: [michael-feathers, saltzer-schroeder]
+
+## Cooper (lead) — operator experience
+The V2i drives simulate an operator running `/onboard-repo` or `/launch`
+in a fresh workspace. A fresh workspace where the picker fires is not the
+operator's real experience — most operators run Claude on a persistent
+machine where they picked a theme once. Seeding a theme in the harness
+image matches that real operator state, not a first-boot corner case.
+
+## Feathers (supporting) — characterization
+The seed is a characterization anchor. It pins the harness environment
+to a shape that matches how Claude runs on the operator's machine. If a
+future Claude release adds a second onboarding gate, the drive.log
+diffs will show it; the seed does not hide that signal, only the theme
+one.
+
+## Saltzer-Schroeder (supporting) — least common mechanism
+The seed is scoped to the Docker image's adopter user. It does not
+change any global state, adopter-observable substrate, or bassclef
+config. Failure blast radius: harness image only.

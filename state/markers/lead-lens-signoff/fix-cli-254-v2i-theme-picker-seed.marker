@@ -1,0 +1,17 @@
+# Lead lens sign-off — V2i theme-picker seed
+- date: 2026-09-27
+- lead: alan-cooper
+- findings-status: no findings (61/61 docker-harness tests GREEN)
+- verdict:
+  - Change is scoped to the harness image; no adopter substrate touched.
+  - Cooper lens: real operators run Claude on a persistent machine with
+    a chosen theme; seeding the theme in the harness matches that state
+    rather than a first-boot corner case.
+  - Feathers lens: seed pins the harness environment; drive.log stays
+    the source of truth for future gates.
+  - Saltzer-Schroeder lens: least-common-mechanism; blast radius is the
+    Docker image only.
+  - Falsification path: docker-smoke run against modified image shows
+    a REPL prompt (matching SMOKE_DRIVE_READY_PATTERN) within 90s per
+    drive. If a second gate appears, extend fixture in a follow-on.
+- sign-off: GO — ready for CI. Operator gates final merge.

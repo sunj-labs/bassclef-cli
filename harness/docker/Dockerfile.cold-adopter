@@ -54,10 +54,18 @@ COPY --chown=adopter:adopter harness/docker/entry.sh /adopter/entry.sh
 COPY --chown=adopter:adopter harness/docker/exit-codes.sh /adopter/exit-codes.sh
 COPY --chown=adopter:adopter scripts/ /adopter/scripts/
 
+# Seed ~/.claude/settings.json so real Claude skips the first-run theme
+# picker in V2i interactive drives (cli#254 Path B). Without a theme field
+# set, Claude blocks on "Choose a theme" before any REPL activity, and the
+# expect drives time out at 90s per drive. The seed lands under the adopter
+# user's home so `claude` at startup reads it and skips onboarding.
+RUN mkdir -p /home/adopter/.claude
+COPY --chown=adopter:adopter harness/docker/fixtures/adopter-claude-settings.json /home/adopter/.claude/settings.json
+
 # Make entry.sh executable + ensure evidence log dirs exist (still root)
 RUN chmod +x /adopter/entry.sh /adopter/exit-codes.sh /adopter/scripts/*.sh 2>/dev/null || true \
   && mkdir -p /adopter/state/events /adopter/state/harness-runs \
-  && chown -R adopter:adopter /adopter
+  && chown -R adopter:adopter /adopter /home/adopter/.claude
 
 # Default env vars — overridden at run time via -e flags
 ENV CLI_VERSION=latest \
