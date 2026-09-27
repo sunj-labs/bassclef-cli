@@ -1,0 +1,11 @@
+# Luminary marker — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- lead: michael-feathers
+- supporting: [david-parnas]
+- rationale:
+  - lead (Feathers) — characterization. Real Docker run surfaced the
+    drift between V2i's default and the Dockerfile's declared value.
+    Fix pins the convention. Tier 0 test locks it.
+  - supporting (Parnas) — one env var name across the harness. Consumer
+    code (V2i function) stops guessing the interface.

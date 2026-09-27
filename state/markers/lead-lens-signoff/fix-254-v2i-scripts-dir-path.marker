@@ -1,0 +1,9 @@
+# Lead lens sign-off — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- lead: michael-feathers
+- findings-status: no findings (52/52 Tier 0 GREEN; was 49 → +3 for the
+  new characterization test)
+- verdict: single-line fix; matches V2 convention; pinned by grep-based
+  test that catches future drift.
+- sign-off: GO.

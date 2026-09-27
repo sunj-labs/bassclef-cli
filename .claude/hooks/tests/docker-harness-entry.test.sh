@@ -528,6 +528,31 @@ test_smoke_report_reads_interactive_json() {
   assert_contains "$content" "[interactive]" "smoke-report tags interactive rows (N7 fold)"
 }
 
+test_v2i_scripts_dir_matches_v2_convention() {
+  # Cli#254 V2i scripts_dir path drift caught in docker-smoke run 36322114727.
+  # V2 (entry.sh L357) uses SMOKE_SCRIPTS_DIR:-/adopter/scripts. V2i must
+  # match. Dockerfile L65 sets SMOKE_SCRIPTS_DIR=/adopter/scripts in ENV.
+  echo "TEST test_v2i_scripts_dir_matches_v2_convention"
+  local v2i_body
+  v2i_body=$(awk '/^_docker_harness_run_v2_interactive\(\)/,/^\}/' "$ENTRY_SH")
+  assert_contains "$v2i_body" 'SMOKE_SCRIPTS_DIR:-/adopter/scripts' "V2i uses SMOKE_SCRIPTS_DIR + /adopter/scripts (matches V2 convention)"
+  # Guard: V2i must NOT use the old BASSCLEF_SCRIPTS_DIR name.
+  if echo "$v2i_body" | grep -q 'BASSCLEF_SCRIPTS_DIR'; then
+    _tests_total=$((_tests_total + 1))
+    _tests_failed=$((_tests_failed + 1))
+    _failures+=("V2i still references BASSCLEF_SCRIPTS_DIR (should be SMOKE_SCRIPTS_DIR)")
+    echo "  FAIL  V2i still references BASSCLEF_SCRIPTS_DIR"
+  else
+    _tests_total=$((_tests_total + 1))
+    _tests_passed=$((_tests_passed + 1))
+    echo "  PASS  V2i does not reference deprecated BASSCLEF_SCRIPTS_DIR"
+  fi
+  # Dockerfile still exports SMOKE_SCRIPTS_DIR
+  local dockerfile="$REPO_ROOT/harness/docker/Dockerfile.cold-adopter"
+  local df_content; df_content=$(cat "$dockerfile" 2>/dev/null)
+  assert_contains "$df_content" "SMOKE_SCRIPTS_DIR=/adopter/scripts" "Dockerfile still exports SMOKE_SCRIPTS_DIR=/adopter/scripts"
+}
+
 # ---- cli #212 additions (2026-09-22) ----
 # Postcondition contract: main() exits with the action function's real return code.
 # Bug shape (pre-fix): `if ! _docker_harness_action; then local code=$?; exit "$code"`
@@ -638,6 +663,7 @@ main() {
   test_v2i_banner_uses_step_8
   test_runbook_documents_interactive_exit_codes
   test_smoke_report_reads_interactive_json
+  test_v2i_scripts_dir_matches_v2_convention
 
   # cli #212 additions (2026-09-22) — exit-code propagation contract
   test_212_install_guard_propagates_real_code

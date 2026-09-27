@@ -1,0 +1,10 @@
+# Temperance marker — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- ceremony-class: (b) narrow bug fix; diagnosis marker required first
+- scope-decision: single-line env-var + path default in V2i function.
+  Match V2's SMOKE_SCRIPTS_DIR / /adopter/scripts convention. Add
+  Tier 0 test pinning the value.
+- drift-trigger: any edit outside the V2i function body's default
+  variable assignment is drift.
+- authorization: agent-merges-within-scope.
