@@ -550,7 +550,13 @@ _docker_harness_run_v2_interactive() {
     local expires_ms=$(( ($(date +%s) + 86400) * 1000 ))
     # Written on one line each so no `}` sits at column 0 (awk slice
     # in docker-harness-entry.test.sh reads function body until `^\}`).
-    printf '%s\n' '{"claudeAiOauth":{"accessToken":"'"$CLAUDE_CODE_OAUTH_TOKEN"'","refreshToken":"","expiresAt":'"$expires_ms"',"scopes":["user:inference","user:profile","user:sessions:claude_code","user:mcp_servers","user:file_upload","org:create_api_key"]}}' > "$claude_home/.claude/.credentials.json"
+    # V4 CI (run 36344142320) showed SMOKE_EXPECT_EOF with empty
+    # refreshToken="" — claude v2.1.197 crashed on startup. Drop the
+    # empty refresh token; write only accessToken + expiresAt + scopes.
+    # If claude needs a refresh token, next drive.log will tell us; we
+    # can iterate. Prajwal gist showed sk-ant-ort01-... shape but we
+    # only have the access token in $CLAUDE_CODE_OAUTH_TOKEN.
+    printf '%s\n' '{"claudeAiOauth":{"accessToken":"'"$CLAUDE_CODE_OAUTH_TOKEN"'","expiresAt":'"$expires_ms"',"scopes":["user:inference","user:profile","user:sessions:claude_code","user:mcp_servers","user:file_upload","org:create_api_key"]}}' > "$claude_home/.claude/.credentials.json"
     chmod 600 "$claude_home/.claude/.credentials.json"
     printf '%s\n' '{"numStartups":10,"installMethod":"npm","autoUpdates":false,"hasCompletedOnboarding":true,"hasTrustDialogAccepted":true,"hasTrustDialogHooksAccepted":true,"hasCompletedProjectOnboarding":true,"hasAcknowledgedCostThreshold":true,"effortCalloutV2Dismissed":true,"theme":"dark","opusProMigrationComplete":true,"sonnet1m45MigrationComplete":true,"projects":{"/home/adopter/test":{"hasTrustDialogAccepted":true,"hasTrustDialogHooksAccepted":true,"hasCompletedProjectOnboarding":true}}}' > "$claude_home/.claude.json"
     echo "INFO: seeded ~/.claude/.credentials.json + ~/.claude.json for V2i (Path A2 seed)" >&2
