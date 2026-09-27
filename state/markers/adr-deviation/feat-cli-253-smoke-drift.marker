@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/cli-253-smoke-drift
+- date: 2026-09-27
+- branch: feat/cli-253-smoke-drift
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
+- rationale: Assertion regex tightening in scripts/lib/smoke-assert.sh (check_no_silent_skip + check_no_unexpected_blocked) is a defect fix per cli #253. No ADR governs assertion regex shape. ADR-058 (install-class dispatch) is adjacent but untouched. No new architectural invariant introduced.

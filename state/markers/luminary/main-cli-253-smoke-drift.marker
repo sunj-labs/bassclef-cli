@@ -1,0 +1,6 @@
+# Luminary marker — goal 2026-09-27b cli #253
+- date: 2026-09-27
+- branch: main → feat/cli-253-smoke-drift
+- lead: michael-feathers — characterization tests pin actual v1.6.1 substrate output before amending the check
+- supporting: [kent-beck (TDD RED-first Tier 0), michael-nygard (fail-loud stability — loud skip IS the correct signal)]
+- rationale: The v1.6.1 log-on-skip stderr is a stability primitive per Nygard. The cure preserves that signal while restoring 43/0 baseline. Feathers's characterization frame ensures the test pins the actual stderr shape rather than an assumed one.

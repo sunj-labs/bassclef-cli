@@ -45,13 +45,22 @@ check_no_not_found() {
   return 1
 }
 
-# check_no_silent_skip — capture must not carry "skip —" lines
-# (a fragment reporting doing nothing).
+# check_no_silent_skip — capture must not carry silent "skip —" lines
+# (a fragment reporting it did nothing without saying why).
+#
+# Per cli #253: v1.6.1 substrate (bassclef-upstream#1954 PR #1956) emits
+# LOUD skip stderr lines like:
+#   [bassclef-hook-connect] skip — target missing at /path/to/target
+# These are the correct fail-loud signal per @luminary michael-nygard.
+# The check filters them out and only counts truly silent skips
+# (bare "skip —" with no loud-skip prefix).
 check_no_silent_skip() {
   local capture_file="$1"
   _smoke_assert_precheck "$capture_file" || return 1
   local matches
-  matches=$(grep -c 'skip —' "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
+  # Grep for "skip —" lines, then exclude v1.6.1 loud-skip prefix
+  # ([bassclef-hook-connect]). Count the remainder.
+  matches=$(grep 'skip —' "$capture_file" 2>/dev/null | grep -cv '^\[bassclef-hook-connect\]' | tr -d '\n' || echo 0)
   [ -z "$matches" ] && matches=0
   if [ "$matches" -eq 0 ]; then
     echo "PASS|no-silent-skip|0 matches"
@@ -61,15 +70,33 @@ check_no_silent_skip() {
   return 1
 }
 
-# check_no_unexpected_blocked — capture must not carry BLOCKED blocks
+# check_no_unexpected_blocked — capture must not carry BLOCKED banners
 # except those declared in the allowlist file (one grep-E pattern per
 # line; empty lines skipped).
+#
+# Per cli #253: the prior regex `(^|[^A-Za-z])BLOCKED:` matched any
+# occurrence of BLOCKED: preceded by a non-letter, including prose that
+# references the token inside backticks (e.g., "Per `.claude/rules/
+# blocked-items.md`, `BLOCKED:` items are ..."). Agent responses citing
+# the rules file false-positive-fired the check.
+#
+# Banner shape (both real hook emit shapes bassclef ships):
+#   🛑 BLOCKED: <reason>
+#   BLOCKED: <reason>   (bare banner at line start)
+#
+# The tightened regex requires BLOCKED: to appear at line start,
+# optionally preceded by whitespace and a 🛑 emoji. Prose mentions
+# inside backticks or mid-sentence no longer match.
 check_no_unexpected_blocked() {
   local capture_file="$1"
   local allowlist_file="${2:-}"
   _smoke_assert_precheck "$capture_file" || return 1
+  # Banner shape: optional leading whitespace + optional 🛑 + optional
+  # whitespace + BLOCKED: at line start. grep -P not portable; use grep
+  # -E with the emoji literal + [[:space:]]*.
+  local banner_regex='^[[:space:]]*(🛑[[:space:]]+)?BLOCKED:'
   local blocked
-  blocked=$(grep -cE '(^|[^A-Za-z])BLOCKED:' "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
+  blocked=$(grep -cE "$banner_regex" "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
   [ -z "$blocked" ] && blocked=0
   if [ "$blocked" -eq 0 ]; then
     echo "PASS|no-unexpected-blocked|0 BLOCKED"
@@ -82,7 +109,7 @@ check_no_unexpected_blocked() {
       [ -z "$pattern" ] && continue
       case "$pattern" in \#*) continue ;; esac
       local m
-      m=$(grep -cE "(^|[^A-Za-z])BLOCKED:.*${pattern}" "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
+      m=$(grep -cE "${banner_regex}.*${pattern}" "$capture_file" 2>/dev/null | tr -d '\n' || echo 0)
       [ -z "$m" ] && m=0
       allowed=$((allowed + m))
     done < "$allowlist_file"
