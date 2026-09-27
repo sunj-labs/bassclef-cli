@@ -1,0 +1,7 @@
+# Temperance marker — goal 2026-09-27b cli #253 smoke assertion drift
+- date: 2026-09-27
+- branch: main → feat/cli-253-smoke-drift
+- scope-decision: Amend two check functions in scripts/lib/smoke-assert.sh — check_no_silent_skip (filter loud-skip lines carrying [bassclef-hook-connect] prefix) + check_no_unexpected_blocked (extend allowlist file with `### ACTIVE BET` + related v1.6.1 additions). Add Tier 0 tests before the code change (Beck TDD).
+- right-thing: Restore accurate 43/0 smoke baseline on v1.6.1 substrate; distinguish loud-skip (correct v1.6.1 stderr per bassclef-upstream#1954 PR #1956) from truly silent no-op.
+- right-way: Beck TDD RED-first via scripts/tests/smoke-assert.test.sh; two-function scope; no interface change; ships in one PR.
+- drift-trigger: If cure needs to touch check_paths_exist, check_no_unknown_command, or drive scripts — pause. If step exceeds 60 turns — pause.

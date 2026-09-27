@@ -1,1 +1,5 @@
-converged
+# /longrun preset marker
+- date: 2026-09-27
+- branch: main
+- preset: exploratory
+- trigger: none (stale next_bet queue; no fresh plan doc for cli; no fresh problem marker)
