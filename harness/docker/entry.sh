@@ -535,35 +535,6 @@ _docker_harness_run_v2_interactive() {
     return 0
   fi
 
-  # cli#254 seed (2026-09-27): pre-populate the two files real Claude
-  # v2.1.x reads to decide "am I logged in + past onboarding":
-  #   - ~/.claude/.credentials.json — post-OAuth session file (0600).
-  #     Presence + valid accessToken → login picker skips entirely.
-  #     Source: etokarev/claude-code-docker + Prajwalsrinvas gist.
-  #   - ~/.claude.json — 12-field onboarding state → theme picker,
-  #     trust dialog, cost threshold, migration prompts all skip.
-  # Runtime seed (not baked at build) so the token never lands in an
-  # image layer. Only fires when CLAUDE_CODE_OAUTH_TOKEN is available.
-  if [[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
-    local claude_home="${HOME:-/home/adopter}"
-    mkdir -p "$claude_home/.claude" 2>/dev/null || true
-    local expires_ms=$(( ($(date +%s) + 86400) * 1000 ))
-    # Written on one line each so no `}` sits at column 0 (awk slice
-    # in docker-harness-entry.test.sh reads function body until `^\}`).
-    # V4 CI (run 36344142320) showed SMOKE_EXPECT_EOF with empty
-    # refreshToken="" — claude v2.1.197 crashed on startup. Drop the
-    # empty refresh token; write only accessToken + expiresAt + scopes.
-    # If claude needs a refresh token, next drive.log will tell us; we
-    # can iterate. Prajwal gist showed sk-ant-ort01-... shape but we
-    # only have the access token in $CLAUDE_CODE_OAUTH_TOKEN.
-    printf '%s\n' '{"claudeAiOauth":{"accessToken":"'"$CLAUDE_CODE_OAUTH_TOKEN"'","expiresAt":'"$expires_ms"',"scopes":["user:inference","user:profile","user:sessions:claude_code","user:mcp_servers","user:file_upload","org:create_api_key"]}}' > "$claude_home/.claude/.credentials.json"
-    chmod 600 "$claude_home/.claude/.credentials.json"
-    printf '%s\n' '{"numStartups":10,"installMethod":"npm","autoUpdates":false,"hasCompletedOnboarding":true,"hasTrustDialogAccepted":true,"hasTrustDialogHooksAccepted":true,"hasCompletedProjectOnboarding":true,"hasAcknowledgedCostThreshold":true,"effortCalloutV2Dismissed":true,"theme":"dark","opusProMigrationComplete":true,"sonnet1m45MigrationComplete":true,"projects":{"/home/adopter/test":{"hasTrustDialogAccepted":true,"hasTrustDialogHooksAccepted":true,"hasCompletedProjectOnboarding":true}}}' > "$claude_home/.claude.json"
-    echo "INFO: seeded ~/.claude/.credentials.json + ~/.claude.json for V2i (Path A2 seed)" >&2
-  else
-    echo "WARN: CLAUDE_CODE_OAUTH_TOKEN unset; V2i credentials file NOT seeded (drives will hit login picker)" >&2
-  fi
-
   # Match V2's convention (this file L357): SMOKE_SCRIPTS_DIR env from
   # Dockerfile L65 pre-sets /adopter/scripts. Prior version used a made-up
   # env name + path which pointed at nothing in the container. Cured

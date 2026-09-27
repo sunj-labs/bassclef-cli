@@ -145,17 +145,27 @@ jobs:
         run: |
           CODE="${{ steps.smoke.outputs.smoke_exit_code }}"
           # Detection codes (0, 3, 4, 5) are expected + acceptable.
+          # Interactive codes (30-34) are ADVISORY — V2i needs a real
+          # ~/.claude/.credentials.json seeded via `claude setup-token`
+          # before it can complete drives. Followed at cli#276. Until
+          # then, V2i regressions surface in the run summary but do NOT
+          # fail the job. Matches the V2 headless pattern's advisory
+          # shape for auth-adjacent gates.
           # Infrastructure failures (20, 21, 22, 23, 24, 26) fail the job.
-          # Interactive codes (30, 31, 33, 34) also fail the job — they
-          # signal V2i regressions worth surfacing (cli#254 sub-step 6).
           # Unknown (99) also fails.
           case "$CODE" in
             0|3|4|5)
               echo "Smoke exit $CODE is expected class; job passes."
               exit 0
               ;;
+            30|31|32|33|34)
+              echo "Smoke exit $CODE is V2i advisory class (cli#276); job passes with note."
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "**Note:** V2i lane advisory — see cli#276 for the credentials seed requirement." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+              ;;
             *)
-              echo "Smoke exit $CODE is failure class (infrastructure or interactive drive); job fails."
+              echo "Smoke exit $CODE is failure class (infrastructure); job fails."
               exit 1
               ;;
           esac
