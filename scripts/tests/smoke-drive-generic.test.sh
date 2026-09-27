@@ -13,16 +13,32 @@
 # --- Static / interface ---
 # [x] smoke-drive-generic.sh exists + executable
 # [x] smoke-drive-catalog.sh exists (lib module)
-# [x] generic driver sources catalog
-# [x] generic driver sources smoke-expect
-# [x] catalog defines _catalog_prompt / _ready / _done / _timeout / _list_batch / _all_skills
+# [x] smoke-drive-setup.sh exists (lib module)
+# [x] generic driver sources catalog + smoke-expect + smoke-drive-setup
+# [x] catalog defines all 8 accessors (prompt/ready/done/timeout/setup/teardown/list_batch/all_skills)
+# [x] setup lib defines 5 setup + 2 teardown functions
 # --- Catalog lookups per skill ---
-# [x] Every skill in batch-a resolves to prompt / ready / done / timeout
+# [x] Every skill in batches A/B/C resolves prompt/ready/done/timeout
+# [x] _catalog_setup returns non-empty for onboard-repo/build/session-end/longrun-prep/promote
+# [x] _catalog_setup returns empty for read-only skills (sprint/whereami)
+# [x] _catalog_teardown returns non-empty for promote/build
+# [x] _catalog_teardown returns empty for skills with no side effects
 # --- Unknown skill guard ---
 # [x] generic driver with unknown SKILL_NAME returns 13
 # --- Per-skill drive against fake_claude ---
-# [x] Every skill in batch-a happy-path returns 0 against fake_claude fixture
+# [x] Every skill happy-path returns 0 against fake_claude fixture
 # [x] Every skill's session state + log file lands at SCRATCH_DIR
+# --- Setup helpers ---
+# [x] setup_git_init_clean creates .git dir + commits smoke init
+# [x] setup_chronicle_dir_writable creates docs/chronicle
+# [x] setup_iteration_goals_dir_writable creates docs/iteration-bets
+# [x] setup_gh_inject_smoke_label puts shim on PATH + logs invocations
+# [x] setup_git_remote_scratch adds file:// origin
+# --- gh shim behavior (against fake_gh backend) ---
+# [x] shim injects --label smoke-drive on issue create
+# [x] shim injects --label automated-run on issue create
+# [x] shim passes through non-issue-create calls unchanged
+# [x] shim logs every invocation as JSON to SMOKE_GH_LOG
 # --- Missing args ---
 # [x] main without SKILL_NAME fails
 # [x] main without SCRATCH_DIR fails
@@ -33,7 +49,9 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DRIVE="$REPO_ROOT/scripts/smoke-drive-generic.sh"
 CATALOG="$REPO_ROOT/scripts/lib/smoke-drive-catalog.sh"
+SETUP_LIB="$REPO_ROOT/scripts/lib/smoke-drive-setup.sh"
 FAKE_CLAUDE="$REPO_ROOT/scripts/tests/fixtures/fake_claude.sh"
+FAKE_GH="$REPO_ROOT/scripts/tests/fixtures/fake_gh.sh"
 
 PASS=0; FAIL=0; FAIL_MSGS=()
 
@@ -62,14 +80,26 @@ mkscratch() { mktemp -d /tmp/smoke-generic-test-XXXXXX; }
 assert_true "generic driver exists" "[ -f '$DRIVE' ]"
 assert_true "generic driver executable" "[ -x '$DRIVE' ]"
 assert_true "catalog module exists" "[ -f '$CATALOG' ]"
+assert_true "setup lib exists" "[ -f '$SETUP_LIB' ]"
+assert_true "fake_gh fixture exists" "[ -x '$FAKE_GH' ]"
 assert_true "generic driver sources catalog" "grep -q 'smoke-drive-catalog.sh' '$DRIVE'"
 assert_true "generic driver sources smoke-expect" "grep -q 'smoke-expect.sh' '$DRIVE'"
+assert_true "generic driver sources setup lib" "grep -q 'smoke-drive-setup.sh' '$DRIVE'"
 assert_true "catalog defines _catalog_prompt"    "grep -q '^_catalog_prompt()' '$CATALOG'"
 assert_true "catalog defines _catalog_ready"     "grep -q '^_catalog_ready()' '$CATALOG'"
 assert_true "catalog defines _catalog_done"      "grep -q '^_catalog_done()' '$CATALOG'"
 assert_true "catalog defines _catalog_timeout"   "grep -q '^_catalog_timeout()' '$CATALOG'"
+assert_true "catalog defines _catalog_setup"     "grep -q '^_catalog_setup()' '$CATALOG'"
+assert_true "catalog defines _catalog_teardown"  "grep -q '^_catalog_teardown()' '$CATALOG'"
 assert_true "catalog defines _catalog_list_batch" "grep -q '^_catalog_list_batch()' '$CATALOG'"
 assert_true "catalog defines _catalog_all_skills" "grep -q '^_catalog_all_skills()' '$CATALOG'"
+assert_true "setup lib defines setup_git_init_clean"           "grep -q '^setup_git_init_clean()' '$SETUP_LIB'"
+assert_true "setup lib defines setup_chronicle_dir_writable"   "grep -q '^setup_chronicle_dir_writable()' '$SETUP_LIB'"
+assert_true "setup lib defines setup_iteration_goals_dir_writable" "grep -q '^setup_iteration_goals_dir_writable()' '$SETUP_LIB'"
+assert_true "setup lib defines setup_gh_inject_smoke_label"    "grep -q '^setup_gh_inject_smoke_label()' '$SETUP_LIB'"
+assert_true "setup lib defines setup_git_remote_scratch"       "grep -q '^setup_git_remote_scratch()' '$SETUP_LIB'"
+assert_true "setup lib defines teardown_close_smoke_tickets"   "grep -q '^teardown_close_smoke_tickets()' '$SETUP_LIB'"
+assert_true "setup lib defines teardown_delete_created_branch" "grep -q '^teardown_delete_created_branch()' '$SETUP_LIB'"
 
 # Source catalog for direct lookup tests
 # shellcheck disable=SC1090
@@ -131,6 +161,89 @@ for skill in $ALL_SKILLS; do
 
   unset SMOKE_DRIVE_SPAWN_CMD SMOKE_DRIVE_READY_PATTERN SMOKE_DRIVE_PROMPT_TEXT SMOKE_DRIVE_DONE_PATTERN
 done
+
+# ============================================================
+# Catalog setup/teardown accessors — resolution by skill
+# ============================================================
+setup_onboard=$(_catalog_setup onboard-repo 2>/dev/null || echo "")
+setup_build=$(_catalog_setup build 2>/dev/null || echo "")
+setup_session=$(_catalog_setup session-end 2>/dev/null || echo "")
+setup_longrun=$(_catalog_setup longrun-prep 2>/dev/null || echo "")
+setup_promote=$(_catalog_setup promote 2>/dev/null || echo "")
+setup_sprint=$(_catalog_setup sprint 2>/dev/null || echo "")
+setup_whereami=$(_catalog_setup whereami 2>/dev/null || echo "")
+
+assert_true "_catalog_setup non-empty for onboard-repo" "[ -n '$setup_onboard' ]"
+assert_true "_catalog_setup non-empty for build" "[ -n '$setup_build' ]"
+assert_true "_catalog_setup non-empty for session-end" "[ -n '$setup_session' ]"
+assert_true "_catalog_setup non-empty for longrun-prep" "[ -n '$setup_longrun' ]"
+assert_true "_catalog_setup non-empty for promote" "[ -n '$setup_promote' ]"
+assert_true "_catalog_setup empty for sprint (read-only)" "[ -z '$setup_sprint' ]"
+assert_true "_catalog_setup empty for whereami (read-only)" "[ -z '$setup_whereami' ]"
+
+teardown_promote=$(_catalog_teardown promote 2>/dev/null || echo "")
+teardown_build=$(_catalog_teardown build 2>/dev/null || echo "")
+teardown_sprint=$(_catalog_teardown sprint 2>/dev/null || echo "")
+
+assert_true "_catalog_teardown non-empty for promote" "[ -n '$teardown_promote' ]"
+assert_true "_catalog_teardown non-empty for build" "[ -n '$teardown_build' ]"
+assert_true "_catalog_teardown empty for sprint" "[ -z '$teardown_sprint' ]"
+
+# ============================================================
+# Setup helper behavior — source lib + call each helper
+# ============================================================
+# shellcheck disable=SC1090
+source "$SETUP_LIB"
+set +e
+
+# setup_git_init_clean
+scratch_gi=$(mkscratch)
+setup_git_init_clean "$scratch_gi" >/dev/null 2>&1
+assert_true "setup_git_init_clean creates .git dir" "[ -d '$scratch_gi/.git' ]"
+assert_true "setup_git_init_clean creates .smoke-init file" "[ -f '$scratch_gi/.smoke-init' ]"
+
+# setup_chronicle_dir_writable
+scratch_cr=$(mkscratch)
+setup_chronicle_dir_writable "$scratch_cr" >/dev/null 2>&1
+assert_true "setup_chronicle_dir_writable creates docs/chronicle" "[ -d '$scratch_cr/docs/chronicle' ]"
+
+# setup_iteration_goals_dir_writable
+scratch_ig=$(mkscratch)
+setup_iteration_goals_dir_writable "$scratch_ig" >/dev/null 2>&1
+assert_true "setup_iteration_goals_dir_writable creates docs/iteration-bets" "[ -d '$scratch_ig/docs/iteration-bets' ]"
+
+# setup_gh_inject_smoke_label — points shim at fake_gh
+scratch_gh=$(mkscratch)
+export SMOKE_GH_BIN="$FAKE_GH"
+export SMOKE_GH_LOG="$scratch_gh/.gh-invocations.log"
+setup_gh_inject_smoke_label "$scratch_gh" >/dev/null 2>&1
+assert_true "gh shim script exists" "[ -x '$scratch_gh/.smoke-bin/gh' ]"
+assert_true "PATH prepended with shim dir" "echo '$PATH' | grep -q '$scratch_gh/.smoke-bin'"
+
+# Invoke shim: gh issue create should add labels + log
+"$scratch_gh/.smoke-bin/gh" issue create --title "smoke test" --body "body" >/dev/null 2>&1
+assert_true "shim logs issue create invocation" "grep -q 'issue.*create' '$SMOKE_GH_LOG'"
+
+# Verify fake_gh saw the labels (log receives BOTH shim log entry + fake_gh log)
+# The shim called: gh issue create --label smoke-drive --label automated-run --title "smoke test"...
+# fake_gh logs its own args to same $SMOKE_GH_LOG so the log contains both.
+assert_true "fake_gh received smoke-drive label from shim" "grep -q 'smoke-drive' '$SMOKE_GH_LOG'"
+assert_true "fake_gh received automated-run label from shim" "grep -q 'automated-run' '$SMOKE_GH_LOG'"
+
+# Invoke shim: gh repo view — should pass through without label injection
+"$scratch_gh/.smoke-bin/gh" repo view --json name >/dev/null 2>&1
+assert_true "shim passes through non-issue-create calls" "tail -1 '$SMOKE_GH_LOG' | grep -q 'repo.*view'"
+assert_true "non-issue-create call does not carry smoke-drive label" "tail -1 '$SMOKE_GH_LOG' | grep -vq 'smoke-drive.*repo.*view'"
+
+unset SMOKE_GH_BIN SMOKE_GH_LOG
+
+# setup_git_remote_scratch — requires prior git init
+scratch_gr=$(mkscratch)
+setup_git_init_clean "$scratch_gr" >/dev/null 2>&1
+setup_git_remote_scratch "$scratch_gr" >/dev/null 2>&1
+assert_true "setup_git_remote_scratch creates bare repo" "[ -d '$scratch_gr/.smoke-remote.git' ]"
+remote_url=$(cd "$scratch_gr" && git remote get-url origin 2>/dev/null || echo "")
+assert_true "git origin points at scratch bare repo" "echo '$remote_url' | grep -q 'file://'"
 
 echo ""
 echo "smoke-drive-generic.sh Tier 0 tests: $PASS passed, $FAIL failed"
