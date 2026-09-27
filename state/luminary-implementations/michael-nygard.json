@@ -23,8 +23,10 @@
     "docs/risk-ledgers/2026-09-21-pre-tag-version-sync.md",
     "docs/rfcs/2026-09-21c-smoke-drive-riff-council.md",
     "state/markers/luminary/fix-247-shadow-detection.marker",
-    "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker"
+    "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker",
+    "scripts/tests/smoke-assert-drift-cure.test.sh",
+    "scripts/lib/smoke-assert.sh"
   ],
-  "last_scanned": "2026-09-26T11:23:49Z",
+  "last_scanned": "2026-09-27T22:18:31Z",
   "scanner_version": "1.0"
 }
