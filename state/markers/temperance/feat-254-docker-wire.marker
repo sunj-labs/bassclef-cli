@@ -1,0 +1,30 @@
+# Temperance marker — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- ceremony-class: (c) cross-cutting wire (Dockerfile + entry.sh + smoke-report + runbook)
+- prior: sub-step 4.5 shipped (PR #263 merged 35b79ef); Batches A/B/C
+  shipped; walking-skeleton 3 drives real-body shipped.
+- scope-decision:
+  - right-thing: close the cli#254 chain by wiring interactive drives
+    into the actual Docker CI run. Install expect in the container.
+    Add a new V2 step to entry.sh that fires the 3 walking-skeleton
+    drives. Extend smoke-report with interactive rows. Extend the
+    docker-smoke runbook exit-code table.
+  - right-way: fail-soft per Nygard — missing SMOKE_GH_TOKEN skips
+    Class 3 skills (/promote, /build) with a WARN, not a hard fail.
+    Missing expect binary means the whole V2 interactive step no-ops
+    with a clear message. Adopters running against older cli versions
+    (no smoke-drive-generic.sh) skip cleanly.
+  - drift-trigger: any edit to smoke-expect verbs, walking-skeleton
+    drives, Batch A/B/C entries, or sub-step 4.5 setup/teardown is
+    drift. This scope wires existing pieces; it does not modify them.
+- blast-radius:
+  - inside scope: harness/docker/Dockerfile.cold-adopter (add expect),
+    harness/docker/exit-codes.sh (add 30-34 for interactive class),
+    harness/docker/entry.sh (add function + wire), scripts/smoke-report.sh
+    (interactive rows), docs/runbook/docker-smoke.md (exit-code table).
+  - outside scope: /release + /deploy drives; dummy-repo PAT setup
+    (that's an adopter action, README calls it out); the generic
+    driver body.
+  - hard ceiling untouched: auth, schema, security.
+- authorization: agent-merges-within-scope.

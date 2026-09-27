@@ -1,0 +1,12 @@
+# ADR-deviation marker — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- adr_governing: ADR-006 (install harness) — extends the 5 decision
+  points with a new interactive drive step
+- outcome: ADR-honored
+- rationale: extends the existing V2 skill drive pattern in entry.sh
+  with an interactive step. Reuses the same auth gate
+  (_docker_harness_preflight_v2). New exit codes (30-34) follow the
+  same numeric-range discipline as existing INFRA codes (20-26).
+  ADR-006's 5 decision points untouched. Adopter contract (ADR-031)
+  preserved via fail-soft skips on missing prereqs.

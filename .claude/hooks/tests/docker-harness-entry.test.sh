@@ -450,6 +450,84 @@ test_dockerfile_installs_claude_cli() {
   assert_contains "$content" "perl" "Dockerfile installs perl for smoke-drive-skills timeout wrapper"
 }
 
+# ---- cli#254 sub-step 5 additions (2026-09-27) ----
+
+test_dockerfile_installs_expect() {
+  echo "TEST test_dockerfile_installs_expect"
+  local dockerfile="$REPO_ROOT/harness/docker/Dockerfile.cold-adopter"
+  local content; content=$(cat "$dockerfile" 2>/dev/null)
+  assert_contains "$content" "expect" "Dockerfile installs expect for cli#254 interactive drives"
+  assert_contains "$content" "command -v expect" "Dockerfile asserts expect present post-install"
+}
+
+# ---- cli#254 sub-step 6 additions (2026-09-27) ----
+
+test_exit_codes_interactive_defined() {
+  echo "TEST test_exit_codes_interactive_defined"
+  local output
+  output="$(bash -c "source '$EXIT_CODES_SH'; echo \$EXIT_INTERACTIVE_BUG-\$EXIT_INTERACTIVE_TIMEOUT-\$EXIT_INTERACTIVE_PREREQ-\$EXIT_INTERACTIVE_TEARDOWN")"
+  assert_eq "30-31-33-34" "$output" "V2i exit codes defined (30/31/33/34)"
+}
+
+test_v2i_function_defined() {
+  echo "TEST test_v2i_function_defined"
+  setup_test_env
+  local output
+  output="$(bash -c "source '$ENTRY_SH' && type -t _docker_harness_run_v2_interactive" 2>&1)"
+  assert_eq "function" "$output" "_docker_harness_run_v2_interactive is defined after source"
+  teardown_test_env
+}
+
+test_v2i_test_mode_short_circuits() {
+  echo "TEST test_v2i_test_mode_short_circuits"
+  setup_test_env
+  # HARNESS_TEST_MODE=1 already set by setup_test_env — V2i should return 0 without work
+  local rc
+  rc=$(bash -c "source '$ENTRY_SH' && _docker_harness_run_v2_interactive >/dev/null 2>&1; echo \$?")
+  assert_eq "0" "$rc" "HARNESS_TEST_MODE=1 short-circuits V2i to exit 0 (DF1 fold)"
+  teardown_test_env
+}
+
+test_v2i_skips_when_expect_missing() {
+  echo "TEST test_v2i_skips_when_expect_missing"
+  setup_test_env
+  unset HARNESS_TEST_MODE
+  # Trim PATH to system dirs only (dirname/basename/mkdir stay reachable;
+  # local expect installs under /opt or /usr/local drop out).
+  local rc
+  rc=$(bash -c "export PATH='/usr/bin:/bin'; source '$ENTRY_SH' && _docker_harness_run_v2_interactive >/dev/null 2>&1; echo \$?" 2>/dev/null)
+  # Either 0 (skipped cleanly — expect missing) or 0 (skipped cleanly —
+  # smoke-expect.sh not at hardcoded /adopter/bassclef-scripts path).
+  # Both paths return 0. Assertion pins the fail-soft contract.
+  assert_eq "0" "$rc" "missing expect (or missing scripts_dir) skips V2i cleanly with rc 0 (DN1 fold)"
+  teardown_test_env
+}
+
+test_v2i_banner_uses_step_8() {
+  echo "TEST test_v2i_banner_uses_step_8"
+  local content; content=$(cat "$ENTRY_SH" 2>/dev/null)
+  assert_contains "$content" "V2 Step 8" "V2i banner uses Step 8 framing (H10 fold)"
+}
+
+test_runbook_documents_interactive_exit_codes() {
+  echo "TEST test_runbook_documents_interactive_exit_codes"
+  local runbook="$REPO_ROOT/docs/runbook/docker-smoke.md"
+  local content; content=$(cat "$runbook" 2>/dev/null)
+  assert_contains "$content" "| 30 | INTERACTIVE" "runbook documents exit code 30"
+  assert_contains "$content" "| 31 | INTERACTIVE" "runbook documents exit code 31"
+  assert_contains "$content" "| 33 | INTERACTIVE" "runbook documents exit code 33"
+  assert_contains "$content" "| 34 | INTERACTIVE" "runbook documents exit code 34"
+}
+
+test_smoke_report_reads_interactive_json() {
+  echo "TEST test_smoke_report_reads_interactive_json"
+  local report_sh="$REPO_ROOT/scripts/smoke-report.sh"
+  local content; content=$(cat "$report_sh" 2>/dev/null)
+  assert_contains "$content" "interactive-drives.json" "smoke-report reads interactive-drives.json"
+  assert_contains "$content" "Interactive drives (cli#254)" "smoke-report emits Interactive drives section header"
+  assert_contains "$content" "[interactive]" "smoke-report tags interactive rows (N7 fold)"
+}
+
 # ---- cli #212 additions (2026-09-22) ----
 # Postcondition contract: main() exits with the action function's real return code.
 # Bug shape (pre-fix): `if ! _docker_harness_action; then local code=$?; exit "$code"`
@@ -550,6 +628,16 @@ main() {
 
   test_dockerfile_does_not_bake_api_key
   test_dockerfile_installs_claude_cli
+
+  # cli#254 sub-step 5+6 additions (2026-09-27) — Docker wire
+  test_dockerfile_installs_expect
+  test_exit_codes_interactive_defined
+  test_v2i_function_defined
+  test_v2i_test_mode_short_circuits
+  test_v2i_skips_when_expect_missing
+  test_v2i_banner_uses_step_8
+  test_runbook_documents_interactive_exit_codes
+  test_smoke_report_reads_interactive_json
 
   # cli #212 additions (2026-09-22) — exit-code propagation contract
   test_212_install_guard_propagates_real_code

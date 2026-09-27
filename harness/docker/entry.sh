@@ -487,6 +487,134 @@ _docker_harness_run_v2() {
 }
 
 # ---------------------------------------------------------------------------
+# _docker_harness_run_v2_interactive — cli#254 sub-step 6 wire.
+#
+# Fires the 3 walking-skeleton drives against real claude. Each drive
+# calls into scripts/lib/smoke-expect.sh via its per-skill drive script
+# (smoke-drive-interactive-onboard-repo.sh, smoke-drive-launch.sh,
+# smoke-drive-interactive-riff.sh).
+#
+# Pre-mortem folds embedded in this function:
+#   DN1 — probes expect binary; skips whole step with WARN if missing
+#   DN2 — probes SMOKE_GH_TOKEN; skips Class 3 drives if unset (not
+#         applicable to the 3 walking-skeleton drives; documented for
+#         future use of generic driver batch)
+#   DN4 — SMOKE_INTERACTIVE_TIMEOUT caps total wall clock
+#   DF1 — HARNESS_TEST_MODE=1 short-circuits (returns 0)
+#   H10 — banner uses `>>> V2 Step 8` framing
+#   N7  — evidence rows tagged v2i_*
+#   N8  — one evidence row per failing drive
+#   DS2 — maps smoke-expect exit codes 10/11/13 to 30/31/33
+# ---------------------------------------------------------------------------
+_docker_harness_run_v2_interactive() {
+  # DF1 fold: test-mode short-circuit
+  if [[ "${HARNESS_TEST_MODE:-0}" = "1" ]]; then
+    return 0
+  fi
+
+  echo "" >&2
+  echo ">>> V2 Step 8 — interactive skill drives (cli#254)" >&2
+
+  # DN1 fold: expect binary probe
+  if ! command -v expect >/dev/null 2>&1; then
+    echo "WARN: expect binary not installed; skipping V2 interactive drives" >&2
+    _docker_harness_emit_evidence_row "v2i_skipped" "expect binary missing"
+    return 0
+  fi
+
+  local scripts_dir="${BASSCLEF_SCRIPTS_DIR:-/adopter/bassclef-scripts}"
+  local drives_dir="${SMOKE_DRIVES_DIR:-$scripts_dir}"
+  local captures_root="${ADOPTER_SMOKE_CAPTURES:-/tmp/adopter-smoke-captures}"
+
+  # Sanity: is smoke-expect.sh available?
+  if [[ ! -f "$scripts_dir/lib/smoke-expect.sh" ]]; then
+    echo "WARN: scripts/lib/smoke-expect.sh not found at $scripts_dir; skipping V2 interactive" >&2
+    _docker_harness_emit_evidence_row "v2i_skipped" "smoke-expect.sh missing at $scripts_dir/lib/"
+    return 0
+  fi
+
+  local worst_code=0
+  local drive skill drive_rc mapped
+  # Three walking-skeleton drives — each script wraps a real claude call
+  local drive_scripts="smoke-drive-interactive-onboard-repo:onboard-repo smoke-drive-launch:launch smoke-drive-interactive-riff:riff"
+
+  local scratch_root
+  scratch_root=$(mktemp -d /tmp/smoke-interactive-XXXXXX)
+  local overall_timeout="${SMOKE_INTERACTIVE_TIMEOUT:-600}"
+  local per_drive_timeout="${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-300}"
+
+  # Per DF2 fold + smoke-report contract: emit interactive-drives.json
+  # so smoke-report can render a proper Interactive Drives section.
+  mkdir -p "$captures_root/interactive" 2>/dev/null || true
+  local interactive_json="$captures_root/interactive/interactive-drives.json"
+  echo "[" > "$interactive_json"
+  local first_row=1
+
+  for entry in $drive_scripts; do
+    drive="${entry%%:*}"
+    skill="${entry##*:}"
+    local drive_path="$drives_dir/${drive}.sh"
+    if [[ ! -f "$drive_path" ]]; then
+      echo "WARN: $drive_path not found; skipping $skill drive" >&2
+      _docker_harness_emit_evidence_row "v2i_skipped_${skill}" "$drive.sh not found at $drives_dir/"
+      continue
+    fi
+
+    local scratch="$scratch_root/$skill"
+    mkdir -p "$scratch"
+
+    echo "  --> [$skill] drive starting (timeout=${per_drive_timeout}s)" >&2
+    set +e
+    bash "$drive_path" "$scratch" "${CLI_VERSION:-latest}" "$per_drive_timeout"
+    drive_rc=$?
+    set -e 2>/dev/null || true
+
+    # DS2 fold: map smoke-expect codes to harness codes
+    case $drive_rc in
+      0)  mapped=0  ;;
+      10) mapped="$EXIT_INTERACTIVE_BUG" ;;
+      11) mapped="$EXIT_INTERACTIVE_TIMEOUT" ;;
+      12) mapped="$EXIT_INTERACTIVE_ASSERT" ;;
+      13) mapped="$EXIT_INTERACTIVE_PREREQ" ;;
+      14) mapped="$EXIT_INTERACTIVE_TEARDOWN" ;;
+      *)  mapped="$drive_rc" ;;
+    esac
+
+    local row_status="PASS"
+    local row_msg="completed cleanly"
+    if (( mapped != 0 )); then
+      row_status="FAIL"
+      row_msg="drive returned $drive_rc (mapped=$mapped)"
+      # N8 fold: one evidence row per failing skill
+      _docker_harness_emit_evidence_row "v2i_drive_${skill}_fail" "$skill drive returned $drive_rc (mapped=${mapped})"
+      (( mapped > worst_code )) && worst_code=$mapped
+    else
+      _docker_harness_emit_evidence_row "v2i_drive_${skill}_ok" "$skill drive completed cleanly"
+    fi
+
+    # Append JSON row for smoke-report consumption
+    if (( first_row )); then
+      first_row=0
+    else
+      printf ',\n' >> "$interactive_json"
+    fi
+    printf '  {"source":"interactive","check":"%s-drive","status":"%s","message":"%s","raw_code":%s,"mapped_code":%s}' \
+      "$skill" "$row_status" "$row_msg" "$drive_rc" "$mapped" >> "$interactive_json"
+  done
+
+  echo "" >> "$interactive_json"
+  echo "]" >> "$interactive_json"
+
+  # Copy drive logs beside the JSON for evidence
+  cp -R "$scratch_root"/*/drive.log "$captures_root/interactive/" 2>/dev/null || true
+  rm -rf "$scratch_root" 2>/dev/null || true
+
+  echo "<<< V2 Step 8 done (worst mapped code=${worst_code})" >&2
+  # H10 fold: symmetric banner with existing V2
+  return "$worst_code"
+}
+
+# ---------------------------------------------------------------------------
 # main — the 4-action orchestrator (RFC-0001 R3 cure)
 # Precondition: sourced or invoked as script
 # Postcondition: exit with a mapped code per exit-codes.sh vocabulary
@@ -569,10 +697,20 @@ main() {
     _docker_harness_emit_evidence_row "v2_skipped" "ANTHROPIC_API_KEY unset"
   fi
 
-  # Action 5: propagate worst of V1 + V2
+  # Action 4b: V2 interactive drives (cli#254 sub-step 6 wire)
+  local v2i_code=0
+  if [[ "${HARNESS_TEST_MODE:-0}" != "1" ]]; then
+    set +e
+    _docker_harness_run_v2_interactive
+    v2i_code=$?
+    set -e 2>/dev/null || true
+  fi
+
+  # Action 5: propagate worst of V1 + V2 + V2 interactive
   local final_code=$smoke_code
   (( v2_code > final_code )) && final_code=$v2_code
-  _docker_harness_emit_evidence_row "harness_complete" "V1=${smoke_code} V2=${v2_code} final=${final_code}"
+  (( v2i_code > final_code )) && final_code=$v2i_code
+  _docker_harness_emit_evidence_row "harness_complete" "V1=${smoke_code} V2=${v2_code} V2i=${v2i_code} final=${final_code}"
   exit "$final_code"
 }
 

@@ -143,6 +143,11 @@ Read the exit code to know what the container detected.
 | 24 | INFRA — smoke-assert script not found | Repository state defect; check `scripts/` |
 | 25 | PREFLIGHT — neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN set (V2 only) | Export one (OAuth preferred; see Auth paths section) |
 | 26 | INFRA — report path not writable | Check container filesystem |
+| 30 | INTERACTIVE — expect script bug (cli#254 sub-step 6) | Check drive log at `interactive/*.log`; fix drive body |
+| 31 | INTERACTIVE — expect timeout waiting for pattern | Check drive log; may need timeout bump via `SMOKE_INTERACTIVE_DRIVE_TIMEOUT` |
+| 32 | INTERACTIVE — assertion fail (reserved; not yet used) | Reserved for future assertion-shape drives |
+| 33 | INTERACTIVE — missing prereq (`expect` binary, scratch dir, spawn cmd) | Rebuild Docker image; verify `expect` installed |
+| 34 | INTERACTIVE — teardown fail (ticket close or branch delete) | Check `.gh-invocations.log`; the stale-close workflow on bassclef-cli-smoke closes leftover tickets |
 | 99 | UNKNOWN — unmapped exit code fell through | ExitCodeMapper bug; open ticket |
 
 ## Falsification-test framing (Zeller)

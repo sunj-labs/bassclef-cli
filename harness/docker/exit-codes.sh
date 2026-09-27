@@ -30,6 +30,13 @@ readonly EXIT_ASSERT_NOT_FOUND=24   # smoke-assert-*.sh script not on PATH
 readonly EXIT_ENV_MISSING=25        # ANTHROPIC_API_KEY missing for V2 skill drive
 readonly EXIT_REPORT_WRITE_FAIL=26  # report path not writable
 
+# V2 interactive drive class (cli#254 sub-step 5+6 wire)
+readonly EXIT_INTERACTIVE_BUG=30      # expect script bug (smoke-expect returned 10)
+readonly EXIT_INTERACTIVE_TIMEOUT=31  # expect timeout waiting for pattern (smoke-expect returned 11)
+readonly EXIT_INTERACTIVE_ASSERT=32   # interactive assertion fail (reserved)
+readonly EXIT_INTERACTIVE_PREREQ=33   # missing prereq (SCRATCH_DIR, expect binary, spawn cmd)
+readonly EXIT_INTERACTIVE_TEARDOWN=34 # teardown_close_smoke_tickets or teardown_delete_created_branch failed
+
 # Unknown-defect class (Saltzer-Schroeder complete mediation catch)
 readonly EXIT_UNKNOWN=99            # unmapped exit code fell through; bug in ExitCodeMapper
 

@@ -1,0 +1,20 @@
+# Luminary marker — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- lead: michael-nygard
+- supporting: [john-ousterhout, linus-torvalds]
+- rationale:
+  - lead (Nygard) — stability pattern. Adopters run Docker CI on every
+    PR. Interactive drive step adds new failure modes (expect timeout,
+    missing token, network drop on gh close). Every one must fail-soft
+    with a specific exit code, not a generic crash. Nygard's lens
+    verifies the ship at Step 5.5.
+  - supporting (Ousterhout) — deep module. The new function
+    `_docker_harness_run_v2_interactive` hides all interactive-drive
+    orchestration behind one call. main() sees a single exit code from
+    the whole batch.
+  - supporting (Linus) — adopter contract. Existing adopters on older
+    cli versions (no smoke-drive-generic.sh) must still get GREEN CI.
+    New step skips cleanly on missing prereqs.
+- balancing-check-role: Nygard confirms fail-soft coverage across all
+  new failure modes before Step 6 merge.
