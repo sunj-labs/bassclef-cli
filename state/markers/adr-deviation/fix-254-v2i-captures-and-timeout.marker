@@ -1,0 +1,6 @@
+# ADR-deviation marker — V2i captures + timeout
+- date: 2026-09-27
+- adr_governing: none — bug fix
+- outcome: ADR-honored
+- rationale: aligns V2i captures_root with V2's bind-mounted convention.
+  Timeout tuning is per-workflow, not architectural.

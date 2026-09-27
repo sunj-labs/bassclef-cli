@@ -528,6 +528,34 @@ test_smoke_report_reads_interactive_json() {
   assert_contains "$content" "[interactive]" "smoke-report tags interactive rows (N7 fold)"
 }
 
+test_v2i_captures_root_is_bind_mounted_path() {
+  # V2i log artifacts must live under a bind-mounted path so the runner's
+  # Upload smoke captures step catches them. Prior default
+  # `/tmp/adopter-smoke-captures` was in-container-only.
+  echo "TEST test_v2i_captures_root_is_bind_mounted_path"
+  local v2i_body
+  v2i_body=$(awk '/^_docker_harness_run_v2_interactive\(\)/,/^\}/' "$ENTRY_SH")
+  assert_contains "$v2i_body" '/adopter/state/harness-runs/interactive-' "V2i captures_root defaults to bind-mounted /adopter/state/harness-runs/interactive-<ts>"
+}
+
+test_v2i_per_drive_timeout_is_tight() {
+  # 3 drives * 90s = 270s. Fits inside the 20-min workflow wall clock
+  # with room for V1 + V2 + docker build.
+  echo "TEST test_v2i_per_drive_timeout_is_tight"
+  local v2i_body
+  v2i_body=$(awk '/^_docker_harness_run_v2_interactive\(\)/,/^\}/' "$ENTRY_SH")
+  assert_contains "$v2i_body" 'SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-90' "V2i per-drive timeout defaults to 90s"
+}
+
+test_workflow_timeout_accommodates_v2i() {
+  # V1 (~2 min) + V2 (~5 min) + V2i (~5 min at 90s x 3 drives) + docker
+  # build (~2 min) = ~14 min. Workflow wall clock at 20 min gives margin.
+  echo "TEST test_workflow_timeout_accommodates_v2i"
+  local workflow="$REPO_ROOT/.github/workflows/docker-smoke.yml"
+  local content; content=$(cat "$workflow" 2>/dev/null)
+  assert_contains "$content" "timeout-minutes: 20" "docker-smoke workflow wall clock is 20 min"
+}
+
 test_v2i_scripts_dir_matches_v2_convention() {
   # Cli#254 V2i scripts_dir path drift caught in docker-smoke run 36322114727.
   # V2 (entry.sh L357) uses SMOKE_SCRIPTS_DIR:-/adopter/scripts. V2i must
@@ -664,6 +692,9 @@ main() {
   test_runbook_documents_interactive_exit_codes
   test_smoke_report_reads_interactive_json
   test_v2i_scripts_dir_matches_v2_convention
+  test_v2i_captures_root_is_bind_mounted_path
+  test_v2i_per_drive_timeout_is_tight
+  test_workflow_timeout_accommodates_v2i
 
   # cli #212 additions (2026-09-22) — exit-code propagation contract
   test_212_install_guard_propagates_real_code

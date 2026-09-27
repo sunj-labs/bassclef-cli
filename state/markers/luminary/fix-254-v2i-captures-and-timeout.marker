@@ -1,0 +1,9 @@
+# Luminary marker — V2i captures + timeout
+- date: 2026-09-27
+- lead: michael-feathers
+- supporting: [michael-nygard]
+- rationale:
+  - lead Feathers — same defect class as PR #268. Real Docker run
+    characterizes the failure; test pins the cure.
+  - supporting Nygard — 90s default balances characterization speed
+    against real Claude latency budget.

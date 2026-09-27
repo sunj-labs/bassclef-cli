@@ -528,7 +528,13 @@ _docker_harness_run_v2_interactive() {
   # per state/markers/diagnose/fix-254-v2i-scripts-dir-path.marker.
   local scripts_dir="${SMOKE_SCRIPTS_DIR:-/adopter/scripts}"
   local drives_dir="${SMOKE_DRIVES_DIR:-$scripts_dir}"
-  local captures_root="${ADOPTER_SMOKE_CAPTURES:-/tmp/adopter-smoke-captures}"
+  # captures_root defaults to a bind-mounted path per docker-smoke.yml's
+  # -v $GITHUB_WORKSPACE/harness-out:/adopter/state/harness-runs. Drive
+  # logs + interactive-drives.json land on the host filesystem so the
+  # runner's Upload smoke captures step catches them. Prior default
+  # /tmp/adopter-smoke-captures was in-container-only; logs vanished on
+  # exit. Cured per state/markers/diagnose/fix-254-v2i-captures-and-timeout.marker.
+  local captures_root="${ADOPTER_SMOKE_CAPTURES:-/adopter/state/harness-runs/interactive-$(date -u +%Y-%m-%dT%H-%M-%SZ)}"
 
   # Sanity: is smoke-expect.sh available?
   if [[ ! -f "$scripts_dir/lib/smoke-expect.sh" ]]; then
@@ -545,7 +551,13 @@ _docker_harness_run_v2_interactive() {
   local scratch_root
   scratch_root=$(mktemp -d /tmp/smoke-interactive-XXXXXX)
   local overall_timeout="${SMOKE_INTERACTIVE_TIMEOUT:-600}"
-  local per_drive_timeout="${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-300}"
+  # Per-drive timeout defaults to 90s. Three drives x 90s = 270s worst
+  # case (~4.5 min), well inside the workflow's 20-min wall clock.
+  # Prior 300s default consumed 15 min just for expect timeouts because
+  # default patterns match fake_claude, not real Claude. Adopter can
+  # bump via SMOKE_INTERACTIVE_DRIVE_TIMEOUT env. Cured per state/markers/
+  # diagnose/fix-254-v2i-captures-and-timeout.marker.
+  local per_drive_timeout="${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-90}"
 
   # Per DF2 fold + smoke-report contract: emit interactive-drives.json
   # so smoke-report can render a proper Interactive Drives section.

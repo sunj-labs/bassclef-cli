@@ -40,7 +40,10 @@ jobs:
   docker-cold-adopter-smoke:
     name: Docker cold-adopter smoke (linux/amd64)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # cli#254 V2i wall-clock margin. Was 15; V2 already takes ~7 min,
+    # V2i adds another 4-5 min at the tightened 90s per-drive timeout.
+    # 20 min gives headroom for cold-cache network + real Claude latency.
+    timeout-minutes: 20
 
     steps:
       - name: Checkout

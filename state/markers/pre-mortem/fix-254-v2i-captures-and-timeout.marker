@@ -1,0 +1,12 @@
+# Pre-mortem marker — V2i captures + timeout
+- date: 2026-09-27
+- lenses: [michael-feathers, michael-nygard]
+- risks:
+  - **VC1** — same drift class re-appears (captures_root default from
+    memory). Cure: Tier 0 test greps V2i for the bind-mounted path.
+  - **VC2** — 90s too short for one skill; real Claude cold-cache boots
+    slow. Cure: adopter can bump via SMOKE_INTERACTIVE_DRIVE_TIMEOUT env
+    in workflow.
+  - **VC3** — 20-min wall clock still tight on cold-cache runs.
+    Cure: tune again after next characterization run.
+- folds: bind-mounted default; grep-based Tier 0 test.
