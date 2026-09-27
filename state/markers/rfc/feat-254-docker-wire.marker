@@ -1,0 +1,45 @@
+# RFC adversarial marker — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- mode: /rfc adversarial (3 outside lenses)
+- lenses: [hyrum-wright, don-norman, alan-cooper]
+
+## Hyrum lens — observable behavior becomes contract
+
+- **H10** — adopters may pipe entry.sh output through their own log
+  processors. New V2i step adds new log lines. Any adopter grepping
+  for `>>> V2 Step 7` may not match the new step. Cure: use the same
+  `>>> ... <<<` framing; new step is `>>> V2 Step 8` numerically.
+- **H11** — exit codes 30-34 become part of the contract. Downstream
+  scripts that switch on code see new values. Cure: runbook documents
+  each code; codes chosen in a fresh range (not reusing 27-29).
+
+## Norman lens — signifier + feedback
+
+- **N7** — smoke-report interactive rows must scan clearly on mobile.
+  Cure: rows follow same table shape as existing V2 rows; single-line
+  status per skill; `[interactive]` tag as visual anchor.
+- **N8** — CI failure banner should tell the operator WHICH skill's
+  drive failed. Cure: evidence row per skill (`v2i_drive_<skill>_fail`)
+  emitted on any non-zero drive.
+
+## Cooper lens — the operator scanning failed CI
+
+- **C7** — operator returning to a failed CI run reads the log
+  top-down. Interactive step comes AFTER existing V2. Cure: preserve
+  existing V2 output shape; add interactive step as a distinct block
+  with its own opening banner + closing summary.
+- **C8** — operator needs to know if the failure is Class 3 side
+  effect (real ticket lingered) vs drive shape (skill body broken).
+  Cure: evidence row + smoke-report both distinguish
+  `class3_teardown_failed` from `interactive_drive_fail`.
+
+## Folds added pre-code
+
+7. **H10 fold** — new step is numbered 8 in banner strings.
+8. **N7 fold** — interactive rows use `[interactive]` tag for scan.
+9. **N8 fold** — one evidence row per failing skill (not aggregate only).
+10. **C8 fold** — teardown failure and drive failure use different
+    evidence-row keys.
+
+Combined with pre-mortem 6 folds: 10 folds pre-code.

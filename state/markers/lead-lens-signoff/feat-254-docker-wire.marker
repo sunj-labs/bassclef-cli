@@ -1,0 +1,22 @@
+# Lead lens sign-off — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- lead: michael-nygard
+- findings-status: no findings (49/49 entry.sh tests GREEN; 340/340 across
+  the whole cli#254 test suite)
+- nygard-lens verdict:
+  - Every new failure mode fails soft. Missing expect binary skips
+    with a WARN + evidence row. Missing scripts dir skips the same way.
+    Test-mode short-circuits cleanly. DF1/DN1/DS2 folds all confirmed
+    in tests.
+  - Exit-code mapping 10/11/13/14 -> 30/31/33/34 pins the smoke-expect
+    contract into the harness's own vocabulary (EXIT_INTERACTIVE_*).
+    Runbook + exit-codes.sh + entry.sh case statement all agree.
+  - smoke-report interactive rows are additive. Existing hooks + skills
+    sections untouched. Section header `## Interactive drives (cli#254)`
+    only appears when interactive-drives.json is present.
+  - Backward compat with existing adopter CI: HARNESS_TEST_MODE=1
+    short-circuits; adopters without expect see clean skip; adopters
+    without smoke-drive-generic.sh see clean skip; no hard fail path
+    triggered by missing prereqs.
+- sign-off: GO — Step 6 merge cleared.

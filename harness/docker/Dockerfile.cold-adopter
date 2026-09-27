@@ -12,16 +12,19 @@ FROM --platform=linux/amd64 debian:12-slim
 # python3 for text processing, jq for JSON parsing, git for repo init, curl for install fallback.
 # procps for command-v checks. ca-certificates for TLS to npm registry + Anthropic API.
 # perl for smoke-drive-skills.sh timeout wrapper (V2).
+# expect for interactive skill drives (cli#254 sub-step 5).
 RUN apt-get update && apt-get install --no-install-recommends -y \
     bash \
     ca-certificates \
     curl \
+    expect \
     git \
     jq \
     perl \
     procps \
     python3 \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && command -v expect >/dev/null || (echo "expect install failed" >&2; exit 1)
 
 # Node 20 via NodeSource (bassclef-cli requires node >= 20 per package.json)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \

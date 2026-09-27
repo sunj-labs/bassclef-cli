@@ -1,0 +1,63 @@
+# Pre-mortem marker — cli#254 sub-steps 5+6 (Docker wire)
+- date: 2026-09-27
+- branch: feat/254-docker-wire
+- mode: /pre-mortem light (3 lenses × 5-8 risks + folds)
+- lenses: [michael-nygard, michael-feathers, saltzer-schroeder]
+
+## Nygard lens — stability under real load
+
+- **DN1** — expect binary missing after Docker rebuild (apt-get cache
+  drift). Cure: docker build asserts `command -v expect` post-install
+  as a build-time check; entry.sh's V2 interactive step also probes
+  at runtime and skips with WARN if missing.
+- **DN2** — SMOKE_GH_TOKEN unset in CI; /promote drive falls back to
+  default GITHUB_TOKEN which cannot write cross-repo. Cure: interactive
+  step probes token presence + skips /promote + /build with WARN;
+  reports skip as `V2i_skipped_class3` in evidence.
+- **DN3** — network drop mid-drive; drive times out; teardown tries
+  to close ticket, also fails. Cure: teardown_close_smoke_tickets
+  returns non-zero + logs stderr; primary teardown failure is
+  non-fatal to the whole CI run (aggregate worst code still bounded).
+- **DN4** — interactive drive takes 5-10 minutes; CI job wall-clock
+  budget exceeded. Cure: SMOKE_INTERACTIVE_TIMEOUT env caps the whole
+  step; overall entry.sh honors a 600s hard cap.
+- **DN5** — smoke-report interactive rows collide with existing V2
+  rows on layout. Cure: prefix rows with `[interactive]` tag.
+
+## Feathers lens — characterization tests
+
+- **DF1** — new V2 interactive function untested; can regress silently.
+  Cure: HARNESS_TEST_MODE=1 short-circuits the function so
+  docker-harness-entry.test.sh can characterize the wire.
+- **DF2** — smoke-report row shape changes break downstream parsers
+  (e.g., adopter scripts grepping the report). Cure: interactive rows
+  are ADDITIVE — existing rows untouched. New rows only appear when
+  interactive step ran.
+- **DF3** — exit-code table drift; runbook and exit-codes.sh disagree.
+  Cure: same PR updates both; grep-check `EXIT_INTERACTIVE_` names in
+  runbook matches source.
+
+## Saltzer-Schroeder lens — complete mediation + fail-safe
+
+- **DS1** — interactive drive fires before auth preflight. Cure:
+  V2 interactive step runs AFTER _docker_harness_preflight_v2 gates.
+  Same gate as existing V2 skill drive.
+- **DS2** — new exit codes leak past ExitCodeMapper. Cure: extend
+  the mapper's known-codes list to include 30-34.
+- **DS3** — teardown runs even when setup failed; leaves state
+  inconsistent. Cure: sub-step 4.5 driver already guards this
+  (setup fail returns 13; teardown skipped on 13).
+
+## Folds landing pre-code
+
+1. **DN1 fold** — Dockerfile RUN command asserts `expect --version`
+   after apt install; entry.sh also probes at runtime.
+2. **DN2 fold** — interactive step probes SMOKE_GH_TOKEN and skips
+   Class 3 skills with WARN + evidence row.
+3. **DN5 fold** — smoke-report interactive rows prefixed with
+   `[interactive]` tag.
+4. **DF1 fold** — HARNESS_TEST_MODE=1 short-circuits the new function.
+5. **DF3 fold** — same PR updates exit-codes.sh + runbook + smoke-report;
+   Tier 0 test greps codes match.
+6. **DS2 fold** — extend `_docker_harness_map_exit_code` (or wherever
+   the mapper lives) with 30-34.

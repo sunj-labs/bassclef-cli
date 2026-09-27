@@ -126,9 +126,13 @@ gh_with_retry() {
 build_report() {
   local hooks_json="${CAPTURES_DIR}/hooks-assertions.json"
   local skills_json="${CAPTURES_DIR}/skills-assertions.json"
+  # cli#254 sub-step 6 wire: interactive-drives.json ships from entry.sh V2i
+  local interactive_json="${CAPTURES_DIR}/interactive/interactive-drives.json"
 
-  # At least one of the two must exist.
-  if [ ! -f "$hooks_json" ] && [ ! -f "$skills_json" ]; then
+  # At least one of the three must exist. Kept the "neither hooks-assertions
+  # nor skills-assertions" wording to preserve tests/smoke-report.test.ts
+  # characterization; interactive-drives.json is additive per DF2 fold.
+  if [ ! -f "$hooks_json" ] && [ ! -f "$skills_json" ] && [ ! -f "$interactive_json" ]; then
     echo "smoke-report: neither hooks-assertions.json nor skills-assertions.json in ${CAPTURES_DIR}" >&2
     exit 2
   fi
@@ -137,6 +141,7 @@ build_report() {
   local fail_count=0
   local hooks_body=""
   local skills_body=""
+  local interactive_body=""
 
   if [ -f "$hooks_json" ]; then
     local hp hf
@@ -154,6 +159,16 @@ build_report() {
     pass_count=$((pass_count + sp))
     fail_count=$((fail_count + sf))
     skills_body=$(jq -r '.[] | "| \(.source) | \(.check) | \(.status) | \(.message) |"' "$skills_json")
+  fi
+
+  # cli#254 sub-step 6: interactive drives section (N7 fold — [interactive] tag)
+  if [ -f "$interactive_json" ]; then
+    local ip if_
+    ip=$(jq '[.[] | select(.status == "PASS")] | length' "$interactive_json")
+    if_=$(jq '[.[] | select(.status == "FAIL")] | length' "$interactive_json")
+    pass_count=$((pass_count + ip))
+    fail_count=$((fail_count + if_))
+    interactive_body=$(jq -r '.[] | "| [interactive] | \(.check) | \(.status) | \(.message) |"' "$interactive_json")
   fi
 
   local total=$((pass_count + fail_count))
@@ -197,6 +212,15 @@ build_report() {
       echo "| source | check | status | message |"
       echo "|---|---|---|---|"
       printf '%s\n' "$skills_body"
+      echo ""
+    fi
+
+    if [ -n "$interactive_body" ]; then
+      echo "## Interactive drives (cli#254)"
+      echo ""
+      echo "| source | check | status | message |"
+      echo "|---|---|---|---|"
+      printf '%s\n' "$interactive_body"
       echo ""
     fi
 
