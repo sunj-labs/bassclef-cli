@@ -1,0 +1,12 @@
+# Pre-mortem marker — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- lenses: [michael-feathers]
+- risks:
+  - **VF1** — same drift recurs in a future V2i extension. Cure: Tier
+    0 test greps the V2i function for the exact env-var name +
+    default path. Regression fails the check.
+  - **VF2** — SMOKE_SCRIPTS_DIR env at Dockerfile L65 could change and
+    the test still matches the source. Cure: test checks both the
+    function default AND greps Dockerfile for the same value.
+- folds: match V2's convention exactly; test pins both sides.

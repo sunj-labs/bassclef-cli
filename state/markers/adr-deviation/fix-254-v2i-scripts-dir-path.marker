@@ -1,0 +1,9 @@
+# ADR-deviation marker — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- adr_governing: none — narrow bug fix; extends V2's env-var convention
+- outcome: ADR-honored
+- rationale: fix aligns V2i default env-var + path with V2's existing
+  convention (SMOKE_SCRIPTS_DIR=/adopter/scripts). ADR-006 (install
+  harness) untouched; V2i already fits within that ADR's 5 decision
+  points.

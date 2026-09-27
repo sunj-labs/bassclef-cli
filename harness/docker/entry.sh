@@ -522,7 +522,11 @@ _docker_harness_run_v2_interactive() {
     return 0
   fi
 
-  local scripts_dir="${BASSCLEF_SCRIPTS_DIR:-/adopter/bassclef-scripts}"
+  # Match V2's convention (this file L357): SMOKE_SCRIPTS_DIR env from
+  # Dockerfile L65 pre-sets /adopter/scripts. Prior version used a made-up
+  # env name + path which pointed at nothing in the container. Cured
+  # per state/markers/diagnose/fix-254-v2i-scripts-dir-path.marker.
+  local scripts_dir="${SMOKE_SCRIPTS_DIR:-/adopter/scripts}"
   local drives_dir="${SMOKE_DRIVES_DIR:-$scripts_dir}"
   local captures_root="${ADOPTER_SMOKE_CAPTURES:-/tmp/adopter-smoke-captures}"
 

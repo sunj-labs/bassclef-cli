@@ -1,0 +1,52 @@
+# Diagnose marker — cli#254 V2i scripts_dir path bug
+- date: 2026-09-27
+- branch: fix/254-v2i-scripts-dir-path
+- observed at: docker-smoke run 36322114727 (workflow_dispatch on latest)
+
+## Repro (Step 0 anchor)
+
+- Fire: `gh workflow run docker-smoke.yml --repo sunj-labs/bassclef-cli -f cli_version=latest`
+- Watch: `gh run watch 36322114727`
+- Observed in log:
+  ```
+  >>> V2 Step 8 — interactive skill drives (cli#254)
+  WARN: scripts/lib/smoke-expect.sh not found at /adopter/bassclef-scripts; skipping V2 interactive
+  ```
+
+## Is / Is Not
+
+Is: V2i skips with WARN because the smoke-expect.sh lib is not at
+    `/adopter/bassclef-scripts/lib/smoke-expect.sh`.
+Is Not: expect binary missing (installed cleanly per Dockerfile sub-step 5).
+Is Not: token unset (irrelevant here — V2i skips before token is used).
+
+## Five Whys
+
+1. Why did V2i skip? Because scripts_dir/lib/smoke-expect.sh was not found.
+2. Why not found? Because scripts_dir defaulted to `/adopter/bassclef-scripts`.
+3. Why that default? Because I wrote `${BASSCLEF_SCRIPTS_DIR:-/adopter/bassclef-scripts}` in entry.sh.
+4. Why that value? Guess. I did not read the existing convention.
+5. Why did I guess? Because I did not grep the file for `scripts_dir` before writing the V2i function.
+
+Root cause: env-var name + default path drift from the existing V2 convention.
+
+## Fix
+
+Change V2i defaults to match V2 (harness/docker/entry.sh L357):
+- `BASSCLEF_SCRIPTS_DIR` → `SMOKE_SCRIPTS_DIR`
+- `/adopter/bassclef-scripts` → `/adopter/scripts`
+
+Also add a Tier 0 test that pins the path — grep the file for
+`SMOKE_SCRIPTS_DIR:-/adopter/scripts` in the V2i function body.
+
+## Falsification (Popper)
+
+After fix, re-fire docker-smoke against latest. Predict:
+- V2i step proceeds past the smoke-expect.sh probe
+- Reaches drive_start for /onboard-repo
+- Either the drive runs to completion OR hits a real Claude
+  pattern miss (exit 31) — either way, the wire bug is closed.
+
+Falsified if: V2i still skips with the same WARN. That would mean
+the Dockerfile's `SMOKE_SCRIPTS_DIR` env at L65 is not exported to
+the entry.sh process at runtime.
