@@ -559,6 +559,12 @@ _docker_harness_run_v2_interactive() {
   # diagnose/fix-254-v2i-captures-and-timeout.marker.
   local per_drive_timeout="${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-90}"
 
+  # cli#254 Path A2 (2026-09-27): drive_start in smoke-expect.sh sends
+  # N Enter keys after spawn to advance past Claude Code v2.1.x first-run
+  # theme picker + preview screens. Adopter overrides via env if needed.
+  # Fake_claude tests default to 0 (no dance).
+  export SMOKE_DRIVE_ONBOARDING_ENTERS="${SMOKE_DRIVE_ONBOARDING_ENTERS:-2}"
+
   # Per DF2 fold + smoke-report contract: emit interactive-drives.json
   # so smoke-report can render a proper Interactive Drives section.
   mkdir -p "$captures_root/interactive" 2>/dev/null || true

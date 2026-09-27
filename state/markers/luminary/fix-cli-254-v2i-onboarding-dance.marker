@@ -1,0 +1,22 @@
+# Luminary — V2i onboarding dance
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-onboarding-dance
+- lead: john-ousterhout
+- supporting: [michael-feathers, alan-cooper]
+
+## Ousterhout (lead) — deep module
+The dance sits inside drive_start with a narrow interface (one env var,
+one behavior toggle). Callers do not learn about picker screens, sleep
+values, or expect-Tcl syntax. drive_start hides all of that. The
+5-verb interface stays 5 verbs.
+
+## Feathers (supporting) — characterization
+The dance is characterized by 5 Tier 0 tests that pin its queue-file
+output shape. If a future Claude release changes the onboarding flow,
+these tests still pass (they check what the dance emits, not what
+Claude renders). Drive.log stays the source of truth for the flow.
+
+## Cooper (supporting) — real operator state
+Real operators do not sit through the theme picker every session.
+Their machines have theme + acceptance state already. The dance
+matches that reality inside the ephemeral Docker container.

@@ -1,0 +1,21 @@
+# ADR-deviation marker — V2i onboarding dance
+- date: 2026-09-27
+- branch: fix-cli-254-v2i-onboarding-dance
+- adr_governing: none — no ADR governs the smoke-expect verb interface or the V2i drive protocol
+- outcome: ADR-honored
+
+## Notes
+
+Change scope: extend drive_start with an opt-in onboarding-keystroke
+dance (env-var SMOKE_DRIVE_ONBOARDING_ENTERS). Wire entry.sh V2i to set
+it to 2 for real-claude drives. No changes to the 5-verb interface;
+no changes to per-skill drives or catalog. Fake_claude tests default to 0
+(unchanged behavior).
+
+Reviewed against `docs/adrs/`:
+- ADR-006 (install harness) — Docker cold-adopter harness. Not touched;
+  the dance is a smoke-expect verb extension, not a harness contract shift.
+- ADR-002/003/004/005 — bassclef init/sync/publish/npm. Not touched.
+
+The dance is a test-harness cure for a Claude Code CLI first-run
+onboarding surface. No pinned ADR governs this surface.

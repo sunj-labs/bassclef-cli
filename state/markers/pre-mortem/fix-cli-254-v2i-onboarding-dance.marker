@@ -1,0 +1,53 @@
+# Pre-mortem — V2i onboarding dance
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-onboarding-dance
+- lenses: [gary-klein, saltzer-schroeder, tony-hoare]
+
+## Risks
+
+### R1 — Klein (change impact)
+Change scope: one lib function extension (drive_start) + one env
+export in entry.sh V2i wrapper. Fake_claude tests default to 0 = no
+dance. Adopter machines untouched. Impact: real-claude V2i drives only.
+
+### R2 — Klein (unmet prerequisite)
+Dance assumes 2 Enters clears onboarding. If Claude renders 3+ screens,
+drives still time out. Falsification: drive.log after CI run.
+Cure path: bump SMOKE_DRIVE_ONBOARDING_ENTERS to 3, or send a
+non-Enter keystroke, per drive.log content.
+
+### R3 — Klein (spurious READY still matches)
+The default READY pattern (READY>|>) may still match on `>` characters
+in the post-Enter screens (e.g., syntax preview or REPL cursor). If
+drive_send fires before Claude is at REPL, drives still fail.
+Falsification: drive.log will show drive_send output landing in the
+wrong screen state.
+Cure: tighten catalog READY patterns to REPL-specific glyphs in a
+follow-on (e.g., match on the actual REPL frame chars).
+
+### R4 — Hoare (postcondition on drive_start)
+drive_start's postcondition is unchanged when the env var is 0 (queue
+file starts with preamble + spawn only, same as before). When the env
+var is >0, the postcondition extends with N sleeps + N sends. Tests
+pin both cases.
+
+### R5 — Saltzer-Schroeder (least privilege)
+Dance sends only Enter keys. No shell injection surface — the raw
+string `\r` is written literally to the queue file. Env var is
+integer-checked; non-numeric input silently falls to 0 (bash test
+`[ "$var" -gt 0 ] 2>/dev/null`).
+
+### R6 — Klein (fake_claude test drift)
+If a future test enables the dance (SMOKE_DRIVE_ONBOARDING_ENTERS>0)
+against fake_claude, fake will echo RESP: lines for each dance Enter,
+which will shift the DONE match into wrong lines. Mitigation: tests
+default to 0. Documented in the dance comment.
+
+## Strongest concerns folded in
+- R2 (Enter count) — falsification path via drive.log.
+- R3 (spurious READY) — flagged as follow-on cure if R2 clears but
+  drives still fail on the DONE pattern.
+
+## Verdict
+Ship. Risks are bounded, observable via drive.log, and each has a
+named cure path.

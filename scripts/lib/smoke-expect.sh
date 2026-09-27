@@ -129,6 +129,32 @@ drive_start() {
   # Empty log
   : > "$log_file"
 
+  # Onboarding dance (cli#254 Path A2, 2026-09-27).
+  # Real Claude Code v2.1.x blocks on first-run theme picker + preview
+  # screen before reaching the REPL. Send N Enter keys with short sleeps
+  # so drive_expect fires after Claude is at REPL, not stuck on picker.
+  # Opt-in via SMOKE_DRIVE_ONBOARDING_ENTERS (default 0).
+  # V2i entry.sh sets 2 for real-claude drives; fake_claude tests skip.
+  # Bash 3.2 portable: while loop with counter (no seq / brace expansion).
+  local dance_enters="${SMOKE_DRIVE_ONBOARDING_ENTERS:-0}"
+  local dance_pre_sleep="${SMOKE_DRIVE_ONBOARDING_PRE_SLEEP:-3}"
+  local dance_between_sleep="${SMOKE_DRIVE_ONBOARDING_BETWEEN_SLEEP:-1}"
+  if [ "$dance_enters" -gt 0 ] 2>/dev/null; then
+    # Initial sleep so Claude renders welcome + picker before we send.
+    printf 'sleep %s\n' "$dance_pre_sleep" >> "$queue_file"
+    local i=0
+    while [ $i -lt "$dance_enters" ]; do
+      # Send bare Enter key to confirm current picker selection.
+      printf 'send -- "\\r"\n' >> "$queue_file"
+      i=$((i + 1))
+      if [ $i -lt "$dance_enters" ]; then
+        printf 'sleep %s\n' "$dance_between_sleep" >> "$queue_file"
+      fi
+    done
+    # Trailing sleep so post-Enter UI renders before the next drive_expect.
+    printf 'sleep %s\n' "$dance_between_sleep" >> "$queue_file"
+  fi
+
   # H2 fold: write state file LAST so a preamble-write failure = no state file
   {
     printf 'SMOKE_DRIVE_VERSION=%s\n' "$SMOKE_EXPECT_VERSION"

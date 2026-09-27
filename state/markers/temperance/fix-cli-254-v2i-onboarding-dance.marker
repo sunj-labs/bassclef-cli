@@ -1,0 +1,24 @@
+# Temperance — V2i onboarding dance (Path A2)
+- date: 2026-09-27
+- branch: fix/cli-254-v2i-onboarding-dance
+- scope-decision: Fix at the shared drive_start layer via opt-in env var.
+  One lib edit + one entry.sh wire + 5 Tier 0 tests. No changes to
+  per-skill drives or catalog. Backward-compatible (default 0 = no
+  behavior change for existing callers).
+- drift-trigger: If drive.log after CI run shows Claude still on
+  onboarding screens, do NOT crank up the Enter count blindly. Read
+  the log; discriminate between "one more gate" vs "wrong keystroke"
+  vs "spurious READY match still". File follow-on per finding.
+
+## Checklist
+- RIGHT THING? Yes — Path B falsified; the picker needs a keystroke,
+  not more settings.json fields.
+- SIMPLEST? Yes — bake dance into drive_start; all 3 per-skill drives
+  inherit it. Env var default 0 keeps fake_claude tests unchanged.
+- BRUTE FORCE? No — diagnosed via real drive.log content (not guessing).
+- BLAST RADIUS? Small — only real-claude callers with the env var set
+  get the dance. Fake_claude tests default 0. Adopter machines untouched.
+- VERIFICATION? Rerun docker-smoke; drives should exit 0 or a
+  non-timeout code. If timeout persists, drive.log tells us the next gate.
+- REVERSIBLE? Yes — one lib block + one entry.sh export line; delete
+  both to revert.
