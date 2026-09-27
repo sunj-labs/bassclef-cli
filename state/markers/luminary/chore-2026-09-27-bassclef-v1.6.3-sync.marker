@@ -1,0 +1,10 @@
+# Luminary marker — bassclef v1.6.3 sync
+- date: 2026-09-27
+- lead: linus-torvalds
+- supporting: [michael-nygard]
+- rationale:
+  - lead Linus — adopter contract. Substrate bump preserves every prior
+    contract; two new tier: lite files land, existing files retagged
+    per #1970 cure. Adopter cure path documented in peer handoff.
+  - supporting Nygard — release cascade stability. Bump lands as PR
+    with tests green; operator merges + tags; npm publish gated.

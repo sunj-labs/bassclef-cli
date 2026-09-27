@@ -1,0 +1,23 @@
+# Temperance marker — bassclef v1.6.3 sync
+- date: 2026-09-27
+- branch: chore/2026-09-27-bassclef-v1.6.3-sync
+- ceremony-class: (b) release-cascade sync — pinned substrate bump
+- upstream trigger: cross-session ping from bassclef-upstream-51:
+  v1.6.3 ships 7 tickets (#1958-#1962, #1970, #1971).
+- scope-decision:
+  - right-thing: bump bassclef substrate pin from v1.6.0 (current
+    dist/lite/bassclef-version.json) to v1.6.3 via prepublish bundle
+    rebuild against sibling bassclef-upstream at HEAD.
+  - right-way: sibling checkout at commit 6e2b445c carries
+    bassclef-version.json=v1.6.3 + both new files. Rebuild bundle,
+    verify contents, ship as release-prep PR.
+  - drift-trigger: any edits outside dist/lite/, package.json version,
+    CHANGELOG, and markers.
+- new adopter-visible surfaces per peer message:
+  - scripts/interpret-input/extract-repo.sh (tier: lite)
+  - scripts/launch-preview/check-production-gating.sh (tier: standard)
+- operator gates preserved: `npm publish` NOT autonomous per
+  feedback_ship_pr_when_green.md; PR ships tests-green, operator
+  merges + tags + publishes.
+- authorization: agent-merges-within-scope for PR authoring;
+  publish is operator-only.

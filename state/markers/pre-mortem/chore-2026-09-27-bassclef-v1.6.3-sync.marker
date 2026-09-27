@@ -1,0 +1,19 @@
+# Pre-mortem marker — bassclef v1.6.3 sync
+- date: 2026-09-27
+- lenses: [linus-torvalds, michael-nygard]
+- risks:
+  - **BS1** — bundle build against wrong sibling checkout. Cure:
+    verify bassclef-upstream at HEAD has bassclef-version.json=v1.6.3
+    before running prepublish (done).
+  - **BS2** — new tier: lite file missed by extractor (the class #1960
+    cured upstream). Cure: verify scripts/interpret-input/extract-repo.sh
+    lands in dist/lite/ after bundle.
+  - **BS3** — tier: standard file leaks into lite bundle (#1971 caught
+    that class upstream but cli-side extractor should also reject).
+    Cure: verify scripts/launch-preview/check-production-gating.sh
+    does NOT land in dist/lite/.
+  - **BS4** — vitest suite regresses on new files. Cure: run full
+    suite pre-commit.
+  - **BS5** — Docker cold-adopter smoke reveals adopter breakage.
+    Cure: workflow_dispatch after PR opens.
+- folds: verify before commit; test suite blocks bad shape.
