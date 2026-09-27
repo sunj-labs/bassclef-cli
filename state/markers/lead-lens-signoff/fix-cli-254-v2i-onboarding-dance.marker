@@ -1,0 +1,20 @@
+# Lead lens sign-off — V2i onboarding dance
+- date: 2026-09-27
+- lead: john-ousterhout
+- findings-status: no findings. 40/40 smoke-expect tests GREEN,
+  55/55 docker-harness tests GREEN, 13/13 launch tests GREEN,
+  12/12 onboard-repo drive tests GREEN, 201/201 generic driver
+  tests GREEN. Total: 321 tests, 0 fail.
+- verdict:
+  - Ousterhout lens: dance lives inside drive_start behind an env var.
+    Narrow interface. Callers don't learn about picker or sleeps.
+    5-verb API stays 5 verbs.
+  - Feathers lens: 5 Tier 0 tests pin the dance queue-file shape.
+    Drive.log stays the source of truth for real-Claude behavior.
+  - Cooper lens: matches real operator state (theme + accept dialog
+    already handled on their machine).
+  - Falsification path: drive.log after CI run. Success = drives
+    exit 0 or non-timeout. Partial = drive.log shows which screen
+    is stuck. Failure = drive.log shows spurious READY match on
+    post-Enter screen; follow-on tightens READY pattern.
+- sign-off: GO — ready for CI.

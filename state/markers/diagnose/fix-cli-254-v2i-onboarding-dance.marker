@@ -1,0 +1,68 @@
+# Diagnosis — V2i drives need to advance past first-run onboarding UI
+
+- date: 2026-09-27
+- branch: fix-cli-254-v2i-onboarding-dance
+- prior branches: fix/cli-254-v2i-theme-picker-seed (Path B, both v1 + v2
+  falsified via CI runs 36333931759 and 36335689592)
+
+## Step 0 — Reproduce
+- Docker-smoke against v1.9.4 with Path B v2 seed at ~/.claude.json
+- V2i drives (/onboard-repo, /launch, /riff) exit 11 → mapped to 31
+- Drive.log evidence: /tmp/smoke-v2/interactive-2026-09-27T17-12-23Z/
+  interactive/drive.log
+- Log shows Claude renders full onboarding UI: Welcome banner,
+  "Let's get started", theme picker with Dark mode pre-selected via seed,
+  syntax preview screen. No REPL prompt within 90s.
+
+## Step 1 — Is / Is Not
+- IS: Real Claude v2.1.197 in Docker, blocking on the theme picker
+  even with hasCompletedOnboarding=true in ~/.claude.json.
+- IS NOT: Seed missing (build log confirms COPY step 11/12 landed).
+- IS NOT: Wrong file path (both ~/.claude/settings.json and
+  ~/.claude.json tried; latter is the correct path per docs).
+- Works: fake_claude fixture (drives PASS locally).
+
+## Step 2 — Five Whys
+1. Why do drives exit 31? Expect timeout waiting for DONE pattern.
+2. Why timeout on DONE? Drive matched READY spuriously (any `>` in the
+   picker's ANSI stream), sent prompt into picker UI, never got DONE.
+3. Why did READY match spuriously? Default pattern `READY>|>` matches
+   any `>` character anywhere.
+4. Why is Claude still on picker despite seed? hasCompletedOnboarding
+   is read (Dark mode has ✔) but Claude Code v2.1.197 still renders
+   the theme picker + preview + waits for Enter to confirm.
+5. What's the actual mechanism to advance? Send Enter key(s) after
+   spawn, before the drive tries to match READY.
+
+## Step 3 — Hypothesis
+Adding an "onboarding dance" to smoke-expect drive_start (opt-in via
+SMOKE_DRIVE_ONBOARDING_ENTERS env var, default 0) that sends N Enter
+keys with sleeps after spawn will advance Claude past the picker.
+V2i entry.sh sets the env var to 2. All three per-skill drives pick
+it up automatically (no per-drive edits needed).
+
+## Falsification test
+Rerun docker-smoke against the modified image. Expected outcomes:
+- Success: drives exit 0. REPL reached; drive_expect READY matches
+  on the actual REPL prompt; DONE matches on Claude's response.
+- Partial: drives exit non-31 (e.g., 30 for expect-script-bug). Read
+  drive.log to see how far the dance advanced Claude.
+- Failure: drives still exit 31. Read drive.log — needs more Enters
+  OR a different key OR the READY pattern still matches spuriously
+  during the dance sleeps.
+
+## Alternative explanations (Peirce)
+- Alt-A: Two Enters is the right count. LIKELY per drive.log — one to
+  confirm theme, second in case of trust dialog or another gate.
+- Alt-B: Needs more Enters. Discriminator: drive.log content after this
+  runs. Extend fixture in a follow-on if needed.
+- Alt-C: Claude in Docker needs a different keystroke (e.g., `y` for
+  trust dialog, or arrow keys). Falsification: drive.log will show
+  which UI is stuck.
+- Alt-D: Claude needs the pty to signal SIGWINCH or a specific
+  terminal size. Not tried yet; consider if A-C all fail.
+
+## Confidence
+Medium. The mechanism (send Enter to advance picker) is standard for
+CLI onboarding flows. Uncertainty is in how many Enters Claude v2.1.197
+needs before REPL.

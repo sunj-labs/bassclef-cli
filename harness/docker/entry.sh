@@ -522,6 +522,19 @@ _docker_harness_run_v2_interactive() {
     return 0
   fi
 
+  # cli#254 Path A2 (2026-09-27): route V2i through the same preflight
+  # as V2 so OAuth token is loaded from file when the env var is empty,
+  # AND ANTHROPIC_API_KEY is unset when both are present (per line 155
+  # of this file). Without this, interactive Claude sees both env vars,
+  # picks API-key mode, and shows the login picker → OAuth browser
+  # flow, which drives can't complete. Operator prefers OAuth
+  # (subscription quota) over ANTHROPIC_API_KEY (metered).
+  if ! _docker_harness_preflight_v2 2>&1; then
+    echo "WARN: preflight_v2 failed; skipping V2 interactive drives" >&2
+    _docker_harness_emit_evidence_row "v2i_skipped" "preflight_v2 failed"
+    return 0
+  fi
+
   # Match V2's convention (this file L357): SMOKE_SCRIPTS_DIR env from
   # Dockerfile L65 pre-sets /adopter/scripts. Prior version used a made-up
   # env name + path which pointed at nothing in the container. Cured
@@ -558,6 +571,12 @@ _docker_harness_run_v2_interactive() {
   # bump via SMOKE_INTERACTIVE_DRIVE_TIMEOUT env. Cured per state/markers/
   # diagnose/fix-254-v2i-captures-and-timeout.marker.
   local per_drive_timeout="${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-90}"
+
+  # cli#254 Path A2 (2026-09-27): drive_start in smoke-expect.sh sends
+  # N Enter keys after spawn to advance past Claude Code v2.1.x first-run
+  # theme picker + preview screens. Adopter overrides via env if needed.
+  # Fake_claude tests default to 0 (no dance).
+  export SMOKE_DRIVE_ONBOARDING_ENTERS="${SMOKE_DRIVE_ONBOARDING_ENTERS:-2}"
 
   # Per DF2 fold + smoke-report contract: emit interactive-drives.json
   # so smoke-report can render a proper Interactive Drives section.

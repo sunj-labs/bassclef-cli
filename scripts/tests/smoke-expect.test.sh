@@ -52,6 +52,12 @@
 # [x] drive_capture with unwritable DEST exits 14
 # --- version function ---
 # [x] smoke_expect_version emits non-empty version string
+# --- onboarding dance (cli#254 Path A2, 2026-09-27) ---
+# [x] drive_start default (env unset) emits no dance in queue
+# [x] drive_start with SMOKE_DRIVE_ONBOARDING_ENTERS=0 emits no dance
+# [x] drive_start with SMOKE_DRIVE_ONBOARDING_ENTERS=2 emits 2 send -- "\r" lines
+# [x] drive_start with SMOKE_DRIVE_ONBOARDING_ENTERS=1 emits 1 send -- "\r" line
+# [x] drive_start with dance emits sleep lines before + between + after sends
 
 set -uo pipefail
 
@@ -246,6 +252,55 @@ assert_true "drive_capture copies log content" "[ -s '$dest_out' ]"
 assert_exit_code "drive_capture with unwritable DEST exits 14" 14 "drive_capture /no/such/dir/deep/out"
 unset _SMOKE_EXPECT_SESSION_STATE
 rm -f "$dest_out"
+
+# ============================================================
+# Onboarding dance (cli#254 Path A2, 2026-09-27)
+# ============================================================
+# drive_start emits sleep+send lines into the queue when
+# SMOKE_DRIVE_ONBOARDING_ENTERS > 0. Verify queue file content per shape.
+
+count_lines_containing() {
+  local file="$1" needle="$2"
+  grep -c -F -- "$needle" "$file" 2>/dev/null | tr -d ' \n'
+}
+
+# Default: env unset → no dance
+scratch_no_dance=$(mkscratch)
+unset SMOKE_DRIVE_ONBOARDING_ENTERS
+( _SMOKE_EXPECT_SESSION_STATE= drive_start "$scratch_no_dance" "$FAKE_CLAUDE" >/dev/null ) || true
+send_count=$(count_lines_containing "$scratch_no_dance/.smoke-drive-queue.exp" 'send -- "\r"')
+assert_true "default (env unset) emits no dance sends" "[ '$send_count' = '0' ]"
+
+# Explicit 0 → no dance
+scratch_zero=$(mkscratch)
+export SMOKE_DRIVE_ONBOARDING_ENTERS=0
+( _SMOKE_EXPECT_SESSION_STATE= drive_start "$scratch_zero" "$FAKE_CLAUDE" >/dev/null ) || true
+send_count=$(count_lines_containing "$scratch_zero/.smoke-drive-queue.exp" 'send -- "\r"')
+assert_true "SMOKE_DRIVE_ONBOARDING_ENTERS=0 emits no dance sends" "[ '$send_count' = '0' ]"
+
+# 2 enters → 2 sends
+scratch_two=$(mkscratch)
+export SMOKE_DRIVE_ONBOARDING_ENTERS=2
+( _SMOKE_EXPECT_SESSION_STATE= drive_start "$scratch_two" "$FAKE_CLAUDE" >/dev/null ) || true
+send_count=$(count_lines_containing "$scratch_two/.smoke-drive-queue.exp" 'send -- "\r"')
+assert_true "SMOKE_DRIVE_ONBOARDING_ENTERS=2 emits 2 sends" "[ '$send_count' = '2' ]"
+
+# 1 enter → 1 send
+scratch_one=$(mkscratch)
+export SMOKE_DRIVE_ONBOARDING_ENTERS=1
+( _SMOKE_EXPECT_SESSION_STATE= drive_start "$scratch_one" "$FAKE_CLAUDE" >/dev/null ) || true
+send_count=$(count_lines_containing "$scratch_one/.smoke-drive-queue.exp" 'send -- "\r"')
+assert_true "SMOKE_DRIVE_ONBOARDING_ENTERS=1 emits 1 send" "[ '$send_count' = '1' ]"
+
+# Dance emits sleep lines around sends (pre + between + trailing)
+scratch_sleeps=$(mkscratch)
+export SMOKE_DRIVE_ONBOARDING_ENTERS=2
+( _SMOKE_EXPECT_SESSION_STATE= drive_start "$scratch_sleeps" "$FAKE_CLAUDE" >/dev/null ) || true
+sleep_count=$(grep -c '^sleep ' "$scratch_sleeps/.smoke-drive-queue.exp" 2>/dev/null | tr -d ' \n')
+# Expect: 1 pre + 1 between (after send 1, before send 2) + 1 trailing = 3
+assert_true "dance emits pre+between+trailing sleeps" "[ '$sleep_count' = '3' ]"
+
+unset SMOKE_DRIVE_ONBOARDING_ENTERS
 
 # ============================================================
 # Summary
