@@ -1,0 +1,8 @@
+# Lead lens sign-off — V2i captures + timeout
+- date: 2026-09-27
+- lead: michael-feathers
+- findings-status: no findings (55/55 Tier 0 GREEN; +3 for the new checks)
+- verdict: both defects cured; grep-based tests pin the values;
+  workflow YAML lint clean.
+- sign-off: GO. Ready to re-fire docker-smoke against latest for
+  third-time characterization.

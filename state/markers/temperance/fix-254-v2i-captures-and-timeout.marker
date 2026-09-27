@@ -1,0 +1,8 @@
+# Temperance marker — V2i captures dir + wall-clock timeout
+- date: 2026-09-27
+- branch: fix/254-v2i-captures-and-timeout
+- ceremony-class: (b) bug fix; two related defects in one commit
+- scope-decision: fix V2i captures_root default to bind-mounted path;
+  drop per-drive timeout default to 90s; bump workflow timeout-minutes
+  to 20. Nothing else.
+- drift-trigger: any edit beyond those three values is drift.

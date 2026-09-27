@@ -1,0 +1,74 @@
+# Diagnose marker — V2i captures dir + wall-clock timeout
+- date: 2026-09-27
+- branch: fix/254-v2i-captures-and-timeout
+- observed at: docker-smoke PR #268 run 36322911003 (fail 15m19s)
+
+## Repro (Step 0)
+
+PR #268 shipped the scripts_dir fix. Re-fired docker-smoke on the fix
+branch. V2i step reached (`>>> V2 Step 8` visible in log at 13:42:25),
+then wall clock hit `timeout-minutes: 15` at 13:50:32. Container killed.
+Interactive drive logs never landed on the runner filesystem.
+
+## Bug 1 — captures dir not bind-mounted
+
+Is: V2i writes to `/tmp/adopter-smoke-captures/interactive/` inside the
+    container. Nothing at that path is bind-mounted to the host.
+Is Not: interactive-drives.json missing (V2i writes it before drive_end).
+
+Five Whys:
+1. Why did captures disappear? Container writes lived in-container.
+2. Why not bind-mounted? V2i defaults to `${ADOPTER_SMOKE_CAPTURES:-/tmp/adopter-smoke-captures}` which is a non-bind-mounted path.
+3. Why that default? Guess again — same class as the scripts_dir bug.
+4. Why didn't I check V2's convention? Because I did not grep for `V2_CAPTURES_DIR` before writing V2i.
+5. Root cause: same drift class as PR #268 — env-var default written from memory, not from the file.
+
+## Bug 2 — wall-clock exhaustion
+
+Is: Container wall clock hit 15 min. V1+V2 ran ~7 min. V2i ran ~8 min
+    then got killed.
+Is Not: A single drive hung indefinitely (all 3 drives got some time budget).
+
+Five Whys:
+1. Why did container get killed? Workflow `timeout-minutes: 15` cap.
+2. Why did V2i take so long? 3 drives × 300s per-drive default = up to
+   900s (15 min) just for expect timeouts.
+3. Why 300s? V2i sets `${SMOKE_INTERACTIVE_DRIVE_TIMEOUT:-300}` — a
+   generous conservative default from PR #264 pre-mortem F2 fold.
+4. Why is 300s too long for smoke? Real Claude never emits the fake
+   `READY>|>` OR `DONE>|complete|done` defaults; every drive times out
+   at 300s. Not a hang — a spec drift between fake_claude fixtures and
+   real Claude.
+5. Root cause: default patterns match fake_claude, not real Claude.
+   Combined with 300s timeout, characterization runs eat 15 min.
+
+## Fix
+
+Two cures shipped in this PR:
+
+1. **captures_root default** changes to
+   `/adopter/state/harness-runs/interactive-<ts>` — bind-mounted per
+   the docker-smoke workflow's `-v $GITHUB_WORKSPACE/harness-out:/adopter/state/harness-runs`
+   mount. Interactive drive logs land on the host filesystem.
+
+2. **per-drive timeout default** drops from 300s to 90s. Rationale:
+   3 drives × 90s = 270s = 4.5 min. Fits inside 15-min wall clock
+   with room. First real-claude run characterizes what Claude actually
+   emits in 90s — enough evidence to tune patterns.
+
+3. **Workflow timeout** bumps `timeout-minutes: 15` → `timeout-minutes: 20`
+   as a safety margin. Not a required cure but sensible while V2i
+   patterns are still being tuned.
+
+## Falsification
+
+Predict after fix:
+- V2i step still reaches the drives (PR #268 already proved that path)
+- Drives time out at 90s each; log lands at
+  `harness-out/interactive-<ts>/interactive-drives.json` + drive.log
+- Container exits within ~12 min wall clock
+- Artifact upload catches the drive log
+- Log reveals actual real-Claude prompt shape
+
+Falsified if: artifact still empty of interactive/ subdir, OR container
+still hits 15-min cap.
