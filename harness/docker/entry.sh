@@ -522,6 +522,19 @@ _docker_harness_run_v2_interactive() {
     return 0
   fi
 
+  # cli#254 Path A2 (2026-09-27): route V2i through the same preflight
+  # as V2 so OAuth token is loaded from file when the env var is empty,
+  # AND ANTHROPIC_API_KEY is unset when both are present (per line 155
+  # of this file). Without this, interactive Claude sees both env vars,
+  # picks API-key mode, and shows the login picker → OAuth browser
+  # flow, which drives can't complete. Operator prefers OAuth
+  # (subscription quota) over ANTHROPIC_API_KEY (metered).
+  if ! _docker_harness_preflight_v2 2>&1; then
+    echo "WARN: preflight_v2 failed; skipping V2 interactive drives" >&2
+    _docker_harness_emit_evidence_row "v2i_skipped" "preflight_v2 failed"
+    return 0
+  fi
+
   # Match V2's convention (this file L357): SMOKE_SCRIPTS_DIR env from
   # Dockerfile L65 pre-sets /adopter/scripts. Prior version used a made-up
   # env name + path which pointed at nothing in the container. Cured
