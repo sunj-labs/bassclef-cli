@@ -107,6 +107,35 @@ _catalog_timeout() {
   esac
 }
 
+# _catalog_setup SKILL_NAME
+# Emits space-separated setup helper function names for the named skill.
+# Empty output means "no setup needed" — driver treats that as OK.
+# Names refer to functions in scripts/lib/smoke-drive-setup.sh.
+_catalog_setup() {
+  case "$1" in
+    # Skills that need a fresh git repo
+    onboard-repo)                echo "setup_git_init_clean" ;;
+    build)                       echo "setup_git_init_clean setup_git_remote_scratch setup_gh_inject_smoke_label" ;;
+    session-end)                 echo "setup_git_init_clean setup_chronicle_dir_writable" ;;
+    longrun-prep)                echo "setup_git_init_clean setup_iteration_goals_dir_writable" ;;
+    # Skills that fire `gh issue create`
+    promote)                     echo "setup_gh_inject_smoke_label" ;;
+    # All others need no setup
+    *)                           echo "" ;;
+  esac
+}
+
+# _catalog_teardown SKILL_NAME
+# Emits space-separated teardown helper function names for the named skill.
+# Empty output means "no teardown needed".
+_catalog_teardown() {
+  case "$1" in
+    promote)                     echo "teardown_close_smoke_tickets" ;;
+    build)                       echo "teardown_close_smoke_tickets teardown_delete_created_branch" ;;
+    *)                           echo "" ;;
+  esac
+}
+
 # _catalog_list_batch BATCH_NAME
 # Emits space-separated skill names for the named batch.
 _catalog_list_batch() {

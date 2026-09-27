@@ -38,6 +38,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/lib/smoke-expect.sh"
 # shellcheck source=lib/smoke-drive-catalog.sh
 source "$SCRIPT_DIR/lib/smoke-drive-catalog.sh"
+# shellcheck source=lib/smoke-drive-setup.sh
+source "$SCRIPT_DIR/lib/smoke-drive-setup.sh"
 
 main() {
   local skill_name="${1:?SKILL_NAME required (see smoke-drive-catalog.sh)}"
@@ -65,6 +67,23 @@ main() {
   local spawn_cmd="${SMOKE_DRIVE_SPAWN_CMD:-claude}"
   local spawn_args_str="${SMOKE_DRIVE_SPAWN_ARGS:-}"
 
+  # Per pre-mortem ST1 fold: setup runs first. Abort drive on setup fail.
+  # Empty catalog return means "no setup needed" — driver skips the loop.
+  local setup_fns teardown_fns fn setup_rc
+  setup_fns=$(_catalog_setup "$skill_name" 2>/dev/null || echo "")
+  for fn in $setup_fns; do
+    if ! type -t "$fn" >/dev/null 2>&1; then
+      echo "smoke-drive-generic: setup fn '$fn' not defined (catalog+setup drift)" >&2
+      return 13
+    fi
+    setup_rc=0
+    "$fn" "$scratch_dir" || setup_rc=$?
+    if [ $setup_rc -ne 0 ]; then
+      echo "smoke-drive-generic: setup '$fn' failed with rc=$setup_rc for skill '$skill_name'" >&2
+      return 13
+    fi
+  done
+
   if [ -n "$spawn_args_str" ]; then
     # shellcheck disable=SC2086
     drive_start "$scratch_dir" "$spawn_cmd" $spawn_args_str || return $?
@@ -75,8 +94,24 @@ main() {
   drive_expect "$ready" "$timeout"
   drive_send "$prompt"
   drive_expect "$done_pat" "$timeout"
-  drive_end
-  return $?
+
+  local drive_rc=0
+  drive_end || drive_rc=$?
+
+  # Teardown runs regardless of drive result. Failures are logged
+  # but do not override drive_rc unless drive_rc==0.
+  teardown_fns=$(_catalog_teardown "$skill_name" 2>/dev/null || echo "")
+  local teardown_failures=0
+  for fn in $teardown_fns; do
+    if type -t "$fn" >/dev/null 2>&1; then
+      "$fn" "$scratch_dir" || teardown_failures=$((teardown_failures + 1))
+    fi
+  done
+  if [ $drive_rc -eq 0 ] && [ $teardown_failures -gt 0 ]; then
+    echo "smoke-drive-generic: $teardown_failures teardown failure(s) for skill '$skill_name'" >&2
+    return 14
+  fi
+  return $drive_rc
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

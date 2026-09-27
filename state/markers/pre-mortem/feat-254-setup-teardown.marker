@@ -1,0 +1,46 @@
+# Pre-mortem marker — cli#254 sub-step 4.5
+- date: 2026-09-27
+- branch: feat/254-setup-teardown
+- mode: /pre-mortem light (2 lenses × 4-5 risks)
+- lenses: [saltzer-schroeder, michael-feathers]
+- risks:
+
+## Saltzer-Schroeder — complete mediation
+
+- **ST1** — teardown fires before setup completes; leaves scratch dirty.
+  Cure: setup returns 0/nonzero; driver aborts on nonzero AND runs no
+  drive verbs; teardown runs only when setup succeeded.
+- **ST2** — real `gh` invoked directly (bypassing shim). Cure: shim
+  is FIRST on PATH; also set `SMOKE_GH_LOG` to catch real-gh call
+  attempts in tests.
+- **ST3** — teardown fails silently (network drops); real tickets
+  linger. Cure: teardown returns nonzero on any close failure; driver
+  logs the finding + emits stderr banner.
+- **ST4** — label-only isolation still hits real repo. Cure: adopter
+  sets GH_SMOKE_REPO env to point at dummy repo when strong isolation
+  is required.
+- **ST5** — smoke label collides with real "smoke-test" label already
+  in use for something else. Cure: use `smoke-drive` label name (less
+  ambiguous); adopter creates label once via `gh label create`.
+
+## Feathers — characterization tests
+
+- **FT1** — shim behavior tested against real gh; test env pollutes
+  real repo. Cure: test fixture provides a fake `gh` binary that logs
+  args instead of calling GitHub. Assertions read the log.
+- **FT2** — setup helper for `git-init-clean` misses git config;
+  driven skill errors on missing user.email. Cure: fixture sets email
+  + name inline.
+- **FT3** — teardown parses gh log with fragile regex. Cure: log format
+  is one-line JSON per invocation; jq parses cleanly.
+- **FT4** — bash 3.2 empty catalog return trips `set -u`. Cure: catalog
+  functions echo empty string when no setup/teardown; driver handles
+  empty case cleanly.
+
+## Folds landing pre-code
+
+1. **ST1 fold** — setup returns 0/1; driver aborts on 1.
+2. **ST2 fold** — shim first on PATH + SMOKE_GH_LOG catches bypasses.
+3. **ST5 fold** — label name is `smoke-drive` (not `smoke-test`).
+4. **FT1 fold** — fake `gh` fixture in scripts/tests/fixtures/fake_gh.sh.
+5. **FT4 fold** — driver handles empty catalog returns via test.

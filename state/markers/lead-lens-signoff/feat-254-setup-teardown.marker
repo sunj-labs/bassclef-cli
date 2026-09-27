@@ -1,0 +1,17 @@
+# Lead lens sign-off — cli#254 sub-step 4.5 (per-skill setup + teardown)
+- date: 2026-09-27
+- branch: feat/254-setup-teardown
+- lead: jerome-saltzer-and-michael-schroeder
+- findings-status: no findings (201/201 Tier 0 tests GREEN; sibling suite 90/0 GREEN across smoke-expect + registry + 3 walking-skeleton drives)
+- verdict:
+  - Complete mediation confirmed. Every `gh issue *` call routes through
+    the shim on PATH. Shim adds --label smoke-drive + --label automated-run
+    for `gh issue create`. Other subcommands pass through unchanged.
+  - Optional GH_SMOKE_REPO env routes calls at a dummy repo (label + repo
+    combined = strong isolation).
+  - Setup + teardown lifecycle wraps drive_start/drive_end. Setup failure
+    aborts drive (returns 13); teardown failure logged (returns 14 when
+    drive itself was 0).
+  - Fixture `scripts/tests/fixtures/fake_gh.sh` pins shim behavior in
+    tests. Real gh never runs during unit tests.
+- sign-off: GO — Step 6 merge cleared.

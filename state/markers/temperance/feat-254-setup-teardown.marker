@@ -1,0 +1,25 @@
+# Temperance marker — cli#254 sub-step 4.5 (per-skill setup + teardown)
+- date: 2026-09-27
+- branch: feat/254-setup-teardown
+- ceremony-class: (b) driver extension + new lib module
+- prior: sub-steps 0-4 + Batches A/B/C shipped 2026-09-26
+- scope-decision:
+  - right-thing: extend generic driver with per-skill setup + teardown
+    hooks. Add scripts/lib/smoke-drive-setup.sh with helper functions.
+    Extend catalog with _catalog_setup + _catalog_teardown accessors.
+    Generic driver calls setup helpers before drive_start and teardown
+    helpers after drive_end.
+  - right-way: label-injection via a `gh` shim on PATH, not full stub.
+    Real gh runs. Real tickets fire. Every ticket carries `smoke-test`
+    + `automated-run` labels. Teardown closes all tickets with those
+    labels. Optional GH_SMOKE_REPO env for dummy repo isolation.
+  - drift-trigger: any edit to the 3 walking-skeleton drives OR to the
+    existing 5 smoke-expect verbs is drift.
+- blast-radius:
+  - inside scope: scripts/lib/smoke-drive-setup.sh (new),
+    scripts/lib/smoke-drive-catalog.sh (extend), scripts/smoke-drive-generic.sh
+    (call setup + teardown), scripts/tests/smoke-drive-generic.test.sh
+    (extend coverage).
+  - outside scope: docker wire (sub-step 5+6), /release + /deploy drives,
+    dummy repo creation (owner does that separately).
+- authorization: agent-merges-within-scope.

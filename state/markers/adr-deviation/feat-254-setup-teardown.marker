@@ -1,0 +1,9 @@
+# ADR-deviation marker — cli#254 sub-step 4.5
+- date: 2026-09-27
+- branch: feat/254-setup-teardown
+- adr_governing: none — no ADR governs smoke driver internals or gh shim
+- outcome: ADR-honored
+- rationale: extends the generic driver with setup + teardown lifecycle.
+  Zero touches to smoke-expect verbs, walking-skeleton drives, or
+  Batch A/B/C skill entries. Adopter contract (ADR-031) untouched —
+  smoke drivers are bassclef-internal.

@@ -1,0 +1,16 @@
+# Luminary marker — cli#254 sub-step 4.5
+- date: 2026-09-27
+- branch: feat/254-setup-teardown
+- lead: jerome-saltzer-and-michael-schroeder
+- supporting: [john-ousterhout, michael-feathers]
+- rationale:
+  - lead (Saltzer-Schroeder) — complete mediation. Every side effect
+    on production (real gh, real git remote) passes through a checkpoint
+    that either isolates it or refuses it. gh-shim + label injection is
+    that checkpoint.
+  - supporting (Ousterhout) — deep module. Setup + teardown helpers
+    live in one lib. Skills declare intent via catalog rows only.
+  - supporting (Feathers) — characterization tests pin actual shim
+    behavior against a fake `gh` binary in the test fixture.
+- balancing-check-role: Saltzer-Schroeder confirms complete mediation
+  before Step 6 merge.
