@@ -1,50 +1,47 @@
-# Pre-mortem light — V2i theme-picker seed
+# Pre-mortem — V2i onboarding seed (revised after v1 falsification)
 - date: 2026-09-27
 - branch: fix/cli-254-v2i-theme-picker-seed
 - lenses: [gary-klein, saltzer-schroeder, michael-feathers]
-- risk-ledger: this file
 
-## Risks
+## v1 result
+Falsified. CI run 36333931759, exit 31. Seed at ~/.claude/settings.json
+did not skip picker. Root cause: wrong file path. Claude reads
+onboarding state from ~/.claude.json, not ~/.claude/settings.json.
 
-### R1 — Klein (blast radius)
-The seed lands only inside the Docker image. Adopter machines are not
-touched. Blast radius: harness CI only.
-- Mitigation: no adopter path changes; only harness/docker/ paths edited.
-- Cost if wrong: rebuild image; drop the COPY line; ship a revert.
+## v2 risks
+
+### R1 — Klein (change impact)
+Seed lands in Docker image only. Adopter machines unaffected.
+Cost if wrong: rebuild image; drop the COPY line; revert.
 
 ### R2 — Klein (unmet prerequisite)
-The seed assumes Claude reads ~/.claude/settings.json at startup and
-respects `theme` as a first-run skip signal. If Claude v2.1.x does not
-read that path OR ignores theme absent other fields, the picker still
-fires.
-- Falsification: read drive.log after PR merges CI; if theme picker
-  still appears, the seed does not clear the gate.
-- Cure path: extend fixture with a second field (onboardingComplete,
-  or similar) after reading Claude's onboarding source of truth.
+v2 assumes ~/.claude.json is the current v2.1.x path. If Anthropic
+changes it in a future release, seed goes stale silently.
+- Falsification: drive.log after v2 run. If picker still fires, path
+  changed OR another gate exists.
+- Cure: extend seed for the next gate; or add /adopter/.config/claude/
+  alt path.
 
 ### R3 — Feathers (silent regression)
-The seed could mask a future Claude change that adds a new onboarding
-gate. Drive.log then shows the new gate; test at read-time reveals it.
-- Mitigation: keep V2i drive.log as the source of truth for gate
-  detection; do not hide log output.
+Seed could mask a new gate added in a future Claude release. Drive.log
+stays authoritative.
 
-### R4 — Saltzer-Schroeder (path traversal / permissions)
-Seeded file lands with adopter:adopter ownership per COPY --chown.
-No other user in the container can write to it. No path-traversal
-surface because the fixture is a static file baked at build time.
-- Mitigation: RUN chown -R covers /home/adopter/.claude after all
-  COPYs land.
+### R4 — Saltzer-Schroeder (least privilege)
+Seed lands with adopter:adopter ownership per COPY --chown. No other
+user in container reads or writes it.
 
-### R5 — Klein (image-size drift)
-The seed adds a JSON file (~20 bytes) plus one mkdir + one COPY. Layer
-count increases by two. Image size delta: negligible.
-- Mitigation: none needed.
+### R5 — Klein (working-directory drift)
+Seed hardcodes /home/adopter/test as the trusted project. If bassclef
+init ever runs in a different cwd, the trust dialog fires. Current
+smoke output confirms /home/adopter/test is the cwd.
+- Mitigation: if init cwd changes, update the projects key.
+
+### R6 — Klein (image-size drift)
+Seed adds ~150 bytes + one COPY layer. Negligible.
 
 ## Strongest concerns folded in
-- R2 (Claude version drift) — falsification via drive.log; if picker
-  reappears in a future Claude major, extend the fixture.
-- R3 (masking future gates) — drive.log stays authoritative; do not
-  silence it.
+- R2 — path may change. Falsification via drive.log after v2 run.
+- R5 — cwd hardcoded. Assert-verified via smoke output.
 
 ## Verdict
-Ship. Risks are bounded and observable via drive.log.
+Ship v2. Risks bounded and observable via drive.log.

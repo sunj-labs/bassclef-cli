@@ -1,0 +1,9 @@
+{
+  "hasCompletedOnboarding": true,
+  "theme": "dark",
+  "projects": {
+    "/home/adopter/test": {
+      "hasTrustDialogAccepted": true
+    }
+  }
+}

@@ -2,46 +2,65 @@
 
 - date: 2026-09-27
 - branch: fix/cli-254-v2i-theme-picker-seed
-- diagnosed_via: Path C probe (5 turns) + PR #269 characterization run
+- diagnosed_via: Path C probe + PR #269 characterization + Path B v1 falsification
+- v1_hypothesis: seeding /home/adopter/.claude/settings.json with {"theme":"dark"}
+- v1_result: FALSIFIED — CI run 36333931759, exit 31, drives burned full 90s
+- v1_source_of_error: settings.json is the wrong file for onboarding state
+- v2_hypothesis: seed /home/adopter/.claude.json (root of HOME) with
+  hasCompletedOnboarding + theme + projects.<cwd>.hasTrustDialogAccepted
 
 ## Step 0 — Reproduce
-- Command: docker-smoke workflow run against v1.9.4 (baseline)
-- Observed: 3 interactive drives (/onboard-repo, /launch, /riff) exit 11
-  which maps to exit 31 (EXIT_INTERACTIVE_TIMEOUT) via entry.sh V2i wrapper.
-- Log source: harness-out/interactive-2026-09-27T14-03-59Z/interactive/drive.log
-- Reproducibility: every drive, every V2i run.
+- Command: docker-smoke workflow run against v1.9.4
+- Observed: 3 drives (/onboard-repo, /launch, /riff) exit 11
+  → mapped to 31 (EXIT_INTERACTIVE_TIMEOUT) by entry.sh V2i wrapper.
+- Log: harness-out/interactive-2026-09-27T14-03-59Z/interactive/drive.log
+- Repro: every drive, every V2i run.
 
 ## Step 1 — Is / Is Not
 - IS: Real Claude in Docker, freshly launched, first-run.
 - IS NOT: fake_claude.sh fixture (drives PASS against fixture per PR #260).
-- IS NOT: `claude -p` non-interactive mode (skips first-run onboarding).
-- Similar thing that WORKS: `claude -p "hello"` in the same container.
+- IS NOT: `claude -p` non-interactive mode.
+- Works: `claude -p "hello"` in same container.
 
 ## Step 2 — Five Whys
 1. Why do drives exit 11? expect timeout waits 90s for READY>; never appears.
 2. Why does READY> never appear? Claude never reaches REPL — blocks on prior UI.
-3. What does Claude show instead? "Welcome to Claude Code v2.1.197" then
+3. What does Claude show? "Welcome to Claude Code v2.1.197" then
    "Choose a theme" picker (options 1-7).
-4. Why the picker? First-run of claude with no ~/.claude/settings.json (or
-   missing theme field) triggers it.
-5. Why fresh every run? Docker image builds a clean adopter home; no state
-   carries the theme choice forward.
+4. Why the picker? First-run of claude with no onboarding-complete marker
+   triggers it.
+5. Where does Claude read the onboarding marker? Per code.claude.com/docs/
+   en/settings-reference + anthropics/claude-code#4714: ~/.claude.json
+   (root of HOME), NOT ~/.claude/settings.json. That was the v1 error.
 
-## Step 3 — Hypothesis
-Pre-seeding /home/adopter/.claude/settings.json with {"theme": "dark"} at
-Docker build time lets Claude skip the theme picker and drop straight to a
-REPL prompt.
+## Step 3 — Revised Hypothesis (v2)
+Pre-seeding /home/adopter/.claude.json (root of HOME) with:
+  { hasCompletedOnboarding: true, theme: "dark",
+    projects: { "/home/adopter/test": { hasTrustDialogAccepted: true } } }
+skips onboarding + theme picker + per-project trust dialog. Real Claude
+drops straight to REPL.
 
-## Falsifiable test
-Build modified image; run V2i with SMOKE_GH_TOKEN set; read drive.log. If
-the log shows a REPL prompt within 90s, hypothesis is confirmed. If a
-second gate appears, hypothesis is partly confirmed and a second field
-is needed.
+## v1 falsification test result
+- Test: build modified image with settings.json seed; run V2i; read
+  drive.log timing. If REPL prompt within 90s, confirmed.
+- Result: CI run 36333931759 exit 31. Drive timing 91s + 90s + 90s.
+  Every drive burned its full timeout. Hypothesis falsified.
+- Cause of failure: seed file at wrong path. Claude does not read
+  onboarding state from ~/.claude/settings.json.
+
+## v2 falsification test (pending CI rerun)
+Rerun docker-smoke against revised image. If drives exit 0 (or a
+non-timeout code), v2 confirmed. If still exit 31, read drive.log
+for the next gate.
 
 ## Alternative explanations (Peirce)
-- Alt-A: Auth failure — ruled out; `claude -p` works with same token.
-- Alt-B: TTY missing — ruled out; expect provides a pty; Claude renders
-  the picker UI (which needs a tty).
-- Alt-C: Theme picker plus a second gate. Possible. Falsification path:
-  read drive.log after seed lands; if second gate appears, extend
-  settings.json in a follow-on.
+- Alt-A: Wrong config path — CONFIRMED. Fix: use ~/.claude.json.
+- Alt-B: Missing companion fields — LIKELY CONFIRMED per docs. Fix:
+  seed hasCompletedOnboarding + theme + projects entry.
+- Alt-C: Picker fires whenever isatty — DISPROVEN by docs; the seed
+  IS the skip mechanism when populated correctly.
+
+## Sources
+- code.claude.com/docs/en/settings-reference
+- github.com/anthropics/claude-code/issues/4714
+- github.com/etokarev/claude-code-docker (community docker precedent)

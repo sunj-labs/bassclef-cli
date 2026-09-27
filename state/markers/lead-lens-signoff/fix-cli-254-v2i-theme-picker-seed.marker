@@ -1,17 +1,18 @@
-# Lead lens sign-off — V2i theme-picker seed
+# Lead lens sign-off — V2i onboarding seed (v2 revised)
 - date: 2026-09-27
 - lead: alan-cooper
-- findings-status: no findings (61/61 docker-harness tests GREEN)
+- findings-status: v1 falsified via CI run 36333931759; v2 amends
+  with correct file path per anthropics/claude-code#4714 + Claude docs
 - verdict:
-  - Change is scoped to the harness image; no adopter substrate touched.
   - Cooper lens: real operators run Claude on a persistent machine with
-    a chosen theme; seeding the theme in the harness matches that state
-    rather than a first-boot corner case.
-  - Feathers lens: seed pins the harness environment; drive.log stays
-    the source of truth for future gates.
-  - Saltzer-Schroeder lens: least-common-mechanism; blast radius is the
-    Docker image only.
-  - Falsification path: docker-smoke run against modified image shows
-    a REPL prompt (matching SMOKE_DRIVE_READY_PATTERN) within 90s per
-    drive. If a second gate appears, extend fixture in a follow-on.
-- sign-off: GO — ready for CI. Operator gates final merge.
+    a chosen theme + accepted trust dialog. Seeding those in the harness
+    matches real operator state.
+  - Feathers lens: v1 hypothesis correctly falsified via observable CI
+    signal (exit 31 + drive timing). v2 fold picks up correct path from
+    Anthropic docs + community docker precedent (etokarev).
+  - Saltzer-Schroeder lens: least-common-mechanism preserved; blast
+    scope stays Docker image only.
+  - Falsification path for v2: docker-smoke run after amend. If drives
+    exit 0 or non-timeout, v2 confirmed. If still 31, file follow-on
+    to read drive.log for the next gate.
+- sign-off: GO on v2 amend — 62/62 tests GREEN.
