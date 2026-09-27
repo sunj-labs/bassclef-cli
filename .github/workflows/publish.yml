@@ -133,7 +133,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.6.3
+          ref: v1.6.4
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
@@ -148,8 +148,8 @@ jobs:
           RESOLVED_SHA=$(git rev-parse HEAD)
           RESOLVED_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "UNKNOWN")
           echo "Resolved: $RESOLVED_TAG at $RESOLVED_SHA"
-          if [ "$RESOLVED_TAG" != "v1.6.3" ]; then
-            echo "::error::Expected pinned tag v1.6.3 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
+          if [ "$RESOLVED_TAG" != "v1.6.4" ]; then
+            echo "::error::Expected pinned tag v1.6.4 but checkout resolved to $RESOLVED_TAG. Tag may have moved or been deleted at sunj-labs/bassclef. Update ADR-007 §Acceptance delta + this workflow before re-publish."
             exit 1
           fi
 
@@ -278,7 +278,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunj-labs/bassclef
-          ref: v1.6.3
+          ref: v1.6.4
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
