@@ -1,0 +1,23 @@
+# Temperance marker — cli#254 CI token wire
+- date: 2026-09-27
+- branch: feat/254-ci-token-wire
+- ceremony-class: (b) small extension — workflow YAML wiring
+- prior: sub-steps 5+6 shipped (PR #264 merged fbb2f8c); operator
+  landed Steps 1+2 (PAT created + SMOKE_GH_TOKEN Actions secret set)
+- scope-decision:
+  - right-thing: pass SMOKE_GH_TOKEN + GH_SMOKE_REPO into the docker
+    smoke run so the V2i interactive step can route /promote-style
+    ticket creates at the sandbox repo.
+  - right-way: keep the anticorruption layer per RFC-0002 R9 —
+    docker run passes ONLY the documented env vars, never the full
+    runner env. Add `permissions:` at workflow level to narrow the
+    default GITHUB_TOKEN. Update Report/Fail-job case statements to
+    name interactive exit codes 30-34.
+  - drift-trigger: any additional env passed into docker run beyond
+    CLI_VERSION + auth tokens + GH_SMOKE_REPO is drift.
+- blast-radius:
+  - inside scope: .github/workflows/docker-smoke.yml only.
+  - outside scope: harness code (sub-steps 5+6 already shipped);
+    sandbox repo permissions (operator-side, Steps 1+2 done);
+    GitHub App migration (future ticket).
+- authorization: agent-merges-within-scope.

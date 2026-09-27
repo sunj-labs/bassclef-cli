@@ -1,0 +1,33 @@
+# Pre-mortem marker — cli#254 CI token wire
+- date: 2026-09-27
+- branch: feat/254-ci-token-wire
+- lenses: [saltzer-schroeder, michael-nygard]
+- risks:
+
+## Saltzer-Schroeder — least privilege
+
+- **CT1** — SMOKE_GH_TOKEN leaks in step summary or log via echo.
+  Cure: never echo $SMOKE_GH_TOKEN. GitHub masks secrets referenced
+  through the secrets. context; do not build URLs or command strings
+  that embed the token in logged output.
+- **CT2** — default GITHUB_TOKEN has broader scope than needed. Cure:
+  add `permissions: contents: read; actions: read` at workflow level.
+- **CT3** — env leaks via `env` dump or `set -x` in any script the
+  container runs. Cure: docker run uses explicit -e vars only (already
+  the pattern per RFC-0002 R9); no bare --env; no --env-file.
+
+## Nygard — stability
+
+- **CT4** — SMOKE_GH_TOKEN unset in fork PRs (secrets not passed to
+  forked workflows). Cure: V2i interactive step in-container tolerates
+  missing GH_TOKEN — Class 3 skills skip; walking-skeleton drives still
+  run because they don't call gh.
+- **CT5** — GH_SMOKE_REPO typo routes tickets to the wrong repo. Cure:
+  literal value pinned in YAML; if it's wrong, the first fire produces
+  a clear `gh` error visible in the smoke log.
+
+Folds pre-code:
+1. **CT2 fold** — permissions block at workflow level.
+2. **CT3 fold** — explicit -e vars only; no --env-file.
+3. **CT4 fold** — no `if: secrets.SMOKE_GH_TOKEN != null` gate; let the
+   in-container V2i step decide based on presence.

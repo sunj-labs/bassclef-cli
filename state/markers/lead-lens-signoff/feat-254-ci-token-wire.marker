@@ -1,0 +1,17 @@
+# Lead lens sign-off — cli#254 CI token wire
+- date: 2026-09-27
+- branch: feat/254-ci-token-wire
+- lead: jerome-saltzer-and-michael-schroeder
+- findings-status: no findings (YAML syntax valid; env vars pass through
+  documented anticorruption layer; permissions block narrows default token)
+- least-privilege verdict:
+  - GITHUB_TOKEN narrowed to `contents: read` + `actions: read` at
+    workflow level. No cross-repo write via default token.
+  - SMOKE_GH_TOKEN referenced via ${{ secrets.SMOKE_GH_TOKEN }} — enters
+    the process only through GitHub's masking pipeline. Never echoed.
+  - docker run passes only 5 explicit -e vars (CLI_VERSION + 2 auth
+    tokens + GH_TOKEN + GH_SMOKE_REPO). No bare --env, no --env-file.
+  - Fork PRs without SMOKE_GH_TOKEN set: env value is empty string,
+    passed as `GH_TOKEN=""` to container. In-container V2i logic
+    treats empty as unset and skips Class 3 skills.
+- sign-off: GO.

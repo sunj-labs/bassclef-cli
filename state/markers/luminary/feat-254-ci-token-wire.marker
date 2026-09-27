@@ -1,0 +1,17 @@
+# Luminary marker — cli#254 CI token wire
+- date: 2026-09-27
+- branch: feat/254-ci-token-wire
+- lead: jerome-saltzer-and-michael-schroeder
+- supporting: [linus-torvalds]
+- rationale:
+  - lead (Saltzer-Schroeder) — least privilege. The workflow gets
+    exactly the two extra env vars needed (SMOKE_GH_TOKEN,
+    GH_SMOKE_REPO) and no more. GITHUB_TOKEN narrows to read-only.
+    Docker run passes only documented env vars per anticorruption
+    layer.
+  - supporting (Linus) — adopter contract. If the SMOKE_GH_TOKEN
+    secret is not set, the workflow still runs; the interactive V2i
+    step in-container falls back to the Batch B/C flow that skips
+    Class 3 skills. No hard fail when the secret is absent.
+- balancing-check-role: Saltzer-Schroeder verifies least-privilege
+  before merge.

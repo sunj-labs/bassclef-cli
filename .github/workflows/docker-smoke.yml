@@ -19,6 +19,8 @@ on:
       - 'src/**'
       - 'harness/**'
       - 'scripts/smoke-*.sh'
+      - 'scripts/lib/smoke-*.sh'
+      - 'scripts/lib/smoke-drive-*.sh'
       - '.github/workflows/docker-smoke.yml'
   workflow_dispatch:
     inputs:
@@ -26,6 +28,13 @@ on:
         description: 'Target @thebassclef/lite version (e.g. 1.2.1, 1.2.2, latest)'
         required: false
         default: 'latest'
+
+# CT2 fold (pre-mortem cli#254 CI token wire): narrow default GITHUB_TOKEN.
+# The elevated SMOKE_GH_TOKEN (repo Actions secret) is the only write path
+# for the V2i interactive step's cross-repo gh calls.
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   docker-cold-adopter-smoke:
@@ -55,11 +64,19 @@ jobs:
           CLI_VERSION: ${{ github.event.inputs.cli_version || 'latest' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # cli#254 CI token wire — SMOKE_GH_TOKEN routes V2i /promote-style
+          # ticket creates at the sandbox repo. GH_SMOKE_REPO pins the target.
+          # If SMOKE_GH_TOKEN is unset (fork PR or first-run before secret
+          # lands), the in-container V2i step skips Class 3 skills per its
+          # own fail-soft logic. Walking-skeleton drives run either way.
+          SMOKE_GH_TOKEN: ${{ secrets.SMOKE_GH_TOKEN }}
+          GH_SMOKE_REPO: sunj-labs/bassclef-cli-smoke
         run: |
-          # Anticorruption layer — pass ONLY the three documented env vars.
+          # Anticorruption layer — pass ONLY the documented env vars.
           # Never use bare --env; never pass the full runner env into the container.
           # Per #184: pass both auth tokens. Harness's preflight_v2 prefers OAuth
           # (subscription) when both are set so runs don't bill metered API.
+          # Per cli#254 CI token wire: pass GH_TOKEN + GH_SMOKE_REPO for V2i step.
           #
           # Bind-mount for capture extraction (cli #221 cure):
           # Container writes drive captures at /adopter/state/harness-runs/<ts>/.
@@ -69,12 +86,16 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/harness-out"
           chmod 777 "$GITHUB_WORKSPACE/harness-out"
           set +e
+          # CT1 fold: never echo $SMOKE_GH_TOKEN. GitHub masks it via secrets.
+          # context. Passing via -e keeps it out of the command string.
           docker run \
             --rm \
             --platform=linux/amd64 \
             -e CLI_VERSION="$CLI_VERSION" \
             -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
             -e CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_CODE_OAUTH_TOKEN" \
+            -e GH_TOKEN="$SMOKE_GH_TOKEN" \
+            -e GH_SMOKE_REPO="$GH_SMOKE_REPO" \
             -v "$GITHUB_WORKSPACE/harness-out":/adopter/state/harness-runs \
             bassclef-cli-cold-adopter:pr
           EXIT_CODE=$?
@@ -109,6 +130,10 @@ jobs:
             22) echo "INFRA FAIL — target CLI_VERSION not on npm registry (EXIT_VERSION_NOT_FOUND). Confirm the version is published: npm view @thebassclef/lite@\$CLI_VERSION" >> "$GITHUB_STEP_SUMMARY" ;;
             23) echo "INFRA FAIL — bassclef init failed inside container (EXIT_INIT_FAIL). Check container logs for init stderr." >> "$GITHUB_STEP_SUMMARY" ;;
             25) echo "PREFLIGHT FAIL — neither ANTHROPIC_API_KEY nor CLAUDE_CODE_OAUTH_TOKEN set (V2 skill drive only)." >> "$GITHUB_STEP_SUMMARY" ;;
+            30) echo "INTERACTIVE — expect script bug (cli#254 V2i). Check drive log at harness-out/**/interactive/*.log." >> "$GITHUB_STEP_SUMMARY" ;;
+            31) echo "INTERACTIVE — expect timeout waiting for pattern. May need bump via SMOKE_INTERACTIVE_DRIVE_TIMEOUT." >> "$GITHUB_STEP_SUMMARY" ;;
+            33) echo "INTERACTIVE — missing prereq (expect binary or spawn cmd). Rebuild Docker image; verify expect installed." >> "$GITHUB_STEP_SUMMARY" ;;
+            34) echo "INTERACTIVE — teardown fail (ticket close). The 6-hour stale-close workflow on bassclef-cli-smoke closes leftover tickets." >> "$GITHUB_STEP_SUMMARY" ;;
             *)  echo "See exit-codes.sh vocabulary for code $CODE." >> "$GITHUB_STEP_SUMMARY" ;;
           esac
 
@@ -118,6 +143,8 @@ jobs:
           CODE="${{ steps.smoke.outputs.smoke_exit_code }}"
           # Detection codes (0, 3, 4, 5) are expected + acceptable.
           # Infrastructure failures (20, 21, 22, 23, 24, 26) fail the job.
+          # Interactive codes (30, 31, 33, 34) also fail the job — they
+          # signal V2i regressions worth surfacing (cli#254 sub-step 6).
           # Unknown (99) also fails.
           case "$CODE" in
             0|3|4|5)
@@ -125,7 +152,7 @@ jobs:
               exit 0
               ;;
             *)
-              echo "Smoke exit $CODE is infrastructure failure; job fails."
+              echo "Smoke exit $CODE is failure class (infrastructure or interactive drive); job fails."
               exit 1
               ;;
           esac
