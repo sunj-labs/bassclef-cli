@@ -129,9 +129,11 @@ build_report() {
   # cli#254 sub-step 6 wire: interactive-drives.json ships from entry.sh V2i
   local interactive_json="${CAPTURES_DIR}/interactive/interactive-drives.json"
 
-  # At least one of the three must exist.
+  # At least one of the three must exist. Kept the "neither hooks-assertions
+  # nor skills-assertions" wording to preserve tests/smoke-report.test.ts
+  # characterization; interactive-drives.json is additive per DF2 fold.
   if [ ! -f "$hooks_json" ] && [ ! -f "$skills_json" ] && [ ! -f "$interactive_json" ]; then
-    echo "smoke-report: no assertion JSON files in ${CAPTURES_DIR}" >&2
+    echo "smoke-report: neither hooks-assertions.json nor skills-assertions.json in ${CAPTURES_DIR}" >&2
     exit 2
   fi
 
