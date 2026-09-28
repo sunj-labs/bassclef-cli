@@ -1,0 +1,4 @@
+# Temperance marker — v1.9.6 cascade on v1.6.5 substrate
+- date: 2026-09-28
+- branch: chore/2026-09-28-bassclef-v1.6.5-sync
+- scope-decision: Right thing — rebuild v1.9.6 pinning v1.6.5 to run Popper falsification test on peer's /temperance cure (bassclef-upstream#1987). Simplest — same pin-bump procedure that shipped v1.9.5 cascade. Drift trigger — expanding scope beyond pin bump + CHANGELOG + smoke re-run.

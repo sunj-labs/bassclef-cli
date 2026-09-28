@@ -24,6 +24,15 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.6] - 2026-09-28
+### Changed
+
+- **Bump bassclef substrate pin `v1.6.4` → `v1.6.5` in `.github/workflows/publish.yml`** (3 refs — 2 checkout `ref:` + 1 tag-assert). v1.6.5 ships two cures: bassclef-upstream#1987 (`/temperance` cold-adopter timeout — dropped SKILL body tail dispatch of `/kiss words --rewrite`; post-turn Stop hook covers grade discipline) and `/onboard-repo` D4 (three "cold-adopter magic demo" instances rewritten to plain wording).
+
+### Notes
+
+- Peer coord: v1.6.5 shipped by bassclef-upstream in response to defect surfaced by v1.9.5 docker-smoke against v1.6.4 substrate. This release's docker-smoke against `@thebassclef/lite@1.9.6` is the Popper falsification test for hypothesis 1 (tail-dispatch second-round-trip). Target: `/temperance` exit 0 with non-empty output under 60s.
+
 ## [1.9.5] - 2026-09-28
 ### Added
 
