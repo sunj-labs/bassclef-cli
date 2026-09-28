@@ -5,7 +5,7 @@
 If you find something that could compromise an adopter's machine,
 their credentials, or their code, please tell us privately first.
 
-**Email** — `security@bassclef.dev`
+**Email** — `maintainer@bassclef.dev`
 
 Please include:
 

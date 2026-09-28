@@ -1,0 +1,9 @@
+# Luminary — cli#282 SECURITY.md address swap
+
+- date: 2026-09-28
+- branch: fix/cli-282-security-email-swap
+- lead: linus-torvalds
+
+## Lead: linus-torvalds
+
+SECURITY.md is the public promise to adopters about vulnerability disclosure. A broken address breaks that promise. Torvalds' rule: we don't break adopters. Fix ships fast without ceremony that delays the cure.
