@@ -66,6 +66,7 @@ export interface StatuslineOutcome {
 
 export interface InstallStatuslineReport {
   dispatcher: StatuslineOutcome;
+  rich: StatuslineOutcome;
   settings: StatuslineOutcome;
 }
 
@@ -76,13 +77,16 @@ export const STATUSLINE_FIELD = {
 } as const;
 
 const DISPATCHER_REL = ['dist', 'lite', 'presence', 'cli', 'bassclef-statusline.dispatcher.sh'];
+const RICH_IMPL_REL = ['dist', 'lite', 'presence', 'cli', 'bassclef-statusline.sh'];
 const USER_DISPATCHER_REL = ['.claude', 'bassclef-statusline.sh'];
+const USER_RICH_IMPL_REL = ['.claude', 'bassclef-statusline-rich.sh'];
 const PROJECT_SETTINGS_REL = ['.claude', 'settings.json'];
 
 export function installStatusline(opts: InstallStatuslineOptions): InstallStatuslineReport {
   if (opts.skip) {
     return {
       dispatcher: skipped(join(opts.home, ...USER_DISPATCHER_REL)),
+      rich: skipped(join(opts.home, ...USER_RICH_IMPL_REL)),
       settings: skipped(join(opts.projectDir, ...PROJECT_SETTINGS_REL)),
     };
   }
@@ -95,11 +99,25 @@ export function installStatusline(opts: InstallStatuslineOptions): InstallStatus
     );
   }
 
-  const sourceBody = readFileSync(dispatcherSource, 'utf8');
-  const dispatcher = handleDispatcher(opts, dispatcherSource, sourceBody);
+  // Rich impl ships beside dispatcher in the tarball. cli#281 — copying only
+  // the dispatcher leaves cold adopters with `bassclef · ?` in the statusline
+  // (dispatcher path 3 hits its self-loop guard). Both files must land in
+  // ~/.claude/ so path 3 finds the rich impl at a distinct filename.
+  const richImplSource = join(opts.packageDir, ...RICH_IMPL_REL);
+  if (!existsSync(richImplSource)) {
+    throw new Error(
+      `bassclef init: cannot install statusline — bundled bassclef-statusline.sh missing at ${richImplSource}. ` +
+        'Reinstall @thebassclef/lite or file a bug.'
+    );
+  }
+
+  const dispatcherBody = readFileSync(dispatcherSource, 'utf8');
+  const richBody = readFileSync(richImplSource, 'utf8');
+  const dispatcher = handleDispatcher(opts, dispatcherSource, dispatcherBody);
+  const rich = handleRichImpl(opts, richImplSource, richBody);
   const settings = handleSettings(opts);
 
-  return { dispatcher, settings };
+  return { dispatcher, rich, settings };
 }
 
 function handleDispatcher(
@@ -152,6 +170,61 @@ function handleDispatcher(
 
   writeExec(target, sourceBody);
   return { kind: 'replaced', path: target, detail: `Overwrote ${target} (--force) with bundled dispatcher.` };
+}
+
+// cli#281 — rich impl install. Same shape as handleDispatcher (fail-soft on
+// symlink, preserve-not-overwrite by default, --force opts in). Distinct
+// filename (bassclef-statusline-rich.sh) so dispatcher path 3 self-loop guard
+// doesn't skip it.
+function handleRichImpl(
+  opts: InstallStatuslineOptions,
+  sourcePath: string,
+  sourceBody: string
+): StatuslineOutcome {
+  const target = join(opts.home, ...USER_RICH_IMPL_REL);
+
+  if (opts.dryRun) {
+    return {
+      kind: 'would-install',
+      path: target,
+      detail: `Dry-run: would copy ${sourcePath} → ${target} (0755).`,
+    };
+  }
+
+  if (!existsSync(target)) {
+    writeExec(target, sourceBody);
+    return { kind: 'installed', path: target, detail: `Wrote ${target} (0755) from bundled rich impl.` };
+  }
+
+  const st = lstatSync(target);
+  if (st.isSymbolicLink()) {
+    if (!opts.force) {
+      return {
+        kind: 'preserved',
+        path: target,
+        detail: `${target} is a symlink; refusing to follow. Pass --force to replace.`,
+      };
+    }
+    unlinkSync(target);
+    writeExec(target, sourceBody);
+    return { kind: 'replaced', path: target, detail: `Replaced symlink at ${target} with bundled rich impl.` };
+  }
+
+  const existing = readFileSync(target, 'utf8');
+  if (existing === sourceBody) {
+    return { kind: 'unchanged', path: target, detail: `${target} already matches bundled rich impl.` };
+  }
+
+  if (!opts.force) {
+    return {
+      kind: 'preserved',
+      path: target,
+      detail: `${target} differs from bundled rich impl. Pass --force to overwrite.`,
+    };
+  }
+
+  writeExec(target, sourceBody);
+  return { kind: 'replaced', path: target, detail: `Overwrote ${target} (--force) with bundled rich impl.` };
 }
 
 function handleSettings(opts: InstallStatuslineOptions): StatuslineOutcome {
