@@ -24,6 +24,31 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.8] - 2026-09-28
+### Added
+
+- `src/lib/install-statusline.ts` — `handleRichImpl` step copies `dist/lite/presence/cli/bassclef-statusline.sh` to `~/.claude/bassclef-statusline.sh` alongside the dispatcher. Same fail-soft shape as `handleDispatcher` (symlink refuse, preserve-not-overwrite, `--force` opt-in). Ships the pair to bassclef-upstream#1961.
+- `src/lib/install-statusline.ts` — `report.rich` outcome added to `InstallStatuslineReport`. Kinds: `installed | unchanged | preserved | replaced | skipped | would-install`.
+- `src/lib/install-statusline.ts` — migration checks: `isLegacyDispatcher` (rich impl slot carried a legacy cli dispatcher) + `isLegacyStatuslineCommand` (settings.json carried the old command). Both trigger implicit overwrite without `--force`. Adopters upgrading from cli ≤ v1.9.6 land clean.
+- `tests/statusline-install.test.ts` — 7 new rich impl assertions (RED-first Beck TDD). Full suite: 498 → 498 GREEN, 491 baseline before cli#281 amendment.
+- `src/commands/init.ts` — `maybeEmitStatuslinePlan` extended to report `report.rich.kind` alongside dispatcher + settings. Fresh install banner names both writes.
+
+### Changed
+
+- **Dispatcher install path.** `USER_DISPATCHER_REL` → `.claude/bassclef-statusline-dispatcher.sh` (was `.claude/bassclef-statusline.sh`). New distinct filename so dispatcher path 3 (`$SCRIPT_DIR/bassclef-statusline.sh`) resolves to the rich impl beside it, not itself. Fixes the self-loop guard trip that produced `bassclef · ?` on cold adopters.
+- **Prepublish command string.** `scripts/prepublish-bundle-substrate.mjs` L205 emits `bash ~/.claude/bassclef-statusline-dispatcher.sh` into `dist/lite/.claude/settings.json`. Byte-parity restored between install-time write and shipped default.
+- **`STATUSLINE_FIELD.command`** — now `bash ~/.claude/bassclef-statusline-dispatcher.sh`. Legacy value preserved as `LEGACY_STATUSLINE_COMMAND` for the migration check.
+
+### Fixed
+
+- **cli#281** — Cold adopters saw `bassclef · ?` at the Claude Code statusline. Root cause: init copied only the dispatcher; rich impl never landed at `~/.claude/`; dispatcher path 3 hit self-loop guard; `?` fallback fired. Fix per issue body option **a** — copy both files, land dispatcher at distinct filename. Adopters upgrading from cli ≤ v1.9.6 migrate without `--force` via `isLegacyDispatcher` + `isLegacyStatuslineCommand` implicit overwrite.
+
+### Notes
+
+- Ceremony landed pre-code per `.claude/rules/loop-discipline.md`: `/temperance` marker + `/pre-mortem light` (Torvalds + Saltzer-Schroeder, 8 risks, top 2 folded — R1.3 dispatcher version bump not applicable since content unchanged; R2.2 fail-soft on rich impl copy covered by parent try/catch in init.ts) + `/luminary` marker (Norman lead + Feathers supporting) + ADR-deviation marker (outcome=ADR-honored per ADR-002 + ADR-010) + lead-lens sign-off marker (Norman).
+- Full test suite 498/498 GREEN; typecheck clean; parity check GREEN post-prepublish edit.
+- Docker cold-adopter smoke on v1.9.8 will verify the fix end-to-end post-publish.
+
 ## [1.9.7] - 2026-09-28
 ### Fixed
 
