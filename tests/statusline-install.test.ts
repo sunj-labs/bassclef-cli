@@ -1,5 +1,5 @@
 // test-list:
-// [x] Fresh install: writes ~/.claude/bassclef-statusline.sh (0755) + settings.json statusLine field
+// [x] Fresh install: writes ~/.claude/bassclef-statusline-dispatcher.sh (0755) + settings.json statusLine field
 // [x] Idempotent: re-run with same source content is a no-op
 // [x] Preserves existing user dispatcher when content differs and --force not set
 // [x] --force overwrites existing user dispatcher
@@ -8,12 +8,12 @@
 // [x] --skip-statusline skips both writes; report entry says skipped
 // [x] HOME unset → throws CopyFailure kind EnvironmentIncomplete (delegates to resolveHome)
 // [x] Dispatcher source missing → throws with clear message
-// [x] Executable bit set correctly on ~/.claude/bassclef-statusline.sh
+// [x] Executable bit set correctly on ~/.claude/bassclef-statusline-dispatcher.sh
 // [x] Report entry records the install (kind: statuslineInstalled | statuslinePreserved | statuslineSkipped)
 // [x] Dry-run: writes nothing but reports the plan
 //
 // cli#281 rich-impl install (Beck RED-first, 2026-09-28):
-// [x] Fresh install: writes ~/.claude/bassclef-statusline-rich.sh (0755) + report.rich.kind='installed'
+// [x] Fresh install: writes ~/.claude/bassclef-statusline.sh (0755) + report.rich.kind='installed'
 // [x] Rich impl source missing → throws with clear message naming the rich file
 // [x] --skip-statusline skips rich impl; report.rich.kind='skipped'
 // [x] Dry-run: report.rich.kind='would-install', writes nothing
@@ -74,9 +74,9 @@ afterEach(() => {
 });
 
 describe('installStatusline — fresh install', () => {
-  it('writes dispatcher to ~/.claude/bassclef-statusline.sh with 0755 perms', () => {
+  it('writes dispatcher to ~/.claude/bassclef-statusline-dispatcher.sh with 0755 perms', () => {
     const report = installStatusline(baseOpts(fx));
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh');
     expect(existsSync(dst)).toBe(true);
     expect(readFileSync(dst, 'utf8')).toBe(DISPATCHER_BODY);
     const mode = statSync(dst).mode & 0o777;
@@ -89,7 +89,7 @@ describe('installStatusline — fresh install', () => {
     const settings = JSON.parse(readFileSync(join(fx.projectDir, '.claude', 'settings.json'), 'utf8'));
     expect(settings.statusLine).toEqual({
       type: 'command',
-      command: 'bash ~/.claude/bassclef-statusline.sh',
+      command: 'bash ~/.claude/bassclef-statusline-dispatcher.sh',
     });
   });
 
@@ -117,7 +117,7 @@ describe('installStatusline — idempotent re-run', () => {
 
 describe('installStatusline — preserve existing without --force', () => {
   it('preserves an operator-edited dispatcher when content differs', () => {
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh');
     mkdirSync(join(fx.fakeHome, '.claude'), { recursive: true });
     writeFileSync(dst, '#!/usr/bin/env bash\necho "operator custom"\n', { mode: 0o755 });
     const report = installStatusline(baseOpts(fx));
@@ -139,7 +139,7 @@ describe('installStatusline — preserve existing without --force', () => {
 
 describe('installStatusline — --force overwrites', () => {
   it('overwrites operator dispatcher when --force is set', () => {
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh');
     mkdirSync(join(fx.fakeHome, '.claude'), { recursive: true });
     writeFileSync(dst, 'old content\n', { mode: 0o755 });
     const report = installStatusline(baseOpts(fx, { force: true }));
@@ -154,7 +154,7 @@ describe('installStatusline — --force overwrites', () => {
     );
     const report = installStatusline(baseOpts(fx, { force: true }));
     const settings = JSON.parse(readFileSync(join(fx.projectDir, '.claude', 'settings.json'), 'utf8'));
-    expect(settings.statusLine.command).toBe('bash ~/.claude/bassclef-statusline.sh');
+    expect(settings.statusLine.command).toBe('bash ~/.claude/bassclef-statusline-dispatcher.sh');
     expect(report.settings.kind).toBe('replaced');
   });
 });
@@ -162,7 +162,7 @@ describe('installStatusline — --force overwrites', () => {
 describe('installStatusline — --skip-statusline', () => {
   it('writes nothing when skip is set; report says skipped', () => {
     const report = installStatusline(baseOpts(fx, { skip: true }));
-    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline.sh'))).toBe(false);
+    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh'))).toBe(false);
     const settings = JSON.parse(readFileSync(join(fx.projectDir, '.claude', 'settings.json'), 'utf8'));
     expect(settings.statusLine).toBeUndefined();
     expect(report.dispatcher.kind).toBe('skipped');
@@ -173,7 +173,7 @@ describe('installStatusline — --skip-statusline', () => {
 describe('installStatusline — dry-run', () => {
   it('writes nothing but reports would-install shape', () => {
     const report = installStatusline(baseOpts(fx, { dryRun: true }));
-    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline.sh'))).toBe(false);
+    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh'))).toBe(false);
     const settings = JSON.parse(readFileSync(join(fx.projectDir, '.claude', 'settings.json'), 'utf8'));
     expect(settings.statusLine).toBeUndefined();
     expect(report.dispatcher.kind).toBe('would-install');
@@ -200,7 +200,7 @@ describe('installStatusline — settingsPreserved signal from walker', () => {
     expect(settings).toEqual({ prior: true });
     expect(report.settings.kind).toBe('preserved');
     // Dispatcher still installs — user-scope is orthogonal.
-    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline.sh'))).toBe(true);
+    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline-dispatcher.sh'))).toBe(true);
     expect(report.dispatcher.kind).toBe('installed');
   });
 });
@@ -209,9 +209,9 @@ describe('installStatusline — settingsPreserved signal from walker', () => {
 // dispatcher can't find the rich impl next to it. Init must copy both.
 // Beck RED-first: these tests fail against pre-fix source.
 describe('installStatusline — rich impl (cli#281)', () => {
-  it('writes rich impl to ~/.claude/bassclef-statusline-rich.sh with 0755 perms', () => {
+  it('writes rich impl to ~/.claude/bassclef-statusline.sh with 0755 perms', () => {
     const report = installStatusline(baseOpts(fx));
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-rich.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
     expect(existsSync(dst)).toBe(true);
     expect(readFileSync(dst, 'utf8')).toBe(RICH_IMPL_BODY);
     const mode = statSync(dst).mode & 0o777;
@@ -226,13 +226,13 @@ describe('installStatusline — rich impl (cli#281)', () => {
 
   it('--skip-statusline skips rich impl too', () => {
     const report = installStatusline(baseOpts(fx, { skip: true }));
-    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline-rich.sh'))).toBe(false);
+    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline.sh'))).toBe(false);
     expect(report.rich.kind).toBe('skipped');
   });
 
   it('dry-run reports would-install for rich impl and writes nothing', () => {
     const report = installStatusline(baseOpts(fx, { dryRun: true }));
-    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline-rich.sh'))).toBe(false);
+    expect(existsSync(join(fx.fakeHome, '.claude', 'bassclef-statusline.sh'))).toBe(false);
     expect(report.rich.kind).toBe('would-install');
   });
 
@@ -243,7 +243,7 @@ describe('installStatusline — rich impl (cli#281)', () => {
   });
 
   it('preserves existing rich impl when content differs and --force not set', () => {
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-rich.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
     mkdirSync(join(fx.fakeHome, '.claude'), { recursive: true });
     writeFileSync(dst, '#!/usr/bin/env bash\necho "operator custom rich"\n', { mode: 0o755 });
     const report = installStatusline(baseOpts(fx));
@@ -252,7 +252,7 @@ describe('installStatusline — rich impl (cli#281)', () => {
   });
 
   it('--force overwrites existing rich impl when content differs', () => {
-    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline-rich.sh');
+    const dst = join(fx.fakeHome, '.claude', 'bassclef-statusline.sh');
     mkdirSync(join(fx.fakeHome, '.claude'), { recursive: true });
     writeFileSync(dst, 'old rich content\n', { mode: 0o755 });
     const report = installStatusline(baseOpts(fx, { force: true }));
