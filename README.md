@@ -63,7 +63,7 @@ your browser.
 
 ## Current release
 
-<!-- version-start -->1.9.5<!-- version-end -->
+<!-- version-start -->1.9.6<!-- version-end -->
 
 See [CHANGELOG.md](CHANGELOG.md) for the full changelog. Adopter-facing
 release notes live at [docs.bassclef.dev/docs/whats-new/releases](https://docs.bassclef.dev/docs/whats-new/releases).
