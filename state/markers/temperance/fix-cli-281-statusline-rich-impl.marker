@@ -1,0 +1,17 @@
+# Temperance — cli#281 statusline rich impl install
+
+- date: 2026-09-28
+- branch: fix/cli-281-statusline-rich-impl
+- scope-class: b (script extension)
+
+Right thing: cold adopters see `bassclef · ?` because init copies dispatcher without rich impl. Fix restores adopter statusline signal.
+
+Simplest: two file-copy adds in install-statusline.ts + one dispatcher path-3 filename change. No new primitive.
+
+Blast radius: adopter-observable behavior change. Ships via v1.9.7. Dev environments with sibling checkout unaffected.
+
+Verification: Tier 0 tests + docker-smoke against v1.9.7 shows non-? statusline.
+
+Reversibility: revert PR; npm has prior versions.
+
+Drift trigger: refactoring install-statusline.ts broadly OR changing rich impl OR touching path 1/2 sibling logic.

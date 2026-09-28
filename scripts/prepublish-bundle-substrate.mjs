@@ -202,7 +202,7 @@ function emitDistLiteSettings(distRoot, settingsObject) {
     ...settingsObject,
     statusLine: {
       type: 'command',
-      command: 'bash ~/.claude/bassclef-statusline.sh',
+      command: 'bash ~/.claude/bassclef-statusline-dispatcher.sh',
     },
   };
   const body = JSON.stringify(withStatusLine, null, 2) + '\n';

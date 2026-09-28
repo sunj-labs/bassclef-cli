@@ -1,0 +1,8 @@
+# ADR-deviation — cli#281 statusline rich impl install
+
+- date: 2026-09-28
+- branch: fix/cli-281-statusline-rich-impl
+- adr_governing: ADR-002 (init safety), ADR-010 (init reporting)
+- outcome: ADR-honored
+
+Rationale: fix extends the existing statusline install step in `src/lib/install-statusline.ts`. Change honors ADR-002 by keeping the new rich-impl copy fail-soft (same shape as the existing dispatcher copy — never blocks init). Change honors ADR-010 by adding the rich-impl copy result to the report object + `.bassclef/init.manifest.json` per contract. No new invariant introduced; no ADR amendment needed.

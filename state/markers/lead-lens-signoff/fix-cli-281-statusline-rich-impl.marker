@@ -1,0 +1,17 @@
+# Lead-lens sign-off — cli#281 statusline rich impl install
+
+- date: 2026-09-28
+- branch: fix/cli-281-statusline-rich-impl
+- lead: don-norman
+
+## Findings cleared
+
+No red or amber findings from review. One gap surfaced during full-suite test: `dist/lite/.claude/settings.json` carried the legacy statusLine command; parity test caught it. Cured via `scripts/prepublish-bundle-substrate.mjs` L205 edit + prepublish rerun. All 498/498 tests GREEN.
+
+## Norman lens verifies the ship
+
+Statusline is a signifier of substrate state. Fix makes the signifier honest — adopters see `bassclef v1.6.5 · not synced` instead of `bassclef · ?`. UX contract restored.
+
+## Rework cycle
+
+Iteration 1 GREEN after prepublish cure. No RED-then-GREEN cycles on cli#281 tests themselves; the parity test surfaced a second-order gap that shipped alongside.

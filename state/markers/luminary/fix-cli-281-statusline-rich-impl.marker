@@ -1,0 +1,14 @@
+# Luminary — cli#281 statusline rich impl install
+
+- date: 2026-09-28
+- branch: fix/cli-281-statusline-rich-impl
+- lead: don-norman
+- supporting: [michael-feathers]
+
+## Lead: don-norman
+
+The `?` output is a broken signifier. Statusline is per rich impl header L26-27: "always-visible substrate state". Norman's shape names why this defect matters more than "script doesn't work" — it's a UX contract violation on the persistent status surface adopters glance at.
+
+## Supporting: michael-feathers
+
+Before amending dispatcher path 3, pin current 3-path lookup behavior with characterization tests. Prevents accidentally breaking sibling fast-path for dev environments.
