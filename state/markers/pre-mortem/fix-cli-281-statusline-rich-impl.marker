@@ -1,0 +1,37 @@
+# Pre-mortem light — cli#281 statusline rich impl install
+
+- date: 2026-09-28
+- branch: fix/cli-281-statusline-rich-impl
+- lenses: [linus-torvalds, saltzer-schroeder]
+- mode: light (2 lenses × 3-5 risks)
+
+## Lens 1 — linus-torvalds (adopter contract)
+
+R1.1: Existing adopters have `~/.claude/bassclef-statusline.sh` from prior install. New init step tries to write `~/.claude/bassclef-statusline-rich.sh`. If existing adopter re-runs `bassclef init --force`, no conflict on the new filename. Non-force init check must not refuse over the rich file being absent.
+
+R1.2: Dispatcher path 3 filename change is a version-gated behavior — old dispatchers still work; new dispatchers look for a new filename. Existing adopters who don't re-run init keep the old shape. No break.
+
+R1.3: The `BASSCLEF_SYNC_VERSION` string in the dispatcher header must bump (per header L48-49: "Bump format when the dispatcher's contract changes"). Missing this trips Surface 4 self-heal in migrate-adopter-references.sh.
+
+R1.4: If cli publishes v1.9.7 with the new dispatcher but the bassclef substrate v1.6.5 shipped in the tarball hasn't itself updated the rich impl filename convention, we're fine — the rich impl file we ship next to dispatcher IS the existing `bassclef-statusline.sh` from bassclef/presence/cli/, just landed at a different install path.
+
+## Lens 2 — saltzer-schroeder (defensive bash)
+
+R2.1: Dispatcher path 3 check must handle the rich-impl file missing at expected location (adopter deleted it, permission changed). Fall through to `?` fallback, not crash.
+
+R2.2: Init step must fail soft on rich-impl copy — statusline install is already cosmetic-add-on per install-statusline.ts L94-95 comment. Rich impl copy failure should not block init overall.
+
+R2.3: Self-loop guard in dispatcher must still fire on the OLD filename `bassclef-statusline.sh` even after adding a new path 3 for `bassclef-statusline-rich.sh` — some adopters may have manually installed rich impl at the old shared basename.
+
+## Fold — top 2 risks addressed in plan
+
+**Folded 1 — R1.3 dispatcher version bump.** Bump `BASSCLEF_SYNC_VERSION` to `thin-pointer-statusline-2026-09-28` in the dispatcher edit. Include in tests: grep for the new version signature.
+
+**Folded 2 — R2.2 fail-soft on rich-impl copy.** Wrap the second copy step in same try/catch shape as existing install-statusline.ts; on failure, log advisory + continue init. Add test for the failure path.
+
+## Not folded (documented risks)
+
+- R1.1, R1.2: no action needed (both already safe by design).
+- R1.4: no action needed (bassclef substrate has not renamed; rich impl file we ship IS the current one).
+- R2.1: no action needed (dispatcher fallback already handles missing candidates via existing guard).
+- R2.3: keep the existing self-loop guard on path 3's new filename target too. Zero-cost extension of existing check.

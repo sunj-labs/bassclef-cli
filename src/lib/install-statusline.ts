@@ -66,23 +66,39 @@ export interface StatuslineOutcome {
 
 export interface InstallStatuslineReport {
   dispatcher: StatuslineOutcome;
+  rich: StatuslineOutcome;
   settings: StatuslineOutcome;
 }
 
 /** Canonical statusLine field value bassclef writes. */
 export const STATUSLINE_FIELD = {
   type: 'command' as const,
-  command: 'bash ~/.claude/bassclef-statusline.sh',
+  command: 'bash ~/.claude/bassclef-statusline-dispatcher.sh',
 } as const;
 
+/**
+ * Old command value from cli ≤ v1.9.6. Detected during migration — when
+ * settings.json still carries this value, we overwrite to the new command
+ * without requiring --force (implicit upgrade path).
+ */
+export const LEGACY_STATUSLINE_COMMAND = 'bash ~/.claude/bassclef-statusline.sh';
+
 const DISPATCHER_REL = ['dist', 'lite', 'presence', 'cli', 'bassclef-statusline.dispatcher.sh'];
-const USER_DISPATCHER_REL = ['.claude', 'bassclef-statusline.sh'];
+const RICH_IMPL_REL = ['dist', 'lite', 'presence', 'cli', 'bassclef-statusline.sh'];
+// cli#281 — dispatcher lands at a distinct filename so the dispatcher's path 3
+// (SCRIPT_DIR/bassclef-statusline.sh) resolves to the rich impl beside it, not
+// itself. Prior cli ≤ v1.9.6 installed the dispatcher AT bassclef-statusline.sh
+// which collided with path 3's target and tripped the self-loop guard. Cold
+// adopters (no sibling bassclef checkout) fell through to the `?` fallback.
+const USER_DISPATCHER_REL = ['.claude', 'bassclef-statusline-dispatcher.sh'];
+const USER_RICH_IMPL_REL = ['.claude', 'bassclef-statusline.sh'];
 const PROJECT_SETTINGS_REL = ['.claude', 'settings.json'];
 
 export function installStatusline(opts: InstallStatuslineOptions): InstallStatuslineReport {
   if (opts.skip) {
     return {
       dispatcher: skipped(join(opts.home, ...USER_DISPATCHER_REL)),
+      rich: skipped(join(opts.home, ...USER_RICH_IMPL_REL)),
       settings: skipped(join(opts.projectDir, ...PROJECT_SETTINGS_REL)),
     };
   }
@@ -95,11 +111,25 @@ export function installStatusline(opts: InstallStatuslineOptions): InstallStatus
     );
   }
 
-  const sourceBody = readFileSync(dispatcherSource, 'utf8');
-  const dispatcher = handleDispatcher(opts, dispatcherSource, sourceBody);
+  // Rich impl ships beside dispatcher in the tarball. cli#281 — copying only
+  // the dispatcher leaves cold adopters with `bassclef · ?` in the statusline
+  // (dispatcher path 3 hits its self-loop guard). Both files must land in
+  // ~/.claude/ so path 3 finds the rich impl at a distinct filename.
+  const richImplSource = join(opts.packageDir, ...RICH_IMPL_REL);
+  if (!existsSync(richImplSource)) {
+    throw new Error(
+      `bassclef init: cannot install statusline — bundled bassclef-statusline.sh missing at ${richImplSource}. ` +
+        'Reinstall @thebassclef/lite or file a bug.'
+    );
+  }
+
+  const dispatcherBody = readFileSync(dispatcherSource, 'utf8');
+  const richBody = readFileSync(richImplSource, 'utf8');
+  const dispatcher = handleDispatcher(opts, dispatcherSource, dispatcherBody);
+  const rich = handleRichImpl(opts, richImplSource, richBody);
   const settings = handleSettings(opts);
 
-  return { dispatcher, settings };
+  return { dispatcher, rich, settings };
 }
 
 function handleDispatcher(
@@ -154,6 +184,84 @@ function handleDispatcher(
   return { kind: 'replaced', path: target, detail: `Overwrote ${target} (--force) with bundled dispatcher.` };
 }
 
+// cli#281 — rich impl install. Same shape as handleDispatcher (fail-soft on
+// symlink, preserve-not-overwrite by default, --force opts in). Rich impl
+// lands at ~/.claude/bassclef-statusline.sh — the same filename the dispatcher
+// path 3 already checks. Dispatcher itself lives at a distinct name so path 3
+// resolves to rich impl, not self.
+//
+// Migration signature: when the target's existing content is a legacy cli
+// dispatcher (contains `BASSCLEF_SYNC_VERSION=thin-pointer-statusline-`),
+// overwrite without requiring --force. Cli ≤ v1.9.6 installed the dispatcher
+// AT this filename; new cli installs rich impl here instead.
+function handleRichImpl(
+  opts: InstallStatuslineOptions,
+  sourcePath: string,
+  sourceBody: string
+): StatuslineOutcome {
+  const target = join(opts.home, ...USER_RICH_IMPL_REL);
+
+  if (opts.dryRun) {
+    return {
+      kind: 'would-install',
+      path: target,
+      detail: `Dry-run: would copy ${sourcePath} → ${target} (0755).`,
+    };
+  }
+
+  if (!existsSync(target)) {
+    writeExec(target, sourceBody);
+    return { kind: 'installed', path: target, detail: `Wrote ${target} (0755) from bundled rich impl.` };
+  }
+
+  const st = lstatSync(target);
+  if (st.isSymbolicLink()) {
+    if (!opts.force) {
+      return {
+        kind: 'preserved',
+        path: target,
+        detail: `${target} is a symlink; refusing to follow. Pass --force to replace.`,
+      };
+    }
+    unlinkSync(target);
+    writeExec(target, sourceBody);
+    return { kind: 'replaced', path: target, detail: `Replaced symlink at ${target} with bundled rich impl.` };
+  }
+
+  const existing = readFileSync(target, 'utf8');
+  if (existing === sourceBody) {
+    return { kind: 'unchanged', path: target, detail: `${target} already matches bundled rich impl.` };
+  }
+
+  // cli#281 migration: existing target is a legacy dispatcher (cli ≤ v1.9.6).
+  // Safe to overwrite implicitly — the legacy dispatcher never worked for cold
+  // adopters anyway, and settings.json will move to the new dispatcher path.
+  if (isLegacyDispatcher(existing)) {
+    writeExec(target, sourceBody);
+    return {
+      kind: 'replaced',
+      path: target,
+      detail: `Migrated ${target} from legacy dispatcher to rich impl (cli#281 upgrade path).`,
+    };
+  }
+
+  if (!opts.force) {
+    return {
+      kind: 'preserved',
+      path: target,
+      detail: `${target} differs from bundled rich impl. Pass --force to overwrite.`,
+    };
+  }
+
+  writeExec(target, sourceBody);
+  return { kind: 'replaced', path: target, detail: `Overwrote ${target} (--force) with bundled rich impl.` };
+}
+
+/** True when the file body looks like a bassclef cli dispatcher (thin-pointer signature). */
+function isLegacyDispatcher(body: string): boolean {
+  return body.includes('BASSCLEF_SYNC_VERSION=thin-pointer-statusline-');
+}
+
 function handleSettings(opts: InstallStatuslineOptions): StatuslineOutcome {
   const target = join(opts.projectDir, ...PROJECT_SETTINGS_REL);
 
@@ -188,6 +296,19 @@ function handleSettings(opts: InstallStatuslineOptions): StatuslineOutcome {
     return { kind: 'unchanged', path: target, detail: `${target} already carries the bassclef statusLine.` };
   }
 
+  // cli#281 migration: existing statusLine is the legacy cli command (points at
+  // the old dispatcher slot). Safe to overwrite implicitly — the legacy command
+  // never resolved a rich impl for cold adopters.
+  if (isLegacyStatuslineCommand(current)) {
+    const next = { ...existing, statusLine: desired };
+    writeSettings(target, next);
+    return {
+      kind: 'replaced',
+      path: target,
+      detail: `Migrated statusLine in ${target} from legacy dispatcher path to new dispatcher path (cli#281 upgrade).`,
+    };
+  }
+
   if (!opts.force) {
     return {
       kind: 'preserved',
@@ -199,6 +320,13 @@ function handleSettings(opts: InstallStatuslineOptions): StatuslineOutcome {
   const next = { ...existing, statusLine: desired };
   writeSettings(target, next);
   return { kind: 'replaced', path: target, detail: `Overwrote statusLine in ${target} (--force).` };
+}
+
+/** True when the settings.json statusLine field is the legacy cli ≤ v1.9.6 command. */
+function isLegacyStatuslineCommand(current: unknown): boolean {
+  if (!current || typeof current !== 'object' || Array.isArray(current)) return false;
+  const c = current as Record<string, unknown>;
+  return c.type === 'command' && c.command === LEGACY_STATUSLINE_COMMAND;
 }
 
 function skipped(path: string): StatuslineOutcome {

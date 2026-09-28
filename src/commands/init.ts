@@ -967,16 +967,18 @@ function maybeEmitStatuslinePlan(opts: StatuslinePlanOpts): void {
   }
 
   const dv = report.dispatcher.kind;
+  const rv = report.rich.kind;
   const sv = report.settings.kind;
 
-  if (dv === 'skipped' && sv === 'skipped') {
+  if (dv === 'skipped' && rv === 'skipped' && sv === 'skipped') {
     opts.say(`bassclef init: statusline install skipped (--skip-statusline).\n`);
     return;
   }
 
   if (opts.dryRun) {
     opts.say(
-      `bassclef init: would install statusline dispatcher at ${report.dispatcher.path} ` +
+      `bassclef init: would install statusline dispatcher at ${report.dispatcher.path}, ` +
+        `rich impl at ${report.rich.path}, ` +
         `and set statusLine in ${report.settings.path}.\n`
     );
     return;
@@ -987,6 +989,14 @@ function maybeEmitStatuslinePlan(opts: StatuslinePlanOpts): void {
   else if (dv === 'replaced') parts.push(`replaced ${report.dispatcher.path} (--force)`);
   else if (dv === 'preserved') parts.push(`preserved ${report.dispatcher.path} (pass --force to overwrite)`);
   else if (dv === 'unchanged') parts.push(`${report.dispatcher.path} already matches bundle`);
+
+  // cli#281 — rich impl outcome. Silent when unchanged/skipped (matches
+  // dispatcher shape). Loud on installed/replaced/preserved so adopters see
+  // both writes on a fresh install.
+  if (rv === 'installed') parts.push(`wrote ${report.rich.path}`);
+  else if (rv === 'replaced') parts.push(`replaced ${report.rich.path} (migration or --force)`);
+  else if (rv === 'preserved') parts.push(`preserved ${report.rich.path} (pass --force to overwrite)`);
+  else if (rv === 'unchanged') parts.push(`${report.rich.path} already matches bundle`);
 
   if (sv === 'installed') parts.push(`set statusLine in ${report.settings.path}`);
   else if (sv === 'replaced') parts.push(`replaced statusLine in ${report.settings.path} (--force)`);
