@@ -1,0 +1,17 @@
+# Temperance — release v1.9.8 for cli#281
+
+- date: 2026-09-28
+- branch: chore/release-v1.9.8-cli-281
+- scope-class: release (patch bump only)
+
+Right thing: v1.9.7 already published (cli#282 SECURITY email swap). cli#281 statusline cure needs its own version. Patch bump v1.9.7 → v1.9.8 ships the fix to npm.
+
+Simplest: `npm run bump patch` after CHANGELOG amendment. Tag + push tag → publish workflow fires with operator Touch ID at env gate.
+
+Impact: npm-published version. Adopter-observable. Publish workflow gates on operator Touch ID.
+
+Verification: tag pushes; publish workflow runs; sigstore transparency log records; docker cold-adopter smoke on v1.9.8 shows non-`?` statusline.
+
+Reversibility: revert via patch release; npm has prior versions; no shipped tag gets moved (memory: git tag collision across rename).
+
+Drift trigger: refactoring beyond CHANGELOG + package.json + src/index.ts + README bump. This branch is pure release plumbing.
