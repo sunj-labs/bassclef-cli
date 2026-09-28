@@ -24,6 +24,26 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.5] - 2026-09-28
+### Added
+
+- **cli#254 interactive skill drives chain — end-to-end.** 12 PRs shipped this session: real `smoke-expect.sh` bodies + fake_claude fixture (#256), 3 walking-skeleton drives for /onboard-repo /launch /riff (#257-#259), 3 batches of 7 skills each via generic driver + catalog (#260-#262), setup + teardown lifecycle with `gh` shim + smoke-drive label (#263), Docker CI wire with V2 Step 8 + 5 new exit codes 30-34 (#264), SMOKE_GH_TOKEN + GH_SMOKE_REPO passed to container (#265), scripts_dir path bug cure (#268), captures dir bind-mount + timeout tuning (#269). Total 21 skills interactive-drive-capable. Sandbox repo `sunj-labs/bassclef-cli-smoke` bootstrapped with `smoke-drive` + `automated-run` labels + 24-hour stale-close workflow. Real-Claude characterization run 36324200730 surfaced first-run theme picker; tuning follow-up filed.
+- **Follow-up tickets filed** — cli#266 (migrate smoke sandbox auth from PAT to GitHub App); cli#267 (restrict edits to `.github/workflows/*.yml` via CODEOWNERS).
+
+### Fixed
+
+- **cli#253 — smoke assertion drift cure for v1.6.1 substrate.** Two functions in `scripts/lib/smoke-assert.sh` restore the 43/0 baseline. `check_no_silent_skip` filters `[bassclef-hook-connect]` loud-skip stderr per bassclef-upstream#1954 PR #1956. `check_no_unexpected_blocked` tightens regex to banner shape (`^[[:space:]]*(🛑[[:space:]]+)?BLOCKED:`) so prose citing `BLOCKED:` inside backticks no longer false-positives. 24 Tier 0 tests + 491/491 vitest + typecheck clean. Shipped via PR #278.
+
+### Changed
+
+- **Bump bassclef substrate pin `v1.6.1` → `v1.6.4` in `.github/workflows/publish.yml`** (3 refs — 2 checkout `ref:` + 1 tag-assert). v1.6.4 ships 9 upstream tickets: v1.6.3 base (#1958, #1959, #1960, #1961, #1962, #1970, #1971) plus v1.6.4 additions #1981 (statusline hang cure: dispatcher self-loop guard + TTY stdin gate + adopter sync state-file write) and #1978 (/longrun scope-class taxonomy amendment: Step 0.86 adds class a/b/c/d with discipline overrides).
+- **Two new adopter-visible files land at lite tier via v1.6.3 substrate.** `scripts/interpret-input/extract-repo.sh` (`tier: lite`) reaches adopters via `bassclef init`. `scripts/launch-preview/check-production-gating.sh` (`tier: standard`) correctly excluded from lite bundle per tier discipline. Verified in the `dist/lite/` post-prepublish tree.
+
+### Notes
+
+- Peer coord: v1.6.4 signal received from bassclef-upstream. No pin-update concerns raised on `bassclef-web#256` or `bassclef-cli#51`.
+- Setup remaining on adopter side before first real-Claude green run: (a) create fine-grained PAT with `issues:write` on `sunj-labs/bassclef-cli-smoke`; (b) add as `SMOKE_GH_TOKEN` in bassclef-cli Actions secrets (done); (c) tune drive patterns after theme-picker characterization run.
+
 ## [1.9.4] - 2026-09-26
 ### Added
 
