@@ -1,0 +1,6 @@
+# ADR-deviation — cli#282 SECURITY.md address swap
+
+- date: 2026-09-28
+- branch: fix/cli-282-security-email-swap
+- adr_governing: none — confirmed no ADR coverage for SECURITY.md email address
+- outcome: ADR-honored

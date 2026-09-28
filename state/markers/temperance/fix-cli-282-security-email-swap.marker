@@ -1,0 +1,12 @@
+# Temperance — cli#282 SECURITY.md address swap
+
+- date: 2026-09-28
+- branch: fix/cli-282-security-email-swap
+- scope-class: a (small fix)
+
+Right thing: SECURITY.md L8 points at security@bassclef.dev, a mailbox that doesn't exist. npm package page renders the address. Adopters trying to report a vulnerability hit a dead address.
+Simplest: one-line edit — security@ → maintainer@bassclef.dev per operator + peer confirmation.
+Blast radius: public disclosure surface. Ships as v1.9.7 patch release so npm page updates.
+Verification: grep after edit shows only maintainer@; PR CI green.
+Reversibility: revert PR.
+Drift trigger: expanding to README (already clean), package.json (already clean), or ADR authoring for the alias.

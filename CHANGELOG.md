@@ -24,6 +24,11 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.7] - 2026-09-28
+### Fixed
+
+- **cli#282 — SECURITY.md security email swap.** v1.9.6 shipped `SECURITY.md` pointing at `security@bassclef.dev`, a mailbox that was never created. npm package page renders SECURITY.md, so adopters trying to report a vulnerability hit a dead address. Swapped to `maintainer@bassclef.dev`. Peer bassclef-web will wire `security@` as a proper alias in a later PR; this ships the working address now.
+
 ## [1.9.6] - 2026-09-28
 ### Changed
 
