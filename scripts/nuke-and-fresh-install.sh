@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
-# nuke-install.sh — one-command fresh install of @thebassclef/lite.
+# nuke-and-fresh-install.sh — one-command fresh install of @thebassclef/lite.
 #
 # For cold adopters who want a truly cold install with zero cruft from
 # prior state. Paste-mangling risk removed by design: script fetches
 # via curl and runs from disk, never as a multi-line paste.
 #
 # Usage:
-#   curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-and-fresh-install.sh | bash
 #   curl -sSL <url> | bash -s -- --version 1.9.8
-#   bash nuke-install.sh --dry-run
+#   bash nuke-and-fresh-install.sh --dry-run
 #
-# Contract per docs/use-cases/UC-script-nuke-install.md.
+# Contract per docs/use-cases/UC-script-nuke-and-fresh-install.md.
 # Anchors: @luminary alan-cooper (CLI shape), @luminary michael-feathers (characterization tests).
 
 set -euo pipefail
 
-SCRIPT_NAME="$(basename "$0" .sh 2>/dev/null || echo "nuke-install")"
+SCRIPT_NAME="$(basename "$0" .sh 2>/dev/null || echo "nuke-and-fresh-install")"
 
 usage() {
   cat <<'EOF'
-Usage: nuke-install.sh [FLAGS]
+Usage: nuke-and-fresh-install.sh [FLAGS]
 
 Cold-adopter fresh install of @thebassclef/lite. Backs up ~/.claude,
 uninstalls any prior global cli, installs the requested version, and
@@ -34,13 +34,13 @@ Flags:
 
 Examples:
   # fresh install of latest
-  curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-install.sh | bash
+  curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-and-fresh-install.sh | bash
 
   # pin a specific version
   curl -sSL <url> | bash -s -- --version 1.9.8
 
   # preview without touching state
-  bash nuke-install.sh --dry-run
+  bash nuke-and-fresh-install.sh --dry-run
 
 Exit codes:
   0  success (or dry-run)
@@ -154,7 +154,7 @@ if [ ! -d .git ]; then
   git init -q
   GIT_AUTHOR_NAME=smoke GIT_AUTHOR_EMAIL=smoke@local \
   GIT_COMMITTER_NAME=smoke GIT_COMMITTER_EMAIL=smoke@local \
-  git commit --allow-empty -m "chore: nuke-install fixture" -q
+  git commit --allow-empty -m "chore: nuke-and-fresh-install fixture" -q
 fi
 
 # Step 6: bassclef init.

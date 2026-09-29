@@ -1,0 +1,17 @@
+# Temperance — rename nuke-install → nuke-and-fresh-install
+
+- date: 2026-09-29
+- branch: chore/rename-nuke-install-to-nuke-and-fresh-install
+- scope-class: b (adopter-facing script rename)
+
+Right thing: operator asked for clearer name — script does both a nuke AND a fresh install; original name buried the install half. Rename ships now while adopter reach is zero (script merged as PR #288 minutes ago, no CDN, no npm ship).
+
+Simplest: git mv three files (script + tests + UC doc), update internal refs, register in standards/file-renames.json per .claude/rules/file-rename-discipline.md, PR + merge.
+
+Impact: no external adopters yet. Substrate ships the rename registry entry so any future adopter carrying the old filename gets caught by migrate-adopter-references.sh.
+
+Verification: tests still 14/14 GREEN after rename; full suite 498/498 GREEN.
+
+Reversibility: revert PR; rename registry keeps the trail.
+
+Drift trigger: touching script logic OR test assertions OR UC content beyond filename swaps.

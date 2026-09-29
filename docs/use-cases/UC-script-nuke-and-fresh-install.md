@@ -1,8 +1,8 @@
 ---
 tier: standard
-ticket: cli#nuke-install
-title: UC-script-nuke-install — Cold adopter runs one-command fresh install
-scope: scripts/nuke-install.sh
+ticket: cli#nuke-and-fresh-install
+title: UC-script-nuke-and-fresh-install — Cold adopter runs one-command fresh install
+scope: scripts/nuke-and-fresh-install.sh
 level: user goal
 primary_actor: cold-adopter
 authoring_luminaries:
@@ -25,7 +25,7 @@ authoring_luminaries:
 
 ## Main success scenario
 
-1. Adopter pastes the curl one-liner: `curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-install.sh | bash`
+1. Adopter pastes the curl one-liner: `curl -sSL https://raw.githubusercontent.com/sunj-labs/bassclef-cli/main/scripts/nuke-and-fresh-install.sh | bash`
 2. Script cd's to `$HOME` so any stale CWD stops mattering.
 3. If `~/.claude` exists, script moves it to `~/.claude.bak.<timestamp>`.
 4. If old global `@thebassclef/lite` install exists, script uninstalls it (silent when none).
