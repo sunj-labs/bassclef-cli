@@ -1,0 +1,17 @@
+# Temperance — nuke-install.sh adopter-facing script
+
+- date: 2026-09-29
+- branch: feat/nuke-install-script
+- scope-class: b (adopter-facing script; new file)
+
+Right thing: cold adopters can't paste multi-line install steps into zsh without paste-mangling (feedback_bash_paste_zsh_interactive_comments). Two runs this session failed the same way. Ship a one-command install path that fetches via curl and pipes to bash — no paste-mangling risk.
+
+Simplest: one new `scripts/nuke-install.sh` + Tier 0 tests + brief Cockburn UC. Fail-soft on missing targets; back up `~/.claude` to a dated dir; land fresh install at `~/tmp/bassclef-smoke-test` with `bassclef init`.
+
+Impact: adopter-facing script. Adopter cold-installs benefit; existing installs unaffected. No changes to init.ts, walker, or dispatcher.
+
+Verification: Tier 0 tests exercise --dry-run + --help + flag parsing. Live nuke test happens post-merge via the operator's actual cold-adopter profile.
+
+Reversibility: revert PR; `~/.claude.bak.<timestamp>` restores in a single mv.
+
+Drift trigger: adding features beyond the seven listed flags OR touching src/ OR editing walker.
