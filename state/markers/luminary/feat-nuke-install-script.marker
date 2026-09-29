@@ -1,0 +1,14 @@
+# Luminary — nuke-install.sh adopter-facing script
+
+- date: 2026-09-29
+- branch: feat/nuke-install-script
+- lead: alan-cooper
+- supporting: [michael-feathers]
+
+## Lead: alan-cooper
+
+CLI shape matters. Cold adopter has one job: install cli fresh, no cruft. Cooper's lens: reduce interaction cost. One command via `curl | bash`, minimal flags, sensible defaults.
+
+## Supporting: michael-feathers
+
+Characterization tests pin observable behavior — help output shape, dry-run mode, flag parsing. Fixture-based; no live npm calls in tests.

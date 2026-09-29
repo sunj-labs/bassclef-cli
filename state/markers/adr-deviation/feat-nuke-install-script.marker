@@ -1,0 +1,8 @@
+# ADR-deviation — nuke-install.sh adopter-facing script
+
+- date: 2026-09-29
+- branch: feat/nuke-install-script
+- adr_governing: none (no ADR governs adopter-facing helper scripts under scripts/)
+- outcome: ADR-honored
+
+Rationale: new script under `scripts/`; no ADR names an invariant this touches. Sister to `scripts/smoke-one-shot.sh` and `scripts/smoke-reset.sh` (both existing adopter-facing scripts, same shape).
