@@ -19,7 +19,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SCRIPT="${REPO_ROOT}/scripts/nuke-install.sh"
+SCRIPT="${REPO_ROOT}/scripts/nuke-and-fresh-install.sh"
 
 PASS=0
 FAIL=0
@@ -54,7 +54,7 @@ assert_contains() {
   fi
 }
 
-echo "==> nuke-install.sh tests"
+echo "==> nuke-and-fresh-install.sh tests"
 
 # T1: --help prints usage + exits 0
 out=$(bash "$SCRIPT" --help 2>&1 || true)
@@ -77,15 +77,15 @@ else
 fi
 
 # T4: --dry-run prints plan + exit 0 without writing
-touch /tmp/nuke-install-sentinel-do-not-delete-me
+touch /tmp/nuke-and-fresh-install-sentinel-do-not-delete-me
 out=$(bash "$SCRIPT" --dry-run 2>&1 || true)
 ec=$(bash "$SCRIPT" --dry-run >/dev/null 2>&1 && echo 0 || echo $?)
 assert "T4a: --dry-run exit 0" "0" "$ec"
 assert_contains "T4b: --dry-run mentions DRY-RUN" "DRY-RUN" "$out"
-if [ -f /tmp/nuke-install-sentinel-do-not-delete-me ]; then
+if [ -f /tmp/nuke-and-fresh-install-sentinel-do-not-delete-me ]; then
   printf '  [PASS] T4c: --dry-run touches no real files\n'
   PASS=$((PASS + 1))
-  rm -f /tmp/nuke-install-sentinel-do-not-delete-me
+  rm -f /tmp/nuke-and-fresh-install-sentinel-do-not-delete-me
 else
   printf '  [FAIL] T4c: sentinel got deleted; dry-run did real work\n'
   FAIL=$((FAIL + 1))
