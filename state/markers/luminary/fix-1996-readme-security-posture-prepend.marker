@@ -1,0 +1,5 @@
+# Luminary marker — #1996 cli README security posture prepend
+- date: 2026-10-01
+- branch: fix/1996-readme-security-posture-prepend
+- lead: don-norman — signifier at first-scan surface; auditor's first question gets answered before the install block
+- supporting: luke-wroblewski — mobile-first content prioritization; posture lands above fold

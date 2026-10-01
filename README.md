@@ -1,6 +1,10 @@
 # @thebassclef/lite
 
-Install bassclef in your project. Two commands.
+**Security posture.** @thebassclef/lite ships with zero install-time scripts, SLSA v1 build provenance, Apache-2.0 license, and zero runtime dependencies. The CLI writes to `~/.claude` and `$CLAUDE_PROJECT_DIR` at runtime, not at install. See [SECURITY.md](SECURITY.md) for disclosure.
+
+## Install
+
+Two commands.
 
 ```bash
 npm install -g @thebassclef/lite

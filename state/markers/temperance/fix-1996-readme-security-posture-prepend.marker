@@ -1,0 +1,5 @@
+# Temperance marker — #1996 cli README security posture prepend
+- date: 2026-10-01
+- branch: fix/1996-readme-security-posture-prepend
+- scope-decision: smallest-shape — prepend one paragraph to top of README naming 4 confirmed security posture facts per ticket's suggested text. Blast radius: README prose only, no code paths, no release pipeline. Not a brute-force retry.
+- drift-trigger: scope exceeds 1 file edit OR crosses into SECURITY.md / docs.bassclef.dev → pause + reassess
