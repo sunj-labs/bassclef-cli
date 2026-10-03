@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-driver-4-env-reach-override
+- date: 2026-10-03
+- branch: feature/294-driver-4-env-reach-override
+- scope-decision: Author driver 4 (env-reach-override) per cli#294 Step 6. Covers Kunal #4 (SKIP_* inline recipe did not bypass hooks).
+- right-thing: Pin the lib/skip-env-inline-check.sh cure shipped in bassclef v1.7.0 via upstream PR #2042.
+- right-way: assert lib exists + source lib + exercise skip_var_set with 3 input cases (inline prefix, env only, neither).
+- drift-trigger: if driver scope widens to call-site auditing across 6 PreToolUse hooks, pause and re-anchor.
