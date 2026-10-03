@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-driver-2-build-against-template
+- date: 2026-10-03
+- branch: feature/294-driver-2-build-against-template
+- scope-decision: Author driver 2 (build-against-template) per cli#294 Step 4. Covers Kunal #2036 findings #2 + #3.
+- right-thing: Pin the dual-form regex cure (`## (Steps|Workunits) enumerated`) shipped in bassclef v1.7.0 via upstream PR #2043.
+- right-way: 2 fixtures (new + legacy heading) + run the awk extractor against each; assert > 0 lines matched; also grep SKILL body for the dual-form pattern.
+- drift-trigger: if driver needs to invoke the full /build skill end-to-end, pause and re-anchor (characterization scope only).
