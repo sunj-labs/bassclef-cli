@@ -1,7 +1,14 @@
-# Pre-mortem marker — cli 1.0.1 hook routing
-- date: 2026-09-13
+# Pre-mortem light marker — cli#295 bundle sync via commit SHA pin
+- date: 2026-10-03
 - branch: main
-- ledger: docs/risk-ledgers/2026-09-13d-cli-1.0.1-hook-routing.md
-- lenses: michael-nygard (lead), michael-feathers, saltzer-schroeder
-- mode: light (3 lenses × 5-8 risks; top 5 folded into engineering)
-- folds: S2 → user-scope symlink refuser; S3 → chmod 0755 enforcer; N5 → banner declared-vs-copied check; N2+S1 → HOME unset + sudo bypass gate; F6 → manifest scope field extension
+- scope: cli#295 bundle sync against upstream commit 633cc2bb
+- lenses-used:
+    lead: linus-torvalds
+    supporting: [michael-nygard, saltzer-schroeder]
+- ledger: docs/risk-ledgers/2026-10-03b-cli-295-bundle-sync.md
+- top-folds:
+  - F1 — publish.yml comment above pin line (L1)
+  - F2 — read scripts/validate-tag.mjs before edit (N1)
+  - F3 — read prepublish-copy script before edit (S5, N3)
+  - F4 — grep whole repo for v1.6.5 refs before edit (S1, S2)
+- mode: light (3 lenses × 5 risks)
