@@ -24,6 +24,20 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.9] - 2026-10-03
+### Added
+
+### Changed
+
+- **Bump bassclef substrate pin `v1.6.5` → `v1.7.0` in `.github/workflows/publish.yml`** (3 refs — L136 + L281 checkout `ref:` + L151 tag-assert; L152 error prose matches). v1.7.0 ships 8 of 10 Kunal #2036 adopter cures (bassclef-upstream PR #1523 squash-merged at 2026-10-03T11Z, release-2026-10-03-89ceaa15). Cures include `trace-helper.sh` operator-identifier sanitization and `lib/identifier-leak-check.sh` for pre-commit gate on staged content. Pin shift semver-clean (v1.7.0 is a MINOR bump because the release bundled a feat commit — ogilvy-writing-audit step — so release-step6 auto-bumped MINOR instead of PATCH).
+
+### Fixed
+
+### Notes
+
+- Peer coord: cli-10 verified `v1.7.0` tag exists at upstream commit `6bc46199` after `bassclef-upstream-d3` ping (session log 2026-10-03b). Ships cli#295.
+- Full RCA breakdown per Kunal finding lands in `docs/release-notes/v1.9.9.md` under per-finding shape (symptom → root cause → fix → verification) matching bassclef-upstream PR #1523 body.
+
 ## [1.9.8] - 2026-09-28
 ### Added
 
