@@ -61,6 +61,12 @@ Same shape as Step 2, one driver per PR. 20-30 turns each. Order:
 
 Any of the 3 confirms the unblock. Any absent at session start → bundle sync still owed; this plan waits.
 
+## Release-notes shape (per peer `bassclef-upstream-b3` message 2026-10-03b)
+
+When cli#295 fires and the next cli release-notes.md gets generated against the bundled bassclef release, use per-finding RCA structure (symptom → root cause → fix → verification). Not flat change-logs. Inherits the shape bassclef is shipping Kunal's #2036 release under. Spirit filed at bassclef-upstream#2039.
+
+Operator may also file an analogous ticket on bassclef-web for docs-gen shape alignment.
+
 ## Related tickets
 
 - cli#294 — parent (5 adopter-regression smoke drivers)
