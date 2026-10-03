@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-driver-5-onboard-free-tier-403
+- date: 2026-10-03
+- branch: feature/294-driver-5-onboard-free-tier-403
+- scope-decision: Author driver 5 (onboard-free-tier-403) per cli#294 Step 3 (reordered to final). Covers Kunal #9.
+- right-thing: Pin the onboard-repo SKILL 3-path block + fallback marker-write shipped in bassclef v1.7.0 via upstream PR #2044.
+- right-way: grep SKILL body for 403 heads-up + 3 paths + fallback marker-write to .claude/onboard-notes.md.
+- drift-trigger: if driver needs to simulate gh api 403 or mock subprocess, pause and re-anchor (grep scope only).
