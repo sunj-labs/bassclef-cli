@@ -1,0 +1,7 @@
+# Temperance marker — feature/295-bundle-sync-v1.7.0
+- date: 2026-10-03
+- branch: feature/295-bundle-sync-v1.7.0
+- scope-decision: Bundle sync cli#295 against upstream v1.7.0 tag. Bump 3 refs in publish.yml + cli version to v1.9.9 + author RCA release notes.
+- right-thing: cli#295 is the thread the plan doc names; v1.7.0 verified live at upstream.
+- right-way: semver pin pattern preserved; full ceremony per plan doc Step 1; auto-merge within scope (orchestrator-gated).
+- drift-trigger: if any additional ref beyond L136/L151/L281 surfaces, pause and re-anchor. If build/bundle verify fails parity, pause and re-anchor.

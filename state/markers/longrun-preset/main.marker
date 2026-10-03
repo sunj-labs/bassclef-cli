@@ -1,5 +1,6 @@
-# /longrun preset marker — main
-preset: converged
-trigger: ticket-body-equivalent-to-plan-doc
-date: 2026-10-03T09:06:46Z
-rationale: cli#294 body enumerates 5 drivers with per-driver specs; operator pre-picked option a (ship all 5)
+# Longrun preset marker — 2026-10-03b
+- date: 2026-10-03
+- branch: main
+- preset: converged
+- trigger: plan-doc
+- plan-doc: docs/next-session-plan-2026-10-03-cli-294-bundle-sync-then-drivers.md

@@ -1,7 +1,7 @@
-# Temperance marker — session-2026-09-20f wait-mode + V2 docker drive
-- date: 2026-09-20
+# Temperance marker — cli#295 bundle sync via Option b then a
+- date: 2026-10-03
 - branch: main
-- scope: run Docker cold-adopter harness against @thebassclef/lite@1.2.2 (V2 if ANTHROPIC_API_KEY available; V1 baseline otherwise); park in wait mode for upstream v2.0.0 signal
-- right-thing: close V2 skill drive gap named in whereami L22; smoke pipeline before v2.0.0 cascade lands
-- right-way: reuse harness/docker/entry.sh + scripts/smoke-drive-skills.sh; no code change unless failures require a cure
-- drift-trigger: touching cli substrate code before v2.0.0 lands; any ceremony work beyond the harness run
+- scope-decision: Run plan doc Step 1 only tonight. Option b then a — ping peer for v1.6.7 tag cut, then bundle sync against v1.6.7. Drivers (Steps 2-6) deferred to next session.
+- right-thing: cli#295 is the thread the plan doc names. Primary unblocked.
+- right-way: wait for v1.6.7 tag (preserves semver pin pattern); full ceremony per plan doc Step 1; close clean per operator prior preference.
+- drift-trigger: if cli#295 bundle sync bloats past 60 turns OR a driver Step starts this session, pause and re-anchor /temperance.
