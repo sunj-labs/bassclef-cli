@@ -1,0 +1,5 @@
+# ADR-deviation marker — feature/294-e2e-cascade-prototypes
+- date: 2026-10-03
+- branch: feature-294-e2e-cascade-prototypes
+- adr_governing: none — confirmed no ADR coverage (new test shape; prototype)
+- outcome: ADR-honored

@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-e2e-cascade-prototypes
+- date: 2026-10-03
+- branch: feature/294-e2e-cascade-prototypes
+- scope-decision: Author (1) plan doc for next session E2E cascade stack + (2) prototype E2E driver for /onboard-repo + (3) prototype E2E driver for /build. Two drivers only; others deferred to next session.
+- right-thing: Operator asked for deeper driver tests catching hook-cascade issues like Kunal's. Prior drivers 1-5 are grep anchors on specific files; this shape observes end-to-end cascade.
+- right-way: scratch workdir + fake binaries + sourcing SKILL body steps + marker/log observation + sequence assertions. Each driver < 250 lines bash.
+- drift-trigger: if a driver grows past 300 lines OR requires a new helper lib OR requires real claude invocation, pause and re-anchor.
