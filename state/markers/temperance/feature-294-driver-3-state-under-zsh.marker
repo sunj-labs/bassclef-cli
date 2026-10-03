@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-driver-3-state-under-zsh
+- date: 2026-10-03
+- branch: feature/294-driver-3-state-under-zsh
+- scope-decision: Author driver 3 (state-under-zsh) per cli#294 Step 5. Covers Kunal #2036 finding #6 (zsh PATH kill).
+- right-thing: Pin the zsh-magic-variable sweep cure shipped in bassclef v1.7.0 via upstream PRs #2043 + #2045.
+- right-way: grep every lib/*.sh in bundled dist/lite/lib + sibling for `local path=` / `local cdpath=` / `local fpath=` / `local manpath=`; assert zero matches each.
+- drift-trigger: if the driver scope widens beyond grep-based assertion OR requires sourcing lib files, pause and re-anchor.
