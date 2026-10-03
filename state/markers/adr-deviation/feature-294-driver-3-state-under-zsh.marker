@@ -1,0 +1,5 @@
+# ADR-deviation marker — feature/294-driver-3-state-under-zsh
+- date: 2026-10-03
+- branch: feature-294-driver-3-state-under-zsh
+- adr_governing: none — confirmed no ADR coverage (new Tier 0 regression test; no architectural invariant touched)
+- outcome: ADR-honored
