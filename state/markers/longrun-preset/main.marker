@@ -1,5 +1,5 @@
-# /longrun preset marker
-- date: 2026-09-27
-- branch: main
-- preset: exploratory
-- trigger: none (stale next_bet queue; no fresh plan doc for cli; no fresh problem marker)
+# /longrun preset marker — main
+preset: converged
+trigger: ticket-body-equivalent-to-plan-doc
+date: 2026-10-03T09:06:46Z
+rationale: cli#294 body enumerates 5 drivers with per-driver specs; operator pre-picked option a (ship all 5)
