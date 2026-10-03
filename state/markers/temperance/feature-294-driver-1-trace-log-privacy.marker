@@ -1,0 +1,7 @@
+# Temperance marker — feature/294-driver-1-trace-log-privacy
+- date: 2026-10-03
+- branch: feature/294-driver-1-trace-log-privacy
+- scope-decision: Author driver 1 (trace-log-privacy) per cli#294 Step 2. Covers Kunal #2036 findings #1 + #5. Lives at scripts/tests/smoke-drive-adopter-trace-log-privacy.test.sh.
+- right-thing: Characterization regression anchor per Feathers lens; pins behavior that was broken pre-v1.7.0.
+- right-way: source trace-helper.sh from dist/lite/ (post-prepublish adopter view) with sibling fallback; mock workdir contains /Users/; grep no-leak + .gitignore has docs/sdlc-traces/.
+- drift-trigger: if driver needs > 100 lines of bash OR requires authoring a new helper lib, pause and re-anchor.
