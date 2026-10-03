@@ -1,0 +1,5 @@
+# ADR-deviation marker — feature/294-driver-4-env-reach-override
+- date: 2026-10-03
+- branch: feature-294-driver-4-env-reach-override
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
