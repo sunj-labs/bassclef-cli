@@ -1,14 +1,21 @@
-# Pre-mortem light marker — cli#295 bundle sync via commit SHA pin
+# Pre-mortem light marker — cli#295 bundle sync via v1.7.0 semver pin
 - date: 2026-10-03
 - branch: main
-- scope: cli#295 bundle sync against upstream commit 633cc2bb
+- scope: cli#295 bundle sync against upstream tag v1.7.0 (commit 6bc46199, release-2026-10-03-89ceaa15)
 - lenses-used:
     lead: linus-torvalds
     supporting: [michael-nygard, saltzer-schroeder]
 - ledger: docs/risk-ledgers/2026-10-03b-cli-295-bundle-sync.md
-- top-folds:
-  - F1 — publish.yml comment above pin line (L1)
-  - F2 — read scripts/validate-tag.mjs before edit (N1)
-  - F3 — read prepublish-copy script before edit (S5, N3)
-  - F4 — grep whole repo for v1.6.5 refs before edit (S1, S2)
+- pin-shift: peer bassclef-upstream-d3 (msg id 9a43965b reply) confirmed v1.7.0 tags the cured release; SHA fallback dropped; semver pattern preserved
+- top-folds-applied:
+  - F2 — scripts/validate-tag.mjs read; validates cli-side tag only (v1.9.9); no conflict with upstream pin
+  - F4 — grep caught 3 refs in publish.yml (L136 + L151 + L281 + L152 error prose); CHANGELOG L60 confirms 3-ref pattern
+- top-folds-dropped-after-pin-shift:
+  - F1 — SHA pin comment no longer needed; v1.7.0 is self-explanatory semver
+- top-folds-still-live:
+  - F2 outcome documented
+  - F3 — prepublish-copy script location pending (check package.json scripts)
+  - F4 — 3-ref edit list named
+- risks-dissolved-by-pin-shift:
+  - L1 (SHA precedent) + L2 (version-provenance oddity) + L3 (statusline drift) + L4 (tag collision) + L5 (SHA-pin non-semver concern)
 - mode: light (3 lenses × 5 risks)
