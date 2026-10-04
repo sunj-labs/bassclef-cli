@@ -1,0 +1,8 @@
+# Temperance marker — cli#342 Dockerfile Dependabot
+- date: 2026-10-04
+- branch: fix/cli-342-dockerfile-dependabot
+- goal: Add .github/dependabot.yml with Docker ecosystem to bump Dockerfile.lite-adopter sha256 digest.
+- scope-decision: Right thing — one YAML config file; weekly Docker ecosystem schedule on Dockerfile.lite-adopter. Right way — Class A casual ceremony per oo-ad-entry-point.md; no code change; no Beck RED-first (no behavior to test).
+- drift-trigger: scope extends to npm ecosystem (separate ticket); OR adds Dockerfile build logic; OR touches Dockerfile.lite-adopter body (digest bump arrives via dependabot PR, not this one).
+- in-scope: .github/dependabot.yml only.
+- out-of-scope: npm ecosystem config; Dockerfile body edits; Session A follow-ons beyond this one.

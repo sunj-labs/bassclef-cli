@@ -1,0 +1,5 @@
+# Loop marker — cli#342 Dockerfile Dependabot
+- date: 2026-10-04
+- branch: fix/cli-342-dockerfile-dependabot
+- iteration-count: 1
+- outcome: Iteration 1 GREEN first pass. YAML parse clean (python3 yaml.safe_load). Dockerfile.lite-adopter matches dependabot's Dockerfile.<suffix> auto-discovery.

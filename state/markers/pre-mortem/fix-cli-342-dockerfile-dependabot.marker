@@ -1,0 +1,5 @@
+# Pre-mortem marker — cli#342 Dockerfile Dependabot
+- date: 2026-10-04
+- branch: fix/cli-342-dockerfile-dependabot
+- ledger-path: not required at Class A ceremony per oo-ad-entry-point.md
+- delta: Class A small fix. No pre-mortem light required. Config file; no code behavior.
