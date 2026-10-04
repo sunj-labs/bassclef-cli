@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session B PR 2
+- date: 2026-10-04
+- branch: feature/stack-2-longrun-prep-driver
+- ledger-path: docs/risk-ledgers/2026-10-04-session-b-session-shape.md
+- delta: Inherits parent ledger. No new risks.

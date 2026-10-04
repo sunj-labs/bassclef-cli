@@ -1,0 +1,8 @@
+# Luminary marker — Session B PR 2 (/longrun prep driver)
+- date: 2026-10-04
+- branch: feature/stack-2-longrun-prep-driver
+- lead: alistair-cockburn
+- supporting:
+  - michael-feathers
+  - linus-torvalds
+- rationale: Cockburn — walking skeleton continues at prep surface. Feathers — characterization pin on the 6-axis header set (compounding-sequence-fresh-analysis.md L59-69 names them). Torvalds — adopter contract pins the frame operators scan on mobile.

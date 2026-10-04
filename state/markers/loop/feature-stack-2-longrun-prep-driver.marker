@@ -1,0 +1,5 @@
+# Loop marker — Session B PR 2
+- date: 2026-10-04
+- branch: feature/stack-2-longrun-prep-driver
+- iteration-count: 1
+- outcome: 6/6 Tier 0 first pass GREEN. Pre-cure fixture detects missing axis + names it; post-cure all 6 pass.

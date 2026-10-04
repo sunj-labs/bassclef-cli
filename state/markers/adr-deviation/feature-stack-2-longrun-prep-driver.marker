@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session B PR 2
+- date: 2026-10-04
+- branch: feature/stack-2-longrun-prep-driver
+- adr_governing: none — characterization driver only
+- outcome: ADR-honored
