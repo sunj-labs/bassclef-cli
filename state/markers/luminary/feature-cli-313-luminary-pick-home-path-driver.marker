@@ -1,0 +1,7 @@
+# Luminary marker — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- lead: michael-feathers
+- supporting:
+  - linus-torvalds
+- rationale: Feathers — characterization at trace layer; driver pins actual behavior of cured upstream source (a38f1f54). Torvalds — adopter contract; cli#313 was an adopter breakage class (hardcoded engineering-team path leaked to every adopter).

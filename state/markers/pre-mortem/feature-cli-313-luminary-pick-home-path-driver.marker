@@ -1,0 +1,11 @@
+# Pre-mortem marker — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- ledger-path: inline below (compact — Class B light shape per oo-ad-entry-point.md)
+- lenses: 2 (Feathers + Torvalds)
+- risks:
+  - F1: Driver pins cured behavior but cli dist/lite/ bundles pre-cure source — driver passes against upstream fixture; cli bundle still ships bug until next release cascade. Fold: UC states this explicitly; driver characterizes cured contract, not current bundle.
+  - F2: Awk inside fixture uses non-portable syntax (BSD vs gawk). Fold: cured source uses `awk` POSIX subset per upstream; driver reuses verbatim.
+  - F3: Env var leak between tests (BASSCLEF_DIR, CLAUDE_PROJECT_DIR, HOME). Fold: unset explicitly in each test's setup; use scratch TMP dirs.
+  - L1: Fixture scratch dir races with parallel test runs. Fold: use mktemp -d per test; trap EXIT cleanup.
+  - L2: Driver fetches cured source via gh api — depends on network. Fold: bake fixture content inline in driver (118-line snapshot pinned to SHA a38f1f54; no network at test time).

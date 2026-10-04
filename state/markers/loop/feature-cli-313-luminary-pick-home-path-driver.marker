@@ -1,0 +1,5 @@
+# Loop marker — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- iteration-count: 1
+- outcome: Iteration 1 GREEN. 6/6 Tier 0 cases pass. Fixture pinned at bassclef-upstream main SHA a38f1f54358b962d8472cc7e53858f600b0f4462. Baked inline per L2 pre-mortem fold (no network at test time).
