@@ -1,0 +1,5 @@
+# Temperance marker — Session E 2026-10-05
+- date: 2026-10-05
+- branch: main
+- scope-decision: Push save-state f0d5b3b + close Dependabot #352 (option a) + triage 28 open tickets with upstream RCA shape (option b). Class a per oo-ad-entry-point matrix — ticket + commit + doc only, no source edits.
+- drift-trigger: Expanding into code fixes beyond ticket/doc work OR triage dragging past 80 turns.

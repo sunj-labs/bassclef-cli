@@ -1,0 +1,8 @@
+# Luminary marker — Session E 2026-10-05
+- date: 2026-10-05
+- branch: main
+- lead: michael-feathers
+- supporting:
+  - linus-torvalds
+  - david-ogilvy
+- rationale: Characterization lens for backlog triage (read current state before claiming); adopter contract on ticket close/update; writing craft on 28 operator-facing comments.
