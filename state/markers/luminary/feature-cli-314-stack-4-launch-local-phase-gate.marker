@@ -1,0 +1,6 @@
+# Luminary marker — Session A PR 4
+- date: 2026-10-04
+- branch: feature/cli-314-stack-4-launch-local-phase-gate
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Cockburn lead. Torvalds supporting — 127.0.0.1 bind is adopter-mobility class (operator says "open on phone" but local serve binds loopback only). Beck supporting — two anchors each with pre-cure/post-cure fixtures.
