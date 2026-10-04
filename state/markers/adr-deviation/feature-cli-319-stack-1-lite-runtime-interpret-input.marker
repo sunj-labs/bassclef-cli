@@ -1,0 +1,6 @@
+# ADR-deviation marker — Session A walking skeleton
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- adr_governing: ADR-005 (Model C open-core split) + ADR-007 (npm-lite substrate bundling)
+- outcome: ADR-honored
+- rationale: Session A ships adopter-regression anchors + test runtime. Both live in scripts/tests/ + .github/workflows/ + Dockerfile at repo root. None modify dist/lite/ bundle contents. ADR-005 Model C split preserved — cli ships adopter-facing content; bassclef substrate stays upstream. ADR-007 lite bundle shape preserved — invariants library READS the bundle; it does not WRITE to it. If invariants lib discovers a bundle defect, R-T4 fold routes to a separate PR with ADR-007 consult, not into this branch.

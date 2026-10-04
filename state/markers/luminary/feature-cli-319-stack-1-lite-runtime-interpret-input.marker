@@ -1,0 +1,8 @@
+# Luminary marker — Session A walking skeleton
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Picked by /extract-intent LIVE at 0.92 confidence from plan doc authoring_luminaries frontmatter. Cockburn (walking skeleton) is the shape authority for Session A — one driver end to end before adding depth. Torvalds (adopter stability) owns the invariants library ceiling and the "we don't break adopters" discipline across releases. Beck (red-first) owns per-driver TDD rhythm — fixture + assertion authored before upstream fix ships. Three lenses from the plan doc apply directly: walking skeleton per journey (Cockburn), cross-release invariants in runtime (Torvalds), red first per driver (Beck).
+- lead-lens-signoff-plan: Cockburn signs off at loop Step 5.5 after /verify GREEN. Signs off naming red-first evidence + walking skeleton chain shape proven at PR 1.
+- plan-doc-ref: docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md L32-52
