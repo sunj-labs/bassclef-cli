@@ -1,0 +1,22 @@
+# tier: upstream
+# Dependabot config for @thebassclef/lite — bump Docker base image digest.
+# Per cli#342 (Session A architect review F-AR-5).
+#
+# Dockerfile.lite-adopter pins node:20-slim by sha256 digest for reproducibility.
+# Without a bump cadence the digest ages silently until a security advisory fires.
+# Weekly dependabot PRs keep the digest current.
+#
+# @luminary michael-nygard — stability pattern (automated bump cadence).
+# @luminary saltzer-schroeder — fail-safe defaults (auto-update as the floor).
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"

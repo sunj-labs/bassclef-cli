@@ -1,0 +1,5 @@
+# ADR-deviation marker — cli#342 Dockerfile Dependabot
+- date: 2026-10-04
+- branch: fix/cli-342-dockerfile-dependabot
+- adr_governing: none — no ADR covers Dependabot config shape
+- outcome: ADR-honored

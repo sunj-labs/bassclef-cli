@@ -1,0 +1,7 @@
+# Luminary marker — cli#342 Dockerfile Dependabot
+- date: 2026-10-04
+- branch: fix/cli-342-dockerfile-dependabot
+- lead: michael-nygard
+- supporting:
+  - saltzer-schroeder
+- rationale: Nygard — stability pattern. Dependabot IS the mechanism that keeps the Dockerfile digest fresh; without the cadence, the digest ages silently. Saltzer-Schroeder — fail-safe defaults. Automated weekly bump is the fail-safe when the engineer forgets.
