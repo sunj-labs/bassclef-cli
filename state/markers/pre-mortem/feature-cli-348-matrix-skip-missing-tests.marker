@@ -1,0 +1,26 @@
+# Pre-mortem light — cli#348 (3 lenses × 5 risks)
+- date: 2026-10-04
+- branch: feature/cli-348-matrix-skip-missing-tests
+
+## Lens N — Nygard (fail-safe + stability)
+- R-N1 Guard swallows a genuine lib-missing bug on main. **Fold F1:** test on main always passes (lib present); guard only fires on absent file; main cell behavior unchanged.
+- R-N2 Guard matches ANY missing file (typos too). **Fold F2:** guard logs the SKIP line with path + short SHA so a typo on main becomes visible as "unexpected SKIP on main".
+- R-N3 Step exits 0 on skip; adopter reader can't tell skip from pass. **Fold F3:** log line uses literal "SKIP:" prefix so operator grep catches it.
+- R-N4 Overall workflow passes but PR Checks still shows cell green on all-skip. **Fold F4:** cell IS green on expected skip; nightly-status.md writer stays unchanged (separate concern).
+- R-N5 Guard pattern applied to only one step not both. **Fold F5:** test asserts the pattern in BOTH `run Tier 0` AND `run drivers` steps.
+
+## Lens F — Feathers (characterization)
+- R-F1 Test characterizes current RED behavior and locks it in. **Fold F6:** test asserts post-fix shape (guard present); pre-fix shape (no guard) fails the test. Beck RED-first.
+- R-F2 Test matches string "SKIP:" in workflow source but workflow runtime output could differ. **Fold F7:** shape test checks source; runtime test deferred to actual GHA run (nightly or PR).
+- R-F3 Test uses grep for guard pattern; pattern evolves to a different shape later. **Fold F8:** test grep anchors on `[[ -f ` + the test file names; narrow enough to catch intent, loose enough to tolerate guard-pattern evolution.
+
+## Lens L — Linus (adopter contract)
+- R-L1 Adopters depending on current RED on tagged refs break. **No fold needed** — the current RED is noise, not signal; no adopter would depend on it.
+- R-L2 Change touches workflow YAML; downstream automations that read workflow output might misparse. **Fold F9:** log output stays line-based; parsers reading step output see new "SKIP:" lines they can filter.
+
+## Folds pre-code
+- F1-F5 — Nygard scope checks baked into shape test
+- F6 — Beck RED-first on shape test
+- F7 — defer runtime check to next PR CI run
+- F8 — grep anchors scoped loose
+- F9 — line-based log output preserved

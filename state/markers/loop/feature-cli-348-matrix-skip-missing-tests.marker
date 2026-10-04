@@ -1,0 +1,5 @@
+# Loop marker — cli#348
+- date: 2026-10-04
+- branch: feature/cli-348-matrix-skip-missing-tests
+- iteration-count: 1
+- outcome: 1/5 RED → 5/5 GREEN after one YAML edit + one in-scratch test refactor (regex was too narrow for multiline YAML). Final shape test uses component check — presence check pattern + filename listed together imply guard applies.

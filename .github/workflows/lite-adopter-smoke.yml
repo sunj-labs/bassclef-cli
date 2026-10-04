@@ -86,9 +86,23 @@ jobs:
           fi
 
       - name: run Tier 0 lite-runtime tests
+        # cli#348 fail-safe (Nygard) — old tags predate these test files.
+        # Guard each invocation with a presence check; log "SKIP:" + short
+        # SHA so operators can grep expected-skip vs real pass. Exit 0 so
+        # the matrix cell stays green on expected-skip and stays red only
+        # on real test failure.
         run: |
-          bash scripts/tests/lite-runtime-invariants.test.sh
-          bash scripts/tests/smoke-assert-check-artifact-exists.test.sh
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          for test in \
+            scripts/tests/lite-runtime-invariants.test.sh \
+            scripts/tests/smoke-assert-check-artifact-exists.test.sh ; do
+            if [[ -f "$test" ]]; then
+              echo "--- $test ---"
+              bash "$test"
+            else
+              echo "SKIP: $test not present at $SHORT_SHA — tag predates test"
+            fi
+          done
 
       - name: run drivers (PR 1b lands these)
         run: |
