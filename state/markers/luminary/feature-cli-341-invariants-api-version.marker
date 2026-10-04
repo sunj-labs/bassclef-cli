@@ -1,0 +1,8 @@
+# Luminary marker — cli#341
+- date: 2026-10-04
+- branch: feature/cli-341-invariants-api-version
+- lead: kent-beck
+- supporting:
+  - john-ousterhout
+  - linus-torvalds
+- rationale: Beck RED-first — test the symbol before writing it. Ousterhout — the symbol is a narrow public interface addition to the deep module (readable at top of file). Torvalds — adopter contract (version signal lets callers detect skew).

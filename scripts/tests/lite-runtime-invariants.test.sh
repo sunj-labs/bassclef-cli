@@ -29,6 +29,8 @@
 # [ ] T14 assert_no_playwright FAIL — trace with "Playwright MCP" prose
 # [ ] T15 assert_lite_runtime PASS — all 4 individual invariants pass on clean trace
 # [ ] T16 assert_lite_runtime FAIL — one invariant fails; umbrella reports which
+# [ ] T17 LITE_RUNTIME_INVARIANTS_API_VERSION is defined after sourcing the lib
+# [ ] T18 LITE_RUNTIME_INVARIANTS_API_VERSION initial value is "1.0"
 
 set -uo pipefail
 
@@ -229,6 +231,22 @@ rc=$?
 assert_eq "1" "$rc" "T16 rc"
 assert_contains "$out" "FAIL" "T16 FAIL token"
 assert_contains "$out" "no-absolute-paths" "T16 names failing invariant"
+
+# ============================================================
+# API version symbol (cli#341 / F-AR-3)
+# ============================================================
+
+# T17 — symbol must be defined after sourcing the lib. Readable at
+# top of file so callers can detect skew between the lib they expect
+# and the lib they got.
+if [[ -n "${LITE_RUNTIME_INVARIANTS_API_VERSION:-}" ]]; then
+  pass "T17 LITE_RUNTIME_INVARIANTS_API_VERSION is defined"
+else
+  fail "T17 LITE_RUNTIME_INVARIANTS_API_VERSION is defined" "symbol not set after sourcing"
+fi
+
+# T18 — initial value is "1.0" per cli#341 ticket body.
+assert_eq "1.0" "${LITE_RUNTIME_INVARIANTS_API_VERSION:-}" "T18 initial value is 1.0"
 
 # ============================================================
 # summary

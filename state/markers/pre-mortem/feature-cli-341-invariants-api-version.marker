@@ -1,0 +1,12 @@
+# Pre-mortem marker — cli#341
+- date: 2026-10-04
+- branch: feature/cli-341-invariants-api-version
+- lenses: Beck (TDD) + Ousterhout (deep module) + Torvalds (don't break adopters)
+- risks:
+  R-K1 (Beck) — symbol lands without test; falsify by adding T17 + T18 BEFORE symbol
+  R-K2 (Ousterhout) — version read happens inside functions (hidden); keep as top-level readable symbol
+  R-L1 (Torvalds) — bump without CHANGELOG note silently breaks caller contracts; policy block names "bump = CHANGELOG entry"
+- folds pre-code:
+  F1 — Tests go in first (R-K1). RED runs; symbol absent; tests fail.
+  F2 — Symbol declared as top-level export after header (R-K2). Readable by `grep LITE_RUNTIME_INVARIANTS_API_VERSION` without sourcing.
+  F3 — Policy block names the trigger: any signature change OR return-code semantics change on the 5 functions bumps the version (R-L1).

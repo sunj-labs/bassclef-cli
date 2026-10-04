@@ -107,6 +107,8 @@ Session A (2026-10-04) adds a lite-only adopter test runtime at `Dockerfile.lite
 - `assert_no_playwright <trace>` — trace does not reference Playwright.
 - `assert_lite_runtime <trace>` — umbrella runs the three trace-based invariants.
 
+The lib exports `LITE_RUNTIME_INVARIANTS_API_VERSION` (currently `"1.0"`) so callers can detect skew. Bump policy — bump on any signature change or return-code semantics change to the five public functions above. Minor bump for additive changes (new function; new PASS/FAIL token). Major bump for breaking changes (removed function; changed return contract). Every bump ships with a `CHANGELOG.md` entry naming the breaking surface + migration path.
+
 Driver files live at `scripts/tests/smoke-drive-e2e-<skill>.test.sh`. Each driver sources the invariants lib + `scripts/lib/smoke-assert.sh` + runs its assertions. CI runs each driver via GitHub Actions matrix across ubuntu + macOS. Nightly runs matrix across last three releases per `.github/workflows/lite-adopter-smoke.yml`.
 
 Operators dispatch local runs via `bash scripts/tests/run-lite-container.sh`. The container is operator convenience, not CI dependency.
