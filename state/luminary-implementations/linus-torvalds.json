@@ -24,8 +24,9 @@
     "docs/rfcs/2026-09-21c-smoke-drive-riff-council.md",
     "state/markers/luminary/fix-247-shadow-detection.marker",
     "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker",
-    "state/markers/luminary/fix-harness-file-fallback-test-isolation.marker"
+    "state/markers/luminary/fix-harness-file-fallback-test-isolation.marker",
+    "docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md"
   ],
-  "last_scanned": "2026-09-26T12:11:06Z",
+  "last_scanned": "2026-10-04T05:51:56Z",
   "scanner_version": "1.0"
 }
