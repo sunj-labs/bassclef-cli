@@ -1,6 +1,1 @@
-# Longrun preset marker — 2026-10-03b
-- date: 2026-10-03
-- branch: main
-- preset: converged
-- trigger: plan-doc
-- plan-doc: docs/next-session-plan-2026-10-03-cli-294-bundle-sync-then-drivers.md
+exploratory
