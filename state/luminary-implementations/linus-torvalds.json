@@ -34,8 +34,9 @@
     "docs/risk-ledgers/2026-10-04-session-b-session-shape.md",
     "docs/rfcs/2026-10-04-session-b-session-shape.md",
     "docs/session-boards/2026-10-04-session-b-session-shape.md",
-    "docs/session-logs/2026-10-04-session-b-session-shape.md"
+    "docs/session-logs/2026-10-04-session-b-session-shape.md",
+    "docs/risk-ledgers/2026-10-04-session-c-handoff-cliff.md"
   ],
-  "last_scanned": "2026-10-04T12:51:56Z",
+  "last_scanned": "2026-10-04T14:14:22Z",
   "scanner_version": "1.0"
 }
