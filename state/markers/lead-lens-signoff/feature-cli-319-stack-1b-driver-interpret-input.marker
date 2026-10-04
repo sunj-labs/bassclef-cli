@@ -1,0 +1,7 @@
+# Lead-lens signoff — Session A walking skeleton PR 1b
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Chain-shape proven at PR 1b per R-C2 fold. Three drivers land on top of PR 1a's runtime — /interpret-input anchor against cli#319; identifier-leak Exhibit-A anchor against cli#305; /personas stub proves the chain-shape (write-path then read-path) end-to-end. Each driver characterizes BOTH pre-cure RED and post-cure GREEN paths; 10/10 Tier 0 tests ship GREEN. SMOKE_LIVE=1 path reserved for nightly workflow against real claude. docs/nightly-status.md ships initial baseline per F-MN-1 fold. Walking skeleton COMPLETE at end of PR 1b. Session B/C can fold off this harness without rebuilding infrastructure.
+- findings-cleared: no findings surfaced; driver characterization clean 10/10
+- next-finding-class: live-mode SMOKE_LIVE=1 may surface fixture rot per R-B1 fold; cured as fixtures carry upstream ticket ref + field-named assertions (not exact-string matches)
