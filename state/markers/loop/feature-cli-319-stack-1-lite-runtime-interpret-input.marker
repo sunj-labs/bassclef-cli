@@ -1,0 +1,19 @@
+# Loop marker — Session A walking skeleton PR 1a (runtime)
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- wu_id: Session A PR 1a (runtime)
+- iteration_count: 1
+- mode: sequential
+- source_files_changed: 5 new (Dockerfile.lite-adopter + lite-runtime-invariants.sh + lite-runtime-invariants.test.sh + smoke-assert-check-artifact-exists.test.sh + run-lite-container.sh) + 3 edited (smoke-assert.sh extended + lite-adopter-smoke.yml new + CONTRIBUTING.md append)
+- lens_used: [alistair-cockburn, linus-torvalds, kent-beck]
+- rhythm:
+    red-first: lite-runtime-invariants.test.sh landed first (lib missing → 1 FAIL rc)
+    impl: lite-runtime-invariants.sh landed; test 33/33 GREEN
+    red-first-helper: smoke-assert-check-artifact-exists.test.sh landed first; path bug surfaced
+    impl: check_artifact_exists added to smoke-assert.sh; test 17/17 GREEN
+    integration: Dockerfile + workflow + run-lite-container.sh + CONTRIBUTING.md append
+- checks: PR 1a scope — runtime only. Drivers (3 files) ride in PR 1b per R-C6 500-line budget fold.
+- test-after-pattern-check: NONE FOUND (tests authored first; sources after; mtimes confirm)
+- adr-compliance: PASS (ADR-005 + ADR-007 honored per adr-deviation marker)
+- designer-signoff: N/A (test infrastructure, not UI)
+- architect-review: fires after PR 1a merge (next task)

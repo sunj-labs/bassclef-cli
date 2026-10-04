@@ -96,3 +96,17 @@ Releases follow ADR-004. Bump, PR, merge, tag, publish workflow, Touch ID at the
 ## Reporting bugs
 
 Open a GitHub issue at [sunj-labs/bassclef-cli/issues](https://github.com/sunj-labs/bassclef-cli/issues).
+
+## Lite adopter test runtime
+
+Session A (2026-10-04) adds a lite-only adopter test runtime at `Dockerfile.lite-adopter`. The runtime enforces four cross-release invariants per `scripts/tests/lib/lite-runtime-invariants.sh`:
+
+- `assert_no_absolute_paths <trace>` — trace does not reference `/Users/<name>` or `/home/<name>` shapes.
+- `assert_bash_3_2_syntax <script>` — script does not use `declare -A` or `[[` double-brackets.
+- `assert_no_pyyaml_required <trace>` — trace does not surface `ImportError` on yaml.
+- `assert_no_playwright <trace>` — trace does not reference Playwright.
+- `assert_lite_runtime <trace>` — umbrella runs the three trace-based invariants.
+
+Driver files live at `scripts/tests/smoke-drive-e2e-<skill>.test.sh`. Each driver sources the invariants lib + `scripts/lib/smoke-assert.sh` + runs its assertions. CI runs each driver via GitHub Actions matrix across ubuntu + macOS. Nightly runs matrix across last three releases per `.github/workflows/lite-adopter-smoke.yml`.
+
+Operators dispatch local runs via `bash scripts/tests/run-lite-container.sh`. The container is operator convenience, not CI dependency.
