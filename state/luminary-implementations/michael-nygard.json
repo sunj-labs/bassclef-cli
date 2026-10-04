@@ -27,6 +27,6 @@
     "scripts/tests/smoke-assert-drift-cure.test.sh",
     "scripts/lib/smoke-assert.sh"
   ],
-  "last_scanned": "2026-09-27T22:18:31Z",
+  "last_scanned": "2026-10-04T10:45:37Z",
   "scanner_version": "1.0"
 }

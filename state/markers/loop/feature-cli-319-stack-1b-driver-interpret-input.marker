@@ -1,0 +1,17 @@
+# Loop marker — Session A walking skeleton PR 1b (3 drivers)
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- wu_id: Session A PR 1b (3 drivers)
+- iteration_count: 1
+- mode: sequential
+- source_files_changed: 4 new (smoke-drive-e2e-interpret-input.test.sh + smoke-drive-e2e-identifier-leak-exhibit-a.test.sh + smoke-drive-e2e-personas-stub.test.sh + docs/nightly-status.md baseline)
+- lens_used: [alistair-cockburn, linus-torvalds, kent-beck]
+- rhythm:
+    red-first: each driver carries pre-cure fixture (artifact lacks the field) → characterization asserts driver fires RED
+    green-flip: each driver carries post-cure fixture (artifact carries the field) → characterization asserts driver fires GREEN
+    integration: all 3 drivers 10/10 characterization tests GREEN; combined with PR 1a infrastructure (50/50 GREEN) and vitest (498/498 GREEN) the suite ships clean
+- checks:
+    adr-compliance: PASS
+    test-after-pattern-check: NONE FOUND (RED-first characterization authored first; both pre-cure and post-cure fixtures per driver)
+    designer-signoff: N/A
+    architect-review: fires after PR 1a + PR 1b merge (session-wide at closeout)

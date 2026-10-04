@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session A walking skeleton PR 1b
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- ledger-path: docs/risk-ledgers/2026-10-04-session-a-walking-skeleton.md (shared across Session A)
+- delta: PR 1b inherits PR 1a's 20-risk ledger + 6 pre-code folds. No new risks surfaced during driver authoring. R-C2 fold (chain-shape at PR 1 not PR 5) ships via /personas stub.
