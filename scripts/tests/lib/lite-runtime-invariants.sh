@@ -24,6 +24,12 @@
 #
 # @pattern patterns/code/gof/strategy.md — one function per invariant;
 # same signature; caller composes via assert_lite_runtime umbrella.
+#
+# API version — bump policy documented in CONTRIBUTING.md under
+# "Lite adopter test runtime". Bump on any signature change or
+# return-code semantics change to the 5 public functions above.
+# Added per cli#341 (F-AR-3) so callers can detect lib skew.
+export LITE_RUNTIME_INVARIANTS_API_VERSION="1.0"
 
 # Internal: precheck that a trace or script file exists.
 _lri_precheck() {

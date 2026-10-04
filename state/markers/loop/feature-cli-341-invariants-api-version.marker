@@ -1,0 +1,5 @@
+# Loop marker — cli#341
+- date: 2026-10-04
+- branch: feature/cli-341-invariants-api-version
+- iteration-count: 1
+- outcome: RED → GREEN first pass. T17 + T18 failed before symbol add; passed after.

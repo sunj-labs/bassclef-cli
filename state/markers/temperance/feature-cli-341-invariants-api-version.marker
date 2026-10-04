@@ -1,0 +1,8 @@
+# Temperance marker — cli#341 invariants lib API version
+- date: 2026-10-04
+- branch: feature/cli-341-invariants-api-version
+- goal: Close cli#341 (F-AR-3) — add LITE_RUNTIME_INVARIANTS_API_VERSION symbol + document bump policy
+- scope-decision: Right thing — one symbol in the lib (`LITE_RUNTIME_INVARIANTS_API_VERSION="1.0"`) + one block in CONTRIBUTING.md naming bump policy. Right way — Beck RED-first; add 2 Tier 0 tests pinning symbol presence + initial value before the symbol lands.
+- drift-trigger: scope extends past the symbol + policy (e.g., introduces runtime version check in each driver, retrofits callers); OR adds API version to unrelated libs (smoke-assert.sh) in same PR.
+- in-scope: scripts/tests/lib/lite-runtime-invariants.sh (symbol), scripts/tests/lite-runtime-invariants.test.sh (2 tests), CONTRIBUTING.md (bump policy block).
+- out-of-scope: caller-side version assertions; semver policy for smoke-assert.sh; Session B kickoff work.

@@ -1,0 +1,5 @@
+# ADR-deviation marker — cli#341
+- date: 2026-10-04
+- branch: feature/cli-341-invariants-api-version
+- adr_governing: none — new symbol on existing lib; no ADR class touched
+- outcome: ADR-honored
