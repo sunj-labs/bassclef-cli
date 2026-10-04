@@ -1,0 +1,7 @@
+# Luminary marker — Session A walking skeleton PR 1b
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Same pin as PR 1a + ceremony marker. Cockburn lead stays across all 5 Session A PRs (walking skeleton authority). Torvalds supporting for cross-release stability — drivers must GREEN under current cli release AND land GREEN under future upstream fix without infrastructure churn. Beck supporting for per-driver red-first — each driver carries both pre-cure (RED anchor) and post-cure (GREEN flip) fixture characterizations.
+- lead-lens-signoff-plan: Cockburn signs off naming chain-shape proven at PR 1b (not PR 5) per R-C2 fold.

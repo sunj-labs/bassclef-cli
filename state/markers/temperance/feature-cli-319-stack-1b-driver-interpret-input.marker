@@ -1,0 +1,8 @@
+# Temperance marker — Session A walking skeleton PR 1b (3 drivers)
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- goal: Session A — ship 3 adopter-regression drivers riding on PR 1a's runtime
+- scope-decision: Right thing — ship /interpret-input driver (cli#319 anchor) + identifier-leak Exhibit-A driver (cli#305 anchor) + /personas stub (chain-shape proof per R-C2 fold). Right way — Beck RED-first characterization on each driver; both pre-cure and post-cure fixtures GREEN; SMOKE_LIVE=1 path exercises real claude in nightly.
+- drift-trigger: driver test wall-clock > 2 min per Tier 0 run (R-B2 fold); OR driver assertions couple to a non-cli#319 class (scope drift from Session A).
+- in-scope paths: scripts/tests/smoke-drive-e2e-interpret-input.test.sh, scripts/tests/smoke-drive-e2e-identifier-leak-exhibit-a.test.sh, scripts/tests/smoke-drive-e2e-personas-stub.test.sh, docs/nightly-status.md.
+- out-of-scope: /jtbd-tasks driver (PR 3); /launch --local Phase 4 gate (PR 4); full-chain path-contract (PR 5); dist/lite bundle edits.
