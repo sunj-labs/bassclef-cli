@@ -1,0 +1,8 @@
+# Temperance marker — Session A PR 2 (/personas full driver)
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- goal: cli#320 anchor (email-slug leak) + cli#318 write-side anchor (persona path contract)
+- scope-decision: Right thing — new driver file `scripts/tests/smoke-drive-e2e-personas.test.sh` sibling to the stub. Right way — Beck RED-first characterization; pre-cure fixture has `jamie-smith` slug derived from git email; post-cure uses persona name only. Chain-shape proved by PR 1b stub already.
+- drift-trigger: driver touches the stub file (stub stays as fallback); OR scope extends to cli#318 read-side (that's PR 3 territory).
+- in-scope paths: scripts/tests/smoke-drive-e2e-personas.test.sh.
+- out-of-scope: /jtbd-tasks driver (PR 3); full-chain path contract (PR 5); dist/lite bundle edits.
