@@ -1,0 +1,8 @@
+# Temperance marker — Session B PR 1 (/sprint driver)
+- date: 2026-10-04
+- branch: feature/cli-308-stack-1-sprint-driver
+- goal: Characterize /sprint orientation output clean of PyYAML ImportError (cli#308 anchor)
+- scope-decision: Right thing — one driver asserts /sprint trace does not carry `ImportError.*yaml` or `No module named 'yaml'`. Right way — Beck RED-first; pre-cure fixture carries the error (RED), post-cure fixture is clean (GREEN).
+- drift-trigger: driver tries to fix cli#308 upstream (that's an upstream cure); OR driver attempts live-mode run in Tier 0 (that's SMOKE_LIVE=1 nightly path).
+- in-scope: scripts/tests/smoke-drive-e2e-sprint.test.sh
+- out-of-scope: lib/state.sh fix; __state_yq2json rewrite; PyYAML prerequisite doc update

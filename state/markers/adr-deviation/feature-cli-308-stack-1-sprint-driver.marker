@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session B PR 1
+- date: 2026-10-04
+- branch: feature/cli-308-stack-1-sprint-driver
+- adr_governing: none — new characterization driver on existing invariants lib; no ADR class touched
+- outcome: ADR-honored

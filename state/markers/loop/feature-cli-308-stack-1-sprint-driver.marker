@@ -1,0 +1,5 @@
+# Loop marker — Session B PR 1
+- date: 2026-10-04
+- branch: feature/cli-308-stack-1-sprint-driver
+- iteration-count: 1
+- outcome: 5/5 Tier 0 first pass GREEN. Pre-cure fixture detects cli#308 (ImportError on yaml); post-cure clean.
