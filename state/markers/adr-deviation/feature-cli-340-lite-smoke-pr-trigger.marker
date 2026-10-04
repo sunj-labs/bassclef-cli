@@ -1,0 +1,5 @@
+# ADR-deviation marker — cli#340
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- adr_governing: none — CI workflow trigger edit; no ADR class touched
+- outcome: ADR-honored

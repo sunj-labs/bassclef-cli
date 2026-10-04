@@ -1,0 +1,8 @@
+# Temperance marker — cli#340
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- goal: Close cli#340 — add pull_request trigger with paths filter to lite-adopter-smoke.yml
+- scope-decision: Right thing — one `pull_request` block + `paths` filter + `concurrency` block (R-N3 fold). Right way — Beck RED-first; one Tier 0 bash test asserts YAML shape (pull_request block exists; paths filter includes workflow + driver + lib paths); test fails before YAML edit; passes after.
+- drift-trigger: scope extends to other workflows (pr-checks.yml, publish.yml); OR concurrency semantics touched beyond this workflow; OR paths filter widened to catch doc edits.
+- in-scope: .github/workflows/lite-adopter-smoke.yml (trigger edit), scripts/tests/lite-adopter-smoke-workflow-shape.test.sh (new Tier 0), docs/use-cases/UC-script-cli-340-lite-smoke-pr-trigger.md (brief UC), 5 Session A folds applied pre-code via pre-mortem light.
+- out-of-scope: pr-checks.yml edits; CHANGELOG.md edit (F8 noted but deferred — not adopter-facing surface change); fork-PR handling beyond default GHA behavior.
