@@ -1,0 +1,8 @@
+# Temperance marker — Session A PR 3 (/jtbd-tasks driver)
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- goal: cli#318 read-side anchor — /jtbd-tasks reads from the same persona path /personas writes
+- scope-decision: Right thing — new driver asserts /jtbd-tasks picks up a canonical .md persona file; fails cleanly when path contract broken. Right way — Beck RED-first; pre-cure fixture puts persona at .yaml (non-canonical); post-cure uses .md.
+- drift-trigger: driver touches /personas full driver file; OR scope extends to full-chain path contract (that is PR 5).
+- in-scope paths: scripts/tests/smoke-drive-e2e-jtbd-tasks.test.sh.
+- out-of-scope: /launch --local Phase 4 gate (PR 4); full-chain path contract (PR 5); dist/lite bundle edits.

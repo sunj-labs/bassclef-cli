@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session A PR 3
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- ledger-path: docs/risk-ledgers/2026-10-04-session-a-walking-skeleton.md (shared Session A)
+- delta: PR 3 inherits parent ledger. No new risks.
