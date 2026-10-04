@@ -1,0 +1,6 @@
+# ADR-deviation marker — Session A PR 3
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- adr_governing: ADR-005 + ADR-007
+- outcome: ADR-honored
+- rationale: Pure test driver. No bundle shape change.

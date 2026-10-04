@@ -1,0 +1,6 @@
+# Luminary marker — Session A PR 3
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Cockburn lead. Torvalds supporting — writer-reader contract break is the exact Hyrum-adjacent class every adopter hits mid-chain. Beck supporting — pre-cure RED fixture mocks the non-canonical path; post-cure GREEN mocks canonical.

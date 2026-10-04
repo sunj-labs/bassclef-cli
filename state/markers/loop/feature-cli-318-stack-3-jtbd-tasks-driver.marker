@@ -1,0 +1,8 @@
+# Loop marker — Session A PR 3 (/jtbd-tasks driver)
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- wu_id: Session A PR 3
+- iteration_count: 1
+- lens_used: [alistair-cockburn, linus-torvalds, kent-beck]
+- rhythm: red-first per anchor + green flip; 4/4 Tier 0 GREEN
+- checks: adr-compliance PASS; test-after-pattern NONE FOUND; architect-review session-wide at closeout

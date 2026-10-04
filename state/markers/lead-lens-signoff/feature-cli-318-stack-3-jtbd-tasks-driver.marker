@@ -1,0 +1,6 @@
+# Lead-lens signoff — Session A PR 3
+- date: 2026-10-04
+- branch: feature/cli-318-stack-3-jtbd-tasks-driver
+- lead-luminary: alistair-cockburn
+- signoff-rationale: cli#318 read-side anchor landed. Reader-on-yaml pre-cure fires RED per cli#318 contract; reader-on-md post-cure GREEN. Cross-check with PR 2's persona shape passes. 4/4 Tier 0.
+- findings-cleared: none
