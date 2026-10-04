@@ -1,0 +1,8 @@
+# Luminary marker — Session B PR 3 (/temperance driver)
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- lead: alistair-cockburn
+- supporting:
+  - michael-feathers
+  - linus-torvalds
+- rationale: Cockburn — walking skeleton closes the Session B cascade with the scope-gate skill. Feathers — characterization pin on the git-add silent-fail class that cli#328 finding 6 flagged. Torvalds — adopter contract — "silent is not deferral" (per blocked-items.md); driver forces the git-add outcome to become auditable.

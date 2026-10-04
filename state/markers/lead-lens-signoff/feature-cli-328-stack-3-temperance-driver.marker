@@ -1,0 +1,6 @@
+# Lead-lens signoff — Session B PR 3 (/temperance driver)
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Walking skeleton closes Session B — /temperance is session-shape surface #3. Driver characterizes cli#328 finding 6 (git-add on gitignored marker). Iteration 1 RED surfaced wrong detection assumption (git-add is NOT silent on gitignored — prints "ignored" hint); iteration 2 GREEN after fixing detection to match actual git behavior. 5/5 Tier 0.
+- findings-cleared: F-ITER-1 (initial detection assumed git-add silent on gitignored; actual git prints hint containing "ignored"; cleared in commit by changing grep anchor)

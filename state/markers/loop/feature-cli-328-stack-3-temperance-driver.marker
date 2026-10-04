@@ -1,0 +1,5 @@
+# Loop marker — Session B PR 3
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- iteration-count: 2
+- outcome: Iteration 1 RED — detection assumed silent git-add on gitignored; actual git prints "ignored" hint. Iteration 2 GREEN after grep anchor swap. 5/5 Tier 0.
