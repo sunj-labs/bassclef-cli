@@ -1,0 +1,8 @@
+# Temperance marker — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- goal: Characterize luminary_pick_catalog resolver cascade + lite fallback per upstream cure at bassclef-upstream main SHA a38f1f54.
+- scope-decision: Right thing — one driver, 6 Tier 0 fixture classes against cured upstream source. Right way — Class B brief UC + Feathers lead + Torvalds supporting + Beck RED-first fixture-fetch pattern (Session A harness reuse). Driver fetches cured source from upstream main SHA, pins trace at adopter boundary.
+- drift-trigger: scope extends to cure cli dist/lite/ (that's cli re-bundle, separate ticket); OR adds new accessor to lib/luminary-pick.sh; OR fixes cli-side source directly.
+- in-scope: scripts/tests/smoke-drive-e2e-luminary-pick-home-path.test.sh (new Tier 0 driver), docs/use-cases/UC-script-cli-313-luminary-pick-home-path-driver.md (brief UC).
+- out-of-scope: cli-side cure of dist/lite/lib/luminary-pick.sh (upstream cures at a38f1f54; cli re-bundles at next release cascade); new lib code; /launch Phase 3.5 skill body.

@@ -1,0 +1,5 @@
+# ADR-deviation marker — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- adr_governing: none — no ADR covers luminary-pick resolver shape; cure follows ADR-031 we-dont-break-adopters discipline (adopter contract preserved).
+- outcome: ADR-honored

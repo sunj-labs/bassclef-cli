@@ -1,0 +1,6 @@
+# Lead-lens signoff — cli#313 luminary-pick home-path driver
+- date: 2026-10-04
+- branch: feature/cli-313-luminary-pick-home-path-driver
+- lead-luminary: michael-feathers
+- signoff-rationale: Characterization at trace layer. Six fixture classes pin cured contract — BASSCLEF_DIR branch, CLAUDE_PROJECT_DIR branch, git-root branch, pwd fallback, both-missing error, cli#313 regression anchor. All pass first iteration. Fixture snapshot pinned at upstream SHA a38f1f54; no network at test time per Feathers characterization pattern.
+- findings-cleared: no findings
