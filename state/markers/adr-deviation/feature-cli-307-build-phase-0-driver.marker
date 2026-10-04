@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session C PR 1
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- adr_governing: none — new characterization driver on existing invariants lib; no ADR class touched
+- outcome: ADR-honored

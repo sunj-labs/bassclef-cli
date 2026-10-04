@@ -1,0 +1,5 @@
+# Loop marker — Session C PR 1
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- iteration-count: 2
+- outcome: Iteration 1 RED — BSD awk ERE alternation (Step|WU) non-portable with dynamic regex via -v pat. Iteration 2 GREEN after pure bash state machine refactor. 6/6 Tier 0. Chain-contract 6/6; lite-runtime 35/35; typecheck clean.

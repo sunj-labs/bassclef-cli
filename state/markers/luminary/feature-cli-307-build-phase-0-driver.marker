@@ -1,0 +1,8 @@
+# Luminary marker — Session C PR 1
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- lead: alistair-cockburn
+- supporting:
+  - michael-feathers
+  - linus-torvalds
+- rationale: Cockburn — walking skeleton for Session C handoff cliff; one driver proves the shape, Slot 9 drivers inherit when they open. Feathers — characterization at trace layer; upstream fixture at SHA 09beb249 is source of truth. Torvalds — adopter contract; floor path list stays open to extension; characterization anchors on outcome not regex.

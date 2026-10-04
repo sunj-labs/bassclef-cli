@@ -1,0 +1,8 @@
+# Temperance marker — Session C PR 1 (cli#307 /build Phase 0 driver)
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- goal: Characterize /build Phase 0 safety floor against Step-N headings per upstream cure at main SHA 09beb249.
+- scope-decision: Right thing — one driver, 4 Tier 0 fixtures (pre-cure RED Step-N with floor path, post-cure GREEN Step-N with floor path, post-cure WU-N with floor path for regression, post-cure Step-N without floor path for clean path). Right way — Beck RED-first; driver sources Session A invariants lib + smoke-assert lib; no new lib code.
+- drift-trigger: scope extends to /autonomous or /deploy-prod drivers (both in Slot 9); OR driver tries to run upstream Tier 0 (that's `.claude/hooks/tests/build-skill-phase-0-step-n-scan.test.sh` upstream-side); OR adds new lib code at cli-side.
+- in-scope: scripts/tests/smoke-drive-e2e-build-phase-0.test.sh (new Tier 0 driver), docs/use-cases/UC-script-cli-307-build-phase-0-driver.md (brief UC).
+- out-of-scope: /autonomous driver; /deploy-prod driver; cli-side cure of /build skill body (upstream owns); hosting_platform contract; new lib code.
