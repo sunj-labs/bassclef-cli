@@ -98,3 +98,49 @@ Session C stage 2 (cli#331 /autonomous + cli#332 /launch → /build → deploy) 
 - Session C stage 1 log: `docs/session-logs/2026-10-04-session-c-stage-1.md`
 - UC cli#313 driver: `docs/use-cases/UC-script-cli-313-luminary-pick-home-path-driver.md`
 - Peer coordination: `bassclef-upstream-51` for Slot 9 cadence
+
+## Epilogue (post-closeout work, 2026-10-04 → 2026-10-05)
+
+After the Session D closeout commit, operator asked for coordination work and an infrastructure investigation. Everything landed locally; nothing broke the Session D close.
+
+### Peer coordination
+
+- Pinged `bassclef-upstream-11` (active peer; prior ref `bassclef-upstream-51` from pre-compaction summary rotated out).
+- Peer confirmed Slot 9 is **queued but not scheduled**, estimated 300-500 turns on upstream side, blocked behind Slots B-G.
+- Upstream shipped Kunal #7 + #10 (PRs #2060 + #2061) + cli#305 cure as PR #2062 (`a312a31b`) tonight.
+- Peer suggested 4 pre-work options (fixtures / risk ledger / UC / hosting question tree). Operator picked none — risk analysis showed stale risk and overkill risk were too high for 3 of 4; the only safe option (risk ledger) was deferred to Session C stage 2 opening.
+
+### cli#305 status comment
+
+Posted status comment on cli#305 citing upstream PR #2062. Ticket stays OPEN pending cli-side `dist/lite` re-bundle at next release cascade. Comment at `https://github.com/sunj-labs/bassclef-cli/issues/305#issuecomment-5983320645`.
+
+### Cross-session inbound approval investigation
+
+Operator flagged a behavior change: inbound peer messages now require manual approval. Session D ran the investigation inline.
+
+- Research via WebSearch (two subagent dispatches failed with prompt-too-long errors on `claude-code-guide` — base system prompt is near API limit; fell back to direct search).
+- Finding: Claude Code CLI v2.1.232 (October 2026) added the `crossSessionInbound` setting with three modes — `accept`, `hold`, `refuse`. Default auto-heuristic holds inbound peer messages when the receiving session runs under bypass-permission mode.
+- Confirmed via `code.claude.com/docs/en/cross-session-messaging` + `claude.com/docs/cowork/changelog`.
+- Memory entry at `~/.claude/projects/-Users-sanjay2025-src-sunj-labs-bassclef-cli/memory/project_cross_session_inbound_approval_change.md` carries the finding + revert path.
+
+### Settings edits (operator-authorized)
+
+Set `crossSessionInbound: "accept"` in three settings files via `jq`:
+
+| Path | Scope | Verified |
+|---|---|---|
+| `~/.claude/settings.json` | user-scope | `jq -r '.crossSessionInbound'` returns `accept` |
+| `~/src/sunj-labs/bassclef-upstream/.claude/settings.json` | project-scope | `jq -r '.crossSessionInbound'` returns `accept` |
+| `~/src/sunj-labs/bassclef-web/.claude/settings.json` | project-scope | `jq -r '.crossSessionInbound'` returns `accept` |
+
+Backups preserved at `<path>.bak-<timestamp>` for each file. Takes effect for NEW sessions; current running sessions keep their loaded config.
+
+Operator's hypothesis (upstream already at `accept`) proved wrong — all three files were on the default auto-heuristic. Each receiver controls its own inbound; the three edits are symmetric, not unidirectional.
+
+### Session D epilogue totals
+
+- 1 cli-side ticket comment (cli#305 status)
+- 3 settings files edited to `crossSessionInbound: "accept"`
+- 1 project memory entry (cross-session approval investigation)
+- 0 driver work; 0 PRs
+- Session D git state unchanged at `afb6bbc` (closeout commit); epilogue in local save-state at `dec475a`
