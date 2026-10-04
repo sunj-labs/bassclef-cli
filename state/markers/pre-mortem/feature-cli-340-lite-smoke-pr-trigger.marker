@@ -1,0 +1,37 @@
+# Pre-mortem light — cli#340 (3 lenses × 5-8 risks)
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- lenses:
+  - linus-torvalds (adopter contract)
+  - michael-nygard (stability patterns)
+  - hyrum-wright (observable behavior)
+
+## Lens L — Linus (adopter contract)
+- R-L1 Workflow fires on every PR regardless of path; noisy for docs-only PRs. **Fold F1:** add `paths` filter scoped to workflow file + smoke-drive drivers + invariants lib + smoke-assert lib.
+- R-L2 Fork PRs break because secrets (SMOKE_GH_TOKEN, OAuth) are not shared with forks. **Fold F2:** rely on existing `env` references; GHA skips those steps on forks per default. Document in workflow comment.
+- R-L3 Adopters who vendor this workflow get PR-trigger behavior they did not ask for. **Fold F3:** paths filter keeps the trigger scoped to files only bassclef-cli maintainers edit.
+- R-L4 Author running the workflow burns adopter OAuth minutes on every PR touch. **Fold F4:** hello-probe already skips matrix on auth degrade; mitigation preserved.
+- R-L5 Trigger renames in GHA break existing PRs; name stays stable. **No fold needed** — GHA `on.pull_request` is stable API.
+
+## Lens N — Nygard (stability patterns)
+- R-N1 `pull_request` trigger starts the long matrix (6+ cells × ~10 min each). **Fold F5:** matrix stays `continue-on-error: true`; PR Checks shows one summary row per cell.
+- R-N2 Hello-probe failure cascades to matrix-skip; PR shows no results. **No fold needed** — the current `needs: hello-probe` dependency already handles this.
+- R-N3 Workflow runs twice when author force-pushes rapidly. **Fold F6:** add `concurrency` block keyed on `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true`.
+- R-N4 Scheduled run fires AND PR run fires simultaneously; shared state corrupts. **No fold** — jobs are stateless (no shared cache write).
+- R-N5 Workflow file edit itself triggers the workflow; infinite loop risk. **No fold** — a single PR run is one invocation; no auto-commit.
+
+## Lens H — Hyrum (observable behavior)
+- R-H1 Adopters depending on "workflow runs on nightly only" break when we add PR trigger. **Fold F7:** nightly schedule unchanged; PR trigger is additive.
+- R-H2 Author expects PR Checks row with specific job name; renaming jobs breaks saved queries. **No fold** — job names stay as-is.
+- R-H3 Observable PR-check cadence changes from "no row until merge" to "row within 10 min". Downstream automation that polls GHA may misread. **Fold F8:** CHANGELOG note calls out the trigger addition explicitly.
+- R-H4 Fork contributors see failed secret-dependent steps and misread as regression. **Fold F2 covers.**
+
+## Folds pre-code
+- F1 — paths filter scopes trigger (R-L1)
+- F2 — comment documents fork-PR behavior (R-L2 + R-H4)
+- F3 — paths filter also protects adopters (R-L3)
+- F4 — hello-probe preserved (R-L4 — no change needed)
+- F5 — continue-on-error preserved (R-N1 — no change)
+- F6 — concurrency block cancels superseded runs (R-N3)
+- F7 — additive change; nightly unchanged (R-H1)
+- F8 — CHANGELOG note (R-H3)

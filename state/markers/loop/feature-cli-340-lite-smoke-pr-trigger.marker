@@ -1,0 +1,5 @@
+# Loop marker — cli#340
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- iteration-count: 1
+- outcome: 4/10 RED → 10/10 GREEN first pass after one YAML edit. All 10 shape assertions clean.

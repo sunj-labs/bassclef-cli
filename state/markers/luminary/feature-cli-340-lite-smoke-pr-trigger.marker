@@ -1,0 +1,8 @@
+# Luminary marker — cli#340
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- lead: linus-torvalds
+- supporting:
+  - michael-nygard
+  - hyrum-wright
+- rationale: Torvalds — adopter contract (we don't break adopters; PR trigger is additive, paths filter keeps noise out). Nygard — stability pattern (concurrency block cancels superseded runs; prevents race on force-push). Hyrum — observable behavior (PR Checks cadence changes from "no row" to "row within 10 min"; CHANGELOG note deferred but behavior documented in workflow comment).

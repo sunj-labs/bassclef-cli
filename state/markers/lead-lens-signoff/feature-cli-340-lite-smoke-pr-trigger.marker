@@ -1,0 +1,6 @@
+# Lead-lens signoff — cli#340
+- date: 2026-10-04
+- branch: feature/cli-340-lite-smoke-pr-trigger
+- lead-luminary: linus-torvalds
+- signoff-rationale: Adopter contract honored. PR trigger is additive — nightly + tag + dispatch all preserved (T08-T10 PASS). Paths filter scopes trigger to files only cli-maintainers edit (R-L1 + R-L3 folds). Concurrency block cancels superseded runs (F6 fold on R-N3). Beck RED-first pass clean — 4/10 → 10/10 after one YAML edit. Chain contract 6/6; typecheck clean.
+- findings-cleared: none (first iteration GREEN; no RED or AMBER surfaced in review)

@@ -30,6 +30,23 @@ on:
         required: false
         default: 'true'
         type: boolean
+  # cli#340 F-AR-2 — PR trigger lets authors see the workflow run on
+  # their PR before merge. paths filter keeps noise out of docs-only
+  # PRs. Fork PRs skip secret-dependent steps by default (GHA policy).
+  pull_request:
+    paths:
+      - '.github/workflows/lite-adopter-smoke.yml'
+      - 'scripts/tests/smoke-drive-e2e-*.test.sh'
+      - 'scripts/tests/lib/lite-runtime-invariants.sh'
+      - 'scripts/lib/smoke-assert.sh'
+      - 'Dockerfile.lite-adopter'
+      - 'scripts/tests/run-lite-container.sh'
+
+# F6 fold (pre-mortem R-N3) — cancel superseded runs on force-push so
+# authors see one row per PR, not a backlog of outdated runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
