@@ -1,0 +1,8 @@
+# Temperance marker — Session B PR 2 (/longrun prep driver)
+- date: 2026-10-04
+- branch: feature/stack-2-longrun-prep-driver
+- goal: Characterize /longrun prep output carries 6-axis compounding frame per .claude/rules/compounding-sequence-fresh-analysis.md
+- scope-decision: Right thing — one driver asserts all 6 axis labels appear in the prep output (Deliverable, Problem, Value prop, Turns, Risk, Shipping priority). Right way — Beck RED-first; pre-cure fixture missing one axis fails; post-cure with all 6 passes.
+- drift-trigger: driver tries to assert axis VALUES (that's postcondition from compounding-sequence-fresh-analysis.md and belongs in hook-level enforcement); OR driver asserts legacy 5-axis frame (grace window through 2026-10-31 but new drivers pin new frame).
+- in-scope: scripts/tests/smoke-drive-e2e-longrun-prep.test.sh
+- out-of-scope: hook extension; 5-axis legacy support; postcondition cell-by-cell check
