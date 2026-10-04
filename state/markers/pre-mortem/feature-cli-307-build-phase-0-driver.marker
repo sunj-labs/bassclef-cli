@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session C PR 1
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- ledger-path: docs/risk-ledgers/2026-10-04-session-c-handoff-cliff.md
+- delta: Inherits parent ledger. No new risks.

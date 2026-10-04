@@ -1,0 +1,6 @@
+# Lead-lens signoff — Session C PR 1
+- date: 2026-10-04
+- branch: feature/cli-307-build-phase-0-driver
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Walking skeleton for Session C handoff cliff ships. Driver characterizes /build Phase 0 cure at upstream main SHA 09beb249. 6/6 Tier 0 after one refactor — BSD awk ERE alternation (Step|WU) non-portable, replaced with pure bash state machine. Four fixture classes shipped — pre-cure RED on Step-N under wu-only mode; post-cure GREEN on Step-N under step-and-wu mode; regression GREEN on WU-N (regression check); clean path GREEN on Step-N with no floor path.
+- findings-cleared: F-ITER-1 (BSD awk ERE parens+alternation incompatible with dynamic regex via -v pat; refactored driver to pure bash state machine; portable across macOS + linux)
