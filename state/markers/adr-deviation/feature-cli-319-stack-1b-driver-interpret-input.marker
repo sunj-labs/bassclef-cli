@@ -1,0 +1,6 @@
+# ADR-deviation marker — Session A walking skeleton PR 1b
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1b-driver-interpret-input
+- adr_governing: ADR-005 (Model C open-core split) + ADR-007 (npm-lite substrate bundling)
+- outcome: ADR-honored
+- rationale: 3 driver test files + docs/nightly-status.md baseline. Nothing modifies dist/lite bundle contents. ADR-005 Model C split preserved. ADR-007 lite bundle shape preserved — drivers READ (via SMOKE_LIVE=1) the lite bundle's skill behavior; never write bundle contents.
