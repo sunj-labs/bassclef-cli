@@ -1,0 +1,6 @@
+# Lead-lens signoff — Session A PR 5 (full-chain path contract)
+- date: 2026-10-04
+- branch: feature/cli-317-stack-5-full-chain-path-contract
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Session A INTEGRATES. Driver walks all 4 edges — intent → personas → tasks → gallery. Breaks characterized at each edge; chain-intact fixture clean. 6/6 Tier 0 GREEN. Session A complete.
+- findings-cleared: none

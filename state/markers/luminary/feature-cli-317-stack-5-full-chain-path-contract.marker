@@ -1,0 +1,6 @@
+# Luminary marker — Session A PR 5
+- date: 2026-10-04
+- branch: feature/cli-317-stack-5-full-chain-path-contract
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Cockburn lead — walking skeleton INTEGRATES. Torvalds supporting — chain path contract is the Hyrum class every adopter hits mid-session. Beck supporting — one break per edge in pre-cure; chain intact in post-cure.
