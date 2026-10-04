@@ -14,7 +14,7 @@
 #   - no gh auth
 #
 # node:20-slim digest from Docker Hub 2026-10-04 (bookworm-slim variant).
-FROM node:20-slim@sha256:a04ebfe840ac5aa29ee68c4cbb0b63f54d4d05f8b4a9bb6cbe9ad8b35a8d8d3f
+FROM node:26-slim@sha256:ec7758ee051e457b468b32bde57b0879010b325bb9862718e9615225ce4aaae1
 
 # Minimal tools — git for npm pack smoke; curl for npm fetch probe.
 # No python3, no playwright, no gh.
