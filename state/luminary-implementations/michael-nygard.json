@@ -25,8 +25,9 @@
     "state/markers/luminary/fix-247-shadow-detection.marker",
     "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker",
     "scripts/tests/smoke-assert-drift-cure.test.sh",
-    "scripts/lib/smoke-assert.sh"
+    "scripts/lib/smoke-assert.sh",
+    "docs/session-logs/2026-10-04-session-d-leaf-pickups.md"
   ],
-  "last_scanned": "2026-09-27T22:18:31Z",
+  "last_scanned": "2026-10-04T18:30:37Z",
   "scanner_version": "1.0"
 }
