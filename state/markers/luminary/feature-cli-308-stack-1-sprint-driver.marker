@@ -1,0 +1,8 @@
+# Luminary marker — Session B PR 1 (/sprint driver)
+- date: 2026-10-04
+- branch: feature/cli-308-stack-1-sprint-driver
+- lead: alistair-cockburn
+- supporting:
+  - michael-feathers
+  - linus-torvalds
+- rationale: Cockburn — walking skeleton continues; /sprint is the first session-shape surface the adopter touches. Feathers — characterization pin on PyYAML error shape in trace. Torvalds — adopter contract (cold macOS no PyYAML; current error class is "goal not found" which lies to adopters).
