@@ -14,8 +14,9 @@
     "docs/specs/2026-09-21c-smoke-drive-riff.md",
     "docs/decompositions/2026-09-21c-smoke-drive-riff.md",
     "docs/architecture/reviews/2026-09-21c-smoke-drive-riff.md",
-    "docs/session-logs/2026-10-04-session-c-stage-1.md"
+    "docs/session-logs/2026-10-04-session-c-stage-1.md",
+    "docs/use-cases/UC-script-cli-306-bash32-driver.md"
   ],
-  "last_scanned": "2026-10-04T17:49:34Z",
+  "last_scanned": "2026-10-04T20:36:40Z",
   "scanner_version": "1.0"
 }

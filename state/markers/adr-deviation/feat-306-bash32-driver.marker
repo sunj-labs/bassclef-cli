@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session F walking skeleton (#306)
+- date: 2026-10-05
+- branch: feat/306-bash32-driver
+- adr_governing: none — new characterization driver on existing invariants lib; follows Session A/D precedent; no ADR class touched
+- outcome: ADR-honored
