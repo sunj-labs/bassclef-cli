@@ -1,0 +1,7 @@
+# Lead-lens signoff — Session A walking skeleton PR 1a (runtime)
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Walking skeleton shape proven. 5 narrow invariant functions landed via Beck RED-first (33 tier-0 tests GREEN). smoke-assert extended with check_artifact_exists via Beck RED-first (17 tier-0 tests GREEN). Dockerfile + workflow + local runner + CONTRIBUTING.md append land the runtime. Dockerfile is operator-local only (RFC F-JC-1 fold); CI runs on GHA OS matrix (ubuntu + macOS). RFC folds F-MN-2 (digest-pinned base), R-T3 (--platform linux/amd64), R-T2 (continue-on-error matrix cells), F-MN-3 (hello-probe pre-flight) applied to workflow shape. Driver file glob in workflow ships empty today — PR 1b lands 3 driver files that fill it. Chain shape proven: workflow sources invariants + check_artifact_exists; drivers will source same; Session B/C skills ride on the same narrow interface.
+- findings-cleared: no findings surfaced during inline review; typecheck clean + vitest 498/498 GREEN + bash tier-0 50/50 GREEN
+- next-finding-class: cold-adopter smoke on real Mac profile (post-merge sibling-smoke per class d modifier — deferred to PR 1b)

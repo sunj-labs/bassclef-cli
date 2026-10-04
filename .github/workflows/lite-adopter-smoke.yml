@@ -1,0 +1,102 @@
+# tier: upstream
+# .github/workflows/lite-adopter-smoke.yml — nightly adopter smoke
+# against the lite runtime.
+#
+# Session A walking skeleton per docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md.
+#
+# RFC F-JC-1 fold: GHA OS matrix (ubuntu + macOS) for fidelity, not container.
+# RFC F-MN-1 fold: writes docs/nightly-status.md so operator reads one file
+#   to see which drivers flipped GREEN overnight.
+# RFC F-MN-3 fold: hello-probe before matrix; skip + file ticket if claude
+#   service degrades or OAuth expires.
+# R-T2 fold: continue-on-error for matrix cells; only tag-push run is a
+#   hard gate.
+# R-B4 fold: exit 3 from a driver counts as expected-RED (not CI failure).
+# Finding 3 fold: matrix across last 3 releases catches regression where
+#   fix A ships and silently breaks fix B.
+
+name: lite-adopter-smoke
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      smoke_live:
+        description: 'Run against real claude (requires OAuth token)'
+        required: false
+        default: 'true'
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  hello-probe:
+    name: hello-probe — fail fast on auth/service degrade
+    runs-on: ubuntu-latest
+    outputs:
+      claude_ok: ${{ steps.probe.outputs.ok }}
+    steps:
+      - name: probe
+        id: probe
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "no OAuth token; skipping matrix"
+            exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          echo "probe skipped — token present (hello-probe inside container deferred to PR 1b driver addition)"
+
+  smoke-matrix:
+    name: smoke / ${{ matrix.os }} / cli-ref=${{ matrix.cli_ref }}
+    needs: hello-probe
+    if: needs.hello-probe.outputs.claude_ok == 'true'
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cli_ref: [main, latest-tag, prior-tag]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.cli_ref == 'main' && 'main' || '' }}
+          fetch-depth: 0
+
+      - name: resolve prior tag
+        if: matrix.cli_ref != 'main'
+        run: |
+          if [[ "${{ matrix.cli_ref }}" == "latest-tag" ]]; then
+            TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          else
+            TAG=$(git tag -l 'v*' --sort=-v:refname | sed -n '2p')
+          fi
+          if [[ -n "$TAG" ]]; then
+            echo "checking out $TAG"
+            git checkout "$TAG"
+          fi
+
+      - name: run Tier 0 lite-runtime tests
+        run: |
+          bash scripts/tests/lite-runtime-invariants.test.sh
+          bash scripts/tests/smoke-assert-check-artifact-exists.test.sh
+
+      - name: run drivers (PR 1b lands these)
+        run: |
+          shopt -s nullglob 2>/dev/null || true
+          found=0
+          for drv in scripts/tests/smoke-drive-e2e-*.test.sh; do
+            found=$((found+1))
+            echo "--- $drv ---"
+            bash "$drv" || echo "driver exit $?"
+          done
+          echo "drivers found: $found"

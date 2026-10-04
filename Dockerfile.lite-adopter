@@ -1,0 +1,34 @@
+# tier: upstream
+# Dockerfile.lite-adopter — lite-only adopter test container.
+#
+# Session A walking skeleton per docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md.
+# RFC F-JC-1 fold: container is operator-local convenience. CI runs on
+# GitHub Actions OS matrix (ubuntu + macOS) for fidelity.
+# RFC F-MN-2 fold: digest-pinned base for reproducibility.
+#
+# Base invariants per plan doc L117-130:
+#   - bash 3.2 syntax only (ubuntu ships bash 5; drivers self-check via
+#     assert_bash_3_2_syntax from scripts/tests/lib/lite-runtime-invariants.sh)
+#   - no PyYAML (python3 omitted)
+#   - no Playwright
+#   - no gh auth
+#
+# node:20-slim digest from Docker Hub 2026-10-04 (bookworm-slim variant).
+FROM node:20-slim@sha256:a04ebfe840ac5aa29ee68c4cbb0b63f54d4d05f8b4a9bb6cbe9ad8b35a8d8d3f
+
+# Minimal tools — git for npm pack smoke; curl for npm fetch probe.
+# No python3, no playwright, no gh.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git curl jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user id (ephemeral test container).
+USER 1000:1000
+WORKDIR /opt/bassclef-cli
+
+# Driver scripts source these libraries. Mount the repo at
+# /opt/bassclef-cli via `docker run -v <repo>:/opt/bassclef-cli:ro`.
+ENV LITE_RUNTIME_LIB=/opt/bassclef-cli/scripts/tests/lib/lite-runtime-invariants.sh
+ENV SMOKE_ASSERT_LIB=/opt/bassclef-cli/scripts/lib/smoke-assert.sh
+
+CMD ["/bin/bash", "-c", "echo 'lite-adopter container ready'; echo 'mount repo at /opt/bassclef-cli and run scripts/tests/run-lite-container.sh'"]

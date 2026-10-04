@@ -1,0 +1,8 @@
+# Temperance marker — Session A walking skeleton (feature/cli-319-stack-1-lite-runtime-interpret-input)
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- goal: Session A — lite-only Docker runtime + 5-PR authoring-chain driver stack
+- scope-decision: Right thing — ship walking skeleton (Dockerfile + invariants lib + nightly workflow + /interpret-input driver + cli#305 Exhibit-A anchor) as PR 1. Right way — Cockburn walking skeleton surfaces integration risk at PR 1 before 4 more drivers ride on the shape. Minimal /personas stub rides in PR 1 per R-C2 fold so chain shape is proven at phase boundary 1.
+- drift-trigger: PR 1 size exceeds 500 lines (per R-C6 fold); OR invariants lib requires editing dist/lite bundle (ADR-007 territory per R-T4 fold); OR driver test wall-clock > 2 min per driver (R-B2 fold); OR scope hits 275 turns.
+- in-scope paths: scripts/tests/lib/lite-runtime-invariants.sh, Dockerfile.lite-adopter, scripts/tests/run-lite-container.sh, .github/workflows/lite-adopter-smoke.yml, scripts/tests/smoke-drive-e2e-interpret-input.test.sh, scripts/tests/smoke-drive-e2e-personas-stub.test.sh, scripts/tests/smoke-drive-e2e-identifier-leak-exhibit-a.test.sh, scripts/lib/smoke-assert.sh (extend with check_artifact_exists), docs/architecture/reviews/, CONTRIBUTING.md.
+- out-of-scope: dist/lite/ bundle edits (ADR-007 PR); upstream substrate changes (bassclef-upstream repo); Session B skills (/sprint, /longrun prep, /temperance drivers); Session C skills (/build Phase 0, /autonomous, /deploy-prod).

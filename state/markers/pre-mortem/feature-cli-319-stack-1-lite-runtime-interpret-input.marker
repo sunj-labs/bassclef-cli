@@ -1,0 +1,9 @@
+# Pre-mortem marker — Session A walking skeleton
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- ledger-path: docs/risk-ledgers/2026-10-04-session-a-walking-skeleton.md
+- mode: light (3 lenses × 5-8 risks per Klein workshop shape)
+- lenses: alistair-cockburn + linus-torvalds + kent-beck
+- risks-total: 20 (6 Cockburn + 7 Torvalds + 7 Beck)
+- folds-pre-code: 6 (R-C1 bash 3.2 pin + R-C2 /personas stub in PR 1 + R-C5 check_artifact_exists + R-C6 500-line PR 1 budget + R-T2 continue-on-error matrix + R-B4 exit-3-as-success convention)
+- folds-deferred: 3 (R-T7 sibling trace-helper scan to PR 1b, R-B7 GREEN-flip sibling check to post-Session-A, R-T6 cold-adopter clone test to PR 5)

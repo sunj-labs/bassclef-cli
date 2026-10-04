@@ -1,0 +1,9 @@
+# Orientation-gate marker — Session A
+- date: 2026-10-04
+- branch: feature/cli-319-stack-1-lite-runtime-interpret-input
+- whereami-read: docs/whereami.md at 2026-10-04T11:51Z
+- plan-doc-read: docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md (committed `b0d5d95` 2026-10-04)
+- parent-chain-walk: Session A is a top-level session (no parent_goal). Prior in_flight_goal 2026-10-03b closed last session (7 PRs merged). next_in_flight_goal in whereami L18 names PRIMARY queue: (1) Session A (this), (2) Session B session-shape, (3) Session C handoff cliff.
+- parent-drivers: Kunal-rerun 22 issues across 7 classes (A-G) + Sam first-contact pain + Louis context-switch orientation + upstream cure cadence awaiting cli-side anchors.
+- open-acceptance: cli#319 (anchor), cli#305 (Exhibit-A anchor), cli#317 (full-chain path contract — PR 5), cli#318 + cli#320 + cli#314 (PRs 2-4), critique 6 (phase gate on /launch --local).
+- out-of-scope: dist/lite bundle edits, upstream substrate fixes, Session B + Session C skills.

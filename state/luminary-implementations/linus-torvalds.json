@@ -25,8 +25,12 @@
     "state/markers/luminary/fix-247-shadow-detection.marker",
     "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker",
     "state/markers/luminary/fix-harness-file-fallback-test-isolation.marker",
-    "docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md"
+    "docs/next-session-plan-2026-10-04-e2e-cascade-drivers.md",
+    "docs/risk-ledgers/2026-10-04-session-a-walking-skeleton.md",
+    "docs/session-boards/2026-10-04-session-a-walking-skeleton.md",
+    "docs/rfcs/2026-10-04-session-a-walking-skeleton.md",
+    "docs/architecture/reviews/2026-10-04-session-a-walking-skeleton.md"
   ],
-  "last_scanned": "2026-10-04T05:51:56Z",
+  "last_scanned": "2026-10-04T11:07:08Z",
   "scanner_version": "1.0"
 }

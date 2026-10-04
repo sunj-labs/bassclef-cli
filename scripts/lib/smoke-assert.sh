@@ -353,3 +353,41 @@ check_whats_the_plan_artifact() {
   echo "FAIL|whats-the-plan-artifact|no plan token (Plan:/Step/chain)"
   return 1
 }
+
+# check_artifact_exists — positive-artifact assertion.
+# Caller supplies a glob or exact path; function PASSes when at least
+# one matching file exists AND is non-empty. FAILs otherwise.
+#
+# Session A R-C5 fold — every driver asserts an output artifact exists,
+# not just exit code. Closes cli#319 class (skill exits 0 without
+# writing the file it promised).
+#
+# Usage: check_artifact_exists "<glob-or-path>"
+#   e.g., check_artifact_exists "/tmp/work/*.json"
+#         check_artifact_exists "docs/input-artifacts/latest.json"
+check_artifact_exists() {
+  local pattern="$1"
+  if [[ -z "$pattern" ]]; then
+    echo "FAIL|artifact-exists|empty pattern"
+    return 1
+  fi
+  # shellcheck disable=SC2086
+  local matches=( $pattern )
+  # Trim nomatch literal (bash expands unmatched glob to the pattern itself).
+  if [[ "${#matches[@]}" -eq 0 ]] || [[ "${matches[0]}" == "$pattern" && ! -e "${matches[0]}" ]]; then
+    echo "FAIL|artifact-exists|no match for ${pattern}"
+    return 1
+  fi
+  local non_empty=0
+  for f in "${matches[@]}"; do
+    if [[ -s "$f" ]]; then
+      non_empty=$((non_empty+1))
+    fi
+  done
+  if [[ "$non_empty" -eq 0 ]]; then
+    echo "FAIL|artifact-exists|${#matches[@]} match(es) but all empty"
+    return 1
+  fi
+  echo "PASS|artifact-exists|${non_empty} non-empty match(es) for ${pattern}"
+  return 0
+}
