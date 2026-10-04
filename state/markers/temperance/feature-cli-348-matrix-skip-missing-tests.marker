@@ -1,0 +1,8 @@
+# Temperance marker — cli#348
+- date: 2026-10-04
+- branch: feature/cli-348-matrix-skip-missing-tests
+- goal: Guard matrix test steps for missing files on old tags; characterize expected-skip signal; unblock cli#340 PR 347.
+- scope-decision: Right thing — wrap test invocations in `.github/workflows/lite-adopter-smoke.yml` with file-presence guard; echo SKIP + short SHA when absent; exit 0. Right way — Beck RED-first; shape test asserts step body has guard pattern.
+- drift-trigger: scope extends to other workflow steps outside the two test-run steps; OR fix extends to rewriting the matrix strategy (os / cli_ref); OR scope expands to also fix nightly-status.md writer.
+- in-scope: .github/workflows/lite-adopter-smoke.yml (two step bodies), scripts/tests/lite-adopter-smoke-matrix-shape.test.sh (new Tier 0), docs/use-cases/UC-script-cli-348-matrix-skip-missing-tests.md (brief UC).
+- out-of-scope: cli#340 scope; matrix strategy change; nightly-status.md writer; test harness refactor.

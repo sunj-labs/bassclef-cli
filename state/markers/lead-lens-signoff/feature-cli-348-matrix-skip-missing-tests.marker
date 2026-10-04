@@ -1,0 +1,6 @@
+# Lead-lens signoff — cli#348
+- date: 2026-10-04
+- branch: feature/cli-348-matrix-skip-missing-tests
+- lead-luminary: michael-nygard
+- signoff-rationale: Fail-safe pattern applied. Missing-file class now logs SKIP + short SHA + exits 0; expected-skip paths green instead of RED. 5/5 Tier 0 shape test. T01+T02 refactored once from narrow regex to component check — grep is line-based and can't cross YAML backslash-continuation. Shape test characterizes intent (presence check + filename listed) without over-specifying YAML shape.
+- findings-cleared: F-ITER-1 (initial test regex was too narrow — matched only single-line shapes; refactored to component check within same scratch iteration before commit)

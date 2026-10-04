@@ -1,0 +1,8 @@
+# Luminary marker — cli#348
+- date: 2026-10-04
+- branch: feature/cli-348-matrix-skip-missing-tests
+- lead: michael-nygard
+- supporting:
+  - michael-feathers
+  - linus-torvalds
+- rationale: Nygard — fail-safe pattern; missing file at old tag is expected; the step signals SKIP cleanly instead of crashing. Feathers — characterization; the current silent-RED is legacy behavior; the new SKIP signal makes the expected-skip path visible. Torvalds — adopter contract; PR Checks RED on expected-skip is noise; adopters trust green/red to mean something.
