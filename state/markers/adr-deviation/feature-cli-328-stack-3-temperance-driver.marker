@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session B PR 3
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- adr_governing: none — characterization driver only
+- outcome: ADR-honored

@@ -1,0 +1,8 @@
+# Temperance marker — Session B PR 3 (/temperance driver)
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- goal: Characterize /temperance marker format fits /build flow (cli#328 finding 6)
+- scope-decision: Right thing — one driver asserts marker shape (path + body format + commit path) auditably fails when `.gitignore` blocks state/markers/, auditably passes when adopter's gitignore keeps markers tracked. Right way — Beck RED-first; pre-cure fixture has gitignored path (RED on git-add silence); post-cure fixture has tracked path (GREEN).
+- drift-trigger: driver attempts to fix the /temperance skill body OR the .gitignore ambiguity (that's upstream cure); OR driver tests the whole /temperance workflow (not just marker shape at the git boundary).
+- in-scope: scripts/tests/smoke-drive-e2e-temperance.test.sh
+- out-of-scope: upstream #1694 cure; .gitignore template change; /temperance SKILL.md edit

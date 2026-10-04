@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session B PR 3
+- date: 2026-10-04
+- branch: feature/cli-328-stack-3-temperance-driver
+- ledger-path: docs/risk-ledgers/2026-10-04-session-b-session-shape.md
+- delta: Inherits parent ledger. R-F4 (fixture carries .gitignore scope creep) addressed via per-test TMP_BASE scoping (F8 fold in RFC).
