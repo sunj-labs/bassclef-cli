@@ -1,0 +1,6 @@
+# Luminary marker — Session A PR 2
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- lead: alistair-cockburn
+- supporting: [linus-torvalds, kent-beck]
+- rationale: Cockburn lead across Session A PRs. Torvalds supporting — cli#320 email-slug leak is pure adopter-privacy class, exactly Linus's "we don't break adopters" discipline at identity surface. Beck supporting — pre-cure fixture carries the email-derived slug; post-cure replaces with persona name; the RED-GREEN rhythm proves cli#320 cure when upstream ships.

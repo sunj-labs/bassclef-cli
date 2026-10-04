@@ -1,0 +1,6 @@
+# ADR-deviation marker — Session A PR 2
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- adr_governing: ADR-005 + ADR-007
+- outcome: ADR-honored
+- rationale: Pure test driver file. No bundle shape change. No ADR deviation.

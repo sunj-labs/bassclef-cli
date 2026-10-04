@@ -1,0 +1,17 @@
+# Loop marker — Session A PR 2 (/personas full driver)
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- wu_id: Session A PR 2
+- iteration_count: 1
+- mode: sequential
+- source_files_changed: 1 new (scripts/tests/smoke-drive-e2e-personas.test.sh)
+- lens_used: [alistair-cockburn, linus-torvalds, kent-beck]
+- rhythm:
+    red-first: driver test with 6 cases authored (T01 slug RED, T03 path RED), then runtime concat fixtures ran clean
+    green: 6/6 Tier 0 GREEN
+    integration: vitest unchanged, no bundle touched
+- checks:
+    adr-compliance: PASS
+    test-after-pattern-check: NONE FOUND
+    designer-signoff: N/A
+    architect-review: fires session-wide at closeout

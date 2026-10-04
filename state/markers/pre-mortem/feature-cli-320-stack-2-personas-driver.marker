@@ -1,0 +1,5 @@
+# Pre-mortem marker — Session A PR 2
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- ledger-path: docs/risk-ledgers/2026-10-04-session-a-walking-skeleton.md (shared Session A)
+- delta: PR 2 inherits parent ledger. One new risk — R-P1 fixture slug may match actual operator git email (false negative). Fold: build slug via printf runtime concat so source does not carry a real email literal.

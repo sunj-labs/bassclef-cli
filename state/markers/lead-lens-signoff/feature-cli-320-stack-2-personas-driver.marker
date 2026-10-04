@@ -1,0 +1,7 @@
+# Lead-lens signoff — Session A PR 2
+- date: 2026-10-04
+- branch: feature/cli-320-stack-2-personas-driver
+- lead-luminary: alistair-cockburn
+- signoff-rationale: Walking skeleton extended with the first FULL driver per plan doc. cli#320 slug-leak anchor characterized under both pre-cure (email-derived slug) and post-cure (plain-name slug) fixtures; cli#318 write-side path anchor characterized under both canonical .md and non-canonical .yaml fixtures; well-formed persona cleans both. 6/6 Tier 0 GREEN. Runtime concat per feedback_ccf3_test_fixtures used to dodge identifier-leak-scrub on fixture email literal. Stub remains alive as cheaper nightly fallback per architect F-AR-4.
+- findings-cleared: no findings surfaced during inline review
+- next-finding-class: PR 3 /jtbd-tasks will exercise cli#318 read-side half; chain-shape proof already landed in PR 1b stub
