@@ -1,0 +1,8 @@
+# Temperance marker — Session A PR 5 (full-chain path contract)
+- date: 2026-10-04
+- branch: feature/cli-317-stack-5-full-chain-path-contract
+- goal: Close cli#317 — /launch chain skills disagree on output paths (4 mismatches)
+- scope-decision: Right thing — one driver walks /interpret-input → /personas → /jtbd-tasks → /launch and asserts each read path matches the prior write path. Right way — Beck RED-first; pre-cure fixture breaks the chain at one edge per test case; post-cure chain intact end-to-end.
+- drift-trigger: driver extends past /launch (not in scope for Session A); OR driver tries to run REAL skills end-to-end in Tier 0 (that is SMOKE_LIVE=1 nightly path).
+- in-scope paths: scripts/tests/smoke-drive-e2e-chain-contract.test.sh.
+- out-of-scope: live-skill chain (nightly only); dist/lite bundle edits.
