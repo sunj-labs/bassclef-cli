@@ -1,0 +1,6 @@
+# Lead-lens sign-off — Session F (#322)
+- date: 2026-10-05
+- branch: feat-322-launch-template-jargon-driver
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Same pattern as prior Session F drivers. Grep shipped /launch SKILL.md for scope-bounded + appetite BLOCK terms. 3 exit paths designed.

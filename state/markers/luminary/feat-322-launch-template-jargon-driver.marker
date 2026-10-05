@@ -1,0 +1,7 @@
+# Luminary marker — Session F (#322)
+- date: 2026-10-05
+- branch: feat-322-launch-template-jargon-driver
+- lead: michael-feathers
+- supporting:
+  - linus-torvalds
+- rationale: Feathers characterization. Linus adopter contract — template that fails the framework's own gate is a userspace-break class.

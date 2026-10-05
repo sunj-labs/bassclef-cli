@@ -1,0 +1,7 @@
+# Temperance marker — Session F (#322)
+- date: 2026-10-05
+- branch: feat-322-launch-template-jargon-driver
+- scope-decision: Ship #322 driver — grep shipped /launch SKILL.md for scope-bounded + appetite literals the clarity-gate blocks on.
+- right-thing: capture adopter's "framework blocks its own template" pain
+- right-way: class b compressed; pattern now 5x-proven in Session F
+- drift-trigger: scope into fixing the template; multi-anchor driver (keep single-concern)
