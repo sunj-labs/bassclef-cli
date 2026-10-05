@@ -1,0 +1,8 @@
+# Architect review marker — 2026-10-05 Session H driver sweep
+- date: 2026-10-05
+- primary_lens: michael-feathers
+- scope: 6 characterization drivers (PRs #367-#372)
+- verdict: READY-WITH-ONE-FOLLOWUP
+- findings: 1 MODERATE
+- tickets_filed: 1 (cli#373)
+- coverage: 13/14 covered + 1 SKIP (DDD n/a); 0 deferred; 0 unmarked
