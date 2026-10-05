@@ -1,0 +1,5 @@
+# Lead-lens sign-off — Session I walking skeleton
+- date: 2026-10-05
+- branch: feat-session-i-walking-skeleton-sam-onboard-repo
+- lead: alistair-cockburn
+- rationale: Walking skeleton — thinnest end-to-end assertion layer over the Sam/onboard-repo capture. Rides existing docker-smoke rig. Cooper 3-level goals (end + experience + life) carried as 3 Tier 0 assertion functions. Fixture-based pin (RED on injected bad fixture; GREEN on golden fixture). Proves the pattern. Scales to 5 more Tier A drivers.

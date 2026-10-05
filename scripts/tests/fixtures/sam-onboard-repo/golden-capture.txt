@@ -1,0 +1,14 @@
+=== claude_bin: /usr/local/bin/claude
+=== timeout_sec: 180
+=== scratch_dir: /home/adopter/onboard-test
+=== output ===
+I ran /onboard-repo and set up your workspace.
+
+Created:
+- .claude/settings.json
+- substrate.config.md
+- .bassclef/init.manifest.json
+
+Next step: run /sprint to see what's next.
+
+=== exit: 0

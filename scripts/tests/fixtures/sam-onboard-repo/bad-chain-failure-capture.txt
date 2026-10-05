@@ -1,0 +1,7 @@
+=== claude_bin: /usr/local/bin/claude
+=== timeout_sec: 180
+=== scratch_dir: /home/adopter/onboard-test
+=== output ===
+Error: /onboard-repo failed. BLOCKED: substrate not synced.
+
+=== exit: 3
