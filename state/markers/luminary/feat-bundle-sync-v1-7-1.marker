@@ -1,0 +1,13 @@
+# Luminary marker — Session G — v1.7.1 bundle sync
+
+- date: 2026-10-05
+- branch: feat/bundle-sync-v1.7.1
+- lead: michael-feathers
+- supporting:
+  - linus-torvalds
+  - alistair-cockburn
+- rationale:
+  - Feathers (lead): Each driver flip IS the characterization-complete signal. RED → GREEN proves cure reached adopter dist.
+  - Torvalds (supporting): Adopter contract. Release is the moment cure reaches machines.
+  - Cockburn (supporting): Walking skeleton. One PR per driver flip. Standard Session A-F shape.
+- source: docs/next-session-plan-2026-10-05-session-g-v1-7-1-bundle-sync.md L25-28

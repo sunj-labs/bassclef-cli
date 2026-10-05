@@ -1,0 +1,9 @@
+# Pre-mortem marker — Session G — v1.7.1 bundle sync
+
+- date: 2026-10-05
+- branch: feat/bundle-sync-v1.7.1
+- mode: light
+- lenses: michael-feathers (lead) + linus-torvalds + alistair-cockburn + michael-nygard
+- risks: 22 (6 Feathers + 6 Torvalds + 5 Cockburn + supporting Nygard assertion signal)
+- top folds applied pre-code: F1 + F4 + L2 + L3 + C1
+- ledger: docs/risk-ledgers/2026-10-05-session-g-v1-7-1-bundle-sync.md

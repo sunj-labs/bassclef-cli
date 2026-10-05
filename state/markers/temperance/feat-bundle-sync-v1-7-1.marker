@@ -1,0 +1,8 @@
+# Temperance marker — Session G — v1.7.1 bundle sync
+
+- date: 2026-10-05
+- branch: feat/bundle-sync-v1.7.1
+- scope-decision: Pull bassclef v1.7.1 pin + regen dist/lite + verify 5 Session F drivers flip + flip semantics in 5 small PRs + release cli v1.9.10. One `/longrun` session, 30-60 turns.
+- right-thing: Session G ships Q1 cures (v1.7.1) to adopter machines. Plan doc L18 names the 7 cures. Delay compounds against adopters.
+- right-way: Serialize bundle sync → flip PRs → release. One PR per flip for atomic rollback per plan doc L95. Minimal diff per flip. Use `npm run bump patch` not hand-edit per memory `feedback_use_npm_run_bump_not_hand_edit`.
+- drift-trigger: Any step past 1.5× budget pauses the session. Any touch to auth / schema / middleware / cross-cutting pauses the session. Expanding scope to flip drivers beyond the 5 Session F drivers pauses.
