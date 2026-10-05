@@ -1,0 +1,9 @@
+# Temperance marker — Session G Step 3 — release v1.9.10
+
+- date: 2026-10-05
+- branch: feat/release-v1-9-10
+- parent-marker: state/markers/temperance/feat-bundle-sync-v1-7-1.marker (Session G full scope)
+- scope-decision: Release cli v1.9.10 bundling bassclef v1.7.1 — bump patch, CHANGELOG entry, open release PR with Closes keywords for cured tickets (#306 #331 #332), merge, tag, publish. Final step of Session G per plan doc L54-63.
+- right-thing: v1.7.1 cures are on main but not yet in adopter machines. Release cascade is the delivery mechanism.
+- right-way: npm run bump patch not hand-edit per memory feedback_use_npm_run_bump_not_hand_edit. Closes keywords in PR body. Operator Touch ID at npm-publish env gate.
+- drift-trigger: Any step past 1.5× budget pauses. Any touch beyond release scope pauses.
