@@ -1,1 +1,3 @@
-exploratory
+preset: converged
+trigger: plan-doc
+plan_doc: docs/next-session-plan-2026-10-05-session-j-dynamic-driver-integration.md

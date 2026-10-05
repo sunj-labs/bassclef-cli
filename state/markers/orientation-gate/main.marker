@@ -1,6 +1,8 @@
-# Orientation-gate marker — main
-- date: 2026-09-19
+# Orientation gate marker — Session J prep
+- date: 2026-10-05
 - branch: main
-- active-goal: none-on-branch (main; goal 2026-09-18a SHIPPED)
-- parent-walk: not applicable (no active goal on main; scoping this session at prep)
-- whereami-read: docs/whereami.md at 2026-09-19T13:50:25Z
+- active_goal: Session J dynamic driver integration bridge
+- parent_chain: cli#375 Tier A roadmap → cli walking skeleton (goal 2026-09-26d) → cli#254 OOAD scaffold
+- parent_drivers: honest adopter simulation; walking skeleton walks at every layer; mocks forbidden
+- open_acceptance: 2 real captures replace mocks; 2 drivers GREEN against real captures; docker-smoke CI triggers on scripts/tests/**
+- out_of_scope: remaining 4 Tier A drivers (sprint/riff/launch/build); architect-review (fires at closeout)
