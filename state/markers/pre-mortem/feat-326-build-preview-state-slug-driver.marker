@@ -1,0 +1,2 @@
+# Pre-mortem light reuses session-wide ledger
+- parent-ledger: docs/risk-ledgers/2026-10-05-session-h-driver-sweep.md

@@ -1,0 +1,5 @@
+# ADR-deviation marker — Driver 3 (cli#326)
+- date: 2026-10-05
+- branch: feat-326-build-preview-state-slug-driver
+- adr_governing: none — same characterization pattern as #322 (Session F precedent)
+- outcome: ADR-honored

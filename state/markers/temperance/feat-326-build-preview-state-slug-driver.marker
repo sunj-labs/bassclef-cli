@@ -1,0 +1,4 @@
+# Temperance marker — Driver 3 (cli#326)
+- date: 2026-10-05
+- scope-decision: grep-based driver pins RED on /build Phase 2b slug-mismatch + /launch inconsistent goal-name patterns
+- drift trigger: no upstream fix
