@@ -24,6 +24,26 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.10] - 2026-10-05
+### Added
+
+### Changed
+
+- **Bump bassclef substrate pin `v1.7.0` → `v1.7.1` in `.github/workflows/publish.yml`** (4 refs — L136 + L281 checkout `ref:` + L151 tag-assert + L152 error prose). v1.7.1 ships 7 Q1 Sam + Louis first-5-min friction cures covering `#306` bash 3.2 associative arrays, `#308` PyYAML trace anchor, `#316` /longrun flow, `#321` extract-intent, `#331` /autonomous lite procedure, `#332` hosting_platform × 3 anchors, plus a meta cure for capability-probe.sh. Tag resolved at upstream commit `a7951b50` published 2026-10-05T03:44:32Z. Pin shift PATCH per Session G plan.
+
+### Fixed
+
+- **`#306`** — flipped `smoke-drive-adopter-306-bash32.test.sh` from RED-detect to GREEN-assert. v1.7.1 cure strips `declare -A LABELS` from shipped `/onboard-repo` SKILL.md. Driver now asserts 0 hits per bundle sync; any future regression (declare -A back in bundle) lights up CI red.
+- **`#331`** — flipped `smoke-drive-adopter-331-autonomous-lite.test.sh` from RED-detect to GREEN-assert. v1.7.1 cure (upstream PR #2069) added the `## Lite procedure` H2 block to shipped `/autonomous` SKILL.md. Driver asserts the anchor present; regression (anchor removed) lights up CI red.
+- **`#332`** — flipped `smoke-drive-adopter-332-hosting-platform.test.sh` from RED-detect to GREEN-assert. v1.7.1 cure (upstream PR #2070) added the `cli#332 cure` HTML-comment anchor to all 3 of `/launch` + `/build` + `/deploy-prod` SKILLs. Driver asserts 3 of 3 anchors; any one removal lights up CI red.
+
+### Notes
+
+- Session G cascade shipped 4 PRs: #362 (bundle sync) + #363 (driver-306 flip) + #364 (driver-331 flip) + #365 (driver-332 flip). Ceremony landed per `.claude/rules/loop-discipline.md` — temperance + luminary (lead michael-feathers + supporting linus-torvalds + alistair-cockburn) + pre-mortem light (3 lenses × 17 risks + 5 top folds pre-code).
+- Two Session F drivers remain RED after bundle sync: `#322` (/launch template L640-641 still ships old appetite yaml key — v1.7.1 cure was partial) and `#329` (adr-discipline-check.sh shipped but settings.json wiring remains missing — predicted per Session G plan L41). Both stay open as follow-ons; status comments on each.
+- Session G plan at docs/next-session-plan-2026-10-05-session-g-v1-7-1-bundle-sync.md.
+- Risk ledger at docs/risk-ledgers/2026-10-05-session-g-v1-7-1-bundle-sync.md.
+
 ## [1.9.9] - 2026-10-03
 ### Added
 
