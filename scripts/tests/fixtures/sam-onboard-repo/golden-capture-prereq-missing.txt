@@ -1,0 +1,41 @@
+=== skill: /onboard-repo
+=== claude_bin: ~/.npm-global/bin/claude
+=== flag: --dangerously-skip-permissions
+=== timeout_sec: 300
+=== scratch_dir: ~/onboard-test
+=== output ===
+I ran the pre-flight checks `/onboard-repo` requires before touching anything. Here's what I found and where it stops.
+
+## What I checked
+
+- **Ancestor `.claude/` audit** — walked from this repo up to `$HOME`. Found `~/.claude`, but that's your real Claude Code home directory (hooks, sessions, projects) — not a stale bassclef install. No cleanup needed.
+- **Repo state** — `~/onboard-test` is a brand-new git repo: branch `master`, zero commits, no remote, nothing tracked except `.claude/skills` and `.claude/rules` (both already symlinked to `~/test`, which is a full bassclef checkout).
+- **Path A prerequisites** (standard GitHub-backed onboarding):
+  - `claude` on PATH — yes
+  - `gh` installed — **no** (`gh: command not found`)
+  - GitHub remote configured — **no**
+  - `.bassclef/init.manifest.json` present — no (so this isn't a "top-up" case either)
+
+`gh` being completely absent (not just unauthenticated) means Path A can't run any of its GitHub steps — label creation, branch protection, environment setup all fail immediately.
+
+## Where this stops
+
+Per the skill's prerequisite-missing gate, here's the menu it specifies:
+
+```
+Prerequisite missing for standard onboarding: gh CLI not installed.
+
+Pick one:
+
+  1. Empty-repo starter demo — runs /launch --local, no GitHub repo
+     created, no vendor accounts needed. Switches this dispatch to
+     --greenfield-from-intent (Path B). No separate API key needed —
+     uses the LLM your Claude Code session provides.
+  2. Fix the prereq and re-run standard onboarding (Path A).
+  3. Cancel.
+```
+
+One more thing worth flagging regardless of which path: this repo is on `master` with no commits. Path A separately refuses to run from `main`/`master` (substrate scaffolding goes through a PR, not a direct commit) — so even with `gh` installed, you'd first need `git checkout -b chore/bassclef-bootstrap`.
+
+**Which do you want?** `1` (local-only demo, no GitHub), `2` (I wait while you install/auth `gh`, then re-run), or `3` (stop here).
+=== exit: 0

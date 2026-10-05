@@ -1,0 +1,6 @@
+# Pre-mortem marker — Session J integration bridge
+- date: 2026-10-05
+- branch: feat/session-j-integration-bridge
+- ledger: docs/next-session-plan-2026-10-05-session-j-dynamic-driver-integration.md § Risk (3 lenses × 7 risks folded pre-code)
+- lenses: alistair-cockburn (R1-R3 walking-skeleton OAuth + capture size + wrapper shape), michael-feathers (R4-R5 scrub + non-determinism), alan-cooper (R6-R7 real jargon + scan-ceiling calibration)
+- folds-applied-pre-code: OAuth via CLAUDE_CODE_OAUTH_TOKEN env; scrub via sed before commit; pin capture + document the run; flag real jargon as upstream promote candidate (not test error); raise ceiling OR expose UX defect

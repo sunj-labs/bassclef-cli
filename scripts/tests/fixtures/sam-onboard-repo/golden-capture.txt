@@ -1,14 +1,25 @@
-=== claude_bin: /usr/local/bin/claude
-=== timeout_sec: 180
-=== scratch_dir: /home/adopter/onboard-test
+=== skill: /onboard-repo
+=== claude_bin: ~/.npm-global/bin/claude
+=== flag: --dangerously-skip-permissions
+=== mode: --greenfield-from-intent
+=== timeout_sec: 300
+=== scratch_dir: ~/onboard-test-greenfield
 === output ===
-I ran /onboard-repo and set up your workspace.
+Path B (`--greenfield-from-intent`) complete:
 
-Created:
-- .claude/settings.json
-- substrate.config.md
-- .bassclef/init.manifest.json
+**B.1 Intent:** tiny personal todo app — single user, add/complete/delete, no auth, local-first storage.
 
-Next step: run /sprint to see what's next.
+**B.2** `git init` + empty commit.
 
+**B.3** Scaffolded minimal wiring: `.claude/settings.json` (SessionStart hook), `substrate.config.md` (`hosting_platform: none`), `CLAUDE.md`. Committed.
+
+**Note:** no bassclef sibling checkout or network reachable in this sandbox, so the `bassclef-sync.sh` dispatcher couldn't be fetched (left a `.NOTE` placeholder instead of the real script). Everything else matches the Path B spec.
+
+**B.4/B.5 — skipped:** dispatching `/launch --local --voice-input` would generate a full artifact chain + localhost gallery, well past the 40-line budget. Not run.
+
+**Next step (your call):** run
+```
+/launch medium --local --voice-input "tiny personal todo app — single user, add/complete/delete tasks, no auth, local-first storage, minimal UI"
+```
+to get clickable mock variants on `localhost:8000+`.
 === exit: 0

@@ -1,0 +1,5 @@
+# Luminary marker — Session J integration bridge
+- date: 2026-10-05
+- branch: feat/session-j-integration-bridge
+- lead: alistair-cockburn — the walking skeleton must walk at every layer; mocks forbidden
+- supporting: michael-feathers (characterization pins real build), alan-cooper (persona assertions frame pass/fail), kent-beck (RED-first; real capture may flip assertions to RED — that is the signal)

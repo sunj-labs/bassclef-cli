@@ -1,6 +1,6 @@
 === claude_bin: /usr/local/bin/claude
 === timeout_sec: 120
-=== scratch_dir: /home/adopter/louis-pickup
+=== scratch_dir: ~/louis-pickup
 === output ===
 I ran /whereami on this repo. Here is everything I know about the current state
 of the project. The project is in Construction phase. The in-flight goal is the
@@ -44,6 +44,6 @@ functions. End goal checks exit code and artifact mention. Experience goal
 scans for jargon BLOCK terms. Life goal counts output body line count against
 a scan ceiling default forty lines.
 
-Phase: Construction. Run /sprint next.
+**Phase**: Construction. Run /sprint next.
 
 === exit: 0
