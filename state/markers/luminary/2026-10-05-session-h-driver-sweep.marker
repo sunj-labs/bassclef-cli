@@ -1,0 +1,9 @@
+# Luminary marker — Session H driver sweep
+- date: 2026-10-05
+- branch: session-h
+- lead: michael-feathers
+- supporting: kent-beck, linus-torvalds
+- lens-rationale:
+  - Feathers lead: characterization tests pin REAL behavior before any upstream cure; drivers are the characterization harness
+  - Beck supporting: RED-first discipline on each driver's test file; test owes acceptance before source
+  - Linus supporting: adopter contract — drivers run against dist/lite/ shipped bundle; cure never ships to adopters without a passing driver

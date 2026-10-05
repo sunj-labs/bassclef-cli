@@ -1,0 +1,5 @@
+# Luminary marker — Driver 1
+- date: 2026-10-05
+- branch: feat/311-artifact-ingestion-null-parent-driver
+- lead: michael-feathers
+- supporting: kent-beck, linus-torvalds

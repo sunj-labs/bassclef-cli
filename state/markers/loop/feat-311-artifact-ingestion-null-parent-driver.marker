@@ -1,0 +1,7 @@
+# Loop marker — Driver 1 (cli#311)
+- date: 2026-10-05
+- branch: feat-311-artifact-ingestion-null-parent-driver
+- wu_id: Session H Step 1 — #311 driver
+- iteration_count: 1
+- outcome: GREEN first iteration — RED-CONFIRMED verified locally; SKIP + GREEN-UNEXPECTED paths verified by code inspection
+- lens_used: [michael-feathers, kent-beck, linus-torvalds]

@@ -1,0 +1,5 @@
+# Pre-mortem light — Session H driver sweep
+- date: 2026-10-05
+- branch: session-h (6 feature branches)
+- lenses: michael-feathers (characterization), kent-beck (RED-first discipline), linus-torvalds (adopter contract)
+- ledger: docs/risk-ledgers/2026-10-05-session-h-driver-sweep.md

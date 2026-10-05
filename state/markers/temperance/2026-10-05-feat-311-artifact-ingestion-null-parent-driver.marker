@@ -1,0 +1,7 @@
+# Temperance marker — Driver 1 (cli#311)
+- date: 2026-10-05
+- branch: feat/311-artifact-ingestion-null-parent-driver
+- scope-decision:
+  - Right thing: bash Tier 0 driver that pins RED for parent_bet:null false-positive in dist/lite/.claude/hooks/artifact-ingestion-gate.sh
+  - Right way: Beck RED-first; one test file; 4-6 cases; characterization only
+  - Drift trigger: do NOT fix upstream hook; do NOT exceed 25 turns
