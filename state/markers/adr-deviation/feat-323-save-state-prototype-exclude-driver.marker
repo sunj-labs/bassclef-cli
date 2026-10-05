@@ -1,0 +1,4 @@
+# ADR-deviation marker — Driver 2
+- date: 2026-10-05
+- adr_governing: none — same characterization pattern as #322
+- outcome: ADR-honored

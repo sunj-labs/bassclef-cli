@@ -1,0 +1,4 @@
+# Pre-mortem light — Driver 2 reuses session-wide ledger
+- date: 2026-10-05
+- parent-ledger: docs/risk-ledgers/2026-10-05-session-h-driver-sweep.md
+- lenses: feathers + beck + torvalds
