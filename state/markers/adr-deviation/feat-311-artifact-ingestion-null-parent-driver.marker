@@ -1,0 +1,5 @@
+# ADR-deviation marker — Driver 1 (cli#311)
+- date: 2026-10-05
+- branch: feat-311-artifact-ingestion-null-parent-driver
+- adr_governing: none — same characterization driver pattern as #306 + #322 + #329 + #331 + #332 (Session F precedent); no ADR class touched
+- outcome: ADR-honored

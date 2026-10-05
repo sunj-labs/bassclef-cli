@@ -1,0 +1,6 @@
+# Lead-lens sign-off — Driver 1 (cli#311)
+- date: 2026-10-05
+- branch: feat-311-artifact-ingestion-null-parent-driver
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Characterization driver mirrors Session F pattern (#306 #322 #329 #331 #332). Single test file; 3 Tier 0 cases (RED anchor + stderr-text anchor + bundle-absent SKIP). Fixture under TMPDIR with trap cleanup. jq-mediated input shape per Claude Code harness. Verified RED-CONFIRMED locally against shipped v1.7.1 bundle. GREEN-UNEXPECTED + SKIP paths verified via code inspection.

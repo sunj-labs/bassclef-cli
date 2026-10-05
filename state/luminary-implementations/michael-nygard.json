@@ -26,8 +26,9 @@
     "state/markers/luminary/fix-245-oauth-remote-control-isolation.marker",
     "scripts/tests/smoke-assert-drift-cure.test.sh",
     "scripts/lib/smoke-assert.sh",
-    "docs/session-logs/2026-10-04-session-d-leaf-pickups.md"
+    "docs/session-logs/2026-10-04-session-d-leaf-pickups.md",
+    "docs/risk-ledgers/2026-10-05-session-g-v1-7-1-bundle-sync.md"
   ],
-  "last_scanned": "2026-10-04T19:38:38Z",
+  "last_scanned": "2026-10-05T09:44:51Z",
   "scanner_version": "1.0"
 }

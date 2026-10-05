@@ -1,0 +1,7 @@
+# Temperance marker — Session H driver sweep
+- date: 2026-10-05
+- branch: session-h (6 feature branches)
+- scope-decision:
+  - Right thing: ship 6 bash Tier 0 drivers that pin RED signals for cli#311 #312 #323 #324 #325 #326 against dist/lite/
+  - Right way: one driver per PR; Beck RED-first; each ships with 4-6 Tier 0 cases; characterizes defect, does NOT fix upstream
+  - Drift trigger: do NOT batch 2+ drivers in one PR; do NOT fix upstream bugs this session (characterization only); do NOT exceed 25 turns per driver without checkpoint
