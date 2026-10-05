@@ -1,0 +1,5 @@
+# ADR-deviation — Driver 6
+- date: 2026-10-05
+- branch: feat-325-launch-mocks-contrast-check-driver
+- adr_governing: none — same pattern as #322
+- outcome: ADR-honored
