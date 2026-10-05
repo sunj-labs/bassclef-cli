@@ -1,0 +1,5 @@
+# ADR-deviation marker — Driver 4 (cli#324)
+- date: 2026-10-05
+- branch: feat-324-launch-ux-migration-must-skip-driver
+- adr_governing: none — same characterization pattern as #322 Session F
+- outcome: ADR-honored

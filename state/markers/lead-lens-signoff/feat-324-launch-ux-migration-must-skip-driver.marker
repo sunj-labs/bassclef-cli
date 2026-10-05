@@ -1,0 +1,6 @@
+# Lead-lens sign-off — Driver 4 (cli#324)
+- date: 2026-10-05
+- branch: feat-324-launch-ux-migration-must-skip-driver
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Dual-SKILL grep driver. Asserts /launch Phase 11 calls /ux-migration a MUST gate AND /ux-migration body has a "Skip for greenfield" row.
