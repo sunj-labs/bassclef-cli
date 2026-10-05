@@ -1,0 +1,6 @@
+# Lead-lens sign-off — Session F pivot (#331)
+- date: 2026-10-05
+- branch: feat-331-autonomous-lite-driver
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Pattern mirrors #306 skeleton (merged b483651). Narrower grep anchor pinned per risk ledger F1 fold. All 3 exit paths designed. 498/498 vitest green. Typecheck clean. Driver captures pre-cure state as adopter-regression anchor for the already-landed upstream cure (PR #2069 merged 4a661adc).

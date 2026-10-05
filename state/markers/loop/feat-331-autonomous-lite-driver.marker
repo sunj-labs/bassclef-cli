@@ -1,0 +1,7 @@
+# Loop marker — Session F pivot (#331)
+- date: 2026-10-05
+- branch: feat-331-autonomous-lite-driver
+- wu_id: Session F Step 2 — #331 driver
+- iteration_count: 1
+- outcome: GREEN first iteration — RED-CONFIRMED path + GREEN-UNEXPECTED path (verified against cured upstream SKILL.md) + SKIP path all designed-and-verified
+- lens_used: [michael-feathers, alistair-cockburn, linus-torvalds]
