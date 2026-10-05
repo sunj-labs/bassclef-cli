@@ -140,3 +140,23 @@ Per `.claude/rules/loop-discipline.md`:
 - Kunal cold-adopter report: bassclef-upstream#2036
 - Session F precedent: PRs #355, #357, #358, #359, #360
 - /extract-intent output at /tmp/session-h-chain-intent.json (confidence 0.92; Cockburn + Cooper picked)
+
+---
+
+## Amendment 2026-10-05 — integration-gap discovered end of Session I
+
+Session I PRs #376 + #377 shipped the assertion-lib layer only. The fixtures are hand-crafted mocks. Cockburn's walking skeleton rule forbids mocks at any layer. Session J (next) ships the integration bridge: replace mock fixtures with REAL captures from docker-smoke running `claude -p` against @thebassclef/lite@1.9.10.
+
+See `docs/next-session-plan-2026-10-05-session-j-dynamic-driver-integration.md` for the converged prep.
+
+Revised 7-PR count:
+- PR 1 (shipped #376) — assertion lib + Sam fixture scaffold
+- PR 2 (shipped #377) — Louis fixture scaffold (pattern-scale check)
+- **PR 3 (next, Session J) — integration bridge: real captures replace mocks for Sam + Louis**
+- PR 4 — /sprint × Louis (real capture)
+- PR 5 — /riff × Jamie (real capture)
+- PR 6 — /launch × Jamie (real capture)
+- PR 7 — /build × Jamie (real capture)
+- PR 8 (new) — architect review covering real-capture suite
+
+Total revised: 8 PRs. Session J ships PR 3; remaining 4 drivers plus architect review ride the proven real-capture path across Sessions K-L.
