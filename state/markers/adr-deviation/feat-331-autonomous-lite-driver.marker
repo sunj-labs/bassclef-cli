@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session F pivot (#331)
+- date: 2026-10-05
+- branch: feat-331-autonomous-lite-driver
+- adr_governing: none — same characterization driver pattern as #306; no ADR class touched
+- outcome: ADR-honored

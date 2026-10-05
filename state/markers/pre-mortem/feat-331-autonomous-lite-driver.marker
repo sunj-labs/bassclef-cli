@@ -1,0 +1,7 @@
+# Pre-mortem light marker — Session F #331 driver
+- date: 2026-10-05
+- branch: feat-331-autonomous-lite-driver
+- ledger: docs/risk-ledgers/2026-10-05-session-f-331-autonomous-lite.md
+- lenses: [michael-feathers, linus-torvalds]
+- risks-named: 6
+- risks-folded: 6

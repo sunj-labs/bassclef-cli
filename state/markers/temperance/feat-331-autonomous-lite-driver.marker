@@ -1,0 +1,7 @@
+# Temperance marker — Session F pivot (#331)
+- date: 2026-10-05
+- branch: feat-331-autonomous-lite-driver
+- scope-decision: Ship #331 driver — characterize pre-cure state (lite procedure anchor absent in shipped autonomous SKILL.md). Same pattern as #306 skeleton. One file + ceremony chain.
+- right-thing: close operator's specific ask on #331/#332 before continuing Session F queue
+- right-way: class b ceremony compressed since pattern proven by #306
+- drift-trigger: scope creep into end-to-end claude run; new container; stacking with #332 driver (ship each as independent PR)
