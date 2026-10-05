@@ -1,0 +1,5 @@
+# Lead-lens sign-off — Session I PR 2
+- date: 2026-10-05
+- branch: feat-session-i-whereami-louis
+- lead: alistair-cockburn
+- rationale: Second Tier A chain driver rides scripts/lib/persona-assert.sh unchanged. Only new content: fixture dir + test file + UC. Pattern scales as predicted. Louis persona slice named; 3 Cooper goal levels asserted; 3 fixtures (golden + bad-jargon + bad-wall).

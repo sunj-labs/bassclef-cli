@@ -1,0 +1,18 @@
+=== claude_bin: /usr/local/bin/claude
+=== timeout_sec: 120
+=== scratch_dir: /home/adopter/louis-pickup
+=== output ===
+I ran /whereami on this repo.
+
+Phase: Construction
+In-flight goal: Tier A dynamic driver suite (PR 2 of 7)
+Last session: 2 days ago (Session I kickoff)
+Next goal: /whereami × Louis — this PR
+
+Open items:
+- 5 Tier A chain drivers to ship after this one
+- Session H architect-review follow-on: cli#373
+
+Run /sprint to see what's next.
+
+=== exit: 0
