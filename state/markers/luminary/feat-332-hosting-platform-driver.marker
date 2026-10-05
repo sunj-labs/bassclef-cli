@@ -1,0 +1,8 @@
+# Luminary marker — Session F pivot (#332)
+- date: 2026-10-05
+- branch: feat-332-hosting-platform-driver
+- lead: michael-feathers
+- supporting:
+  - alistair-cockburn
+  - linus-torvalds
+- rationale: Feathers lead — pre-cure characterization at 3 shipped surfaces. Cockburn — same walking skeleton pattern. Torvalds — adopter contract preserved; one driver reads 3 adopter-observable files.
