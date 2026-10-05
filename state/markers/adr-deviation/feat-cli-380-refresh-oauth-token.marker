@@ -1,0 +1,5 @@
+# ADR-deviation marker — cli#380
+- date: 2026-10-06
+- branch: feat/cli-380-refresh-oauth-token
+- adr_governing: none — adopter-script addition; no ADR covers OAuth refresh wrappers
+- outcome: ADR-honored

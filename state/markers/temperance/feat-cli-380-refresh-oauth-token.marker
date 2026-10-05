@@ -1,0 +1,6 @@
+# Temperance marker — cli#380 refresh-oauth-token.sh
+- date: 2026-10-06
+- branch: feat/cli-380-refresh-oauth-token
+- scope-decision: Right thing — ship one-command OAuth refresh script that unblocks Session J + any future refresh. Right way — Beck RED-first (tests before source) per Tier 0 strict TDD; parameterize file path so cloud container can swap store later. Drift trigger — do NOT bake cloud-non-interactive refresh into this script (separate ticket); do NOT touch service-account path (separate refactor).
+- parent_chain: cli#380 → Session J unblock → cli#375 Tier A roadmap
+- out_of_scope: cloud-hosted refresh variant; service-account auth; Keychain integration

@@ -92,3 +92,6 @@ harness-out/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# docker-smoke local run output (bind-mount landing)
+harness-out/

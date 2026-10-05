@@ -1,0 +1,7 @@
+# Pre-mortem marker — cli#380
+- date: 2026-10-06
+- branch: feat/cli-380-refresh-oauth-token
+- ledger: docs/risk-ledgers/2026-10-06-cli-380-refresh-oauth-token.md
+- mode: light (3 lenses × 5 risks per lens; 15 risks total; all folded pre-code)
+- lenses: saltzer-schroeder (R1-R5 atomic/backup/chmod/regex/isolated-probe), tony-hoare (R6-R10 precond/postcond/rollback/mutex/length-window), alan-cooper (R11-R15 banner/plain-errors/trap/dry-run-truth/help-from-header)
+- folds-applied-pre-code: 15/15 — see ledger § Pre-code folds applied
