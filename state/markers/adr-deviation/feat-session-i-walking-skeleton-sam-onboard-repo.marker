@@ -1,0 +1,5 @@
+# ADR-deviation — Session I walking skeleton
+- date: 2026-10-05
+- branch: feat-session-i-walking-skeleton-sam-onboard-repo
+- adr_governing: ADR-029 release pipeline (walking skeleton rides existing docker-smoke harness); no new ADR class
+- outcome: ADR-honored
