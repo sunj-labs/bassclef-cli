@@ -1,0 +1,49 @@
+=== claude_bin: /usr/local/bin/claude
+=== timeout_sec: 120
+=== scratch_dir: /home/adopter/louis-pickup
+=== output ===
+I ran /whereami on this repo. Here is everything I know about the current state
+of the project. The project is in Construction phase. The in-flight goal is the
+Tier A dynamic driver suite. We shipped PR 1 of 7 last session. We have 5 more
+Tier A chain drivers queued after this one. The next goal is /whereami Louis
+which is this PR. Session H architect-review filed cli#373 as a MODERATE
+finding. The last session was 2 days ago. The driver suite rides the walking
+skeleton pattern from PR 1. The lib at scripts/lib/persona-assert.sh is shared
+across all Tier A drivers. The fixtures per driver land under scripts/tests/
+fixtures/. Each driver asserts across Cooper 3-level goals. The end goal is
+chain completion. The experience goal is output quality. The life goal is
+scannability. Each PR carries 6 state markers for temperance pre-mortem
+luminary adr-deviation loop and lead-lens-signoff. The pattern was proven in
+PR 1. PR 2 extends it to Louis persona slice. PR 3 through 6 will add Sprint
+and Riff and Launch and Build. PR 7 ships the architect review. Each PR costs
+roughly 15 to 40 turns. Total session scope spans 2 to 3 sessions. The /longrun
+discipline runs at session level. The /loop CI till green rule applies per PR.
+The /architect-review auto-dispatches at closeout per /longrun Step 7.5.
+Session H merged 7 PRs including 6 characterization drivers and the review.
+Session I is this one. Session J will cover PR 3 if we stop at PR 2 this
+session. The roadmap lives at docs/plans/tier-a-dynamic-driver-roadmap.md.
+Session logs land at docs/session-logs/.
+
+Open tickets include cli#311 for null-parent artifact-ingestion-gate false-
+positive. Also cli#312 for verb_goal_pairs no-producer schema asymmetry.
+Also cli#322 for /launch Phase 14 template jargon. Also cli#323 for the
+save-state.sh prototype auto-commit defect. Also cli#324 for /launch versus
+/ux-migration MUST-vs-skip conflict. Also cli#325 for /launch mocks no
+contrast check. Also cli#326 for /build Phase 2b slug mismatch. Also cli#329
+for lite tier adr-discipline hook unwired. Also cli#373 architect-review
+follow-on about bump-version.mjs postcondition. Also cli#375 the tracker for
+this roadmap. Nine tickets total.
+
+Upstream filing bassclef-upstream#2087 covers header-vs-manifest tier
+disagreement on 14 hooks. Related to cli#329. Also the Kunal cold-adopter
+report bassclef-upstream#2036 covers 10 findings total. Some addressed by
+Session H drivers. Some addressed by Session I drivers coming.
+
+The persona-assert lib at scripts/lib/persona-assert.sh ships with three
+functions. End goal checks exit code and artifact mention. Experience goal
+scans for jargon BLOCK terms. Life goal counts output body line count against
+a scan ceiling default forty lines.
+
+Phase: Construction. Run /sprint next.
+
+=== exit: 0

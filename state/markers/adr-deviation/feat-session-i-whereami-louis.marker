@@ -1,0 +1,5 @@
+# ADR-deviation — Session I PR 2
+- date: 2026-10-05
+- branch: feat-session-i-whereami-louis
+- adr_governing: ADR-029 release pipeline (rides existing persona-assert lib from PR #376)
+- outcome: ADR-honored
