@@ -1,0 +1,7 @@
+# Loop marker — Driver 4 (cli#324)
+- date: 2026-10-05
+- branch: feat-324-launch-ux-migration-must-skip-driver
+- wu_id: Session H Step 4 — #324 driver
+- iteration_count: 1
+- outcome: GREEN first iteration
+- lens_used: [michael-feathers, kent-beck, linus-torvalds]
