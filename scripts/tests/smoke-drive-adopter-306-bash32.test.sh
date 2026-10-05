@@ -9,21 +9,24 @@
 # bash 3.2 which has no associative arrays. Adopter runs the block,
 # bash errors, no labels get created, script keeps going.
 #
-# This driver asserts the RED signal is observed TODAY. When upstream
-# cures the ticket (strip `declare -A`, use a while-read loop per the
-# ticket body), and cli bundle-syncs, this test fails. That failure
-# is the signal to flip semantics — the characterization is done; the
-# ticket closes via /release-close-sweep.
+# This driver asserts the GREEN signal: #306 cure is present in the
+# shipped bundle. Session G bundle sync (v1.7.0 → v1.7.1) brought the
+# upstream cure for #306 (strip `declare -A`, use a while-read loop).
+# From Session G forward this driver is a durable regression anchor —
+# if a future bundle sync ever re-ships `declare -A` in this SKILL.md,
+# the driver fails loud and surfaces the regression on CI.
 #
-# Walking skeleton for Session F per
+# Semantics flipped in Session G per
+# docs/next-session-plan-2026-10-05-session-g-v1-7-1-bundle-sync.md L48.
+# Walking skeleton origin: Session F per
 # docs/next-session-plan-2026-10-05-session-f-driver-build-out.md L41-67.
 #
 # @pattern patterns/code/feathers/characterization-test.md
 #
 # Exit codes:
-#   0  — RED-CONFIRMED (declare -A present in shipped bundle)
-#   1  — GREEN-UNEXPECTED (declare -A gone; cure may have landed)
-#   77 — SKIP (bundle not generated; run `npm run bundle` first)
+#   0  — GREEN-CONFIRMED (0 declare -A hits; cure present in shipped bundle)
+#   1  — RED-REGRESSION (declare -A back in shipped bundle; cure regressed)
+#   77 — SKIP (bundle not generated; run prepublish script first)
 
 set -euo pipefail
 
@@ -43,12 +46,12 @@ match_count=$(grep -cE '^[[:space:]]*declare[[:space:]]+-A' "$SKILL_FILE" 2>/dev
 match_count=${match_count//[^0-9]/}
 match_count=${match_count:-0}
 
-if [[ "$match_count" -gt 0 ]]; then
-  echo "RED-CONFIRMED|driver-306|${match_count} declare -A hit(s) in shipped SKILL.md"
-  echo "PASS: #306 bash 3.2 break reproduces against shipped substrate"
+if [[ "$match_count" -eq 0 ]]; then
+  echo "GREEN-CONFIRMED|driver-306|0 declare -A hits — cure present in shipped SKILL.md"
+  echo "PASS: #306 cure holds; shipped substrate uses no bash 3.2 associative arrays"
   exit 0
 fi
 
-echo "GREEN-UNEXPECTED|driver-306|0 declare -A hits — upstream may have cured #306"
-echo "FAIL: driver no longer RED — flip semantics to assert GREEN; verify ticket body"
+echo "RED-REGRESSION|driver-306|${match_count} declare -A hit(s) returned in shipped SKILL.md"
+echo "FAIL: #306 regressed — bash 3.2 break is back in shipped substrate"
 exit 1
