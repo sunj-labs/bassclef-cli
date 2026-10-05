@@ -1,0 +1,5 @@
+# Lead-lens sign-off — Driver 2 (cli#323)
+- date: 2026-10-05
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Grep-based driver mirrors #322. 2 greps characterize the defect — one asserts docs/ staging line exists, one asserts exclusion pathspec absent. Both must hold for RED. Pattern accepts either ':!docs/prototypes' or ':(exclude)docs/prototypes' idioms for post-cure GREEN flip.

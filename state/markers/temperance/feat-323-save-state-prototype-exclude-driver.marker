@@ -1,0 +1,7 @@
+# Temperance marker — Driver 2 (cli#323)
+- date: 2026-10-05
+- branch: feat-323-save-state-prototype-exclude-driver
+- scope-decision:
+  - Right thing: bash Tier 0 driver pins RED on save-state.sh L211-212 missing docs/prototypes exclusion
+  - Right way: grep-based characterization (mirrors #322 pattern); 3 Tier 0 cases
+  - Drift trigger: no upstream cure; no cross-file changes
