@@ -1,0 +1,7 @@
+# Temperance marker — Session F walking skeleton (#306)
+- date: 2026-10-05
+- branch: feat-306-bash32-driver
+- scope-decision: Ship ONE driver end-to-end (#306 bash 3.2 declare -A under lite runtime). Session A invariants lib reused. New test file + new fixture dir. No cure authoring. Follow-ons grow from this skeleton same session.
+- right-thing: characterize RED today so cure flips driver GREEN on next bundle sync; prove /release-close-sweep ticket closure signal end-to-end
+- right-way: class b ceremony — brief UC + luminary consult (Cockburn + Feathers) + pre-mortem light (2 lenses × 3-5 risks) + Beck RED-first + impl + verify + PR
+- drift-trigger: scope creep into #331 or #332 (both BLOCKED on Slot 9); authoring a cure instead of characterization; new container or helper lib
