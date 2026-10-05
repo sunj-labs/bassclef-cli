@@ -1,0 +1,6 @@
+# Lead-lens sign-off — Session F (#329)
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- lead: michael-feathers
+- verdict: READY — no findings
+- rationale: Same pattern as prior Session F drivers. Captures DEAD-LETTER adopter risk — rule promises mediation that settings.json does not deliver. 4 exit paths designed. Full suite green.

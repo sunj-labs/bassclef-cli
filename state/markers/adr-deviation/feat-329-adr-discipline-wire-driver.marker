@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session F (#329)
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- adr_governing: none — same characterization pattern as prior Session F drivers
+- outcome: ADR-honored
