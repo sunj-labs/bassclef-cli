@@ -1,0 +1,7 @@
+# Loop marker — Session F (#329)
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- wu_id: Session F Step 4 — #329 driver
+- iteration_count: 1
+- outcome: GREEN first iteration — RED-CONFIRMED verified; GREEN-UNEXPECTED verified via tempfile
+- lens_used: [michael-feathers, saltzer-schroeder, alistair-cockburn]

@@ -1,0 +1,7 @@
+# Pre-mortem light marker — Session F #329 driver
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- ledger: docs/risk-ledgers/2026-10-05-session-f-329-adr-dead-letter.md
+- lenses: [michael-feathers, saltzer-schroeder]
+- risks-named: 4
+- risks-folded: 4

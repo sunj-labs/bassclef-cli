@@ -1,0 +1,8 @@
+# Luminary marker — Session F (#329)
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- lead: michael-feathers
+- supporting:
+  - saltzer-schroeder
+  - alistair-cockburn
+- rationale: Feathers — characterize the broken state. Saltzer-Schroeder — complete mediation is the discipline being violated (rule says hook mediates but it does not). Cockburn — same walking skeleton shape.

@@ -1,0 +1,7 @@
+# Temperance marker — Session F (#329 dead-letter driver)
+- date: 2026-10-05
+- branch: feat-329-adr-discipline-wire-driver
+- scope-decision: Ship #329 driver — asserts adr-discipline-check.sh shipped but not wired in settings.json. DEAD-LETTER pattern per rule mechanism-fidelity.md.
+- right-thing: close operator's queue item on #329; add characterization anchor for a rule-vs-mechanism gap
+- right-way: class b ceremony; pattern 3x-proven (#306 #331 #332)
+- drift-trigger: scope into fixing the wiring itself (that's upstream work); multiple drivers (keep narrow)
