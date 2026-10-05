@@ -1,0 +1,7 @@
+# Temperance marker — Session F pivot (#332)
+- date: 2026-10-05
+- branch: feat-332-hosting-platform-driver
+- scope-decision: Ship #332 driver — one file greps 3 cure anchors across /launch + /build + /deploy-prod shipped SKILL.md files. All 3 anchors confirmed ABSENT in shipped bundle, PRESENT in cured upstream.
+- right-thing: close operator's named ask on #332 (sister to #331)
+- right-way: class b ceremony compressed; pattern proven by #306 + #331
+- drift-trigger: scope into end-to-end claude run; new fixture dir; three separate drivers instead of one

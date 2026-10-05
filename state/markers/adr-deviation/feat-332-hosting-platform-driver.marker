@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session F pivot (#332)
+- date: 2026-10-05
+- branch: feat-332-hosting-platform-driver
+- adr_governing: none — same characterization driver pattern as #306 + #331; no ADR class touched
+- outcome: ADR-honored
