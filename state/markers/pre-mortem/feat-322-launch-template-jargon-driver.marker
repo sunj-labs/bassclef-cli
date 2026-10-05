@@ -1,0 +1,7 @@
+# Pre-mortem light — Session F #322 driver
+- date: 2026-10-05
+- branch: feat-322-launch-template-jargon-driver
+- lenses: [michael-feathers, linus-torvalds]
+- risks-named: 3
+- risks-folded: 3
+- note: pattern 5x-proven; risks are the same shape as prior drivers (F1 narrow anchor, F2 bundle sync lifecycle, L1 adopter contract preserved)

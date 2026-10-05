@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session F (#322)
+- date: 2026-10-05
+- branch: feat-322-launch-template-jargon-driver
+- adr_governing: none — same characterization pattern
+- outcome: ADR-honored
