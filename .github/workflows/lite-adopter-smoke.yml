@@ -37,8 +37,10 @@ on:
     paths:
       - '.github/workflows/lite-adopter-smoke.yml'
       - 'scripts/tests/smoke-drive-e2e-*.test.sh'
+      - 'scripts/tests/claude-chain.test.sh'
       - 'scripts/tests/lib/lite-runtime-invariants.sh'
       - 'scripts/lib/smoke-assert.sh'
+      - 'scripts/lib/claude-chain.sh'
       - 'Dockerfile.lite-adopter'
       - 'scripts/tests/run-lite-container.sh'
 
@@ -112,7 +114,8 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           for test in \
             scripts/tests/lite-runtime-invariants.test.sh \
-            scripts/tests/smoke-assert-check-artifact-exists.test.sh ; do
+            scripts/tests/smoke-assert-check-artifact-exists.test.sh \
+            scripts/tests/claude-chain.test.sh ; do
             if [[ -f "$test" ]]; then
               echo "--- $test ---"
               bash "$test"

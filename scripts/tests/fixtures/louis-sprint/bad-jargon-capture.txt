@@ -1,0 +1,21 @@
+=== skill: /sprint
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# Sprint — Session K load-bearing substrate primitives
+
+**Active goal:** Session K operationalizes the Tier A chain-driving primitive via composer-first dispatch across the four persona-anchored drivers.
+
+**In flight:**
+- PR 4 — composer scaffold for the load-bearing /sprint × Louis primitive
+
+**Blast radius:** Primitive is load-bearing across the thread; operationalizing requires blast-radius audit before merge.
+
+**Next-work composition:**
+1. Primitive scaffold with tier-preset enforcement.
+2. Load-bearing composer dispatch chain for downstream primitives.
+3. Operationalize the walking skeleton.
+
+Composer dispatch per the primitive-anchored thread. Fire /longrun prep to operationalize scope.
+=== exit: 0

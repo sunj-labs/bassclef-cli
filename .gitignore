@@ -86,9 +86,9 @@ state/events/test-runs/
 # Vitest coverage output (cli#165)
 coverage/
 *.lcov
-# >>> bassclef-sync managed symlinks (do not edit) >>>
-CLAUDE.md.bak.*
-# <<< bassclef-sync managed symlinks <<<
 
 # Session J smoke outputs — bind-mount capture dir, never committed
 harness-out/
+# >>> bassclef-sync managed symlinks (do not edit) >>>
+CLAUDE.md.bak.*
+# <<< bassclef-sync managed symlinks <<<

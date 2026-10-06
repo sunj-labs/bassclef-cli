@@ -1,0 +1,6 @@
+# ADR-deviation marker — PR 4 chain helper + /sprint × Louis
+- date: 2026-10-07
+- branch: feat/cli-375-pr-4-sprint-louis-chain-helper
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
+- note: Reviewed docs/adrs/ADR-001..ADR-010 + ADR-057. None govern scripts/lib/*.sh test harness primitives. ADR-001..010 cover CLI commands (init/sync/migrate), build toolchain (Vite + TypeScript + Vitest), publish pipeline, install harness contract, Model C open-core split, and lite catalog path invariant. ADR-057 covers lite catalog destination paths. The chain helper is a Tier A testing harness primitive scoped under scripts/lib/ — distinct from CLI command surfaces and distribution contracts. New primitive adds narrow interface (claude_chain_capture + claude_chain_continue) with env-var contract (CLAUDE_BIN, CLAUDE_CHAIN_TIMEOUT_SEC, CLAUDE_PERMISSIONS) and 5-line capture header. Interface shape mirrors scripts/smoke-drive-onboard-repo.sh (shipped) + harness/docker/entry.sh (shipped). No cross-cutting concern touched.

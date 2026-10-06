@@ -22,9 +22,12 @@ on:
       - 'scripts/lib/smoke-*.sh'
       - 'scripts/lib/smoke-drive-*.sh'
       - 'scripts/lib/persona-assert.sh'
+      - 'scripts/lib/claude-chain.sh'
+      - 'scripts/tests/claude-chain.test.sh'
       - 'scripts/tests/smoke-drive-e2e-*.sh'
       - 'scripts/tests/fixtures/sam-onboard-repo/**'
       - 'scripts/tests/fixtures/louis-whereami/**'
+      - 'scripts/tests/fixtures/louis-sprint/**'
       - '.github/workflows/docker-smoke.yml'
   workflow_dispatch:
     inputs:
