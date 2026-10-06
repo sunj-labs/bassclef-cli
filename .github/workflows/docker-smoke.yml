@@ -29,6 +29,7 @@ on:
       - 'scripts/tests/fixtures/louis-whereami/**'
       - 'scripts/tests/fixtures/louis-sprint/**'
       - 'scripts/tests/fixtures/jamie-riff/**'
+      - 'scripts/tests/fixtures/jamie-launch/**'
       - '.github/workflows/docker-smoke.yml'
   workflow_dispatch:
     inputs:

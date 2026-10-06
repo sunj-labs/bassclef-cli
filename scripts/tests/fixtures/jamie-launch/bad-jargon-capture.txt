@@ -1,0 +1,29 @@
+=== skill: /launch medium
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /launch — load-bearing composer gallery
+
+Intent: operationalize the signup primitive via composer dispatch.
+
+## Mock gallery (3 primitives)
+
+### Variant A — tier-preset composer
+Primitive: load-bearing hero composer.
+Blast radius: entire signup surface.
+
+### Variant B — composer-first dispatch
+Primitive: scope-bounded signup composer.
+Blast radius: narrow (local only).
+
+### Variant C — operationalized primitive
+Primitive: dispatch-chain-enforced signup primitive.
+Blast radius: compose-with the full signup stack.
+
+## Spec
+
+Operationalize the composer-first signup primitive.
+
+Next: operationalize via /build composer dispatch.
+=== exit: 0

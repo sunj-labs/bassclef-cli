@@ -1,0 +1,52 @@
+=== skill: /launch medium
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /launch medium — weekly briefing newsletter signup page
+
+Intent: a signup page for the weekly briefing newsletter targeted at SMB operators who manage multiple SaaS tools.
+
+## Mock gallery (3 variants)
+
+### Variant A — Tufte (data over decoration)
+Headline: "47 tools your team uses. One briefing. 20 minutes a week."
+Proof: sparkline of open rates for last 12 weeks across 1,200 subscribers.
+Typography: Charter at 18px body, 36px headline. One typeface family.
+Color palette: ink on cream. Two accents (red for high weeks, green for recent uptick).
+Hero image: none. Density first.
+URL: /tmp/launch-tufte/
+Spec snippet: 2-column grid, data-table for recent issues, signup form sidebar.
+
+### Variant B — Rams (less, but better)
+Headline: "The weekly briefing for people who build small things."
+Proof: one testimonial, one byline, white space.
+Typography: Helvetica Neue. 42px headline. 20px body.
+Color palette: neutral grays plus one brand color for the CTA.
+Hero image: large grayscale photo.
+URL: /tmp/launch-rams/
+Spec snippet: single-column centered layout, 60% viewport max-width.
+
+### Variant C — Walker (editorial voice)
+Headline: "You read 40 tabs this week. This one is on us."
+Proof: three recent topic tags with hover-preview cards.
+Typography: Walker Studios typeface at 48px headline, Reader at 17px body.
+Color palette: full-bleed background, dynamic per-issue.
+Hero image: generated collage from this week's coverage.
+URL: /tmp/launch-walker/
+Spec snippet: full-width hero, scroll-triggered reveal, inline tag preview cards.
+
+## Buildable spec
+
+System: a Next.js signup form POST-ing to a Postgres table. Rate-limited at 3 sign-ups per minute per IP. Email validation via Zod schema at API boundary. Confirmation email sent via Resend SDK with signed unsubscribe token (HS256, 30-day expiry). Signup events logged to Posthog with UTM capture.
+
+## INVEST user stories (5)
+
+1. As a reader, I can see the headline in under 2 seconds so I know what the briefing covers.
+2. As a reader, I can sign up with just an email so I don't abandon the form.
+3. As the operator, I can see weekly sign-up counts in Posthog so I know if the hero is working.
+4. As a reader, I can confirm my subscription from the welcome email so my address is verified.
+5. As the operator, I can see per-variant conversion data so I can pick the winning hero.
+
+Next: pick a variant. Then say "/build <variant>" to ship it.
+=== exit: 0

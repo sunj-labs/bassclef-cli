@@ -1,0 +1,10 @@
+# Temperance marker — PR 6 /launch × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-6-launch-jamie
+- scope-decision:
+  - Right thing: Ship /launch x Jamie Tier A driver. Mirrors Jamie-riff shape. 3 fixtures.
+  - Right way: Sources chain helper from main (PR 5 will have fixed it by merge time). Hand-crafted fixtures with OAuth-refresh follow-on.
+  - Drift trigger: no /build driver work on this branch.
+- parent_chain: cli#375 -> PRs #384, #385 (chain helper + 1st 2 drivers landed) -> PR 6 (/launch driver)
+- plan_doc: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md
+- out_of_scope: PR 7 (/build); live docker captures
