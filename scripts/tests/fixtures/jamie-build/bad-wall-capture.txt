@@ -1,0 +1,50 @@
+=== skill: /build
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /build — weekly briefing signup page
+
+Reading plan from docs/iteration-bets/2026-10-07-signup-page.md.
+Picked Variant B (Rams minimal). 3 user stories to ship.
+
+## Story 1 of 3 — signup form POST endpoint
+
+Branch: feat/signup-api
+Files touched: src/app/api/signup/route.ts, src/lib/signup/validate.ts, prisma/migrations/20261007_signup_add.sql
+Tests added: tests/api/signup.test.ts (4 Tier 0 cases — happy path, rate-limit 429, invalid email 400, duplicate email 409)
+Reviewer agent findings: 0 red, 1 amber (missing Content-Type header assertion); amber folded in iteration 2.
+Verify: 4 Tier 0 tests PASS. 94% branch coverage. Reviewer signed off at iteration 2.
+PR: #412 (OPEN; ready for human review; 342 LOC +, 18 LOC -)
+
+## Story 2 of 3 — hero rendering + form
+
+Branch: feat/signup-hero
+Files touched: src/app/page.tsx, src/components/Hero.tsx, src/components/SignupForm.tsx, src/app/page.module.css
+Tests added: tests/components/Hero.test.tsx (3 cases), tests/components/SignupForm.test.tsx (3 cases), e2e/signup-flow.spec.ts (1 Playwright smoke)
+Reviewer agent findings: 1 red (A11y violation on form label), fixed in iteration 2; 0 amber.
+Verify: 7 unit + 1 Playwright smoke PASS. 88% branch coverage. Reviewer signed off at iteration 2.
+PR: #413 (OPEN; ready for human review; 487 LOC +, 23 LOC -)
+
+## Story 3 of 3 — conversion tracking
+
+Branch: feat/signup-tracking
+Files touched: src/lib/analytics/signup.ts, src/app/api/signup/route.ts
+Tests added: tests/analytics/signup.test.ts (2 integration cases with mock Posthog SDK)
+Reviewer agent findings: 0 red, 0 amber. Clean on iteration 1.
+Verify: 2 integration tests PASS. 100% branch coverage. Reviewer signed off at iteration 1.
+PR: #414 (OPEN; ready for human review; 156 LOC +, 4 LOC -)
+
+## Prod deploy
+
+Gated on human per guardrails. Merge each PR when ready. Prod deploy workflow fires on main push after all 3 land. Expected prod deploy time: ~3 minutes per PR.
+
+## Verify report summary
+
+Total tests added: 13 (10 unit + 1 Playwright smoke + 2 integration)
+Total LOC: 985 added, 45 removed
+Reviewer iterations: 2 for Story 1-2, 1 for Story 3
+Prod gate: human approval required for 3 PRs
+
+Next: review PRs #412, #413, #414. Merge in order. Prod deploys automatically.
+=== exit: 0

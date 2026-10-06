@@ -1,0 +1,10 @@
+# Temperance marker — PR 7 /build × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-7-build-jamie
+- scope-decision:
+  - Right thing: Ship /build x Jamie Tier A driver. Final driver. 7-of-7 Tier A harness coverage.
+  - Right way: Mirror Jamie-launch/Jamie-riff pattern. Hand-crafted fixtures. OAuth-refresh follow-on.
+  - Drift trigger: do not expand into PR 8 architect-review scope (that is a separate ticket per plan).
+- parent_chain: cli#375 -> PRs #384 #385 PR 6 (chain) -> PR 7 (last Tier A driver)
+- plan_doc: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md
+- out_of_scope: PR 8 architect-review (follow-on ticket)
