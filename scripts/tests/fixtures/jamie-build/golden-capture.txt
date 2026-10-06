@@ -1,0 +1,34 @@
+=== skill: /build
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /build — weekly briefing signup page
+
+Reading plan from docs/iteration-bets/2026-10-07-signup-page.md.
+Picked Variant B (Rams minimal). 3 user stories to ship.
+
+## Story 1 of 3 — signup form POST endpoint
+
+Branch: feat/signup-api
+Verify: 4 Tier 0 tests PASS. Reviewer agent signed off.
+PR: #412 (OPEN; ready for human review)
+
+## Story 2 of 3 — hero rendering + form
+
+Branch: feat/signup-hero
+Verify: 6 unit tests + 1 Playwright smoke PASS. Reviewer signed off.
+PR: #413 (OPEN; ready for human review)
+
+## Story 3 of 3 — conversion tracking
+
+Branch: feat/signup-tracking
+Verify: 2 integration tests PASS. Reviewer signed off.
+PR: #414 (OPEN; ready for human review)
+
+## Prod deploy
+
+Gated on human. Merge each PR when ready. Prod deploy fires on main push after all 3 land.
+
+Next: review PRs #412, #413, #414. Merge in order. Prod deploys automatically.
+=== exit: 0

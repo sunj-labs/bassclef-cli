@@ -1,0 +1,6 @@
+# Luminary marker — PR 7 /build × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-7-build-jamie
+- lead: alan-cooper
+- supporting: michael-feathers, alistair-cockburn, kent-beck
+- rationale: Jamie reads /build output (PRs opened + verify report + reviewer signoff + prod gate). Jamie's 90s read decides "serious effort."

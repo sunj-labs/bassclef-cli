@@ -1,0 +1,5 @@
+# adr-deviation marker — PR 7 /build × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-7-build-jamie
+- notes: Mirrors Jamie-launch shape. Final Tier A driver. 7 of 7 harness coverage after merge.
+- parent_chain: cli#375 -> PRs #384, #385, PR 6 -> PR 7

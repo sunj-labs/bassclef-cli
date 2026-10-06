@@ -1,0 +1,29 @@
+=== skill: /build
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /build — load-bearing composer dispatch
+
+Operationalize the signup primitive via composer-first dispatch chain.
+
+## Primitive 1 — load-bearing form composer
+
+Branch: feat/signup-primitive-1
+Blast radius: entire signup surface.
+Verify: tier-preset composer dispatch green.
+
+## Primitive 2 — scope-bounded hero composer
+
+Branch: feat/signup-primitive-2
+Blast radius: narrow (local composer only).
+Verify: compose-with the primitive-anchored stack.
+
+## Primitive 3 — operationalized tracking primitive
+
+Branch: feat/signup-primitive-3
+Blast radius: cross-cutting tracking dispatch chain.
+Verify: operationalize the primitive composer.
+
+Next: operationalize composer dispatch for prod.
+=== exit: 0
