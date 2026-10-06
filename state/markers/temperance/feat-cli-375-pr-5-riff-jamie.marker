@@ -1,0 +1,10 @@
+# Temperance marker — PR 5 /riff × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-5-riff-jamie
+- scope-decision:
+  - Right thing: Ship /riff x Jamie Tier A driver. Sources scripts/lib/claude-chain.sh (merged in PR #384). Mirrors louis-sprint shape — 3 fixtures, Cooper 3-level, SKIP if lib missing.
+  - Right way: Reuse the chain helper from the main branch; do not re-author. Hand-craft fixtures (OAuth still pending per PR #381). Driver asserts against persona (Jamie positioning reader).
+  - Drift trigger: Do NOT touch /launch or /build driver work. If driver pulls past 20 turns, pause.
+- parent_chain: cli#375 -> PR #384 (chain helper landed) -> PR 5 (first driver sourcing helper)
+- plan_doc: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md
+- out_of_scope: PR 6-7 drivers; live docker captures; chain helper changes

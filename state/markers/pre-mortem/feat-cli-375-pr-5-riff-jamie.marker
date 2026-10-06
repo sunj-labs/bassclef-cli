@@ -1,0 +1,10 @@
+# Pre-mortem marker — PR 5 /riff × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-5-riff-jamie
+- ledger_path: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L64-85
+- lenses: alan-cooper, michael-feathers, alistair-cockburn
+- top_risks_folded:
+  - R4 (cockburn): fixture format drift across 4 drivers compounds. Fold — mirror louis-sprint exact shape.
+  - R6 (feathers): assertions pin aspirational behavior. Fold — hand-craft golden to shape /riff should ACTUALLY ship (2-3 variants with luminary attribution).
+  - Jamie-specific: variants without luminary names are a dancing-bear smell. Fold — bad-jargon fixture omits luminary attribution.
+- surfaces: scripts/tests/fixtures/jamie-riff/*.txt (new 3+README), scripts/tests/smoke-drive-e2e-riff-jamie.test.sh (new)

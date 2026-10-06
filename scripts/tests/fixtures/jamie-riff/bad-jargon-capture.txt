@@ -1,0 +1,29 @@
+=== skill: /riff
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /riff — 3 variants with load-bearing composer primitives
+
+Intent: operationalize the landing page hero via primitive-anchored composer dispatch.
+
+## Variant A — tier-preset-first
+
+Headline: operationalize the primitive-anchored composer thread.
+Primitive: load-bearing hero composer.
+Blast radius: entire landing surface.
+
+## Variant B — load-bearing composition
+
+Headline: compose-with the primitive-dispatched hero stack.
+Primitive: tier-preset-enforced marketing composer.
+Blast radius: cross-cutting marketing dispatch chain.
+
+## Variant C — scope-bounded primitive
+
+Headline: operationalize the scope-bounded hero primitive.
+Primitive: composer-first marketing dispatch.
+Blast radius: narrow (local composer only).
+
+Next: dispatch /launch composer to operationalize scope.
+=== exit: 0

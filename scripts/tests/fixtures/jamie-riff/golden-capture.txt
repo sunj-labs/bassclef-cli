@@ -1,0 +1,32 @@
+=== skill: /riff
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /riff — 3 variants for landing page hero
+
+Intent: a landing page hero for a weekly briefing newsletter about small-business tech.
+
+## Variant A — Edward Tufte (data over decoration)
+
+Headline: "47 tools your team already uses. One briefing. 20 minutes a week."
+Proof point: a 1-line sparkline showing per-week open rates.
+Hero image: none. Density first.
+Preview: /tmp/riff-tufte/index.html
+
+## Variant B — Rams (less, but better)
+
+Headline: "The weekly briefing for people who build small things."
+Proof point: one quote, one byline, white space.
+Hero image: large, grayscale, single photo.
+Preview: /tmp/riff-rams/index.html
+
+## Variant C — Walker (editorial voice)
+
+Headline: "You read 40 tabs this week. This one is on us."
+Proof point: three tags showing recent topics.
+Hero image: generated collage from this week's coverage.
+Preview: /tmp/riff-walker/index.html
+
+Next: pick a variant. Then say "/launch <variant>" to spec the build.
+=== exit: 0

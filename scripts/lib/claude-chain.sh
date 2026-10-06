@@ -32,6 +32,13 @@
 #
 # @pattern patterns/code/gof/facade.md
 
+# NOTE: `set -e` deliberately omitted. This lib is sourced into test
+# harnesses that capture non-zero exits from claude_chain_capture/continue
+# via `RC=$?` for assertion. Enabling `-e` kills the harness shell on the
+# first expected-error test case. Every error site in this lib uses
+# explicit `|| rc=$?` or `return N` so `-e` adds no safety here. Defensive-
+# bash discipline (.claude/rules/defensive-bash.md discipline 1) deviation
+# documented per architect-review 2026-10-07 F3 conditional guidance.
 set -uo pipefail
 
 # ---------------------------------------------------------------------
@@ -103,16 +110,20 @@ _claude_chain_invoke() {
 
   # Invoke with per-turn timeout. perl SIGALRM is portable across macOS +
   # linux containers (per smoke-drive-onboard-repo.sh precedent).
+  # F1 fix (architect-review 2026-10-07): declare $child_pid in closure scope
+  # so SIGALRM handler kills the actual child, not signal-name-coerced-to-0
+  # (which would send SIGTERM to the entire process group).
   local rc=0
   perl -e '
     use strict; use warnings;
     my $timeout = shift @ARGV;
     my @cmd = @ARGV;
-    $SIG{ALRM} = sub { kill 15, $_[0] if $_[0]; exit 142 };
+    my $child_pid;
+    $SIG{ALRM} = sub { kill 15, $child_pid if $child_pid; exit 142 };
     alarm $timeout;
-    my $pid = fork();
-    if ($pid == 0) { exec @cmd or die "exec failed: $!"; }
-    waitpid($pid, 0);
+    $child_pid = fork();
+    if ($child_pid == 0) { exec @cmd or die "exec failed: $!"; }
+    waitpid($child_pid, 0);
     exit($? >> 8);
   ' "$timeout_sec" "$resolved_bin" "${args[@]}" >> "$out_file" 2>&1 || rc=$?
 

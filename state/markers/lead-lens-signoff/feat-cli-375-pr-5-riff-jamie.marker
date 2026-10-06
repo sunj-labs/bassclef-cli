@@ -1,0 +1,12 @@
+# Lead-lens sign-off marker — PR 5 /riff × Jamie driver + chain-helper architect-review folds
+- date: 2026-10-07
+- branch: feat/cli-375-pr-5-riff-jamie
+- lead_luminary: alan-cooper
+- signoff: no findings on driver; 3 architect-review findings folded into chain helper
+- rationale:
+  - Driver work (jamie-riff): Cooper-persona assertions grade golden (3 variants with distinct luminary lenses: Tufte / Rams / Walker) + reject bad-jargon + reject bad-wall.
+  - Chain-helper fixes (interspersed architect-review per operator ask):
+    - F1 (BLOCKING, fixed): Perl SIGALRM handler kill target. Was `kill 15, $_[0]` where $_[0] is signal-name "ALRM" coerced to 0, broadcasting SIGTERM to process group. Now declares $child_pid in closure; alarm handler kills the actual child. Would have shipped silently through PR 4 CI (no exit-5 test exercised the path).
+    - F2 (fixed): T13 added — mock claude that sleeps 5s + CLAUDE_CHAIN_TIMEOUT_SEC=1 asserts rc=5 + `=== exit: 5` trailer. Catches F1 regression + fills test-sufficiency criterion 2 (per-exit-code coverage).
+    - F3 (reverted with rationale): `set -euo pipefail` adds no safety here because every error site uses `|| rc=$?`, and the lib is SOURCED into test harnesses that must capture non-zero exits via RC=$?. Enabling -e kills the harness shell. Inline comment documents the deviation per defensive-bash sister rule.
+  - All 5 drivers + chain helper green locally (26 cases). No regressions.
