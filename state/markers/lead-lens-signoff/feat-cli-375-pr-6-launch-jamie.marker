@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — PR 6 /launch × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-6-launch-jamie
+- lead_luminary: alan-cooper
+- signoff: no findings
+- rationale: Jamie-persona assertions grade golden (3 variants + spec + 3 user stories, clean) + reject bad-jargon + reject bad-wall. 6 drivers now ride the chain helper. All green locally.

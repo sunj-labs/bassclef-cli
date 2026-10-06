@@ -1,0 +1,10 @@
+# Luminary marker — PR 6 /launch × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-6-launch-jamie
+- lead: alan-cooper
+- lead_rationale: Same Jamie persona (positioning + maturity reader, 90s budget). /launch output carries gallery + buildable spec; Jamie grades whether the whole surface signals "serious effort" or demo-ware.
+- supporting:
+  - michael-feathers — characterization
+  - alistair-cockburn — walking skeleton
+  - kent-beck — RED-first
+- source: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L96-101

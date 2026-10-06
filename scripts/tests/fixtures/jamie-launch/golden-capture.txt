@@ -1,0 +1,38 @@
+=== skill: /launch medium
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /launch medium — weekly briefing newsletter
+
+Intent: a signup page for the weekly briefing newsletter.
+
+## Mock gallery (3 variants)
+
+### Variant A — Tufte (data over decoration)
+Headline: "47 tools your team uses. One briefing. 20 minutes a week."
+Proof: sparkline of open rates for last 12 weeks.
+URL: /tmp/launch-tufte/
+
+### Variant B — Rams (less, but better)
+Headline: "The weekly briefing for people who build small things."
+Proof: one testimonial, one byline.
+URL: /tmp/launch-rams/
+
+### Variant C — Walker (editorial voice)
+Headline: "You read 40 tabs this week. This one is on us."
+Proof: three recent topic tags.
+URL: /tmp/launch-walker/
+
+## Buildable spec
+
+System: a Next.js signup form POST-ing to a Postgres table. Rate-limited at 3 sign-ups per minute per IP.
+
+## INVEST user stories (3)
+
+1. As a reader, I can see the headline in under 2 seconds so I know what the briefing covers.
+2. As a reader, I can sign up with just an email so I don't abandon the form.
+3. As the operator, I can see weekly sign-up counts so I know if the hero is working.
+
+Next: pick a variant. Then say "/build <variant>" to ship it.
+=== exit: 0

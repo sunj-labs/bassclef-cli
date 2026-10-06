@@ -1,0 +1,10 @@
+# Pre-mortem marker — PR 6 /launch × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-6-launch-jamie
+- ledger_path: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L64-85
+- lenses: alan-cooper, michael-feathers, alistair-cockburn
+- top_risks_folded:
+  - R4 (cockburn): fixture format drift. Fold — mirror jamie-riff shape.
+  - R6 (feathers): assertions pin aspirational behavior. Fold — golden mirrors what /launch SHOULD produce (gallery + spec + stories).
+  - Jamie-specific: a buildable spec with no user stories or no proof points is a dancing-bear smell.
+- surfaces: scripts/tests/fixtures/jamie-launch/*.txt (new), scripts/tests/smoke-drive-e2e-launch-jamie.test.sh (new)

@@ -1,0 +1,6 @@
+# ADR-deviation marker — PR 6 /launch × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-6-launch-jamie
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
+- note: Test-only addition. Sources already-shipped persona-assert + claude-chain (PR 5 will land T13 timeout coverage before this merges). Same scope as PR 4/5 ADR review.
