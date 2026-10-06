@@ -31,6 +31,17 @@
     "kiss_words_turn_prose": true
   },
 
+  // /longrun merge mode. agent-merges-within-scope lets the agent merge
+  // PRs that stay inside the goal doc scope and clear hard ceilings
+  // (auth, schema, security, prod-deploy, blast-radius-floor). Session K
+  // sets this for the Tier A full driver run — operator approved
+  // 2026-10-07.
+  "longrun": {
+    "orchestrator_merge": {
+      "mode": "agent-merges-within-scope"
+    }
+  },
+
   // Per-path testing-tier enforcement. Empty matchers for now; WU-1 will
   // add the TypeScript source layout and this seed can be populated when
   // src/ and tests/ shapes are known.
