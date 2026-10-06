@@ -1,0 +1,10 @@
+# Luminary marker — PR 5 /riff × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-5-riff-jamie
+- lead: alan-cooper
+- lead_rationale: Jamie is a positioning reader. Persona assertions grade whether /riff output passes the 90-second "serious effort" test. Cooper's goal-directed design lens is primary.
+- supporting:
+  - michael-feathers — characterization pins real /riff output shape
+  - alistair-cockburn — walking skeleton (driver walks end-to-end on 3 fixtures)
+  - kent-beck — RED-first; driver sees fixtures before persona-assert fires
+- source: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L96-101

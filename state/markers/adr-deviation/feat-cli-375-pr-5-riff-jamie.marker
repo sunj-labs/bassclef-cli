@@ -1,0 +1,6 @@
+# ADR-deviation marker — PR 5 /riff × Jamie driver
+- date: 2026-10-07
+- branch: feat/cli-375-pr-5-riff-jamie
+- adr_governing: none — confirmed no ADR coverage
+- outcome: ADR-honored
+- note: Test-only addition. Driver sources already-shipped scripts/lib/claude-chain.sh and scripts/lib/persona-assert.sh. New file is scripts/tests/smoke-drive-e2e-riff-jamie.test.sh + 3 fixtures. No ADR touched. ADR-001..010 + ADR-057 reviewed PR 4; same scope here.

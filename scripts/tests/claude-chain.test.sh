@@ -36,8 +36,9 @@ trap 'rm -rf "$MOCK_DIR"' EXIT
 # [x] T09 CLAUDE_PERMISSIONS=strict suppresses --dangerously-skip-permissions
 # [x] T10 CLAUDE_CHAIN_TIMEOUT_SEC env var honored
 # [x] T11 capture file carries 5-line header (skill, bin, timeout, mode, output marker)
-# [x] T12 capture file carries === exit: N trailer so persona-assert.sh reads exit code (added after real-fixture header-shape audit)
-# [~] T13 lib absent -> test suite skips cleanly — covered by T01's SKIP-77 branch at run time (verified RED-first)
+# [x] T12 capture file carries === exit: N trailer so persona-assert.sh reads exit code
+# [x] T13 CLAUDE_CHAIN_TIMEOUT_SEC fires timeout -> rc=5 + === exit: 5 trailer (F2 architect-review fold)
+# [~] T14 lib absent -> test suite skips cleanly — covered by T01's SKIP-77 branch at run time
 
 PASS=0
 FAIL=0
@@ -253,6 +254,33 @@ if [[ "$TRAILER_OK" == "1" ]]; then
   ok
 else
   fail "T12 — === exit: N trailer missing or wrong value"
+fi
+
+# ---------------------------------------------------------------------
+# T13 — timeout path fires rc=5 + exit trailer (F2 architect-review fold)
+# ---------------------------------------------------------------------
+# Mock claude that sleeps 5s; CLAUDE_CHAIN_TIMEOUT_SEC=1 should fire SIGALRM
+# at 1s and map 142 -> 5. Catches F1 bug (killing $child_pid, not signal name).
+SLOW_MOCK="$MOCK_DIR/slow-claude.sh"
+cat > "$SLOW_MOCK" <<'SLOW_EOF'
+#!/usr/bin/env bash
+echo "slow-mock: starting"
+sleep 5
+echo "slow-mock: finished (should not reach)"
+exit 0
+SLOW_EOF
+chmod +x "$SLOW_MOCK"
+
+OUT_FILE="$MOCK_DIR/t13.out"
+CLAUDE_BIN="$SLOW_MOCK" \
+  CLAUDE_CHAIN_TIMEOUT_SEC=1 \
+  claude_chain_capture "/sprint" "$OUT_FILE" >/dev/null 2>&1
+RC=$?
+
+if [[ "$RC" == "5" ]] && grep -q '^=== exit: 5$' "$OUT_FILE" 2>/dev/null; then
+  ok
+else
+  fail "T13 — timeout should rc=5 + '=== exit: 5' trailer; got rc=$RC trailer=$(grep '^=== exit:' "$OUT_FILE" 2>/dev/null || echo missing)"
 fi
 
 # ---------------------------------------------------------------------

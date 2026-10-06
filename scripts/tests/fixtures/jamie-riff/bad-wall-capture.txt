@@ -1,0 +1,48 @@
+=== skill: /riff
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# /riff — 3 variants for landing page hero
+
+Intent: a landing page hero for a weekly briefing newsletter about small-business tech, specifically targeting SMB operators who manage multiple SaaS tools and want weekly digest content.
+
+## Variant A — Edward Tufte (data over decoration)
+
+Headline: "47 tools your team already uses. One briefing. 20 minutes a week."
+Proof point: a 1-line sparkline showing per-week open rates for the last 12 weeks across 1,200 current subscribers.
+Hero image: none. Density first.
+Design rationale: Tufte's data-to-ink ratio principle applies to landing hero density. Every element earns its space. The sparkline is the only decoration; it carries data.
+Typography: Charter at 18px body, 36px headline. One typeface family. One weight for prose, one for the sparkline numerals.
+Color palette: ink on cream. Two accents (red for high weeks, green for recent uptick).
+Preview: /tmp/riff-tufte/index.html
+
+## Variant B — Rams (less, but better)
+
+Headline: "The weekly briefing for people who build small things."
+Proof point: one quote, one byline, white space.
+Hero image: large, grayscale, single photo.
+Design rationale: Rams's 10 principles — honest, unobtrusive, long-lasting. The photo carries emotional weight; the rest is scaffolding.
+Typography: Helvetica Neue. 42px headline. 20px body. 15% letter-spacing on headline.
+Color palette: neutral grays plus one brand color for the CTA. White space is the design.
+Preview: /tmp/riff-rams/index.html
+
+## Variant C — Walker (editorial voice)
+
+Headline: "You read 40 tabs this week. This one is on us."
+Proof point: three tags showing recent topics with hover-preview cards.
+Hero image: generated collage from this week's coverage with 6-9 thumbnail tiles.
+Design rationale: Walker Art Center editorial energy — hero carries curatorial point of view, not just typography.
+Typography: Walker Studios typeface at 48px headline, Reader at 17px body. Two typefaces playing against each other.
+Color palette: full-bleed background, dynamic per-issue.
+Preview: /tmp/riff-walker/index.html
+
+## Luminary attribution
+
+Each variant pins a distinct lens. Picker trades off:
+- Tufte — serious reader, data-first, respects attention
+- Rams — minimalism signals maturity; works best for enterprise audience
+- Walker — editorial energy; works best for curiosity-driven readers
+
+Next step: pick a variant. Then say "/launch <variant>" to spec the build.
+=== exit: 0
