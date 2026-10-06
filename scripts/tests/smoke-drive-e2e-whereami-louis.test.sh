@@ -52,7 +52,7 @@ BAD_JARGON="$FIX_DIR/bad-jargon-capture.txt"
 BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
 
 # T01 — golden passes all 3
-if persona_assert_end_goal "$GOLDEN" "Phase:" 0 2>/dev/null \
+if persona_assert_end_goal "$GOLDEN" "**Phase**:" 0 2>/dev/null \
     && persona_assert_experience_goal "$GOLDEN" 2>/dev/null \
     && persona_assert_life_goal "$GOLDEN" 40 2>/dev/null; then
   PASS=$((PASS + 1))
@@ -62,7 +62,7 @@ else
 fi
 
 # T02 — bad-jargon: end pass, experience FAIL, life pass (dancing bear)
-T02_END=$(persona_assert_end_goal "$BAD_JARGON" "Phase:" 0 2>/dev/null && echo pass || echo fail)
+T02_END=$(persona_assert_end_goal "$BAD_JARGON" "**Phase**:" 0 2>/dev/null && echo pass || echo fail)
 T02_EXP=$(persona_assert_experience_goal "$BAD_JARGON" 2>/dev/null && echo pass || echo fail)
 T02_LIFE=$(persona_assert_life_goal "$BAD_JARGON" 40 2>/dev/null && echo pass || echo fail)
 
@@ -74,7 +74,7 @@ else
 fi
 
 # T03 — bad-wall: end pass, experience pass, life FAIL (scan ceiling)
-T03_END=$(persona_assert_end_goal "$BAD_WALL" "Phase:" 0 2>/dev/null && echo pass || echo fail)
+T03_END=$(persona_assert_end_goal "$BAD_WALL" "**Phase**:" 0 2>/dev/null && echo pass || echo fail)
 T03_EXP=$(persona_assert_experience_goal "$BAD_WALL" 2>/dev/null && echo pass || echo fail)
 T03_LIFE=$(persona_assert_life_goal "$BAD_WALL" 40 2>/dev/null && echo pass || echo fail)
 

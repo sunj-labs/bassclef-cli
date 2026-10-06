@@ -1,0 +1,5 @@
+# ADR-deviation marker — Session J integration bridge
+- date: 2026-10-05
+- branch: feat/session-j-integration-bridge
+- adr_governing: none — fixture replacement + CI path-filter extension; no architectural decision governs mock-to-real-capture migration
+- outcome: ADR-honored

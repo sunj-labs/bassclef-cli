@@ -121,6 +121,15 @@ exit_code=0
   echo "=== claude_bin: ${CLAUDE_BIN}"
   echo "=== timeout_sec: ${TIMEOUT_SEC}"
   echo "=== scratch_dir: ${SCRATCH_DIR}"
+  # Permission mode — default to dangerously-skip so write-side tool calls
+  # (settings.json, substrate.config.md, CLAUDE.md scaffolds) do not block
+  # on an approval prompt the `claude -p` flow cannot answer. Reproduced
+  # 2026-10-05 in harness-out/session-j-retry (hung at 180s + 300s without
+  # the flag; GREEN in ~24s with it). Opt out with CLAUDE_PERMISSIONS=strict.
+  CLAUDE_PERMISSIONS="${CLAUDE_PERMISSIONS:-dangerously-skip}"
+  PERM_FLAG=""
+  [ "$CLAUDE_PERMISSIONS" = "dangerously-skip" ] && PERM_FLAG="--dangerously-skip-permissions"
+  echo "=== claude_permissions: ${CLAUDE_PERMISSIONS}"
   echo "=== output ==="
   set +e
   perl -e '
@@ -128,7 +137,7 @@ exit_code=0
     $SIG{ALRM} = sub { exit 142 };
     alarm $t;
     exec @cmd or exit 127
-  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" -p "run the /onboard-repo skill on this repo. show me the output." < /dev/null 2>&1
+  ' "$TIMEOUT_SEC" "$CLAUDE_BIN" $PERM_FLAG -p "run the /onboard-repo skill on this repo. show me the output." < /dev/null 2>&1
   exit_code=$?
   set -e
   echo "=== exit: ${exit_code}"

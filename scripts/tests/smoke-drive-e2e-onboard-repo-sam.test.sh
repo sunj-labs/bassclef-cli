@@ -13,9 +13,10 @@
 # @thebassclef/lite. No bassclef vocab. Follows README CTA (/onboard-repo).
 #
 # Covers 3 fixture-pinned cases:
-#   T01 — golden fixture passes all 3 Cooper goal levels
+#   T01 — golden fixture (Path B happy-path) passes all 3 Cooper goal levels
 #   T02 — bad-jargon fixture fails experience goal (dancing-bear catch)
 #   T03 — bad-chain-failure fixture fails end goal (exit non-zero)
+#   T04 — golden-prereq-missing fixture (Path A gate landing) passes all 3
 #
 # Walking skeleton assertion layer. Live-claude invocation stays in
 # docker-smoke V2 Step 6 (scripts/smoke-drive-onboard-repo.sh); this
@@ -31,9 +32,10 @@
 set -uo pipefail
 
 # test-list:
-# [x] T01 golden fixture passes end-goal + experience-goal + life-goal
+# [x] T01 golden fixture (Path B happy-path) passes end-goal + experience-goal + life-goal
 # [x] T02 bad-jargon fixture passes end-goal + life-goal; FAILS experience-goal
 # [x] T03 bad-chain-failure fixture FAILS end-goal (exit=3)
+# [x] T04 golden-prereq-missing fixture (Path A gate landing) passes all 3 Cooper goals
 # [x] persona-assert lib absent → SKIP
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -55,6 +57,7 @@ FAIL_MSGS=()
 GOLDEN="$FIX_DIR/golden-capture.txt"
 BAD_JARGON="$FIX_DIR/bad-jargon-capture.txt"
 BAD_CHAIN="$FIX_DIR/bad-chain-failure-capture.txt"
+GOLDEN_PREREQ="$FIX_DIR/golden-capture-prereq-missing.txt"
 
 # ----- T01 golden passes all 3 -----
 
@@ -89,6 +92,17 @@ if [[ "$T03_END" == "fail" ]]; then
 else
   FAIL=$((FAIL + 1))
   FAIL_MSGS+=("T03 FAIL — bad-chain-failure should fail end-goal; got $T03_END")
+fi
+
+# ----- T04 prereq-missing fixture (Path A gate land) passes all 3 Cooper goals -----
+
+if persona_assert_end_goal "$GOLDEN_PREREQ" "Prerequisite missing" 0 2>/dev/null \
+    && persona_assert_experience_goal "$GOLDEN_PREREQ" 2>/dev/null \
+    && persona_assert_life_goal "$GOLDEN_PREREQ" 40 2>/dev/null; then
+  PASS=$((PASS + 1))
+else
+  FAIL=$((FAIL + 1))
+  FAIL_MSGS+=("T04 FAIL — prereq-missing fixture did not pass all 3 Cooper goals")
 fi
 
 # ----- Report -----

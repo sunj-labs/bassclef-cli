@@ -1,6 +1,6 @@
 === claude_bin: /usr/local/bin/claude
 === timeout_sec: 180
-=== scratch_dir: /home/adopter/onboard-test
+=== scratch_dir: ~/onboard-test
 === output ===
 I operationalized the substrate primitive. The load-bearing composer tier-preset
 is now wired at .claude/settings.json. blast radius minimized. compose-with

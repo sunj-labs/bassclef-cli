@@ -1,0 +1,6 @@
+# Temperance marker — Session J integration bridge
+- date: 2026-10-05
+- branch: feat/session-j-integration-bridge
+- scope-decision: Right thing — replace 2 mock fixtures with real `claude -p` captures from docker-smoke against @thebassclef/lite@1.9.10. Right way — capture first, then replace fixtures, then re-run drivers (expect 2-3 RED iterations per Beck). Drift trigger — do NOT start remaining 4 Tier A drivers (sprint/riff/launch/build) in this session; Session J ships Option a only.
+- parent_chain: cli#375 Tier A roadmap → Session I PRs #376 + #377 (walking skeleton) → Session J (walks the skeleton against real captures)
+- out_of_scope: /sprint × Louis real-capture driver; /riff /launch /build drivers; architect-review (fires at closeout)

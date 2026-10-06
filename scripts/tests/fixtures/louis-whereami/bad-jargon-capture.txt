@@ -1,12 +1,12 @@
 === claude_bin: /usr/local/bin/claude
 === timeout_sec: 120
-=== scratch_dir: /home/adopter/louis-pickup
+=== scratch_dir: ~/louis-pickup
 === output ===
 Operationalized the whereami primitive. In-flight substrate composer currently
 scope-bounded to Tier A compose-with pipeline. Load-bearing roadmap at
 docs/plans/. Blast radius narrow. Tier-preset: standard.
 
-Phase: Construction
+**Phase**: Construction
 Last session: 2 days ago.
 
 Run /sprint next.

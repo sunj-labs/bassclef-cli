@@ -21,6 +21,10 @@ on:
       - 'scripts/smoke-*.sh'
       - 'scripts/lib/smoke-*.sh'
       - 'scripts/lib/smoke-drive-*.sh'
+      - 'scripts/lib/persona-assert.sh'
+      - 'scripts/tests/smoke-drive-e2e-*.sh'
+      - 'scripts/tests/fixtures/sam-onboard-repo/**'
+      - 'scripts/tests/fixtures/louis-whereami/**'
       - '.github/workflows/docker-smoke.yml'
   workflow_dispatch:
     inputs:

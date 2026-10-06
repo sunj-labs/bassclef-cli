@@ -89,3 +89,6 @@ coverage/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
+
+# Session J smoke outputs — bind-mount capture dir, never committed
+harness-out/
