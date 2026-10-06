@@ -1,0 +1,12 @@
+# Pre-mortem marker — PR 4 chain helper + /sprint × Louis
+- date: 2026-10-07
+- branch: feat/cli-375-pr-4-sprint-louis-chain-helper
+- ledger_path: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L64-85
+- lenses: alistair-cockburn, michael-feathers, kent-beck
+- top_risks_folded_into_plan:
+  - R1 (cockburn): abstract chain helper only AFTER one driver works. Fold — write /sprint driver inline first, then extract helper.
+  - R2 (cockburn): multi-turn race on claude stdout flush. Fold — sleep 2 between -c calls OR --background + wait.
+  - R3 (cockburn): claude -c may fail across container exec boundary. Fold — chain inside ONE container exec per driver.
+  - R6 (feathers): write assertion AFTER capture lands. Fold — capture first, then driver.
+  - R9 (beck): hollow test if driver written before capture. Fold — fire container -> capture -> write driver.
+- surfaces: scripts/lib/claude-chain.sh (new), scripts/tests/claude-chain.test.sh (new), scripts/tests/smoke-drive-sprint-louis.test.sh (new)

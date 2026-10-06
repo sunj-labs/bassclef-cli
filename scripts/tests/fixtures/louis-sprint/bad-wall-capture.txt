@@ -1,0 +1,53 @@
+=== skill: /sprint
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== mode: capture
+=== output ===
+# Sprint — Session K Tier A full driver run
+
+**Active goal:** Session K — ship 4 real-capture persona drivers (PRs 4-7) so the harness covers 7 of 7 Tier A skills across every persona lens.
+
+The parent thread cli#375 opened on 2026-10-01 with the goal of mounting a dynamic driver suite that can regression-cover every Tier A skill against real captures from the @thebassclef/lite cold-adopter docker container.
+
+Session H shipped the walking skeleton (PR #376, Sam × /onboard-repo).
+Session I shipped the second driver (PR #377, Louis × /whereami).
+Session J shipped the integration bridge (PR #382, real captures for both Sam + Louis).
+Session K ships PRs 4-7 with chain helper scaffolded in PR 4.
+
+The chain helper (cli#383) wraps `claude -c` multi-turn chaining so each driver can capture menu picks + follow-on actions across turns. Session J proved the one-shot pattern. Session K proves the multi-turn pattern.
+
+**In flight:**
+- PR 4 — chain helper + /sprint × Louis (feat/cli-375-pr-4-sprint-louis-chain-helper, OPEN)
+- PR #381 — OAuth refresh script (OPEN, needs CI re-run before any live capture)
+
+**Shipped last session:**
+- PR #382 — /onboard-repo × Sam + /whereami × Louis real captures (MERGED 2026-10-06)
+- PR #379 — Session H + I closeout (MERGED)
+- PR #378 — Session J prep plan (MERGED)
+- PR #377 — Louis × /whereami Tier A chain driver (MERGED)
+- PR #376 — walking skeleton for Tier A dynamic driver suite (MERGED)
+
+**Next 3 steps:**
+1. Capture /sprint output in docker container, land scripts/tests/fixtures/louis-sprint/golden-capture.txt.
+2. Write scripts/tests/smoke-drive-e2e-sprint-louis.test.sh with 3 Cooper goal levels.
+3. Open PR 4, run CI to green, merge.
+
+**Blocked items:**
+- cli#361 — degraded sync (8 hooks fail self-heal) — parked diagnosis on main
+- Session J closeout markers (deferred action — folds into Session K closeout Step 7.5)
+
+**Hard ceilings per operator guardrails:**
+- No auth touches this session.
+- No schema touches.
+- No security touches.
+- No prod-deploy touches without explicit operator approval.
+
+**Luminary map for Session K:**
+- alistair-cockburn (walking skeleton; lead)
+- michael-feathers (characterization pins real output)
+- alan-cooper (persona assertions grade pass/fail)
+- kent-beck (RED-first; chain helper lands with its own Tier 0 test)
+- linus-torvalds (we don't break adopters; forward-only enforcement)
+
+Ready to ship. Dispatch /longrun prep to confirm scope and open PR 4.
+=== exit: 0

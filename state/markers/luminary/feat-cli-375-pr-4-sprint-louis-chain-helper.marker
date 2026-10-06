@@ -1,0 +1,10 @@
+# Luminary marker — PR 4 chain helper + /sprint × Louis
+- date: 2026-10-07
+- branch: feat/cli-375-pr-4-sprint-louis-chain-helper
+- lead: alistair-cockburn
+- lead_rationale: Walking skeleton walks end-to-end on one driver before PRs 5-7 source the helper. If it does not walk here, pattern fails and we revert to per-driver inline chaining.
+- supporting:
+  - kent-beck — RED-first on the helper. Tier 0 test ships before implementation. Catches R9.
+  - michael-feathers — characterization pins real /sprint output. Catches R6.
+  - alan-cooper — Louis persona assertions grade output for status-check reader. Catches jargon drift.
+- source: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md L96-101

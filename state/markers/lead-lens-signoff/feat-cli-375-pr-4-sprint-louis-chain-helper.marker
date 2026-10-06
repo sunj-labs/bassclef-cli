@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — PR 4 chain helper + /sprint × Louis
+- date: 2026-10-07
+- branch: feat/cli-375-pr-4-sprint-louis-chain-helper
+- lead_luminary: alistair-cockburn (walking skeleton)
+- signoff: no findings
+- rationale: Walking skeleton walks end-to-end. Chain helper lands with 12 Tier 0 tests (narrow interface — @luminary ousterhout). /sprint × Louis driver walks against 3 fixtures (persona-assert Cooper 3-level). Sibling drivers (Sam + Louis-whereami) stay green — no regression. Scope held: no PR 5-7 work on this branch; chain helper exposed but driver uses fixtures (one PR advance per plan). Fixtures carry hand-crafted provenance with follow-on ticket path to replace with live captures once OAuth refresh ships. Chain helper will see live use in PR 5 (/riff × Jamie) and prove multi-turn chaining there.

@@ -1,0 +1,13 @@
+# Temperance marker — PR 4 chain helper + /sprint × Louis
+- date: 2026-10-07
+- branch: feat/cli-375-pr-4-sprint-louis-chain-helper
+- scope-decision:
+  - Right thing: Ship scripts/lib/claude-chain.sh + /sprint x Louis real-capture driver as one PR. Chain helper lands with its own Tier 0 test before any driver sources it.
+  - Right way: Beck RED-first on the chain helper. Then capture real /sprint output from docker container. Then driver references the capture. CI till green. agent-merges-within-scope.
+  - Drift trigger: Do NOT start PR 5 /riff work in this branch. If chain helper design pulls past 40 turns, pause and re-anchor. If capture pulls past 20 turns, fall back to expect-wrapper (per plan R2).
+- parent_chain: cli#375 (Tier A roadmap) -> cli#383 (chain-driving ticket)
+- plan_doc: docs/next-session-plan-2026-10-07-session-k-tier-a-full.md
+- out_of_scope:
+  - PR 5-7 driver work (sequential)
+  - Session J closeout markers (deferred action — folds into Session K closeout)
+  - cli#361 degraded sync cure (parked diagnosis on main)
