@@ -200,6 +200,7 @@ export function runInit(argv: readonly string[]): number {
         entries: outcome.result?.wouldCopyEntries ?? [],
         configs: plans.map((pl) => ({ path: pl.relativePath })),
         refused: outcome.result?.refused ?? [],
+        unchanged: outcome.result?.unchanged ?? [],
         // A dry run still reads every source file, so it can still fail
         // to read one. Hard-coding this empty hid those failures from
         // the JSON (RFC-0005 A-3).
@@ -345,6 +346,10 @@ function dispatchSubstrateCopy(
   }
   const parts: string[] = [];
   if (result.copied.length > 0) parts.push(`${result.copied.length} substrate files copied`);
+  // cli#235 — user-scope dual-write hits identical content from prior
+  // install; report separately so adopters see honest total without a
+  // misleading "path collision" bucket.
+  if (result.unchanged.length > 0) parts.push(`${result.unchanged.length} already-present`);
   if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
   if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
   say(`bassclef init: ${parts.join(', ')}.\n`);
@@ -662,6 +667,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     entries: walker.result?.copiedEntries ?? [],
     configs: results.map((r) => ({ path: r.plan.relativePath })),
     refused: walker.result?.refused ?? [],
+    unchanged: walker.result?.unchanged ?? [],
     errored: walker.result?.errored ?? [],
     hookCount: walker.result?.hookCount ?? 0,
     declaredHooksCopied,
@@ -792,6 +798,19 @@ function writeManifest(
         template: `bundle:${path}`,
         template_version: pkgVersion,
         outcome: 'refused',
+        source: 'bundle',
+      });
+    }
+    // cli#235 — user-scope dual-writes that matched existing content
+    // byte-for-byte still land in the manifest so totals.files math
+    // matches the manifest file count (ADR-010 D1). Semantically these
+    // files ARE present at the right location via a prior install.
+    for (const path of walkerResult.unchanged) {
+      entries.push({
+        path,
+        template: `bundle:${path}`,
+        template_version: pkgVersion,
+        outcome: 'unchanged',
         source: 'bundle',
       });
     }

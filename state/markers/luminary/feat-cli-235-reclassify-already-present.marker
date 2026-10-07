@@ -1,0 +1,6 @@
+# Luminary marker — cli#235 cure
+- date: 2026-10-08
+- branch: feat/cli-235-reclassify-already-present
+- lead: michael-feathers
+- supporting: tony-hoare, martin-fowler
+- rationale: Feathers lead — characterization test pins current refusal behavior, then adds the reclassification path. Hoare supporting — post-condition contract (user-scope dual-write of identical content maps to unchanged, not refused). Fowler supporting — refactor copyOne outcome discrimination without changing writeSafely's safety invariant.

@@ -105,6 +105,16 @@ export interface CopyResult {
   /** Per-scope shape of the same list. Consumers preferring scope info read this. */
   copiedEntries: CopiedEntry[];
   refused: string[];
+  /**
+   * Paths where a user-scope dual-write found the existing file already
+   * matched byte-for-byte. Prior init populated $HOME; this run would
+   * have written the same content. Counted separately from `refused` so
+   * the banner does not report a misleading "path collision" when the
+   * only "refusals" are identical content left over by a prior install
+   * (cli#235). Project-scope AlreadyExists stays in `refused` — those
+   * are real adopter-edit conflicts.
+   */
+  unchanged: string[];
   errored: string[];
   wouldCopy?: string[];
   /** Per-scope shape of wouldCopy, so a dry run can build the same report. */
@@ -134,6 +144,7 @@ export function copySubstrate(
     copied: [],
     copiedEntries: [],
     refused: [],
+    unchanged: [],
     errored: [],
     erroredMessages: [],
     hookCount: 0,
@@ -392,7 +403,7 @@ function copyOne(
   options: CopyOptions,
   result: CopyResult,
   scopeDecision: ScopeDecision
-): 'copied' | 'refused' | 'errored' | 'wouldCopy' | 'skipped' {
+): 'copied' | 'refused' | 'unchanged' | 'errored' | 'wouldCopy' | 'skipped' {
   const sourcePath = join(bundleRoot, relPath);
   const adopterRelPath = mapAdopterPath(relPath);
   const targetPath = scopeDecision.targetPath;
@@ -448,6 +459,29 @@ function copyOne(
   } catch (e) {
     if (e instanceof WriteError) {
       if (e.kind === 'AlreadyExists') {
+        // cli#235 — reclassify user-scope dual-write of identical content.
+        // decisionsForFile (L377-386) dual-writes undeclared hooks to both
+        // $HOME and $CLAUDE_PROJECT_DIR. On an adopter machine with a
+        // prior bassclef install, the user-scope hook path already exists.
+        // The project-scope write succeeded; the user-scope write refuses
+        // with AlreadyExists even though content is byte-identical. Report
+        // as 'unchanged' so the banner does not claim 'path collision'
+        // for a file that is already correct on disk. Adopter-edited user-
+        // scope content (hash differs) still records as refused — ADR-002
+        // safety preserved.
+        if (scope === 'user') {
+          try {
+            const existing = readFileSync(targetPath, 'utf8');
+            if (hashContent(existing) === hashContent(outputContent)) {
+              result.unchanged.push(adopterRelPath);
+              return 'unchanged';
+            }
+          } catch {
+            // Read failed (symlink target gone, EACCES, etc). Fall through
+            // to the strict refused classification — safer than silently
+            // treating it as unchanged.
+          }
+        }
         result.refused.push(adopterRelPath);
         return 'refused';
       }

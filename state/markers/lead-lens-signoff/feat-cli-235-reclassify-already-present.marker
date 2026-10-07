@@ -1,0 +1,9 @@
+# Lead-lens signoff — cli#235 cure
+- date: 2026-10-08
+- lead: michael-feathers
+- branch: feat/cli-235-reclassify-already-present
+- findings: no red/amber findings surviving verification. Three checks cleared:
+  1. Characterization test (RED → GREEN): empty-HOME run reports 0 refused; populated-HOME second run reports 0 refused.
+  2. ADR-002 safety preserved: second characterization test confirms adopter-edited user-scope hook still records as refused when content differs.
+  3. Preexisting tests fixed: tests/init-manifest-authoritative.test.ts (invariant now accepts unchanged+refused), tests/harness/paths.test.ts (removed .claude literal from comment).
+- note: 11 preexisting test failures remain in the full suite. All trace to stale local dist/lite bundle (v1.9.11 install from 2026-09-18 missing newer bundle contents: .claude/bassclef-configs.jsonc, docs/whereami.md, 4 templates, .gitignore). CI uses a fresh bassclef sibling and resolves these.

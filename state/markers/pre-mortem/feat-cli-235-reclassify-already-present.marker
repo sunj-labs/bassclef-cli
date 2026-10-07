@@ -1,0 +1,20 @@
+# Pre-mortem light — cli#235 cure
+- date: 2026-10-08
+- lenses: michael-feathers, tony-hoare, saltzer-schroeder
+
+## Feathers risks
+- F1: Characterization test too narrow — only pins hash-matched case; adopter-edited content path untested. Mitigation: test both branches (match -> unchanged; differ -> refused).
+- F2: Snapshot drift — if bundle changes (hook decl/undecl) the test count changes. Mitigation: assert zero refused rather than exact count; count-independence.
+- F3: Dry-run path divergence — reclassification only fires on real write. Mitigation: skip dry-run (writer never fires there).
+
+## Hoare risks
+- H1: hashContent read of outputContent AND existing file — double hash cost. Mitigation: only hash when AlreadyExists fires (exceptional path).
+- H2: Readfile may throw on broken symlink — classify as refused rather than unchanged. Mitigation: try/catch around read; fall through to refuse.
+
+## Saltzer-Schroeder risks
+- S1: Complete mediation — writeSafely's AlreadyExists check still owns the write-time boundary. The reclassification is read-only post-check. Mitigation: no bypass; reclassify after the throw, not before.
+- S2: Adopter-edited user-scope hook content silently treated as "unchanged" if we hash-match wrong. Mitigation: strict byte-for-byte comparison via hashContent.
+
+## Highest-concern folds
+- F1 -> test both match AND differ cases
+- H2 -> read failure maps to refuse, not unchanged (keep adopter protection)
