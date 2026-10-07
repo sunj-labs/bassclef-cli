@@ -1,0 +1,6 @@
+# Temperance marker — PR 2 cli#398 nuke script extensions
+- date: 2026-10-08
+- branch: feat/cli-398-nuke-github-cleanup-plus-pat-wire
+- scope-decision: Right thing — add --delete-github + --install-upstream-pat flags per operator ask tonight. Right way — opt-in flags, fail-soft when gh missing/unauthenticated/lacks scope, idempotent shell rc append, read -s recipe in --help so PAT never hits shell history. Drift trigger — do NOT change existing default behavior; new flags opt-in only.
+- parent_chain: Session N friction surface (cold adopter smoke created bassclef-smoke-test-2 as workaround for stale repo; needs PAT to file bugs upstream)
+- out_of_scope: Dockerfile changes; docker-smoke CI workflow changes; existing default behavior
