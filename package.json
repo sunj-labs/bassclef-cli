@@ -1,6 +1,6 @@
 {
   "name": "@thebassclef/lite",
-  "version": "1.9.10",
+  "version": "1.9.11",
   "description": "Bassclef CLI — install and upgrade bassclef in your project with two commands.",
   "keywords": [
     "bassclef",
@@ -42,7 +42,7 @@
     "LICENSE"
   ],
   "bassclef": {
-    "upstream_tag": "v0.46.0",
+    "upstream_tag": "v1.8.0",
     "wiring_manifest_schema_major": 2,
     "bundle_paths": [
       "dist/lite/"

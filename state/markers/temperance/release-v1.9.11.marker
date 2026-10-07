@@ -1,0 +1,9 @@
+# Temperance marker — release v1.9.11 bundle sync
+- date: 2026-10-07
+- branch: release/v1.9.11
+- scope-decision:
+  - Right thing: Bundle-sync release pulling bassclef v1.8.0 content into npm. 6 cli cures close via Closes keywords on PR.
+  - Right way: Follow Session G pattern (prior bundle-sync shipped v1.9.10). npm run bump patch; publish.yml pin v1.7.1 → v1.8.0 at both spots; package.json upstream_tag mirrors; CHANGELOG filled.
+  - Drift trigger: Do NOT touch src/ for new features; this is bundle-sync scope only. Do NOT fire the GitHub release — operator creates tag + release; env gate + Touch ID fire from there.
+- parent_chain: Session K Tier A merged -> peer bassclef-upstream v1.8.0 pinged -> operator "cut the next npm release"
+- out_of_scope: GitHub release creation (operator); src/ feature changes; auth/schema/security

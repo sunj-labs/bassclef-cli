@@ -24,6 +24,26 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.11] - 2026-10-07
+### Added
+- Bassclef substrate pin bumped v1.7.1 → v1.8.0 — bundle sync carries 6 cli-side cures via `dist/lite/`.
+
+### Changed
+- `.github/workflows/publish.yml` bassclef checkout `ref` updated at two spots (L136 + L281 pre-release).
+- `package.json` `upstream_tag` mirrors to v1.8.0.
+
+### Fixed
+- cli#309 — `/build` with `hosting_platform: none` warns instead of refusing (bassclef-upstream PR #2101)
+- cli#311 — artifact-ingestion-gate skips when `parent_bet` is null (bassclef-upstream PR #2102)
+- cli#312 — `interpret-input` emits `structural_hints.verb_goal_pairs` default (bassclef-upstream PR #2104)
+- cli#319 — `interpret-input` writes `intent` field (bassclef-upstream PR #2105)
+- cli#322 — `/launch` Phase 14 template jargon gate (bassclef-upstream PR #2100)
+- cli#324 — `/launch` Phase 11 greenfield partial vs redesign full (bassclef-upstream PR #2103)
+
+### Notes
+- 6 cli tickets close via release cascade (Closes keywords on this PR).
+- Peer agent `bassclef-upstream-6e` announced bassclef v1.8.0 at 2026-10-06T21:00Z; this release ships the cli-side bundle sync.
+
 ## [1.9.10] - 2026-10-05
 ### Added
 
