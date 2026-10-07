@@ -1,0 +1,5 @@
+# Luminary marker — cli#380
+- date: 2026-10-06
+- branch: feat/cli-380-refresh-oauth-token
+- lead: saltzer-schroeder — fail-safe defaults; verify before write; backup for revert; chmod 600
+- supporting: tony-hoare (pre/postcondition contracts; probe before writing), alan-cooper (one command, clear exit codes, friendly stderr), michael-feathers (Tier 0 strict TDD; characterization tests before source)

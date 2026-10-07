@@ -87,7 +87,7 @@ state/events/test-runs/
 coverage/
 *.lcov
 
-# Session J smoke outputs — bind-mount capture dir, never committed
+# docker-smoke local run output (bind-mount landing)
 harness-out/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*

@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — cli#380
+- date: 2026-10-06
+- branch: feat/cli-380-refresh-oauth-token
+- lead_luminary: saltzer-schroeder
+- findings: no findings
+- rationale: All 15 pre-mortem risks (R1-R15) folded pre-code per docs/risk-ledgers/2026-10-06-cli-380-refresh-oauth-token.md. 32/32 Tier 0 tests pass first iteration (0 RED cycles). Shellcheck 0 errors after 2 minor fixes. End-to-end smoke (--help + --dry-run + --verify-only against real claude) returned expected results — verify-only correctly identified current token as expired (exit 2). Fail-safe defaults verified: umask 077 + chmod 600 explicit; atomic mv-based write; timestamped backup; probe before write; rollback on probe fail. Lead lens (saltzer-schroeder) cleared.
