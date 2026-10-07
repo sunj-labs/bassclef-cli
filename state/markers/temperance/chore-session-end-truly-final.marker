@@ -1,0 +1,5 @@
+# Temperance marker — Session K truly final close
+- date: 2026-10-07
+- branch: chore/session-end-truly-final
+- scope-decision: Resolve one new rescue (Pattern B). Append whereami with PR #381 landed + cli#380 closed.
+- /session-end MUST tier wrap.
