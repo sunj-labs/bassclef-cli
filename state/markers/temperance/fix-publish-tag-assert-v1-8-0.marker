@@ -1,0 +1,8 @@
+# Temperance marker — publish workflow tag-assert fix
+- date: 2026-10-07
+- branch: fix/publish-tag-assert-v1.8.0
+- scope-decision: PR #391 bumped bassclef pin ref v1.7.1 → v1.8.0 at L136 + L281 but missed the hard-coded assertion at L151 + L152. Publish workflow for v1.9.11 failed at pre-publish-checks "Assert pinned bassclef tag resolves". Fix: update L151 + L152 string from v1.7.1 to v1.8.0.
+- Right thing: 1-line sed fix. Reruns the publish workflow for v1.9.11.
+- Right way: Push cure as PR; CI runs typecheck; merge; operator fires workflow re-run via `gh workflow run publish.yml` OR delete+recreate release v1.9.11.
+- Drift trigger: Do NOT touch anything else; this is a surgical cure.
+- parent_chain: PR #391 merged -> operator fired tag + release -> publish workflow failed on tag assert -> this cure
