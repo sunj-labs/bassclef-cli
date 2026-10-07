@@ -1,0 +1,5 @@
+# Temperance marker — Session K final sweep
+- date: 2026-10-07
+- branch: chore/session-k-final-sweep
+- scope-decision: /session-end MUST tier sweep. One rescue to resolve Pattern B (hook false-positive from merge Stops). No code. No feature work.
+- Drift trigger: nothing beyond the rescue + marker commits.
