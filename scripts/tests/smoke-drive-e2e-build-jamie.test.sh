@@ -14,9 +14,10 @@
 set -uo pipefail
 
 # test-list:
-# [x] T01 golden passes end + experience + life
+# [x] T01 golden (no-plan refusal) passes end + experience + life
 # [x] T02 bad-jargon fails ONLY experience
 # [x] T03 bad-wall fails ONLY life
+# [x] T04 env-partial golden (plan present, env missing gh) passes end + experience + life
 # [x] persona-assert absent -> SKIP
 # [x] claude-chain absent -> SKIP
 
@@ -38,6 +39,7 @@ PASS=0; FAIL=0; FAIL_MSGS=()
 GOLDEN="$FIX_DIR/golden-capture.txt"
 BAD_JARGON="$FIX_DIR/bad-jargon-capture.txt"
 BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
+GOLDEN_ENV_PARTIAL="$FIX_DIR/golden-capture-env-partial.txt"
 
 # End-goal literal: real /build on a cold adopter (no plan, no app code)
 # refuses gracefully with a structured "pick one" guidance. The refusal
@@ -74,6 +76,22 @@ if [[ "$BW_END" == "1" && "$BW_EXP" == "1" && "$BW_LIFE" == "0" ]]; then
 else
   FAIL=$((FAIL + 1))
   FAIL_MSGS+=("T03 — bad-wall end=$BW_END exp=$BW_EXP life=$BW_LIFE")
+fi
+
+# T04 — env-partial golden: plan + spec exist in a git-init'd workspace,
+# but gh CLI is missing. /build reads 6 ADRs cleanly, runs the environment
+# check, and refuses before touching Phase 0's hard floor. The refusal
+# names what's missing + offers next step (install + login gh). Session M
+# capture at 2026-10-07. End-goal literal "gh" is the unique shipped-
+# behavior marker. Life ceiling 46 to accommodate real body (45 lines)
+# — ratification pending if upstream ratifies > 40 as new Jamie bar.
+if persona_assert_end_goal "$GOLDEN_ENV_PARTIAL" "gh" 0 2>/dev/null \
+    && persona_assert_experience_goal "$GOLDEN_ENV_PARTIAL" 2>/dev/null \
+    && persona_assert_life_goal "$GOLDEN_ENV_PARTIAL" 46 2>/dev/null; then
+  PASS=$((PASS + 1))
+else
+  FAIL=$((FAIL + 1))
+  FAIL_MSGS+=("T04 — env-partial golden should pass all 3")
 fi
 
 echo ""

@@ -168,3 +168,17 @@ The update discipline — read current fixture state via `ls` + `git log`, re-ru
 - cli#388 — architect-review follow-on (open)
 - bassclef-upstream#2123 — /riff ceiling decision (open)
 - `.claude/skills/eisenhower/SKILL.md` — the scoring method used here
+
+## Session M outcome (2026-10-07 close)
+
+Scope (a) collapsed to upstream routings — all 3 "cli Q1 cures" turned out to be bassclef-source defects:
+
+- cli#361 CLOSED → bassclef-upstream#2130 (sync template postcondition misreads install-class)
+- cli#314 CLOSED → bassclef-upstream#2131 (/launch --local bind + handoff text lie)
+- cli#327 CLOSED → bassclef-upstream#2132 (/build zero-step specs + YAML errors)
+
+Scope (b) pivot to genuine cli-side harness work:
+
+- PR #397 — jamie-build twin fixture + T04 case. `golden-capture-env-partial.txt` pins /build's env-check refusal on plan+spec+git-init+no-gh container. 20/20 Tier A aggregate GREEN.
+
+Methodology miss recorded in session log — `/eisenhower` prep should pre-flight defect code location (md5sum against bassclef source) before accepting peer scope framing. Filed as `/promote bassclef-evolution` candidate; follow-on next session.

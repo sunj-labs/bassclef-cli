@@ -1,0 +1,51 @@
+=== skill: /build signup-page
+=== claude_bin: ~/.npm-global/bin/claude
+=== timeout_sec: 180
+=== scratch_dir: ~/test (git init + plan + spec)
+=== output ===
+Ignoring 17 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["~/test"].hasTrustDialogAccepted: true in ~/.claude.json.
+**Flash:** `/build signup-page` checked your setup before writing code — GitHub's CLI tool (`gh`) isn't installed, so I stopped before touching any files.
+
+**Kiss:** I read the goal (`docs/iteration-bets/signup-page.md`) and the spec (`docs/specs/signup-page.md`) — a signup form at `/signup` plus a backend endpoint to save subscribers. Before writing anything, `/build` checks whether your setup can finish the whole job (write code, open a pull request, get it reviewed). Right now it can't, so it stopped early and didn't touch any files.
+
+## ADR check (per `/build`'s required first step)
+
+I read every file in `architecture/decisions/`. Six ADRs exist (release pipeline, adopter-break discipline, sync dispatcher, release tagging, vocabulary rename, skill template). None of them set a rule that this signup-page work would break. No conflict to raise.
+
+## What the setup check found
+
+| Check | Result |
+|---|---|
+| Git repo | yes |
+| GitHub CLI (`gh`) installed | **no** — `gh: command not found` |
+| GitHub CLI logged in | no (can't check — not installed) |
+| Browser-automation tool (Playwright) loaded | no |
+| Network reachable | yes (not checked further — the `gh` gap already decided the outcome) |
+
+```
+/build: environment does not support the full chain.
+  - git present? yes
+  - gh authed? no
+  - Playwright MCP loaded? no
+  - network reachable? no
+
+Emitting the spec at docs/specs/signup-page.md. cd into a git repo with gh auth to run the full chain.
+```
+
+## Why it stopped here
+
+`/build` only runs the full chain — write code, open a PR, stage a deploy — when git, `gh` (logged in), and a browser tool are all present. One is missing here (`gh`), so `/build` exits clean at this check. It does not fall back to a smaller version of the job; it stops and tells you what's missing. This is `/build`'s own rule, not something I chose.
+
+It also never touched Phase 0's hard floor check (the one that refuses to write auth, schema, or security code) or noticed you're on the `main` branch — both of those checks come later, and `/build` didn't get that far.
+
+## Next step
+
+Install and log in to GitHub's CLI tool, then run `/build signup-page` again:
+
+```
+brew install gh      # or your package manager
+gh auth login
+```
+
+Once that's done, re-running `/build signup-page` will also need a feature branch — `/build` refuses to run from `main`. Want me to create one (e.g. `feature/signup-page`) now so it's ready for the next run?
+=== exit: 0

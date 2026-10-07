@@ -1,0 +1,6 @@
+# Orientation-gate marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- whereami_read: docs/whereami.md at session start
+- parent_goal_walk: Session M scope (b) → cli#375 (CLOSED) → bet 2026-08-06b
+- scope_a_routing: 3 upstream tickets filed (bassclef-upstream#2130, #2131, #2132); cli#361, cli#314, cli#327 CLOSED
