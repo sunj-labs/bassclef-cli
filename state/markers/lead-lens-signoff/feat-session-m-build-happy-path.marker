@@ -1,0 +1,5 @@
+# Lead-lens-signoff marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- lead_luminary: michael-feathers
+- signoff: no findings. One new real-capture fixture lands at scripts/tests/fixtures/jamie-build/golden-capture-env-partial.txt. Driver T04 case added with end-goal literal "gh", life-ceiling 46. 20/20 aggregate Tier A cases GREEN. Characterization honored — ceiling matches shipped body (45 lines + 1 budget).

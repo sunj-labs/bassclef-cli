@@ -1,0 +1,6 @@
+# Temperance marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- scope-decision: Right thing — ship a second /build fixture capturing env-partial refusal shape; mirror Session J sam-onboard-repo twin-fixture pattern. Right way — set up plan + spec + git init in cold-adopter container; capture; characterize what Jamie actually sees. Drift trigger — do NOT install gh in Dockerfile to force Phase 3+ live capture; keep scope tight.
+- parent_chain: Session M scope (b) → cli#375 (closed) → bet 2026-08-06b (upstream parent)
+- out_of_scope: Dockerfile gh install, Playwright MCP wiring, Phase 3-7 LIVE capture, cli#328 cure (routes upstream)

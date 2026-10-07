@@ -1,0 +1,8 @@
+# Thread-walk marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- active_goal: Session M scope (b) /build happy-path capture
+- parent_chain:
+  - Session M scope (b) — this PR
+  - cli#375 "Tier A dynamic driver roadmap" (CLOSED Session K)
+  - bet 2026-08-06b-launch-npm-thebassclef-core (upstream parent)

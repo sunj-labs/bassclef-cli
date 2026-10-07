@@ -1,0 +1,8 @@
+# Pre-mortem light marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- lenses: [michael-feathers, alistair-cockburn, alan-cooper]
+- risks-folded:
+  - Container missing gh → anticipated; refusal shape IS the characterization not a bug
+  - Spec Steps enumerated section shape must match /build Phase 1 parser → cured by using canonical header "## Steps enumerated"
+  - End-goal literal "gh" too generic → mitigated by context ("gh: command not found")

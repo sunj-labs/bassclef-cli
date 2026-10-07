@@ -1,0 +1,9 @@
+# Luminary marker — Session M /build env-partial capture
+- date: 2026-10-07
+- branch: feat/session-m-build-happy-path
+- lead: michael-feathers
+- supporting: [alistair-cockburn, alan-cooper]
+- notes:
+  - feathers (lead) — characterization pins /build on cold adopter at 2 refusal shapes; happy path deferred until container carries gh + Playwright
+  - cockburn — walking skeleton pattern reused; one container exec per fixture, scrub, write, driver iterate
+  - cooper — Jamie 90s scan budget; env-partial body 45 lines runs the surface close to ceiling; filed upstream as ratification question
