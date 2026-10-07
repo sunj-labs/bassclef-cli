@@ -7,6 +7,13 @@ updated: 2026-10-07
 parent_plan: docs/plans/tier-a-dynamic-driver-roadmap.md
 goal: Validate low-friction UX for Sam / Louis / Jamie in first 5-10 minutes of adopter touch
 cadence: update at every Session close that touches drivers, fixtures, or Tier A tickets
+amendments:
+  - 2026-10-07 — cli#361 moved Q4 → Q1 after peer coordination. The bassclef-sync DEGRADED banner fires on every adopter SessionStart; that IS the 5-10 min friction surface. Prior Q4 classification missed the per-session banner evidence.
+  - 2026-10-07 — cli#327 promoted Q2 → Q1 for Session M scope. Peer flagged it in deferred Q1 set; pairs with cli#328 /build Phase 4-7 gaps on Jamie's happy path.
+session_m_scope:
+  waiting_on: bassclef-upstream v1.9.0 release URL + bassclef-version.json SHA from peer uds:/tmp/cc-socks/38138.sock
+  scope_a: cli#361 + cli#314 + cli#327 (~80-150 turns)
+  scope_b_follow_on: cli#361 + cli#314 + cli#327 + cli#328 pair (~200-350 turns; unlocks /build happy path capture)
 ---
 
 # Tier A driver inventory + state
@@ -76,18 +83,19 @@ Scored 2026-10-07. Anchor goal — Sam / Louis / Jamie first 5-10 min UX validat
 
 Blocks the current adopter happy path OR carries a security concern:
 
+- **cli#361** — 8 hooks recur missing after bassclef-sync self-heal. The `bassclef-sync: DEGRADED` banner fires on every SessionStart — including this session's own at 2026-10-07 turn 1. Every adopter sees it on first touch. Session M scope (a) picks this up.
 - **cli#320** — /personas leaks git email in default slug. Blocks any adopter running /personas. Security concern. Fix is small; ship next.
 - **cli#235** — bassclef init reports '68 files refused' on fresh dir. Sam's first touch — this IS the 5-minute UX. If adopters see this on a clean install, the validation stops before it starts.
 - **cli#241** — /riff cannot read .claude/luminaries/ in docker container sandbox. Jamie's /riff path breaks in the exact environment the harness tests. Blocks /riff validation.
-- **cli#314** — /launch --local says "open on phone" but binds 127.0.0.1. Jamie reads the output as a lie. Trust-breaking on first touch.
+- **cli#314** — /launch --local says "open on phone" but binds 127.0.0.1. Jamie reads the output as a lie. Trust-breaking on first touch. Session M scope (a) picks this up.
+- **cli#327** — /build passes zero-step spec + hides YAML parse errors. Promoted from Q2 for Session M because peer flagged it in the deferred Q1 set and it pairs with /build Phase 4-7 gaps (#328). Session M scope (a) picks this up.
 
 ### Q2 — SCHEDULE (important, not urgent) — assign a time budget
 
 Moves the goal; no 2-week deadline. Each needs a time budget:
 
 - **cli#388** — architect-review on full Tier A harness. ~30 turns. Closes PR 7 of 7 from roadmap. Catches drift across the 6 drivers.
-- **cli#328** — 14 gaps in /build Phases 4-7 from supervised run. Enables /build happy path capture (the current biggest gap). Big ticket — likely 100-200 turns on its own.
-- **cli#327** — /build passes zero-step specs + hides YAML errors. Pairs with #328. Fix together or sequence.
+- **cli#328** — 14 gaps in /build Phases 4-7 from supervised run. Enables /build happy path capture (the current biggest gap). Big ticket — likely 100-200 turns on its own. Session M follow-on scope (b) picks this up alongside #327.
 - **cli#325** — /launch mocks have no contrast check. 10-20 turns. Lifts Jamie's /launch quality bar.
 - **cli#318** — /personas and /jtbd-tasks path conflict. 20-30 turns. Clears a persona-chain blocker that will surface the moment anyone chains the two.
 - **cli#310** — /build capability probe flaky. 10-15 turns. Reduces first-touch noise on Jamie's /build attempts.
