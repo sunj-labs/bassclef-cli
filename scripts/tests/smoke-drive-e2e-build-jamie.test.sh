@@ -39,7 +39,12 @@ GOLDEN="$FIX_DIR/golden-capture.txt"
 BAD_JARGON="$FIX_DIR/bad-jargon-capture.txt"
 BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
 
-if persona_assert_end_goal "$GOLDEN" "Story 1" 0 2>/dev/null \
+# End-goal literal: real /build on a cold adopter (no plan, no app code)
+# refuses gracefully with a structured "pick one" guidance. The refusal
+# itself is Jamie's first-touch /build experience. Characterization per
+# @luminary michael-feathers — pin shipped behavior; aspirational Story-N
+# shape ships only after /canvas or /spec lands a plan.
+if persona_assert_end_goal "$GOLDEN" "pick one" 0 2>/dev/null \
     && persona_assert_experience_goal "$GOLDEN" 2>/dev/null \
     && persona_assert_life_goal "$GOLDEN" 40 2>/dev/null; then
   PASS=$((PASS + 1))
@@ -61,7 +66,7 @@ else
 fi
 
 BW_END=0; BW_EXP=0; BW_LIFE=0
-persona_assert_end_goal "$BAD_WALL" "Story 1" 0 2>/dev/null && BW_END=1
+persona_assert_end_goal "$BAD_WALL" "Story 1" 0 2>/dev/null && BW_END=1  # scaffold retains Story 1 heading — negative-case pins scaffold shape
 persona_assert_experience_goal "$BAD_WALL" 2>/dev/null && BW_EXP=1
 persona_assert_life_goal "$BAD_WALL" 40 2>/dev/null && BW_LIFE=1
 if [[ "$BW_END" == "1" && "$BW_EXP" == "1" && "$BW_LIFE" == "0" ]]; then

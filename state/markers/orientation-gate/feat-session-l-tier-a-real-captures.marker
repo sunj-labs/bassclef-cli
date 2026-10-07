@@ -1,0 +1,6 @@
+# Orientation-gate marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- whereami_read: docs/whereami.md at 2026-10-07T06:30Z (session start)
+- plan_doc_read: docs/next-session-plan-2026-10-08-session-l-exercise-v1.9.11.md (108 lines, verbatim)
+- parent_goal_walk: cli#389 → cli#375 → bet 2026-08-06b (walked recursively per Step 0.6)

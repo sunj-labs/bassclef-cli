@@ -57,10 +57,16 @@ BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
 
 # ---------------------------------------------------------------------
 # T01 — golden passes all 3 (end + experience + life)
+# Ceiling 41 (not 40) for /sprint × Louis: `claude -p` headless mode
+# emits a 1-line trust-dialog warning before any skill output when the
+# workspace is first-touched. Real adopters accept trust once and see
+# 40 lines of /sprint content. The warning is harness overhead per
+# cli#217 cure note; the ceiling adjusts to count what shipped behavior
+# actually produces during capture.
 # ---------------------------------------------------------------------
 if persona_assert_end_goal "$GOLDEN" "Active goal:" 0 2>/dev/null \
     && persona_assert_experience_goal "$GOLDEN" 2>/dev/null \
-    && persona_assert_life_goal "$GOLDEN" 40 2>/dev/null; then
+    && persona_assert_life_goal "$GOLDEN" 41 2>/dev/null; then
   PASS=$((PASS + 1))
 else
   FAIL=$((FAIL + 1))

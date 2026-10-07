@@ -1,0 +1,10 @@
+# Thread-walk marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- active_goal: cli#389 (OPEN)
+- parent_chain:
+  - cli#389 "Replace hand-crafted Tier A fixtures with live docker captures" (OPEN; this PR closes)
+  - cli#375 "Tier A dynamic driver roadmap — 7 PRs for real-adopter simulation" (CLOSED 2026-10-07; Session K wrap)
+  - bet 2026-08-06b-launch-npm-thebassclef-core (upstream parent goal)
+- open-acceptance-items: 4 real captures land + driver GREEN + deltas filed (all satisfied this PR)
+- out_of_scope: cli#388 architect-review (parallel); bassclef substrate cures; Tier B drivers

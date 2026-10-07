@@ -1,32 +1,51 @@
 === skill: /riff
 === claude_bin: ~/.npm-global/bin/claude
 === timeout_sec: 180
-=== mode: capture
+=== scratch_dir: ~/test
 === output ===
-# /riff — 3 variants for landing page hero
+Ignoring 17 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["~/test"].hasTrustDialogAccepted: true in ~/.claude.json.
+`/riff` ran in **scratch mode** (no git repo detected — writes go to a tmp dir, no PR, no screenshots since Playwright MCP isn't invoked in this mode). Files live at `/tmp/riff-mainstreet-stack-hero/` and won't survive a reboot.
 
-Intent: a landing page hero for a weekly briefing newsletter about small-business tech.
+## The 3 variants
 
-## Variant A — Edward Tufte (data over decoration)
+**Variant 1 — Don Norman lens (clarity & signifiers)**
+> **One email. Every Friday. The tech your small business actually needs.**
+> Mainstreet Stack cuts through the noise — tools, pricing changes, and scams to avoid, in 5 minutes.
+> `[Get Friday's issue free →]`  *No credit card. Unsubscribe in one click.*
 
-Headline: "47 tools your team already uses. One briefing. 20 minutes a week."
-Proof point: a 1-line sparkline showing per-week open rates.
-Hero image: none. Density first.
-Preview: /tmp/riff-tufte/index.html
+One high-contrast button. The headline and the microcopy both say the same thing — subscribe, get a Friday email — so there's no gap between what the button looks like it does and what it does.
 
-## Variant B — Rams (less, but better)
+**Variant 2 — David Ogilvy lens (facts, specificity, proof)**
+> **12,410 small-business owners read this before their first coffee.**
+> Every Friday, Mainstreet Stack tells you which software changed its price, which app just got easier to use, and which "deal" is a trap. Four minutes to read.
+> *Written by Dana Ruiz, who ran a hardware store for 11 years before she started tracking this for a living. No sponsors in the main section — ever.*
+> `[Join 12,410 readers — free]`
 
-Headline: "The weekly briefing for people who build small things."
-Proof point: one quote, one byline, white space.
-Hero image: large, grayscale, single photo.
-Preview: /tmp/riff-rams/index.html
+Every claim carries a number or a name instead of an adjective. (Flagging now: the 12,410 figure is a placeholder — swap in a real subscriber count before this ships, or the fact becomes a lie.)
 
-## Variant C — Walker (editorial voice)
+**Variant 3 — Luke Wroblewski lens (mobile-first, content-first)**
+> **Small-business tech. One email. Fridays.**
+> No jargon. No upsells. Just what changed this week and what to do about it.
+> `[Subscribe]` *Free. One tap. Unsubscribe anytime.*
 
-Headline: "You read 40 tabs this week. This one is on us."
-Proof point: three tags showing recent topics.
-Hero image: generated collage from this week's coverage.
-Preview: /tmp/riff-walker/index.html
+Built at a 390px phone width first: one headline, one line of value, one 56px tap target. Everything else a desktop hero usually carries — nav, imagery, a proof row — got cut on purpose.
 
-Next: pick a variant. Then say "/launch <variant>" to spec the build.
+## Self-review (scratch mode has no Playwright, so this stands in for `/visual-review`)
+
+- **Contrast** — all 3 CTAs pass a rough 4.5:1 check by eye.
+- **Tap targets** — all ≥44px tall; Variant 3 is 56px.
+- **Honesty** — no fake urgency. Variant 2's subscriber count is a placeholder, flagged above, not a shipped claim.
+- **One throughline** — every variant states the name, the cadence (Friday/weekly), the topic (small-business tech), and exactly one CTA.
+
+## Files on disk
+
+```
+/tmp/riff-mainstreet-stack-hero/
+├── gallery.html                      ← open this one, it iframes all 3
+├── variant-1-norman/index.html
+├── variant-2-ogilvy/index.html
+└── variant-3-wroblewski/index.html
+```
+
+Open `gallery.html` in a browser to click through them side by side. Want me to push one into `/stage` or `/build` once you pick a direction, or adjust the newsletter name/copy first?
 === exit: 0
