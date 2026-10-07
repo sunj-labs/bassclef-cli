@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — PR 2 cli#398
+- date: 2026-10-08
+- branch: feat/cli-398-nuke-github-cleanup-plus-pat-wire
+- lead: alan-cooper
+- findings: no red/amber findings
+- rationale: CLI shape passes Cooper review — flags map to operator intent (nuke + optional cleanup + optional PAT install); --help text front-loads the discipline (`read -s` recipe); --dry-run shows exactly what will happen; fail-soft paths keep the happy path clean. Smoke-tested the install-step path to confirm chmod 600 lands; dry-run tested both flag combinations and env-var presence.

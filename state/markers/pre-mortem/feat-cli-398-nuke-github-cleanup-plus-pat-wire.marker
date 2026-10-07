@@ -1,0 +1,9 @@
+# Pre-mortem marker — PR 2 cli#398
+- date: 2026-10-08
+- branch: feat/cli-398-nuke-github-cleanup-plus-pat-wire
+- risks-folded:
+  - R1 (Saltzer-Schroeder): PAT value could leak to shell history. Fold: --help documents `read -s` recipe; PAT only read from env var.
+  - R2 (Cooper): --delete-github could delete wrong repos. Fold: default-off opt-in flag; per-hit prompt-confirm; pattern narrow to *bassclef-smoke-test*; --yes requires explicit opt-in.
+  - R3 (Nygard): gh may lack delete_repo scope. Fold: fail-soft; print clear error naming the required scope; carry on with workdir prep.
+  - R4 (Nygard): shell rc append could duplicate on repeat runs. Fold: grep for a fixed marker string before append.
+  - R5 (Feathers): dry-run must preview the new branches honestly. Fold: dry-run covers both flag states (env var set + missing).

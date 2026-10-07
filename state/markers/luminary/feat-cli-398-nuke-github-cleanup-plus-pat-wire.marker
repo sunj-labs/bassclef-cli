@@ -1,0 +1,8 @@
+# Luminary marker — PR 2 cli#398
+- date: 2026-10-08
+- branch: feat/cli-398-nuke-github-cleanup-plus-pat-wire
+- lead: alan-cooper (CLI shape — the two flags fit operator's mental model of nuke-and-fresh; --help explains, --dry-run previews, --yes scripts, fail-soft on missing gh)
+- supporting:
+  - saltzer-schroeder (least privilege — chmod 600 PAT file, read -s avoids history, idempotent marker in rc)
+  - michael-nygard (stability — fail-soft paths on gh missing / unauthenticated / lacks delete_repo scope)
+  - michael-feathers (characterization — dry-run output pins observable behavior per flag combination)
