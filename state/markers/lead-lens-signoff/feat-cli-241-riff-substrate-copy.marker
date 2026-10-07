@@ -1,0 +1,6 @@
+# Lead-lens sign-off marker — PR 1 cli#241
+- date: 2026-10-08
+- branch: feat/cli-241-riff-substrate-copy
+- lead: michael-feathers
+- findings: no red/amber findings
+- rationale: gate 2 capture at /tmp/riff-only-session-n/riff.out confirmed cured behavior — 10 luminary name hits, 0 fallback phrases, 3 prototype paths cited. Feathers characterization satisfied — real behavior pinned via source of record (the capture) before claim shipped. No red/amber on three dimensions: (a) adopter-observable surface preserved (scripts/*.sh is a drive script; existing callers unaffected); (b) blast radius bounded (one file, one block); (c) no side effects beyond scratch dir cp.

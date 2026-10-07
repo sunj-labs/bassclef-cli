@@ -1,0 +1,7 @@
+# Luminary marker — PR 1 cli#241
+- date: 2026-10-08
+- branch: feat/cli-241-riff-substrate-copy
+- lead: michael-feathers (characterization — gate 2 capture pins cured behavior; real luminary names appear in /riff output)
+- supporting:
+  - alistair-cockburn (walking skeleton — docker image rebuild + /riff drive run before merge)
+  - alan-cooper (Jamie 90s first-touch — /riff now reads real lens files instead of named-strategy fallback)

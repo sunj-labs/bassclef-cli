@@ -186,12 +186,26 @@ fi
 # project-scope only (per copy-substrate.ts:decisionsForFile + memory
 # feedback_hooks_dual_write_skills_project_only). The bassclef-init'd
 # /adopter/test at Step 3 IS the source of the symlinks.
+#
+# cli #241 cure — copy substrate content (cp -RL follows symlinks) instead of
+# re-symlinking. Prior ln -sfn landed symlinks whose targets escape $SCRATCH_DIR;
+# Claude Code's sandbox refuses reads through those symlinks and /riff falls
+# back to named-strategy analysis. cp -RL puts real files under the writable
+# scratch root; sandbox follows cleanly. Also adds luminaries (previously
+# missing — /riff reads lens files from .claude/luminaries).
 SUBSTRATE_SOURCE="${BASSCLEF_SUBSTRATE_SOURCE:-${ADOPTER_TEST_DIR:-${HOME:-/home/adopter}/test}/.claude}"
 if [ -d "$SUBSTRATE_SOURCE/skills" ] && [ -d "$SUBSTRATE_SOURCE/rules" ]; then
   mkdir -p "$SCRATCH_DIR/.claude"
-  ln -sfn "$SUBSTRATE_SOURCE/skills" "$SCRATCH_DIR/.claude/skills"
-  ln -sfn "$SUBSTRATE_SOURCE/rules"  "$SCRATCH_DIR/.claude/rules"
-  echo "smoke-drive-riff: linked bassclef substrate from ${SUBSTRATE_SOURCE}" >&2
+  # Remove any stale symlinks from a prior run before copying
+  rm -rf "$SCRATCH_DIR/.claude/skills" "$SCRATCH_DIR/.claude/rules" "$SCRATCH_DIR/.claude/luminaries" 2>/dev/null || true
+  cp -RL "$SUBSTRATE_SOURCE/skills"     "$SCRATCH_DIR/.claude/skills"
+  cp -RL "$SUBSTRATE_SOURCE/rules"      "$SCRATCH_DIR/.claude/rules"
+  if [ -d "$SUBSTRATE_SOURCE/luminaries" ]; then
+    cp -RL "$SUBSTRATE_SOURCE/luminaries" "$SCRATCH_DIR/.claude/luminaries"
+    echo "smoke-drive-riff: copied bassclef substrate (skills + rules + luminaries) from ${SUBSTRATE_SOURCE}" >&2
+  else
+    echo "smoke-drive-riff: copied bassclef substrate (skills + rules) from ${SUBSTRATE_SOURCE}; luminaries missing at source" >&2
+  fi
 else
   echo "smoke-drive-riff: WARN — ${SUBSTRATE_SOURCE} missing; /riff will report skill-not-found" >&2
 fi
