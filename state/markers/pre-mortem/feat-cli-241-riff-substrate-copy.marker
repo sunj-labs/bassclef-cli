@@ -1,0 +1,8 @@
+# Pre-mortem marker — PR 1 cli#241
+- date: 2026-10-08
+- branch: feat/cli-241-riff-substrate-copy
+- ledger-path: docs/next-session-plan-2026-10-09-session-n-cli-side-scope.md (L70-85)
+- strongest-concerns-folded:
+  - R1 (Cockburn): docker-smoke must stay green after Dockerfile change — fold confirmed via tight /riff drive container run with cp -RL edit baked (attempt 3, gate 2 PASSED)
+  - R3 (Feathers): Session L jamie-riff fixture pinned old wrong-behavior; after cure the fixture needs re-capture — flagged as sister ticket at closeout
+  - cp -RL adds ~2-5s per drive run — acceptable per plan R5 Cooper fold (<15% slowdown bar)

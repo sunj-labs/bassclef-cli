@@ -1,0 +1,6 @@
+# Temperance marker — PR 1 cli#241 riff substrate copy
+- date: 2026-10-08
+- branch: feat/cli-241-riff-substrate-copy
+- scope-decision: Right thing — cure cli#241 (/riff falls back to named-strategy because sandbox refuses symlink-escape reads). Right way — cp -RL in smoke-drive-riff.sh so substrate lives under scratch root; no symlink to follow out. Drift trigger — do NOT expand to other drive scripts in this PR.
+- parent_chain: Session N scope-a → cli#241 (first-touch Jamie /riff defect)
+- out_of_scope: smoke-assert-riff update (filed as sister ticket); other drive scripts; Dockerfile change
