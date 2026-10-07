@@ -69,8 +69,9 @@ describe('manifest names the whole run (ADR-010 D1, D4)', () => {
   it('still matches when the run refuses files', () => {
     // The test above passes on a fresh init because refused is 0 — it
     // cannot tell a correct report from one that counts successes only.
-    // A second init into a populated HOME produces real refusals, which
-    // is the case that caught RFC-0005 A-1.
+    // A second init into a populated HOME produces real refusals OR
+    // unchanged user-scope dual-writes (cli#235), which is the case that
+    // caught RFC-0005 A-1. Both outcomes land in the manifest and totals.
     const other = mkdtempSync(join(fakeHome, '.bassclef-auth-first-'));
     spawnSync(process.execPath, [CLI, 'init', '--dir', other, '--allow-any-dir'], {
       encoding: 'utf8', timeout: 30000, env: { ...process.env, HOME: fakeHome },
@@ -78,9 +79,17 @@ describe('manifest names the whole run (ADR-010 D1, D4)', () => {
 
     const r = run('init', ['--json']);
     const report = JSON.parse(r.stdout);
-    expect(report.refused).toBeGreaterThan(0);
+    // cli#235 — on repeat init with populated HOME, user-scope dual-
+    // writes whose content hash matches become `unchanged`, not `refused`.
+    // The invariant is: the manifest counts the whole run, not just
+    // successes. Assert refused + unchanged > 0 so the test fires on
+    // both pre-cure (all refused) and post-cure (reclassified) shapes.
+    const nonWritten = (report.refused ?? 0) + (report.unchanged ?? 0);
+    expect(nonWritten).toBeGreaterThan(0);
     expect(readManifest().files.length).toBe(report.totals.files);
-    expect(report.totals.files).toBe(report.totals.written + report.refused + report.errored);
+    expect(report.totals.files).toBe(
+      report.totals.written + report.refused + (report.unchanged ?? 0) + report.errored
+    );
 
     try { rmSync(other, { recursive: true, force: true }); } catch { /* ignore */ }
   });

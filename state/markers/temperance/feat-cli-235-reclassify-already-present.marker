@@ -1,0 +1,5 @@
+# Temperance marker — cli#235 cure
+- date: 2026-10-08
+- branch: feat/cli-235-reclassify-already-present
+- scope-decision: Smallest shape — add 'unchanged' outcome to copyOne; reclassify user-scope AlreadyExists when content matches. Blast radius: adopter init banner wording + CopyResult shape (additive field). Brute-force check: no retry loop; one classification branch.
+- drift-trigger: Expanding scope beyond banner + CopyResult + copyOne (e.g., refactoring the dual-write path itself) is out of scope. If the test requires rewriting decisionsForFile, pause.

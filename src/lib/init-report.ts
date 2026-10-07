@@ -27,6 +27,13 @@ export interface InitReportInput {
   entries: readonly ReportEntry[];
   configs: readonly ReportConfig[];
   refused: readonly string[];
+  /**
+   * User-scope dual-writes where the existing file matched bundle content
+   * byte-for-byte (prior install populated $HOME). Counted separately from
+   * `refused` per cli#235 so the banner does not claim "path collision"
+   * for files that are already correct on disk.
+   */
+  unchanged?: readonly string[];
   errored: readonly string[];
   /** Hook commands the copied settings.json declares. */
   hookCount: number;
@@ -83,6 +90,13 @@ export interface InitReport {
   };
   /** Files an existing file blocked. Not an error; init exits 0. */
   refused: number;
+  /**
+   * User-scope dual-writes where existing content matched bundle
+   * content byte-for-byte. Counted separately from refused so a
+   * reader does not interpret identical-content writes as true
+   * conflicts (cli#235).
+   */
+  unchanged: number;
   /** Files that could not be read or written. */
   errored: number;
   /**
@@ -118,6 +132,7 @@ export function buildInitReport(input: InitReportInput): InitReport {
   }
 
   const refused = input.refused.length;
+  const unchanged = input.unchanged?.length ?? 0;
   const errored = input.errored.length;
   const written = input.configs.length + input.entries.length;
 
@@ -125,7 +140,7 @@ export function buildInitReport(input: InitReportInput): InitReport {
     schema_version: 3,
     tier: input.tier,
     totals: {
-      files: written + refused + errored,
+      files: written + refused + unchanged + errored,
       written,
       project,
       user,
@@ -138,6 +153,7 @@ export function buildInitReport(input: InitReportInput): InitReport {
       files: catalog.hooks,
     },
     refused,
+    unchanged,
     errored,
     failed: refused + errored,
   };
