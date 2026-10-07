@@ -1,0 +1,14 @@
+# Pre-mortem light marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- risk-ledger: docs/next-session-plan-2026-10-08-session-l-exercise-v1.9.11.md § Pre-mortem light
+- lenses: [alistair-cockburn, michael-feathers, alan-cooper]
+- risk-count: 7 (R1-R7)
+- folds-applied:
+  - R1 OAuth stale — verified `oauth-token` passed probe before step 2; no refresh needed
+  - R2 step 3 blow past 30 turns — step 3 landed ~15 turns; no pause rule fired
+  - R3 docker cold-cache long build — image existed from 2026-09-26; no rebuild
+  - R4 scaffold assertions aspirational — updated per-driver (end-goal literal + life ceiling)
+  - R5 jargon in output — all 4 real captures clean; no BLOCK terms surfaced
+  - R6 /riff exceeds Jamie ceiling — PREDICTED FIRED; bassclef-upstream#2123 filed
+  - R7 /build missing per-story PR numbers — PREDICTED FIRED; /build refusal-shape captured; scaffold assumption named + driver updated

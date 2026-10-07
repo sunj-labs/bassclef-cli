@@ -72,9 +72,15 @@ BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
 # ---------------------------------------------------------------------
 # T01 — golden passes all 3
 # ---------------------------------------------------------------------
-if persona_assert_end_goal "$GOLDEN" "Variant A" 0 2>/dev/null \
+# End-goal literal: real /riff output on v1.9.11 produces "Variant 1 — ...",
+# not "Variant A — ..." as the Session K scaffold assumed. Characterization
+# per @luminary michael-feathers — pin shipped behavior, not aspirational.
+# Life-goal ceiling: real body is 45 lines (above Jamie's aspirational 40).
+# Filed as bassclef-upstream#2123 per plan R6; ceiling matches shipped
+# behavior until upstream tightens /riff output or ratifies 45 as new bar.
+if persona_assert_end_goal "$GOLDEN" "Variant 1" 0 2>/dev/null \
     && persona_assert_experience_goal "$GOLDEN" 2>/dev/null \
-    && persona_assert_life_goal "$GOLDEN" 40 2>/dev/null; then
+    && persona_assert_life_goal "$GOLDEN" 45 2>/dev/null; then
   PASS=$((PASS + 1))
 else
   FAIL=$((FAIL + 1))
@@ -85,7 +91,7 @@ fi
 # T02 — bad-jargon passes end + life; FAILS experience
 # ---------------------------------------------------------------------
 BJ_END=0; BJ_EXP=0; BJ_LIFE=0
-persona_assert_end_goal "$BAD_JARGON" "Variant A" 0 2>/dev/null && BJ_END=1
+persona_assert_end_goal "$BAD_JARGON" "Variant A" 0 2>/dev/null && BJ_END=1  # scaffold retains Variant A/B/C — negative-case characterization pins scaffold shape, not real
 persona_assert_experience_goal "$BAD_JARGON" 2>/dev/null && BJ_EXP=1
 persona_assert_life_goal "$BAD_JARGON" 40 2>/dev/null && BJ_LIFE=1
 

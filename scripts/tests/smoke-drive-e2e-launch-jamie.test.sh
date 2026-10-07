@@ -48,7 +48,11 @@ BAD_JARGON="$FIX_DIR/bad-jargon-capture.txt"
 BAD_WALL="$FIX_DIR/bad-wall-capture.txt"
 
 # T01 golden passes all 3
-if persona_assert_end_goal "$GOLDEN" "Variant A" 0 2>/dev/null \
+# End-goal literal: real /launch output on v1.9.11 produces filenames like
+# "variant-a-don-norman.html" rather than the scaffold's "## Variant A — ..."
+# heading. Characterization per @luminary michael-feathers — pin shipped
+# behavior. "variant-a" is stable across luminary picker rotations.
+if persona_assert_end_goal "$GOLDEN" "variant-a" 0 2>/dev/null \
     && persona_assert_experience_goal "$GOLDEN" 2>/dev/null \
     && persona_assert_life_goal "$GOLDEN" 40 2>/dev/null; then
   PASS=$((PASS + 1))
@@ -59,7 +63,7 @@ fi
 
 # T02 bad-jargon
 BJ_END=0; BJ_EXP=0; BJ_LIFE=0
-persona_assert_end_goal "$BAD_JARGON" "Variant A" 0 2>/dev/null && BJ_END=1
+persona_assert_end_goal "$BAD_JARGON" "Variant A" 0 2>/dev/null && BJ_END=1  # scaffold retains Variant A heading — negative-case pins scaffold shape
 persona_assert_experience_goal "$BAD_JARGON" 2>/dev/null && BJ_EXP=1
 persona_assert_life_goal "$BAD_JARGON" 40 2>/dev/null && BJ_LIFE=1
 if [[ "$BJ_END" == "1" && "$BJ_EXP" == "0" && "$BJ_LIFE" == "1" ]]; then
@@ -71,7 +75,7 @@ fi
 
 # T03 bad-wall
 BW_END=0; BW_EXP=0; BW_LIFE=0
-persona_assert_end_goal "$BAD_WALL" "Variant A" 0 2>/dev/null && BW_END=1
+persona_assert_end_goal "$BAD_WALL" "Variant A" 0 2>/dev/null && BW_END=1  # scaffold retains Variant A heading — negative-case pins scaffold shape
 persona_assert_experience_goal "$BAD_WALL" 2>/dev/null && BW_EXP=1
 persona_assert_life_goal "$BAD_WALL" 40 2>/dev/null && BW_LIFE=1
 if [[ "$BW_END" == "1" && "$BW_EXP" == "1" && "$BW_LIFE" == "0" ]]; then

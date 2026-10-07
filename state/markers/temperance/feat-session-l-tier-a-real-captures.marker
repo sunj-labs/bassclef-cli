@@ -1,0 +1,6 @@
+# Temperance marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- scope-decision: Right thing — replace 4 Session K scaffolds (louis-sprint, jamie-riff, jamie-launch, jamie-build) with real `claude -p` captures from @thebassclef/lite@1.9.11 cold-adopter docker container. Right way — one capture at a time; Louis sprint first proves the pattern; iterate driver assertions to match shipped behavior. Drift trigger — do NOT cure substrate from this repo; file deltas to bassclef-upstream.
+- parent_chain: cli#389 (OPEN; this PR closes) → cli#375 (closed; Tier A roadmap) → bet 2026-08-06b-launch-npm-thebassclef-core (parent)
+- out_of_scope: cli#388 architect-review (parallel session); bassclef-upstream substrate cures; Tier B driver work; operator-private pseudonym registry refresh.

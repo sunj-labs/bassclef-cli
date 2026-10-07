@@ -44,5 +44,19 @@ Each variant pins a distinct lens. Picker trades off:
 - Rams — minimalism signals maturity; works best for enterprise audience
 - Walker — editorial energy; works best for curiosity-driven readers
 
+## Design process notes
+
+- Round 1: brainstorm 7 initial directions. Narrowed to 3 via dot-voting.
+- Round 2: typography audit against WCAG AA. All three pass.
+- Round 3: contrast check on CTA button. Tufte needs red adjustment.
+- Round 4: hero image constraints. Rams photo needs 1200x900 min.
+- Round 5: typography foundry licensing. Walker Studios needs commercial.
+
+## Accessibility review
+
+Variant A — screen reader order: headline → sparkline alt text → CTA.
+Variant B — photo needs descriptive alt text, not just filename.
+Variant C — collage tiles each need alt + hover-preview keyboard focus.
+
 Next step: pick a variant. Then say "/launch <variant>" to spec the build.
 === exit: 0

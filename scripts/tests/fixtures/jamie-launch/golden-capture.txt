@@ -1,38 +1,35 @@
 === skill: /launch medium
 === claude_bin: ~/.npm-global/bin/claude
 === timeout_sec: 180
-=== mode: capture
+=== scratch_dir: ~/test
 === output ===
-# /launch medium — weekly briefing newsletter
+Ignoring 17 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["~/test"].hasTrustDialogAccepted: true in ~/.claude.json.
+## Mode
 
-Intent: a signup page for the weekly briefing newsletter.
+No git repo at `~/test` (confirmed via `git rev-parse --is-inside-work-tree` → "not a git repository"). Per `lib/capability-probe.sh`, that resolves to **scratch mode**: no PR, no deploy, artifacts written to a tmp dir. Per the `/launch` SKILL, scratch mode runs only **Phase 1 (interpret-input)** and **Phase 4 (riff-prototypes)** — everything else (spec, GRASP, ux-migration, construction draft) needs `local` or `full` mode inside a real repo.
 
-## Mock gallery (3 variants)
+## Gallery — 4 variants at `/tmp/bassclef-launch-scratch/newsletter-signup/`
 
-### Variant A — Tufte (data over decoration)
-Headline: "47 tools your team uses. One briefing. 20 minutes a week."
-Proof: sparkline of open rates for last 12 weeks.
-URL: /tmp/launch-tufte/
+Luminary pick (in-turn, per `lib/luminary-pick.sh` catalog): **don-norman**, **steve-krug**, **luke-wroblewski** — a signup form mostly fails on affordance, friction, or mobile reach, so those three lenses cover the common failure points. Plus one Anthropic baseline (4 total, per medium tier's N=3+1).
 
-### Variant B — Rams (less, but better)
-Headline: "The weekly briefing for people who build small things."
-Proof: one testimonial, one byline.
-URL: /tmp/launch-rams/
+| Variant | Lens | What it does differently |
+|---|---|---|
+| `variant-a-don-norman.html` | **Signifiers & feedback** | Bordered card form, strong focus ring, an explicit signifier line under the button ("clicking here sends the first issue"), visible inline confirmation on submit |
+| `variant-b-steve-krug.html` | **Don't make me think** | One field, one button, centered, no value-prop bullets competing for attention — the pitch is the headline, nothing else to decide |
+| `variant-c-luke-wroblewski.html` | **Mobile-first** | Single-column dark UI sized to a phone frame, label-above-input, full-width thumb-reach button pinned near the bottom |
+| `variant-baseline-anthropic.html` | **Baseline** | Neutral two-column SaaS layout — copy left, card-form right — the champion-challenger control |
 
-### Variant C — Walker (editorial voice)
-Headline: "You read 40 tabs this week. This one is on us."
-Proof: three recent topic tags.
-URL: /tmp/launch-walker/
+Open `index.html` in that folder to browse all four with back-nav, or any variant file directly.
 
-## Buildable spec
+## The plan
 
-System: a Next.js signup form POST-ing to a Postgres table. Rate-limited at 3 sign-ups per minute per IP.
+**Problem:** small-business owners want tech news that's relevant to running a business, not general tech news — one weekly email, five minutes, no fluff.
 
-## INVEST user stories (3)
+**Value prop:** *SMB Signal* — the weekly briefing that respects your Friday afternoon. New tools reviewed (not hyped), price changes that hit margins, one tip you can use before Monday.
 
-1. As a reader, I can see the headline in under 2 seconds so I know what the briefing covers.
-2. As a reader, I can sign up with just an email so I don't abandon the form.
-3. As the operator, I can see weekly sign-up counts so I know if the hero is working.
+**Scope for this page:** single email-capture field, one CTA, no account creation, no payment. Success = a subscriber record, a confirmation message, and a welcome email on the back end — nothing else blocks launch.
 
-Next: pick a variant. Then say "/build <variant>" to ship it.
+**What's NOT in this plan** because scratch mode stopped after Phase 4: formal use case, INVEST user stories, IA model, interaction design, GRASP responsibility matrix, and the buildable spec. Those come from Phases 5–9, which need `local` or `full` mode.
+
+**Next step:** pick a variant (or ask me to refine), then re-run as `/launch medium "<same brief>" base=<variant-slug> --local` from inside a real git repo. That gets you the full spec + migration plan + a working localhost preview, without needing GitHub auth.
 === exit: 0

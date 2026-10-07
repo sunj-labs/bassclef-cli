@@ -1,0 +1,10 @@
+# Luminary marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- lead: michael-feathers
+- supporting: [alistair-cockburn, alan-cooper, linus-torvalds]
+- notes:
+  - feathers (lead) — real captures are the characterization boundary; scaffolds come down. Pin shipped behavior at ceiling 41 (sprint) + 45 (riff) because that is what adopters actually see on v1.9.11.
+  - cockburn — walking skeleton walks end-to-end at every layer. Louis sprint capture (step 3) proved the pattern; steps 4-6 reused it.
+  - cooper — Louis + Jamie 90s scan budget still met across all 4 captures; one upstream delta (riff at 45 lines) filed for ceiling-brush observation.
+  - torvalds — upstream filing carries concrete repro + evidence + two paths; bassclef-upstream#2123.

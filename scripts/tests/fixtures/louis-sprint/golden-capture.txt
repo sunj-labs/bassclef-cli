@@ -1,27 +1,47 @@
 === skill: /sprint
 === claude_bin: ~/.npm-global/bin/claude
 === timeout_sec: 180
-=== mode: capture
+=== scratch_dir: ~/test
 === output ===
-# Sprint — Session K Tier A full driver run
+Ignoring 17 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["~/test"].hasTrustDialogAccepted: true in ~/.claude.json.
+## Sprint status
 
-**Active goal:** Session K — ship 4 real-capture persona drivers (PRs 4-7) so the harness covers 7 of 7 Tier A skills.
+**This repo is brand new — nothing is in flight yet.**
 
-**In flight:**
-- PR 4 — chain helper + /sprint × Louis (feat/cli-375-pr-4-sprint-louis-chain-helper, OPEN)
+Bassclef just finished its first bring-up here. There's no active goal, no canvases, no roadmap, and no GitHub issues to read from — this repo isn't even a git repository yet, and `gh` isn't installed, so I can't read issues or commit history either.
 
-**Shipped last session:**
-- PR #382 — /onboard-repo × Sam + /whereami × Louis real captures (MERGED)
-- PR #381 — OAuth refresh script (OPEN, needs CI re-run)
+---
 
-**Next 3 steps:**
-1. Capture /sprint output in docker container, land `scripts/tests/fixtures/louis-sprint/golden-capture.txt`.
-2. Write `scripts/tests/smoke-drive-e2e-sprint-louis.test.sh` with 3 Cooper goal levels.
-3. Open PR 4, run CI to green, merge.
+### Thread context
 
-**Blocked:** None. CI loop stays local until push.
+- Active goal: none
+- Parent goal: none
+- Parent roadmap: none
+- Parent drivers: 0 items
 
-**Hard ceilings:** No auth, schema, security, prod-deploy touches this session.
+### What I checked (and found empty)
 
-Ready to ship. Dispatch /longrun prep to confirm scope.
+| Source | Status |
+|---|---|
+| `docs/whereami.md` | Present — says "First iteration goal: None yet" |
+| `docs/canvases/` | Missing |
+| `docs/roadmaps/` | Missing |
+| git repo | Not initialized (`fatal: not a git repository`) |
+| `gh` CLI | Not installed — can't read issues |
+| Open issues | Can't check (no git, no gh) |
+
+This is colder than the usual fallback case — normally I'd fall back to `git log` and `gh issue list` to guess what you're working on, but neither is available here. So there's genuinely no state to orient against.
+
+### What's next — pick one
+
+| Option | Scope | What it gets you |
+|---|---|---|
+| **a** | `git init` + first commit | Unlocks every git-based skill (`/sprint`, `/longrun`, PR workflow). Needed either way. |
+| **b** | `/state-a-problem` or `/lean-canvas` | Define what this project actually is before building anything |
+| **c** | `/onboard-repo --greenfield-from-intent` | Tell me your idea in a sentence; I scaffold canvas + spec + first goal from it |
+| **d** | Just tell me what you want to build | Skip ceremony — I'll write the code directly |
+
+**My recommendation:** start with **a** (git init) regardless of what else you pick — almost everything else in bassclef assumes a git history exists. Then **c** if you have an idea but want it shaped, or **d** if you already know exactly what you want.
+
+What would you like to do?
 === exit: 0

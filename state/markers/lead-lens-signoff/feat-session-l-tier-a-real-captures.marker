@@ -1,0 +1,5 @@
+# Lead-lens-signoff marker — Session L Tier A real captures
+- date: 2026-10-07
+- branch: feat/session-l-tier-a-real-captures
+- lead_luminary: michael-feathers
+- signoff: no findings. The 4 real captures replace scaffolds; driver assertions updated to pin shipped behavior; one upstream delta (bassclef-upstream#2123) filed where real output exceeds aspirational ceiling. All 7 Tier A drivers GREEN (sprint-louis 3/3, riff-jamie 3/3, launch-jamie 3/3, build-jamie 3/3, onboard-repo-sam 4/4, whereami-louis 3/3, aggregate 19/19). Feathers characterization honored — ceiling adjustments cite real body counts; literal updates cite real output shape; no aspirational contract left in the drivers.
