@@ -1,0 +1,9 @@
+# Temperance marker — Session L prep plan + Session K publish addendum
+- date: 2026-10-07
+- branch: chore/session-l-prep-plus-session-k-publish-addendum
+- scope-decision:
+  - Right thing: Write Session L plan doc exercising @thebassclef/lite@1.9.11 against the 7-driver Tier A harness. Also append whereami operator_recap with post-closeout v1.9.11 ship record.
+  - Right way: Converged prep per bassclef#1555 (Deliverable + Problem + Value + Turns + Risk + Priority). Plus step sequence. Then /session-end discipline on current session.
+  - Drift trigger: Do NOT start docker capture work tonight (that's Session L). Do NOT reopen architect-review (cli#388 covers).
+- parent_chain: Session K Tier A + release v1.9.11 shipped -> Session L exercises against the published package
+- out_of_scope: capture work, upstream issue filing, architect-review (Session L work)
