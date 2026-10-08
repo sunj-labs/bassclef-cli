@@ -24,6 +24,20 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.12] - 2026-10-08
+### Added
+- Bassclef substrate pin bumped `v1.8.0` → `v1.9.3` — bundle sync carries the Session N cures (install-written-paths mediation + CLI init.manifest.json fallback, pre-commit-gate matcher, write-state-marker lite tier retag, artifact-ingestion HTML-comment tolerance, local-serve `--lan` cure) plus the v1.9.3 hotfix stamping `lite-manifest.json manifest_version` `0.0.0` → `1.17.1`.
+- Install-written-paths convergence from cli-side (`src/lib/install-written-paths.ts`). `bassclef init` now writes `state/install-written-paths.json` so bassclef-upstream discipline hooks (pre-commit-identifier-leak-scrub, pre-commit-gate 3-marker section) skip dispatcher-installed files instead of firing false-positive BLOCKs on an adopter's first commit. Closes bassclef-upstream#2036 Finding #8 Class A.
+- 5 adopter-anchor drivers at `scripts/tests/smoke-drive-adopter-{2138,2139,2140,2142,2143}-*.test.sh` per ADR-011 D1+D2. Post-flip GREEN-confirms shape; each driver pins a specific Session N cure anchor against the shipped `dist/lite/` bundle.
+- 4 flow drivers at `scripts/tests/smoke-drive-flow-{install-first-commit,launch-local-serve-phone,write-marker-use-marker,agent-write-hook-scan}.sh` per ADR-011 D3. Flow registry at `scripts/tests/smoke-drive-flows-registry.sh` per D4.
+
+### Changed
+
+### Fixed
+
+### Notes
+- The v1.9.3 bundle unblocks the manifest-version regression that parked the v1.9.2 bundle sync branch — cli bundler expected major 1.x; v1.9.2 shipped `0.0.0`; v1.9.3 stamps `1.17.1`.
+
 ## [1.9.11] - 2026-10-07
 ### Added
 - Bassclef substrate pin bumped v1.7.1 → v1.8.0 — bundle sync carries 6 cli-side cures via `dist/lite/`.
