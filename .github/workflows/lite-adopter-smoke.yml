@@ -37,6 +37,8 @@ on:
     paths:
       - '.github/workflows/lite-adopter-smoke.yml'
       - 'scripts/tests/smoke-drive-e2e-*.test.sh'
+      - 'scripts/tests/smoke-drive-adopter-*.test.sh'
+      - 'scripts/tests/smoke-drive-flow-*.sh'
       - 'scripts/tests/claude-chain.test.sh'
       - 'scripts/tests/lib/lite-runtime-invariants.sh'
       - 'scripts/lib/smoke-assert.sh'
@@ -124,13 +126,41 @@ jobs:
             fi
           done
 
-      - name: run drivers (PR 1b lands these)
+      - name: run drivers (PR 1b lands these; ADR-011 D4 extends to adopter + flow families)
         run: |
           shopt -s nullglob 2>/dev/null || true
+          pass=0
+          fail=0
+          skip=0
           found=0
-          for drv in scripts/tests/smoke-drive-e2e-*.test.sh; do
-            found=$((found+1))
-            echo "--- $drv ---"
-            bash "$drv" || echo "driver exit $?"
+          failing=()
+          # Three driver families per ADR-011 D4:
+          #   - smoke-drive-e2e-*.test.sh      — persona chains (onboard, launch, build)
+          #   - smoke-drive-adopter-*.test.sh  — per-cure anchor drivers (ADR-011 D1+D2)
+          #   - smoke-drive-flow-*.sh          — adopter command sequences (ADR-011 D3)
+          # Exit 77 is SKIP per ADR-011 D2; SKIP does not count as fail.
+          for pattern in \
+              scripts/tests/smoke-drive-e2e-*.test.sh \
+              scripts/tests/smoke-drive-adopter-*.test.sh \
+              scripts/tests/smoke-drive-flow-*.sh; do
+            for drv in $pattern; do
+              found=$((found+1))
+              echo "--- $drv ---"
+              set +e
+              bash "$drv"
+              rc=$?
+              set -e
+              case "$rc" in
+                0)  pass=$((pass+1)) ;;
+                77) skip=$((skip+1)) ;;
+                *)  fail=$((fail+1)); failing+=("$drv (rc=$rc)") ;;
+              esac
+            done
           done
-          echo "drivers found: $found"
+          echo ""
+          echo "==> drivers: $found total / $pass pass / $fail fail / $skip skip"
+          if (( fail > 0 )); then
+            echo "FAILING DRIVERS:"
+            for f in "${failing[@]}"; do echo "  $f"; done
+            exit 1
+          fi
