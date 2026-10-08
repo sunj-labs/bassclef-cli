@@ -44,12 +44,13 @@ count_must=${count_must//[^0-9]/}; count_must=${count_must:-0}
 count_skip=$(grep -cE "Skip.*greenfield|Greenfield.*Skip|greenfield.*prototype is the spec" "$UX_SKILL" 2>/dev/null || echo 0)
 count_skip=${count_skip//[^0-9]/}; count_skip=${count_skip:-0}
 
+# Flipped to GREEN-confirms per ADR-011 D2 (post-cure anchor).
+# PASS when the MUST-vs-skip conflict is gone. FAIL if both signals return together.
 if [[ "$count_must" -gt 0 ]] && [[ "$count_skip" -gt 0 ]]; then
-  echo "RED-CONFIRMED|driver-324|/launch calls /ux-migration MUST (${count_must}) + /ux-migration says Skip-greenfield (${count_skip})"
-  echo "PASS: #324 MUST-vs-skip conflict reproduces"
-  exit 0
+  echo "REGRESSION|driver-324|/launch calls /ux-migration MUST (${count_must}) + /ux-migration says Skip-greenfield (${count_skip})"
+  echo "FAIL: #324 MUST-vs-skip conflict returned — cure reverted"
+  exit 1
 fi
 
-echo "GREEN-UNEXPECTED|driver-324|/launch MUST count=${count_must}; /ux-migration Skip count=${count_skip}"
-echo "FAIL: driver no longer RED — flip semantics; cross-ref #324 close"
-exit 1
+echo "GREEN-CONFIRMED|driver-324|/launch MUST count=${count_must}; /ux-migration Skip count=${count_skip}; #324 cure holds"
+exit 0

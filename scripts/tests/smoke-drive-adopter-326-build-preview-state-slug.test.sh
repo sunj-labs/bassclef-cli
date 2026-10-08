@@ -53,13 +53,15 @@ count_field_read=${count_field_read//[^0-9]/}; count_field_read=${count_field_re
 count_construction_patterns=$(grep -cE "<sprint-slug>-construction|<YYYY-MM-DD>-<sprint-slug>-construction" "$LAUNCH_SKILL" 2>/dev/null || echo 0)
 count_construction_patterns=${count_construction_patterns//[^0-9]/}; count_construction_patterns=${count_construction_patterns:-0}
 
+# Flipped to GREEN-confirms per ADR-011 D2 (post-cure anchor).
+# PASS when /build reads goal.preview_state (or no longer uses literal path lookup).
+# FAIL if path-based lookup returns without a goal-field read.
 if [[ "$count_path_lookup" -gt 0 ]] && [[ "$count_field_read" -eq 0 ]]; then
-  echo "RED-CONFIRMED|driver-326|/build Phase 2b uses path-based preview-state lookup (${count_path_lookup} match) without reading goal's preview_state: field"
+  echo "REGRESSION|driver-326|/build Phase 2b uses path-based preview-state lookup (${count_path_lookup} match) without reading goal's preview_state: field"
   echo "  /launch construction-goal name pattern count: ${count_construction_patterns}"
-  echo "PASS: #326 slug-mismatch reproduces"
-  exit 0
+  echo "FAIL: #326 slug-mismatch returned — cure reverted"
+  exit 1
 fi
 
-echo "GREEN-UNEXPECTED|driver-326|path lookup count=${count_path_lookup}; field read count=${count_field_read}"
-echo "FAIL: driver no longer RED — flip semantics; cross-ref #326 close"
-exit 1
+echo "GREEN-CONFIRMED|driver-326|path lookup count=${count_path_lookup}; field read count=${count_field_read}; #326 cure holds"
+exit 0

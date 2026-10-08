@@ -40,12 +40,13 @@ count_appetite=${count_appetite//[^0-9]/}; count_appetite=${count_appetite:-0}
 
 total=$((count_scope + count_appetite))
 
+# Flipped to GREEN-confirms per ADR-011 D2 (post-cure anchor).
+# PASS when the jargon terms are absent. FAIL if either returns.
 if [[ "$total" -gt 0 ]]; then
-  echo "RED-CONFIRMED|driver-322|shipped template carries jargon (scope-bounded=${count_scope} appetite=${count_appetite})"
-  echo "PASS: #322 adopter template-fails-its-own-gate reproduces"
-  exit 0
+  echo "REGRESSION|driver-322|shipped template re-introduces jargon (scope-bounded=${count_scope} appetite=${count_appetite})"
+  echo "FAIL: #322 template-fails-its-own-gate returned — cure reverted"
+  exit 1
 fi
 
-echo "GREEN-UNEXPECTED|driver-322|both jargon terms absent — template cured"
-echo "FAIL: driver no longer RED — flip semantics; cross-ref #322 close"
-exit 1
+echo "GREEN-CONFIRMED|driver-322|both jargon terms absent from /launch template; #322 cure holds"
+exit 0
