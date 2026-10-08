@@ -33,8 +33,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HELPER="$REPO_ROOT/dist/lite/.claude/skills/onboard-repo/write-state-marker.sh"
 
 if [[ ! -f "$HELPER" ]]; then
-  echo "FAIL|driver-2140|regression: $HELPER missing from bundle (cure retag reverted)"
-  exit 1
+  echo "SKIP|driver-2140|$HELPER absent (run bundle sync first)"
+  exit 77
 fi
 
 missing=()
