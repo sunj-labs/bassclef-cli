@@ -14,6 +14,10 @@ amendments:
     scope: iteration b — align Status with frontmatter; fix files-count mismatch; extend complete-mediation to mkdir
   - date: 2026-09-13
     scope: goal 2026-09-13 cli#68 Phase 1 Step 2 — file-list contract extends from 3 named files to full dist/<tier>/ tree walk per ADR-009 D1 (which cross-cites ADR-055 D1); every safety invariant preserved unchanged
+  - date: 2026-10-08
+    scope: cli#235 cure — copyOne reclassifies user-scope dual-write AlreadyExists as 'unchanged' when existing content hash matches outputContent hash. ADR-002 safety invariant preserved — the writeSafely refuse-on-exists check still owns the write-time boundary; the reclassification is a post-throw read-only comparison. Adopter-edited user-scope content (hash differs) still records as refused. CopyResult gains `unchanged: string[]` field; init.ts banner reports "N already-present" row separately from "N refused".
+  - date: 2026-10-08
+    scope: v1.9.3 convergence — init now calls `install_written_paths_register` per written path per bassclef-upstream#2149 permissive fallback. The register call is best-effort; failure does not change init's exit code. Dual-manifest shape: cli writes `.bassclef/init.manifest.json` AND registers each path with the upstream lib. The two manifests converge over time per peer coordination.
 ---
 
 # ADR-002 — Pin the safety contract for `bassclef init` — fail-safe defaults + atomic writes + path scoping

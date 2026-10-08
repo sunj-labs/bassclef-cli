@@ -8,6 +8,9 @@ supersedes: []
 superseded_by: []
 amends:
   - ADR-002
+amendments:
+  - date: 2026-10-08
+    scope: cli#235 cure — InitReport schema v3 extended with `unchanged: number` counting user-scope dual-write entries where existing content hash matched outputContent hash byte-for-byte. The `totals.files` arithmetic becomes `written + refused + unchanged + errored` so the three descriptions still agree with disk. CopyResult grows `unchanged: string[]`; writeManifest records unchanged outcomes alongside refused per ADR-010 D4 (partial-init must look partial). The banner adds "N already-present" between "N copied" and "N refused" rows. The misleading "path collision" line stops firing when the only "refused" are reclassified identical-content prior-install writes.
 luminaries:
   primary:
     - linus-torvalds
