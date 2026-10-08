@@ -49,12 +49,14 @@ count_add_docs=${count_add_docs//[^0-9]/}; count_add_docs=${count_add_docs:-0}
 count_exclude=$(grep -cE "[':]!docs/prototypes|:\(exclude\)docs/prototypes" "$HOOK" 2>/dev/null || echo 0)
 count_exclude=${count_exclude//[^0-9]/}; count_exclude=${count_exclude:-0}
 
+# Flipped to GREEN-confirms per ADR-011 D2 (post-cure anchor).
+# PASS when docs/prototypes exclusion is present OR broad docs/ staging is gone.
+# FAIL if both the broad staging returns AND the exclusion is missing.
 if [[ "$count_add_docs" -gt 0 ]] && [[ "$count_exclude" -eq 0 ]]; then
-  echo "RED-CONFIRMED|driver-323|shipped hook stages docs/ broadly (${count_add_docs} git add docs/ lines) without docs/prototypes exclusion"
-  echo "PASS: #323 auto-save-prototype-leak reproduces"
-  exit 0
+  echo "REGRESSION|driver-323|shipped hook stages docs/ broadly (${count_add_docs} git add docs/ lines) without docs/prototypes exclusion"
+  echo "FAIL: #323 auto-save-prototype-leak returned — cure reverted"
+  exit 1
 fi
 
-echo "GREEN-UNEXPECTED|driver-323|docs/prototypes exclusion present (count=${count_exclude}) OR docs/ staging removed (count=${count_add_docs})"
-echo "FAIL: driver no longer RED — flip semantics; cross-ref #323 close"
-exit 1
+echo "GREEN-CONFIRMED|driver-323|docs/prototypes exclusion present (count=${count_exclude}) OR docs/ staging removed (count=${count_add_docs}); #323 cure holds"
+exit 0

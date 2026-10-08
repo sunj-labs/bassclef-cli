@@ -47,17 +47,33 @@ docker run --rm \
     cd /opt/bassclef-cli
     pass=0
     fail=0
-    for drv in scripts/tests/smoke-drive-e2e-*.test.sh; do
-      if [[ -f "$drv" ]]; then
-        echo "--- running $drv ---"
-        if bash "$drv"; then
-          pass=$((pass+1))
-        else
-          fail=$((fail+1))
+    skip=0
+    # Three driver families per ADR-011 D4 + ADR-006 install harness:
+    #   - smoke-drive-e2e-*.test.sh      — persona chains (onboard, launch, build)
+    #   - smoke-drive-adopter-*.test.sh  — per-cure anchor drivers (ADR-011 D1+D2)
+    #   - smoke-drive-flow-*.sh          — adopter command sequences (ADR-011 D3)
+    # Exit 77 is SKIP per ADR-011 D2 (bundle unavailable in container, etc.);
+    # SKIP does not count as fail.
+    for pattern in \
+        scripts/tests/smoke-drive-e2e-*.test.sh \
+        scripts/tests/smoke-drive-adopter-*.test.sh \
+        scripts/tests/smoke-drive-flow-*.sh; do
+      for drv in $pattern; do
+        if [[ -f "$drv" ]]; then
+          echo "--- running $drv ---"
+          set +e
+          bash "$drv"
+          rc=$?
+          set -e
+          case "$rc" in
+            0)  pass=$((pass+1)) ;;
+            77) skip=$((skip+1)) ;;
+            *)  fail=$((fail+1)) ;;
+          esac
         fi
-      fi
+      done
     done
     echo ""
-    echo "==> drivers: $pass pass / $fail fail"
+    echo "==> drivers: $pass pass / $fail fail / $skip skip"
     [[ "$fail" -eq 0 ]] || exit 3
   '

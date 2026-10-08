@@ -82,15 +82,13 @@ set -e
 
 STDERR_BODY=$(cat "$STDERR_FILE" 2>/dev/null)
 
-# Case 1 + Case 2: hook must BLOCK (exit 2) AND stderr must name "parent_bet: null"
+# Flipped to GREEN-confirms per ADR-011 D2 (post-cure anchor).
+# PASS when the hook accepts parent_bet: null. FAIL if the defect returns.
 if [[ "$EXIT_CODE" -eq 2 ]] && echo "$STDERR_BODY" | grep -qE 'parent_bet:[[:space:]]*null'; then
-  echo "RED-CONFIRMED|driver-311|hook BLOCKs on parent_bet: null (exit=$EXIT_CODE; stderr names null parent)"
-  echo "PASS: #311 null-parent false-positive reproduces"
-  exit 0
+  echo "REGRESSION|driver-311|hook still BLOCKs on parent_bet: null (exit=$EXIT_CODE; stderr names null parent)"
+  echo "FAIL: #311 null-parent false-positive returned — cure reverted"
+  exit 1
 fi
 
-# Case 3: hook accepted — either cure landed OR hook body changed semantics
-echo "GREEN-UNEXPECTED|driver-311|hook did not BLOCK on parent_bet: null (exit=$EXIT_CODE)"
-echo "stderr: $STDERR_BODY"
-echo "FAIL: driver no longer RED — flip semantics; cross-ref #311 close"
-exit 1
+echo "GREEN-CONFIRMED|driver-311|hook accepts parent_bet: null (exit=$EXIT_CODE); #311 cure holds"
+exit 0
