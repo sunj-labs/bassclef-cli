@@ -9,6 +9,9 @@ accepted_via: Step 1 of goal 2026-09-13 cli#68 Phase 1 authors this ADR; Step 2 
 supersedes: null
 superseded_by: null
 extends: [ADR-002, ADR-005, ADR-007]
+amendments:
+  - date: 2026-10-08
+    scope: v1.9.3 dual-manifest convergence — cli's `.bassclef/init.manifest.json` stays the init contract source at cli side. Per bassclef-upstream#2149, cli ALSO registers each written path with `lib/install-written-paths.sh is_install_written_path` so bassclef's install-written-paths manifest and cli's init manifest converge. The upstream lib carries a permissive fallback that reads `.bassclef/init.manifest.json` directly when its own entries are missing — so cli consumers at any lite tier see consistent is-install-written answers from bassclef hooks. Convergence is additive. Rename event is covered under existing we-dont-break-adopters discipline per `.claude/rules/we-dont-break-adopters.md`.
 authoring_luminaries:
   primary: [michael-nygard]
   supporting: [vaughn-vernon, alan-cooper, linus-torvalds]

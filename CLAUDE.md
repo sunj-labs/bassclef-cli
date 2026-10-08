@@ -53,6 +53,7 @@ Read `docs/whereami.md` at session-start for the live snapshot.
 - `docs/adrs/ADR-008-bassclef-migrate-subcommand.md` — `bassclef migrate` subcommand contract for 0.0.2 → 0.1.0 config preservation.
 - `docs/adrs/ADR-009-manifest-as-init-contract-source.md` — wiring manifest is the init contract source (points at upstream ADR-055).
 - `docs/adrs/ADR-010-init-reporting-contract.md` — init reporting contract; banner, `.bassclef/init.manifest.json`, `--json` mode all read one report object.
+- `docs/adrs/ADR-011-cli-side-cure-anchor-drivers-and-flow-layer.md` — per-cure characterization drivers + new flow-layer test category; extends ADR-006 (proposed).
 - `docs/adrs/ADR-057-lite-catalog-destination-path-invariant.md` — lite catalog destination path invariant (proposed; per upstream ADR-056 self-containment).
 
 ## Primary luminary triad (per iteration bet)
