@@ -4,12 +4,14 @@ session_id: 2026-10-08-0130
 project: bassclef-cli
 agent: personal
 status: completed
-tags: [session-n, cli-side-scope, cli-241, cli-235, cli-320, cli-398, upstream-tickets]
+tags: [session-n, cli-side-scope, cli-241, cli-235, cli-320, cli-398, upstream-tickets, v1.9.3-cascade, adr-011-drivers]
 started_at: 2026-10-07T18:00:00Z
-ended_at: 2026-10-08T01:35:00Z
-duration_minutes: ~455
-turns: ~160
-closes: [cli#241, cli#235, cli#398, cli#320]
+ended_at: 2026-10-09T01:30:00Z
+duration_minutes: ~1890
+turns: ~360
+closes: [cli#241, cli#235, cli#398, cli#320, bassclef-upstream#2036-finding-8-class-a]
+prs_merged: [401, 402, 403, 404]
+npm_releases: ["@thebassclef/lite@1.9.12"]
 ---
 
 # Session: Session N — cli-side scope (cli#241 /riff cure + cli#235 refused reclassify + cli#398 nuke extensions + cli#320 upstream route)
@@ -110,3 +112,73 @@ Per operator's cold-adopter smoke share, these upstream tickets filed before Ste
 - Monitor + merge PR #401 when CI green.
 - v1.9.1 lite publish bump planned by operator (covers v1.9.1 substrate changes + cli#241 cure).
 - Session O prep when upstream cascade lands (fixes to #2138-#2143 + #2146).
+
+---
+
+## Session N continuation — overnight autonomous run (2026-10-08 evening → 2026-10-09 early morning)
+
+Operator went to sleep around 01:30 UTC. Peer bassclef-upstream-77 confirmed the v1.9.3 upstream hotfix at ~12:50 UTC. The autonomous run picked up the plan carried in `operator_recap` and cleared it through to a live npm release plus the ADR-011 D4 Open-questions commitment.
+
+### PR #402 — ADR amendments (merged `fba3f88`)
+
+- ADR-002 — amendment entries for cli#235 unchanged + v1.9.3 convergence
+- ADR-009 — amendments section with dual-manifest convergence entry
+- ADR-010 — amendments section with InitReport v3 schema + banner shape
+- ADR-011 — NEW ADR (proposed status) carrying D1-D4 (adopter-anchor drivers + per-shape semantics + flow-layer category + flow registry)
+- CLAUDE.md — ADR-011 pointer added
+
+### PR #403 — v1.9.12 bundle sync + install-written-paths convergence + ADR-011 drivers (merged `e6bf3fe`)
+
+- Bundle sync against bassclef v1.9.3 (`manifest_version` 1.17.1 cured; v1.9.2's `0.0.0` regression unblocked)
+- `src/lib/install-written-paths.ts` + call site in `src/commands/init.ts` — `bassclef init` now writes `<targetDir>/state/install-written-paths.json` matching the sibling lib's schema. Closes bassclef-upstream#2036 Finding #8 Class A from the cli side.
+- 5 adopter-anchor drivers at `scripts/tests/smoke-drive-adopter-{2138,2139,2140,2142,2143}-*.test.sh` per ADR-011 D1+D2 (post-flip GREEN-confirms)
+- 4 flow drivers at `scripts/tests/smoke-drive-flow-*.sh` per ADR-011 D3
+- Flow registry at `scripts/tests/smoke-drive-flows-registry.sh` per ADR-011 D4
+- 1 characterization test (6 cases) for the convergence lib
+- `npm run bump patch` → v1.9.11 → v1.9.12
+
+### npm release — @thebassclef/lite@1.9.12
+
+- Tag v1.9.12 pushed on `e6bf3fe`
+- GitHub release created triggers publish workflow 37784229616
+- OIDC trusted-publisher provenance signed to sigstore log index 3148948556
+- npm registry latest flipped: v1.9.11 → v1.9.12
+- Docker cold-adopter smoke 37784667631 passed against v1.9.12
+
+### PR #404 — runner wiring + 5 driver flips (merged `d353829`)
+
+Caught after operator's "what about flow tests?" question. The ADR-011 D4 Open-questions commitment said the runner matcher extension lands in the v1.9.3 PR. PR #403 missed it — `scripts/tests/run-lite-container.sh:50` still only globbed `smoke-drive-e2e-*.test.sh`. The 5 adopter-anchor + 4 flow drivers shipped but never fired in docker-smoke CI.
+
+Local sweep after wiring surfaced 5 pre-existing RED-confirms drivers still in that shape after their cures merged (cli#311, #322, #323, #324, #326). PR #404 fixed both:
+
+- Extended `run-lite-container.sh` to loop three driver families (e2e / adopter / flow); exit 77 honored as SKIP per ADR-011 D2
+- Flipped 5 drivers to GREEN-confirms shape per ADR-011 D2 — each is a symmetric exit-code swap plus `RED-CONFIRMED → REGRESSION` / `GREEN-UNEXPECTED → GREEN-CONFIRMED` message rename
+- Local sweep: 45 pass / 0 fail / 0 skip
+- CI docker-smoke rerun against main at `d353829` confirms in-container pass
+
+### Promotable patterns (continuation)
+
+- **ADR Open-questions as action items, not footnotes.** ADR-011 D4 Open-questions said "Implementation lands in the v1.9.3 PR." PR #403 shipped the primitives but missed the glue. A follow-on PR closed the gap one iteration later. Suggests `/longrun closeout` should scan the current session's new ADR frontmatter for `## Open questions` entries and treat them as closeout obligations.
+- **Driver flip discipline as pair-shape work.** When a cure lands, its RED-confirms driver should flip in the SAME PR. ADR-011 D2 already names the one-line swap. PR #403 shipped the bundle sync; the 5 flips should have ridden it. Promotion: fold "flip stale RED-confirms drivers" into the bundle-sync skill's checklist.
+
+### Session upstream + cross-session coord
+
+- Peer bassclef-upstream-77 — v1.9.3 release coord cleared via cross-session message at 12:50 UTC; peer closed the manifest_version regression.
+- Peer bassclef-upstream-d5 — green-lit their /longrun (4 Sam-trust cures incl. bassclef-upstream#2146 mirroring cli#320's cure pattern). No block.
+
+### Gate Evidence (continuation)
+
+| Gate | Fired | Evidence | Outcome |
+|------|-------|----------|---------|
+| Temperance | yes | `state/markers/temperance/feat-v1.9.3-bundle-sync-plus-convergence.marker` | PASS |
+| Diagnosis | n/a | PRs 402-404 are additive feature + follow-on; no fix-branch diagnosis required | n/a |
+| Tests | yes | 500 → 506 vitest pass across PR #403 (6 new convergence cases); 45 driver sweep pass across PR #404 | PASS |
+| Verify | yes | tsc --noEmit green at every commit; CI full matrix green on PR #403 (test+typecheck + docker-smoke); CI 8/8 green on PR #404; manual docker-smoke dispatch 37835177569 confirms runner extension in-container | PASS |
+| Loop | yes | PR #403 iteration 1 (RED → cure dedup → GREEN); PR #404 iteration 1 (local 40/5 → 45/0 after symmetric flip) | PASS |
+
+### Next (continuation)
+
+- Deepen 3 grep-only flow drivers (launch-local-serve-phone, write-marker-use-marker, agent-write-hook-scan) to run actual commands rather than grep anchors — SHOULD per /kiss scope answer.
+- Deepen 5 adopter-anchor drivers to assert behavior alongside the ticket citation — SHOULD per /kiss scope answer.
+- Sister bassclef-upstream ticket: `lib/install-written-paths.sh` `_iwp_init_manifest_has_path` reads `.entries[]` while cli writes `.files[]`. Convergence makes primary authoritative; fallback shape mismatch surfaces as a sister cure.
+- Session O prep when operator wakes.
