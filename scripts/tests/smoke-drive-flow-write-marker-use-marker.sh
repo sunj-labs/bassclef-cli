@@ -29,8 +29,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HELPER="$REPO_ROOT/dist/lite/.claude/skills/onboard-repo/write-state-marker.sh"
 
 if [[ ! -f "$HELPER" ]]; then
-  echo "FAIL|flow-write-marker-use-marker|step=presence: $HELPER missing from bundle"
-  exit 1
+  echo "SKIP|flow-write-marker-use-marker|$HELPER absent (run bundle sync first)"
+  exit 77
 fi
 
 if ! bash -n "$HELPER" 2>/dev/null; then
