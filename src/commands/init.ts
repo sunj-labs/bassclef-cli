@@ -29,6 +29,7 @@ import { parseInitArgs, ArgvError } from './init-argv.js';
 import { resolveTargetDir, ResolveError } from '../lib/resolve-target-dir.js';
 import { writeSafely, mkdirSafely, WriteError } from '../lib/write-safely.js';
 import { hashContent } from '../lib/hash.js';
+import { registerInstallWrittenPaths } from '../lib/install-written-paths.js';
 import { version as pkgVersion } from '../index.js';
 import {
   substrateConfigMdTemplate,
@@ -678,6 +679,28 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   // config files. Per ADR-010 D1; this is what ADR-002 §Amendment
   // 2026-09-13 already committed to and the Phase 3 code did not do.
   writeManifest(targetDir, results, walker.result);
+
+  // Register install-written paths so bassclef-upstream discipline hooks
+  // (pre-commit-identifier-leak-scrub, pre-commit-gate 3-marker section)
+  // skip them. Per bassclef-upstream#2036 Finding #8 — Kunal cold-adopter
+  // Class A (install-leak surfaces). Only paths this run actually wrote;
+  // refused/errored/unchanged entries aren't ours to claim as install-written.
+  const createdConfigPaths = results
+    .filter((r) => r.outcome === 'created')
+    .map((r) => ({
+      relativePath: r.plan.relativePath,
+      contentHashSha256: hashContent(r.plan.content),
+    }));
+  const createdBundlePaths = (walker.result?.copiedEntries ?? [])
+    .filter((e) => typeof e.content_hash_sha256 === 'string')
+    .map((e) => ({
+      relativePath: e.path,
+      contentHashSha256: e.content_hash_sha256 as string,
+    }));
+  registerInstallWrittenPaths(targetDir, [
+    ...createdConfigPaths,
+    ...createdBundlePaths,
+  ]);
 
   // RFC N4 — folder guidance line after walker (only on success).
   if (walker.code === 0) {
