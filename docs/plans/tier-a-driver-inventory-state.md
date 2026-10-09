@@ -169,6 +169,58 @@ The update discipline — read current fixture state via `ls` + `git log`, re-ru
 - bassclef-upstream#2123 — /riff ceiling decision (open)
 - `.claude/skills/eisenhower/SKILL.md` — the scoring method used here
 
+## Session N outcome (2026-10-09 overnight close)
+
+PRs merged tonight: #402, #403, #404, #405. One npm release — @thebassclef/lite@1.9.12. One sister upstream filing — bassclef-upstream#2154.
+
+### Tier A impact
+
+- All 6 Tier A persona flow drivers stay GREEN at 1.9.12. Aggregate 20/20 (Session M `build-env-partial` T04 case included) carries forward.
+- cli#235 `bassclef init` reclassify of user-scope dual-write already-present as `unchanged` — merged PR #401 (actually landed in Session N prep window; captured here for completeness).
+- cli#320 (/personas slug) stays open on upstream as bassclef-upstream#2146.
+- Four new Q1 items from this run folded into open-tickets list (see below).
+
+### Vocabulary clarification (operator catch, 2026-10-09)
+
+Three test families now ship. Operator asked for plain names. Agreed naming going forward:
+
+| Family | Plain name | Prefix today | Scope |
+|---|---|---|---|
+| **Flow drivers** | Flow drivers | `smoke-drive-e2e-*.test.sh` | Full user chains via Claude dispatch; Tier A persona chains live here |
+| **Regression tests** | Regression tests | `smoke-drive-adopter-*.test.sh` | One file per past bug — pins each cure stays shipped |
+| **Shell flow tests** (new) | Shell flow tests | `smoke-drive-flow-*.sh` | Raw CLI command sequences without Claude dispatch |
+
+File renames tracked at cli#407. The `smoke-drive-flow-*` family added tonight carries 1 real shell flow test + 3 mislabeled regression tests; cli#407 moves the 3 mislabeled files into the regression family.
+
+### Testing infrastructure — which layer each family fires at
+
+| Layer | What fires | Who runs it |
+|---|---|---|
+| **1. Vitest unit + integration** | `tests/**/*.test.ts` against `src/*.ts` | `npm test` + CI test+typecheck job (blocks merges) |
+| **2. Flow drivers** (Tier A persona chains) | `scripts/tests/smoke-drive-e2e-*.test.sh` against REAL captures from prior docker-smoke runs | `scripts/tests/run-lite-container.sh` locally + `.github/workflows/lite-adopter-smoke.yml` matrix (6 cells; report-only on fail) |
+| **3. Regression tests** | `scripts/tests/smoke-drive-adopter-*.test.sh` against shipped `dist/lite/*` files | Same runners as Layer 2 |
+| **4. Shell flow tests** (new) | `scripts/tests/smoke-drive-flow-*.sh` against raw CLI commands + filesystem effects | Same runners as Layer 2 |
+| **5. Live Claude dispatch** | `scripts/smoke-drive-{skills,onboard-repo,riff,launch,interactive-*}.sh` via `harness/docker/entry.sh` inside Dockerfile.cold-adopter | `.github/workflows/docker-smoke.yml` (blocks on fail) |
+| **6. npm supply chain** | OIDC trusted publisher + sigstore provenance per release | `.github/workflows/publish.yml` on tag push |
+
+Layers 2 + 3 + 4 all got wired into CI tonight via PR #405. Before tonight only Layer 2 fired in CI.
+
+### New open tickets filed tonight
+
+- bassclef-upstream#2154 — `lib/install-written-paths.sh` `_iwp_init_manifest_has_path` reads `.entries[]` while cli writes `.files[]`; sister fallback shape fix. Dormant today because cli's primary register path is authoritative. Q3 (DELEGATE — upstream owns).
+- cli#406 — pickup tracker for bassclef-upstream#2006 (bassclef init final output / Sam-B 5-min value test). Peer handoff from bassclef-upstream-d5. Q2 (SCHEDULE — Sam first-touch surface).
+- cli#407 — taxonomy cleanup; rename the 3 test families to plain names + collapse ADR-011 D3 confusion. Q3 (hygiene; close before next Tier A sweep).
+
+### Next-session Q1 candidates (freshly scored 2026-10-09)
+
+Reads from inventory above + tonight's filings:
+
+1. **cli#406** — bassclef init 5-min value test (Sam-B feat). Peer-estimated ~20-line rewrite. Highest Sam first-touch impact.
+2. **cli#328 + /build happy path** — unblocks /build case 4 (currently refusal-only). Pair cure.
+3. **cli#318** — /personas and /jtbd-tasks path conflict. Clears persona-chain blocker.
+
+Session M methodology miss (pre-flight defect code location via md5sum) carries forward as /promote candidate.
+
 ## Session M outcome (2026-10-07 close)
 
 Scope (a) collapsed to upstream routings — all 3 "cli Q1 cures" turned out to be bassclef-source defects:

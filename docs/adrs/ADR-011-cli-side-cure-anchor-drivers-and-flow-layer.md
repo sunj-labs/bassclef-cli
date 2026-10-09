@@ -14,6 +14,9 @@ authoring_luminaries:
   supporting: [alistair-cockburn, kent-beck, linus-torvalds]
 lead_lens: michael-feathers
 goal: Session N closeout + v1.9.3 fold
+amendments:
+  - date: 2026-10-09
+    scope: taxonomy clarification per operator catch during Session N overnight run — D1 "adopter-anchor drivers" renamed to **regression tests** (plain name); D3 "flow-layer drivers" partially collapses because 3 of 4 files added in PR #403 grep file text and are actually regression tests. The real distinction stays — regression tests pin a single past bug; flow drivers walk a full user chain via Claude. The existing `smoke-drive-e2e-*.test.sh` family IS the flow driver family (Tier A persona chains per docs/plans/tier-a-driver-inventory-state.md). A fourth family emerged tonight at the shell-CLI layer (raw commands, no Claude dispatch) — kept narrow as **shell flow tests**. File renames tracked at cli#407. Testing infrastructure layer map lives in the inventory doc §"Testing infrastructure — which layer each family fires at".
 references:
   - {type: adr, id: ADR-006, anchor: install harness contract — this ADR extends with two new test categories}
   - {type: ticket, id: 2138, anchor: install-written-paths mediation cure in v1.9.3}
