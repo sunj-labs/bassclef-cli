@@ -24,6 +24,17 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.14] - 2026-10-10
+### Added
+
+### Changed
+
+- CI runner pins modernized across all 5 workflow files per cli#193. `actions/checkout@v4` → `@v5` (10 call sites), `actions/setup-node@v4` → `@v5` (4 call sites), `runs-on: ubuntu-latest` → `ubuntu-24.04` (7 call sites), matrix `os` → `[ubuntu-24.04, macos-14]`. GitHub deprecation windows cleared ahead of forced-upgrade cliffs. No cli source change; no substrate change; runtime behavior identical. Verified end-to-end: PR #414 CI 9/9 pass on new runners.
+
+### Fixed
+
+### Notes
+
 ## [1.9.13] - 2026-10-10
 ### Added
 
