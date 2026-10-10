@@ -171,6 +171,9 @@ if [ "$DRY_RUN" -eq 1 ]; then
     else
       echo "  5. --delete-github set but gh not authenticated; would skip"
     fi
+    if [ "$AUTO_YES" -eq 1 ]; then
+      echo "  5a. --purge-adopter: remove stale substrate caches at $(dirname "$WORKDIR")/bassclef + ${HOME}/bassclef-version.json (if present)"
+    fi
     echo "  6. rm -rf ${WORKDIR}"
     echo "  7. mkdir -p ${WORKDIR} && cd ${WORKDIR}"
     echo "  8. git init -q + empty fixture commit"
@@ -295,6 +298,22 @@ if [ "$DELETE_GITHUB" -eq 1 ]; then
       done <<< "$hits"
     fi
   fi
+fi
+
+# Step 3c: sibling cache cleanup under --purge-adopter.
+# The statusline reads bassclef-version.json via a fallback chain that includes
+# $WORKDIR/../bassclef/bassclef-version.json (sibling peer) and $HOME/bassclef-version.json
+# (dispatcher-dir fallback). A stale sibling clone from a prior run can show the
+# wrong substrate version. --purge-adopter removes these so the next run reads
+# cleanly from the npm-bundled version.
+if [ "$DELETE_GITHUB" -eq 1 ] && [ "$AUTO_YES" -eq 1 ]; then
+  WORKDIR_PARENT="$(dirname "$WORKDIR")"
+  for cache in "$WORKDIR_PARENT/bassclef" "$HOME/bassclef-version.json"; do
+    if [ -e "$cache" ]; then
+      echo "${SCRIPT_NAME}: removing stale substrate cache ${cache}" >&2
+      rm -rf "$cache"
+    fi
+  done
 fi
 
 # Step 4: fresh workdir.
