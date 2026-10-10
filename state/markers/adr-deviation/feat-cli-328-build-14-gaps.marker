@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/cli-328-build-14-gaps decomposition
+- date: 2026-10-10
+- branch: feat/cli-328-build-14-gaps
+- adr_governing: ADR-031 (we-don't-break-adopters) + ADR-040 (planning skill vocabulary + lite profile)
+- outcome: ADR-honored
+- rationale: cli#328 batches touch 3 adopter-observable SKILL bodies (/build, /launch, /pre-mortem) + 1 agent (Builder). All changes preserve grace window per ADR-031 — compat shim on vocabulary + plain-English grade 8 ceiling. Per `.claude/rules/we-dont-break-adopters.md` adopter-count threshold (N ≤ 24; current 5), vocabulary renames ship immediate without 90-day grace; behavior changes keep full compat shim discipline. Finding 7 (Builder model bump) is a behavior change — characterization test pins pre-bump behavior per ADR-040 D1 vocabulary rename pattern.
