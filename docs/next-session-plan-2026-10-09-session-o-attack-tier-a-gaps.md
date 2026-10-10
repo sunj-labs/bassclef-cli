@@ -21,6 +21,8 @@ Three Q1 items from the freshly scored queue in `docs/plans/tier-a-driver-invent
 
 **Step 4 — cli#318 /personas and /jtbd-tasks path conflict** (if time budget permits). Clears a persona-chain blocker. 20-30 turns per inventory.
 
+**Step 5 — cli#411 bassclef init writes bassclef-version.json.** Cures the statusline-shows-wrong-version class seen in the 2026-10-09 smoke run on cold-adopter-1 where v1.8.0 showed despite cli v1.9.12 install. Sibling cache cleanup via `--purge-adopter` (PR #410) is the short-term mitigation; init writing the file is the root-cause cure. ~40-60 turns. Includes Tier 0 test + manifest schema entry.
+
 ## Scope choice at prep
 
 Session O prep picks between three shapes:
@@ -28,8 +30,9 @@ Session O prep picks between three shapes:
 - **Shape a — focused depth (Step 1 + Step 3):** Sam-B feat + taxonomy rename. ~70-90 turns. Clean, closes two tickets.
 - **Shape b — happy path push (Step 1 + Step 2):** Sam-B feat + /build happy path. ~130-250 turns. Unblocks the biggest Tier A gap.
 - **Shape c — full queue (Step 1 + Step 2 + Step 3 + Step 4):** everything above. ~180-320 turns. Only pick if operator has a wide time budget AND accepts the compounding risk.
+- **Shape d — Sam-touch pair (Step 1 + Step 5):** Sam-B feat + bassclef-version.json cure. ~70-120 turns. Both items polish the Sam first-5-min surface — final output copy + statusline shows the right version. High coherent payoff.
 
-Default recommend: **Shape a**. Highest Sam first-touch impact + closes a nagging hygiene miss from Session N. Shape b is next if operator wants to push /build forward.
+Default recommend: **Shape a** OR **Shape d**. Shape a closes a nagging hygiene miss from Session N. Shape d doubles down on Sam first-touch surface (Session N smoke proved its weight). Pick b if operator wants to push /build forward instead.
 
 ## Entry state (reads at prep)
 
