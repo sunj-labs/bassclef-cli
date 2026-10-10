@@ -1,0 +1,15 @@
+# Architect review marker — Session P step 7 (cli#415)
+- date: 2026-10-10T19:14:00Z
+- report: docs/architecture/reviews/2026-10-10-session-p-cli-415-cross-repo-validator.md
+- primary_lens: jerome-saltzer-and-michael-schroeder
+- supporting_lenses: [michael-nygard, michael-feathers]
+- scope: cli#415 PR #416 merge 9cf9014 (ADR-059 CLI validator vendor + CI gate)
+- verdict: READY
+- coverage: 12 covered + 1 deferred + 4 skip (A4 compliance)
+- findings: 2 moderate (F1 test_refs split, F2 sibling smoke CI gate), 1 trivial (step ordering)
+- sibling-smoke: upstream validator exit 0, cli validator exit 0
+- method-per-finding:
+    F1: static (registry inspect)
+    F2: static + dynamic (workflow inspect + sibling smoke)
+    N1: static (workflow inspect)
+- next: file F1 + F2 tickets; file /promote for architect-review-discipline substrate sibling; ack peer heads-up; proceed to cli#328 Step 8
