@@ -1,0 +1,6 @@
+# Pre-mortem marker — Session P
+- date: 2026-10-10
+- ledger: docs/risk-ledgers/2026-10-10-session-p-cli-415-then-328.md
+- mode: light (3 lenses × 5-7 risks each; 12 risks total)
+- lenses: [jerome-saltzer-and-michael-schroeder, linus-torvalds, michael-feathers]
+- folded-into-plan: R1-R3 (cli#415 impl order); R6-R8 (cli#328 batch shape); R9-R10 (architect-review intersperse evidence); R12 (stretch — deferred to Session Q)

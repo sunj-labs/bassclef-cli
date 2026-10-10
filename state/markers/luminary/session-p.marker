@@ -1,0 +1,7 @@
+# Luminary marker — Session P
+- date: 2026-10-10
+- branch: main
+- scope: cli#415 then cli#328
+- lead: jerome-saltzer-and-michael-schroeder
+- supporting: [linus-torvalds, michael-feathers]
+- rationale: Saltzer-Schroeder for complete-mediation (dual-fire gate); Linus for adopter contract (cli#328 touches 3 SKILL bodies); Feathers for characterization (no Phase 4-7 driver today; smoke drivers pin acceptance per batch)
