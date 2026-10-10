@@ -1,0 +1,6 @@
+# Lead lens signoff — fix-cli-373-bump-build-postcondition
+- date: 2026-10-10
+- branch: fix-cli-373-bump-build-postcondition
+- lead: tony-hoare
+- findings: no red; no amber; 1 NOTE on stdio inherit (not blocking)
+- sign-off: cleared for merge — postcondition contract satisfied per Hoare lens
