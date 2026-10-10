@@ -1,0 +1,7 @@
+# Pre-mortem marker — Session O Shape d
+- date: 2026-10-10
+- branch: main (branches cut at step kickoff)
+- scope: cli#406 + cli#411 (Shape d — Sam-touch pair)
+- ledger: docs/risk-ledgers/2026-10-10-session-o-shape-d.md
+- mode: light-compressed (3 lenses × 3 risks)
+- highest-concern-folded: L2+N1 write collision; F1 verbatim shape drift

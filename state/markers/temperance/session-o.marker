@@ -1,0 +1,7 @@
+# Temperance marker — Session O Shape d
+- date: 2026-10-10
+- branch: main
+- scope-decision: Ship cli#406 (init 5-min feat) + cli#411 (version.json write) — Sam first-5-min pair, 70-120 turns, class b both
+- right-thing: Both polish Sam's first-touch surface on two axes (final output copy + statusline version truth)
+- right-way: Beck RED-first per Feathers; writeSafely + registerInstallWrittenPaths reuse per existing contracts
+- drift-trigger: pause + re-anchor if cli#328 /build gaps or cli#318 persona conflict pulls focus; those belong to Session P

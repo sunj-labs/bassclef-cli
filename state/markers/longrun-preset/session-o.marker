@@ -1,0 +1,7 @@
+# /longrun preset marker — Session O
+- date: 2026-10-10
+- preset: converged
+- trigger: plan-doc
+- plan_doc: docs/next-session-plan-2026-10-09-session-o-attack-tier-a-gaps.md
+- plan_doc_mtime: within 48h
+- recommended_section_present: true
