@@ -1,0 +1,7 @@
+# Lead-lens sign-off — feat/cli-407-test-family-rename
+- date: 2026-10-10T20:00:00Z
+- branch: feat/cli-407-test-family-rename
+- lead: alan-cooper (operator surface clarity)
+- findings-cleared: NO RED/AMBER findings
+- reviewer-marker: state/markers/reviewer/feat-cli-407-test-family-rename.md
+- sign-off-rationale: Rename lands cleanly. 24 regression files + 21 symlinks preserve adopter contract. ADR-011 D1 + D3 updated. CI glob covers new name AND old name during grace. Tier 0 driver GREEN; full suite 520/520; two renamed drivers execute PASS via new names. Cooper lens — the plain names "regression" + "flow" + "e2e" read cleaner than "adopter" + "flow" + "e2e" at operator surface. Ship.

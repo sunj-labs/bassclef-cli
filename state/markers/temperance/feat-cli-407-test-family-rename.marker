@@ -1,0 +1,9 @@
+# Temperance marker — feat/cli-407-test-family-rename
+- date: 2026-10-10
+- branch: feat/cli-407-test-family-rename
+- parent-session: session-q
+- scope: adopter → regression rename; flow collapse into regression; ADR-011 + CI globs updates
+- scope-decision:
+  - right-thing: cli#407 Finding + 3 flow-family mislabels
+  - right-way: narrow rename path (keep e2e; rename adopter → regression; collapse flow)
+  - drift-trigger: pause past 60 turns; pause if symlink aliases need runner-side work

@@ -1,0 +1,6 @@
+# Luminary marker — Session Q
+- date: 2026-10-10
+- scope: cli#407
+- lead: alan-cooper (operator surface clarity — test family names are operator-visible)
+- supporting: [michael-feathers, kent-beck, linus-torvalds]
+- rationale: Cooper for naming clarity; Feathers for characterize-current-shape-before-rename; Beck for Tier 0 driver on the new names; Linus for adopter-contract symlink aliases per ADR-031

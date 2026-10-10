@@ -1,0 +1,9 @@
+# Pre-mortem marker — Session Q
+- date: 2026-10-10
+- mode: light (3 lenses × 3-5 risks each)
+- lenses: [alan-cooper, linus-torvalds, michael-feathers]
+- risks:
+  - Q1 (Cooper): the new names may read worse than `adopter-*` to future operators. Mitigation: carry one-line gloss in ADR-011 for each family.
+  - Q2 (Linus): adopter configs grep `smoke-drive-adopter-*` names. Breaks their custom CI setups. Mitigation: symlink aliases from old → new for one release cycle per ADR-031.
+  - Q3 (Feathers): rename cascade touches ~20 files + ADR + 2 CI workflow files; a stale ref somewhere RED-fires CI. Mitigation: Tier 0 driver greps for both old + new names; expects old=0, new>0 after rename.
+  - Q4 (Linus): CI runner globs read file paths; a rename without updating globs silently drops tests from CI. Mitigation: run full suite before PR; count matches pre + post.
