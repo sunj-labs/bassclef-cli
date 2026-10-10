@@ -1,0 +1,10 @@
+# Temperance marker — fix/cli-373-bump-build-postcondition
+- date: 2026-10-10
+- branch: fix/cli-373-bump-build-postcondition
+- scope-decision:
+  - right-thing: Add runBuild(runCmd) helper + call it from main() tail after writeReadmeVersion. Cures the dist/ staleness class per cli#373 + Session H architect-review.
+  - simplest: Dependency-injected runner mirrors the refuseIfDirty(allowDirty, runCmd) idiom on line 111 — one new function, one call site.
+  - brute-force? No. Hypothesis cited inline: adding build to the postcondition cures the dist/ version-mismatch class. Falsifiable test ships in the same PR.
+  - blast-radius: Script bump path only. CI test suite catches regressions. No adopter-visible surface change until next release.
+  - verification: 3 new unit tests + visual confirm post-impl via grep of dist/ for new version.
+  - reversible: One-line revert of the main() call + remove the runBuild function. Under 15 min to undo.

@@ -186,6 +186,24 @@ export function writeChangelog(changelogPath, newText) {
   renameSync(tmpPath, changelogPath);
 }
 
+// Rebuilds dist/ so the bundle version matches package.json. Session H
+// architect-review surfaced the staleness class: tests reading dist/ fail
+// post-bump until build runs. This closes the postcondition — bump leaves
+// dist/ current. Dependency-injected runner mirrors refuseIfDirty's shape
+// for test mocking. Closes cli#373.
+export function runBuild(runCmd) {
+  const runner = runCmd || ((cmd) => execSync(cmd, { stdio: 'inherit' }).toString());
+  try {
+    runner('npm run build');
+  } catch (e) {
+    throw new RefusedError(
+      `npm run build failed after bump: ${e.message}. ` +
+      `Files already written (package.json + src/index.ts + README.md + CHANGELOG.md). ` +
+      `Fix the build error, then run \`npm run build\` manually before commit.`
+    );
+  }
+}
+
 export function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -240,6 +258,8 @@ export async function main(argv, cwd) {
     }
     writeReadmeVersion(readmePath, newVersion);
 
+    process.stdout.write(`Rebuilding dist/ with new version ${newVersion}...\n`);
+    runBuild();
     process.stdout.write(`Bumped: ${pkg.version} → ${newVersion}\n`);
     process.stdout.write('Next steps:\n');
     process.stdout.write('  git add package.json CHANGELOG.md src/index.ts README.md\n');

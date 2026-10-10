@@ -1,0 +1,7 @@
+# Pre-mortem marker — session-r cli#373
+- date: 2026-10-10
+- branch: fix/cli-373-bump-build-postcondition (not yet cut)
+- ledger: docs/risk-ledgers/2026-10-10-session-r-cli-373.md
+- lenses: tony-hoare (primary), michael-feathers (supporting), kent-beck (supporting)
+- risks: 15 (5 per lens)
+- cures-folded: dependency-inject runBuild, RED-first discipline, try/catch wrap, grep dist/ for date literals
