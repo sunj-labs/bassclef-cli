@@ -1,0 +1,8 @@
+# Temperance marker — Session O tail: Shape e + f upstream routing
+- date: 2026-10-10
+- branch: main
+- scope-decision: Route 4 cli tickets to bassclef-upstream (cli#305, #284, #318) + close cli#235 with Session N cross-ref. All 4 cure files are byte-identical to upstream; cli-side fix would create drift. Follow Session M routing pattern per feedback_cli_side_cures_not_upstream_driver_flags.
+- right-thing: Each cure ships once at the authoritative source; cli inherits via substrate sync. No cli-side divergence.
+- right-way: Each upstream filing carries full diagnosis + reproducer + cure spec from cli ticket body. Each cli close posts cross-ref comment.
+- drift-trigger: pause if upstream peer flags a conflict with their current /longrun scope.
+- reversible: filings reversible by close+repost; cli closes reversible by reopen.

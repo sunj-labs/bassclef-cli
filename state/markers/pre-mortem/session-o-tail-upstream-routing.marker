@@ -1,0 +1,7 @@
+# Pre-mortem light — Session O tail
+- date: 2026-10-10
+- scope: 4 upstream filings + 4 cli closes
+- mode: compressed (2 lenses × 2 risks each)
+- lens-1-linus: R1 duplicate filing (searched; none open). R2 upstream peer busy — route anyway, their /longrun will see them.
+- lens-2-feathers: R3 bad diagnosis (mitigated: quote cli ticket body verbatim). R4 missing cross-ref on close (mitigated: explicit upstream# + Session N SHA in each close comment).
+- action: proceed; no folds needed
