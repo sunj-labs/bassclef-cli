@@ -1,0 +1,10 @@
+# Peer-coord marker — cli#415 for Session P pickup
+- date: 2026-10-10T16:40:00+0100
+- from: uds:/tmp/cc-socks/3043.sock (bassclef-upstream-4f)
+- ticket: https://github.com/sunj-labs/bassclef-cli/issues/415
+- scope: ADR-059 step 4 — CLI side of cross-repo contract validator (vendor approach 1a; 4 upstream files + sister CI job)
+- urgency: not urgent per peer; pick up next /longrun prep
+- parent-upstream: bassclef-upstream main 320f445b (PRs #2167 #2168 #2169 merged)
+- estimated-turns: 80-150
+- out-of-scope-today: Session O closed via /session-end at 16:37; no new work this session
+- next-session-anchor: cli#415 is a plan-doc candidate for Session P
