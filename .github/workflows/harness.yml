@@ -36,7 +36,7 @@ permissions:
 jobs:
   harness:
     name: install harness (local pack + published fetch)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Pre-mortem R3.2 — 15 minutes covers harness (~5 min) plus npm setup
     # (~2 min) plus propagation wait (up to 3 min) plus margin.
     timeout-minutes: 15
@@ -70,13 +70,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Checkout at tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ steps.resolve.outputs.tag }}
           fetch-depth: 1
 
       - name: Setup Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'

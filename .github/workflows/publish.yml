@@ -53,7 +53,7 @@ permissions:
 jobs:
   checks:
     name: Pre-publish checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       tag: ${{ steps.resolve-tag.outputs.tag }}
       prerelease: ${{ steps.resolve-tag.outputs.prerelease }}
@@ -71,14 +71,14 @@ jobs:
           fi
 
       - name: Checkout at tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ steps.resolve-tag.outputs.tag }}
           # Fetch full history so the ancestor check in validate-tag works.
           fetch-depth: 0
 
       - name: Setup Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
@@ -130,7 +130,7 @@ jobs:
         # bassclef-upstream (R&D), so npm publishes ship the last
         # stable release surface. See ADR-005 §Amendment 2026-08-12
         # + ADR-007 §Amendment 2026-08-30 for the release flow.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: sunj-labs/bassclef
           ref: v1.8.0
@@ -211,7 +211,7 @@ jobs:
 
   publish:
     name: Publish to npm
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: checks
     environment: npm-publish
     # Job-level re-declaration. Workflow-level permissions at line 45-50 should
@@ -225,13 +225,13 @@ jobs:
 
     steps:
       - name: Checkout at tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ needs.checks.outputs.tag }}
           fetch-depth: 0
 
       - name: Setup Node 22 with npm provenance
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
@@ -275,7 +275,7 @@ jobs:
         # checks job's pin so both jobs bundle the same source revision.
         # Bump v1.3.0 → v1.6.0 lands Q1 Sam+Louis first-5-min friction
         # cures (see checks job comment for the four ticket refs).
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: sunj-labs/bassclef
           ref: v1.8.0
