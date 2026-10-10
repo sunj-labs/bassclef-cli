@@ -1,0 +1,12 @@
+# Pre-mortem marker — feat/cli-407-test-family-rename
+- date: 2026-10-10
+- parent-ledger: state/markers/pre-mortem/session-q.marker
+- impl-order:
+  1. Grep current state — count adopter-* + flow-* file sets
+  2. Characterization driver RED — asserts new names present + old names ONLY as symlinks
+  3. git mv each adopter-* → regression-*; create old-name symlinks
+  4. git mv 3 flow-* into regression family; keep 1 flow-* or merge into e2e
+  5. Update CI workflow globs in pr-checks.yml + lite-adopter-smoke.yml
+  6. Update ADR-011 D1-D4 vocabulary
+  7. Update flow registry at state/flow-driver-registry (if present)
+  8. Verify driver GREEN + full suite GREEN + typecheck

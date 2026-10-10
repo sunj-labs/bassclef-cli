@@ -1,0 +1,8 @@
+# Temperance marker — Session Q
+- date: 2026-10-10
+- branch: main (per-branch below)
+- scope: cli#407 taxonomy rename alone — cli#418 deferred (upstream validator not in public bassclef yet)
+- scope-decision:
+  - right-thing: rename 3 test families to plain English per cli#407 body
+  - right-way: keep `e2e` prefix (dev-standard); rename `adopter-*` → `regression-*`; collapse 3 of 4 `flow-*` into regression family (per cli#407 alternative). Keep symlink aliases for one release per ADR-031 grace. Update ADR-011 D1-D4 + CI workflow globs + flow registry.
+  - drift-trigger: pause past 60 turns (1.5× 40t ceiling); pause if symlink alias approach surfaces hook or runner complications

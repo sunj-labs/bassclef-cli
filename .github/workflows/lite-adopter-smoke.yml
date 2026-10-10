@@ -37,6 +37,7 @@ on:
     paths:
       - '.github/workflows/lite-adopter-smoke.yml'
       - 'scripts/tests/smoke-drive-e2e-*.test.sh'
+      - 'scripts/tests/smoke-drive-regression-*.test.sh'
       - 'scripts/tests/smoke-drive-adopter-*.test.sh'
       - 'scripts/tests/smoke-drive-flow-*.sh'
       - 'scripts/tests/claude-chain.test.sh'
@@ -134,14 +135,16 @@ jobs:
           skip=0
           found=0
           failing=()
-          # Three driver families per ADR-011 D4:
-          #   - smoke-drive-e2e-*.test.sh      — persona chains (onboard, launch, build)
-          #   - smoke-drive-adopter-*.test.sh  — per-cure anchor drivers (ADR-011 D1+D2)
-          #   - smoke-drive-flow-*.sh          — adopter command sequences (ADR-011 D3)
+          # Three driver families per ADR-011 D4 (cli#407 rename):
+          #   - smoke-drive-e2e-*.test.sh         — persona chains (onboard, launch, build)
+          #   - smoke-drive-regression-*.test.sh  — per-cure anchor drivers (ADR-011 D1+D2)
+          #   - smoke-drive-flow-*.sh             — real adopter command sequences (ADR-011 D3)
+          # Legacy smoke-drive-adopter-*.test.sh preserved as symlinks → regression (grace per ADR-031).
           # Exit 77 is SKIP per ADR-011 D2; SKIP does not count as fail.
+          # Note: find -L follows symlinks so legacy adopter-* links do not double-count.
           for pattern in \
               scripts/tests/smoke-drive-e2e-*.test.sh \
-              scripts/tests/smoke-drive-adopter-*.test.sh \
+              scripts/tests/smoke-drive-regression-*.test.sh \
               scripts/tests/smoke-drive-flow-*.sh; do
             for drv in $pattern; do
               found=$((found+1))

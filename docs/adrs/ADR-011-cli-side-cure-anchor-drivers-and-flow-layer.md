@@ -48,9 +48,11 @@ The deeper gap: all 5 defects fired at FLOW boundaries, not at single-skill boun
 
 Two test categories ship under the cli harness:
 
-### D1 — adopter-anchor drivers
+### D1 — regression drivers (cli#407 rename — formerly "adopter-anchor drivers")
 
-Per-cure characterization tests under `scripts/tests/smoke-drive-adopter-<upstream-ticket-N>-<slug>.test.sh`. Shape:
+Per-cure characterization tests under `scripts/tests/smoke-drive-regression-<upstream-ticket-N>-<slug>.test.sh`. Shape:
+
+Legacy name `smoke-drive-adopter-*.test.sh` kept as symlink for one release cycle per ADR-031 grace window.
 
 - Reads shipped `dist/lite/` artifacts post-bundle
 - Asserts cured behavior OR pre-cure RED anchor (two shapes; see D2)
@@ -68,9 +70,11 @@ Two shapes compose. The driver's exit semantics stay stable; its assertion flips
 
 Driver flips in the same PR as the bundle sync. The flip is a one-line assertion swap. Both shapes stay greppable by exit code (0 = PASS; 1 = defect- or cure-missing; 77 = SKIP).
 
-### D3 — flow-layer drivers
+### D3 — flow-layer drivers (cli#407 narrows — 3 of 4 initial files were mislabeled regressions)
 
-New test category under `scripts/tests/smoke-drive-flow-<slug>.sh`. Runs an adopter command sequence end-to-end with assertions between steps. Shape:
+Real flow drivers under `scripts/tests/smoke-drive-flow-<slug>.sh`. Run adopter command sequences end-to-end with assertions between steps. Shape:
+
+Per cli#407 rename — 3 of 4 initial `smoke-drive-flow-*` files from PR #403 were greps against file text, not command sequences. Those three moved to `smoke-drive-regression-*.test.sh` with symlink aliases. The remaining real flow is `smoke-drive-flow-install-first-commit.sh` (runs `bassclef init` → `git add` → `git commit` end-to-end).
 
 - Reads from a docker cold-adopter container OR a scratched local workdir
 - Runs commands as the adopter would (`bassclef init`, `git add -A && git commit`, `/launch --local --lan`, etc.)

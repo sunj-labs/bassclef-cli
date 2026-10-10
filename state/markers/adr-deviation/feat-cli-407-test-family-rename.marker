@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/cli-407-test-family-rename
+- date: 2026-10-10
+- branch: feat/cli-407-test-family-rename
+- adr_governing: ADR-011 (adopter-anchor drivers + flow-layer taxonomy) + ADR-031 (we-don't-break-adopters)
+- outcome: ADR-honored
+- rationale: Rename updates ADR-011 D1-D4 vocabulary; symlink aliases preserve adopter contract per ADR-031 grace window. cli#407 proposes the rename; this branch implements it per the body's "keep e2e" alternative.
