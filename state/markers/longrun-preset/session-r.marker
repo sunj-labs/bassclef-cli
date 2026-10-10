@@ -1,0 +1,6 @@
+# Preset marker — session-r
+- date: 2026-10-10
+- preset: exploratory
+- trigger: chronicle-R-exploratory-label + whereami-PRIMARY-queue
+- shape: scan-table dominant + recommend row + no cards until operator asks
+- rationale: plan doc 2026-10-09 stale (all recommended paths SHIPPED via Session O+P+Q); whereami PRIMARY queue uses letter labels not (1); chronicle 2026-10-10 L97 explicitly labels Session R exploratory

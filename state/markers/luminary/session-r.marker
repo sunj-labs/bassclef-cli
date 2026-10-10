@@ -1,0 +1,10 @@
+# Luminary marker — session-r
+- date: 2026-10-10
+- lead: tony-hoare
+- supporting: [jerome-saltzer-and-michael-schroeder, michael-nygard, michael-feathers, kent-beck]
+- rationale:
+  - Hoare — both fixes are pre/postcondition contracts (bump postcondition; hook wiring postcondition)
+  - Saltzer-Schroeder — complete mediation for cli#329 (the wiring IS the mediation)
+  - Nygard — DEAD-LETTER class per cli#329 body
+  - Feathers — characterization test on hook firing + bump postcondition
+  - Beck — Tier 0 RED-first per branch

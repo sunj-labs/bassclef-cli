@@ -1,0 +1,10 @@
+# Temperance marker — session-r cli#329 + cli#373 pair
+- date: 2026-10-10
+- branch: main (branches cut per ticket)
+- scope-decision:
+  - right-thing: ship cli#329 wiring + cli#373 build postcondition as two separate PRs; 30-50 turns total
+  - right-way: Beck RED-first per ticket; /loop CI till green; /architect-review only if cli#329 lands cross-repo
+  - drift-triggers:
+    1. cli#329 routes to upstream → pause + SendMessage to bassclef-upstream peer per class d
+    2. Either ticket exceeds 25 turns → re-anchor
+    3. CI red for 2+ iterations → stop + /diagnose

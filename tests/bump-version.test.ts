@@ -37,6 +37,9 @@
 // [x] writeReadmeVersion — replaces the version marker
 // [x] writeReadmeVersion — refuses when the marker is missing
 // [x] writeReadmeVersion — leaves surrounding markdown intact
+// [x] runBuild — invokes `npm run build` via injected runner (cli#373)
+// [x] runBuild — throws RefusedError when build runner fails (cli#373)
+// [x] runBuild — passes the exact command `npm run build` with no args (cli#373)
 
 import { describe, it, expect } from 'vitest';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
@@ -49,6 +52,7 @@ import {
   refuseIfDirty,
   writeIndexTsVersion,
   writeReadmeVersion,
+  runBuild,
   ArgvError,
   RefusedError,
 } from '../scripts/bump-version.mjs';
@@ -310,5 +314,39 @@ describe('writeReadmeVersion', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+// cli#373 — build postcondition
+// Session H architect-review surfaced the dist/ staleness class after v1.9.10
+// bump. Four tests failed with `expected 1.9.10 to be 1.9.9` because dist/
+// still carried the pre-bump version. The cure is a `npm run build` call at
+// the tail of main(). This block characterizes the runBuild helper.
+describe('runBuild', () => {
+  it('invokes `npm run build` via injected runner', () => {
+    const calls: string[] = [];
+    const stub = (cmd: string) => {
+      calls.push(cmd);
+      return '';
+    };
+    runBuild(stub);
+    expect(calls).toEqual(['npm run build']);
+  });
+
+  it('throws RefusedError when build runner fails', () => {
+    const stub = () => {
+      throw new Error('vite build failed: exit code 1');
+    };
+    expect(() => runBuild(stub)).toThrow(RefusedError);
+  });
+
+  it('passes the exact command with no args', () => {
+    let received = '';
+    const stub = (cmd: string) => {
+      received = cmd;
+      return '';
+    };
+    runBuild(stub);
+    expect(received).toBe('npm run build');
   });
 });
