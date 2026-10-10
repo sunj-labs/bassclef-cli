@@ -1,0 +1,9 @@
+# Temperance marker — feat/cli-193-node-ubuntu-pin
+- date: 2026-10-10
+- branch: feat/cli-193-node-ubuntu-pin
+- scope-decision: Pin Node 22 (LTS) + ubuntu-24.04 explicit across all .github/workflows/*.yml files that touch the shim-deprecated class. Per cli#193 acceptance. Sister workflow sweep per bassclef-workflow-parity rule.
+- right-thing: Clear the two forced-upgrade warnings before the compat windows close. Node 20 shim retires soon; ubuntu-latest flips to 26.04 on 2026-10-19.
+- right-way: Explicit pins + sister sweep. No runtime behavior change — only workflow pins. Re-run publish on a test tag post-PR to confirm warnings absent.
+- blast-radius: Low. Workflow pins only; no code or substrate change.
+- drift-trigger: pause if any workflow test fires an unexpected signal post-pin.
+- reversible: Fully reversible — revert the PR.

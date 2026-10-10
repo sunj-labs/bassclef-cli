@@ -58,7 +58,7 @@ permissions:
 jobs:
   hello-probe:
     name: hello-probe — fail fast on auth/service degrade
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       claude_ok: ${{ steps.probe.outputs.ok }}
     steps:
@@ -84,11 +84,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, macos-14]
         cli_ref: [main, latest-tag, prior-tag]
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ matrix.cli_ref == 'main' && 'main' || '' }}
           fetch-depth: 0
