@@ -1,0 +1,9 @@
+# Temperance marker — feat/cli-406-init-5min-value-test
+- date: 2026-10-10
+- branch: feat/cli-406-init-5min-value-test
+- scope-decision: Rewrite init final output per Sam-verbatim shape in bassclef-upstream#2006. Catalog counts move behind --verbose. Hook banner and refused line unchanged.
+- right-thing: Sam's first 5 minutes gets one honest value test. Catalog inventory still available via --verbose for operators.
+- right-way: Beck RED-first on tests/init-value-test-block.test.ts. Shared const at src/lib/init-value-test-block.ts so test + impl pin the same string. No change to writeSafely or walker.
+- blast-radius: Low. 20-line edit in init.ts + 1 new lib file + 1 new test. 6 Tier A flow drivers pin the surface; aggregate 20/20 GREEN before + after.
+- drift-trigger: If a test asserts an exact catalog line that I missed, pause and re-anchor.
+- reversible: Fully reversible via git revert.
