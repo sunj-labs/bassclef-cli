@@ -1,0 +1,9 @@
+# Temperance marker — feat/cli-411-write-version-json
+- date: 2026-10-10
+- branch: feat/cli-411-write-version-json
+- scope-decision: `bassclef init` reads bundled dist/lite/bassclef-version.json and writes a copy to <targetDir>/bassclef-version.json. Register via registerInstallWrittenPaths. One manifest entry row. Tier 0 test asserts file exists post-init + version matches bundled.
+- right-thing: Cures statusline showing v1.8.0 instead of v1.9.12 on cold-adopter-1 by making init itself write the version file into the adopter workdir root — statusline's first non-env candidate ($cwd/bassclef-version.json) then wins per the fallback chain in dist/lite/presence/cli/bassclef-statusline.sh L32-62.
+- right-way: Reuse writeSafely + registerInstallWrittenPaths. Beck RED-first. Fail-soft when bundled file is missing (dev install).
+- blast-radius: Low. New file write only. No change to any existing write path. writeSafely refuses existing files without --force per ADR-002.
+- drift-trigger: pause if the statusline test on an adopter clone still shows stale version after init runs — means candidate ordering is wrong.
+- reversible: Fully reversible via git revert.
