@@ -4,11 +4,12 @@ id: chronicle-2026-10-10-session-o
 status: closed
 session: session-o
 started: 2026-10-10T10:40:00Z
-closed: 2026-10-10T12:00:00Z
-scope: Shape d — Sam-touch pair (cli#406 + cli#411)
+closed: 2026-10-10T16:37:00Z
+scope: Shape d (cli#406 + cli#411) + tail (v1.9.13 + Shape e+f + cli#193 + v1.9.14)
 authoring_luminaries:
   primary: michael-feathers
   supporting: alan-cooper
+  tail_adds: michael-nygard
 ---
 
 # Session O — Sam-touch pair (cli#406 + cli#411)
@@ -96,10 +97,61 @@ Per plan doc, these remain for Session P or later:
 
 cli#407 taxonomy rename (Q1 from Session N) + cli#328 /build happy path pair (biggest Tier A gap). Shape b from Session O plan doc.
 
+## Session O tail (post-closeout, 2026-10-10 12:00-16:37)
+
+Operator asked for the v1.9.13 publish. Then picked Shape e + f. Then cli#193. Then v1.9.14 publish. Session kept going past the planned close.
+
+### v1.9.13 publish
+- OIDC trusted publisher. No Touch ID.
+- Workflow run 38054553847 success. `+ @thebassclef/lite@1.9.13` at 13:09:10Z.
+- 583/583 tests GREEN at all tiers (vitest 520 + bash 58 + hooks 1 + shell flow 4).
+
+### Shape e + f (Sam + Louis Eisenhower sweep)
+Four cli tickets closed. Two already cured upstream before cli-side work started — pre-flight code-location probe caught the dups per Session M methodology.
+- cli#235 CLOSED (cure shipped Session N PR #401 commit 37d58b8; verified 546 created / 0 refused on fresh init)
+- cli#305 CLOSED (cure shipped bassclef-upstream#2062 commit a312a31b in v1.9.4 bundle)
+- cli#284 → bassclef-upstream#2165 (whereami third state — Louis)
+- cli#318 → bassclef-upstream#2166 (`/personas create` + `/jtbd-tasks` path — Louis)
+
+### cli#193 — Node + Ubuntu runner pins
+- 5 workflow files touched (publish, pr-checks, harness, docker-smoke, lite-adopter-smoke)
+- `actions/checkout@v4` → `@v5` (10 call sites)
+- `actions/setup-node@v4` → `@v5` (4 call sites)
+- `runs-on: ubuntu-latest` → `ubuntu-24.04` (7 call sites)
+- Matrix `os` → `[ubuntu-24.04, macos-14]`
+- Sister parity: all 5 workflows updated together.
+- PR #414 — 9/9 CI checks pass on first iteration on the new runners.
+
+### v1.9.14 publish
+- Shipped the pin cure via a real publish run.
+- Workflow run 38067472420 success. `+ @thebassclef/lite@1.9.14` at 16:24:38Z.
+- `latest` tag flipped to 1.9.14.
+- **Pin cure proven on live run:** zero hits for `Node.js 20` deprecation warning; zero hits for `ubuntu-latest` migration warning.
+
+## Session O tail numbers
+
+- Turn count (tail): ~160
+- Turn count (total session): ~210
+- PRs merged (tail): 1 (#414)
+- Tickets closed (tail): 5 cli (#235, #305, #284, #318, #193)
+- Upstream tickets filed: 2 (#2165, #2166)
+- npm publishes: 2 (v1.9.13, v1.9.14) — both OIDC, both clean first try
+- CI failures: 0
+
+## Discoveries (tail)
+
+1. **Pre-flight code-location probe pays.** Two of four Eisenhower Q1 "cli-side" cures were already shipped upstream (cli#305 self-exclude + author check in v1.9.4; cli#235 copy-substrate reclassify in Session N PR #401). The compare-against-upstream grep caught both before any cli-side work started. Session M methodology catch holds.
+2. **npm run bump leaves dist/lite stale after re-build.** Both v1.9.13 and v1.9.14 bump + build cycles produced 12 vitest failures until I re-ran `scripts/prepublish-bundle-substrate.mjs` manually. Fresh prepublish fixes it. CI runs fresh prepublish — no production impact. Local workflow pain. Candidate for cli#373 cure (bump postcondition should include fresh prepublish).
+3. **The pin cure proved itself on live run.** Pre-mortem risk R2 was "pins look fine locally but break on real GitHub runners." The v1.9.14 publish run exercised the new pins end-to-end — all 9 checks pass. Risk retired by evidence.
+
 ## Refs
 
 - PR #412 (cli#406 merged)
-- PR #413 (cli#411 ride)
+- PR #413 (cli#411 characterization)
+- PR #414 (cli#193 workflow pins)
 - Plan doc: `docs/next-session-plan-2026-10-09-session-o-attack-tier-a-gaps.md`
 - Risk ledger: `docs/risk-ledgers/2026-10-10-session-o-shape-d.md`
 - Parent inventory: `docs/plans/tier-a-driver-inventory-state.md`
+- Upstream filings: bassclef-upstream#2165 (whereami), bassclef-upstream#2166 (personas)
+- Session N cure cross-ref: PR #401 commit 37d58b8 (cli#235)
+- Upstream cure cross-ref: a312a31b (bassclef-upstream#2062; cli#305)
