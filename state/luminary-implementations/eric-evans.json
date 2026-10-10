@@ -1,0 +1,9 @@
+{
+  "luminary_slug": "eric-evans",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "docs/architecture/reviews/2026-10-10-session-p-cli-415-cross-repo-validator.md"
+  ],
+  "last_scanned": "2026-10-10T18:21:09Z",
+  "scanner_version": "1.0"
+}
