@@ -40,6 +40,7 @@ import type { ManifestEntry } from '../lib/manifest-types.js';
 import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifest-io.js';
 import { copySubstrate, CopyFailure, resolveBundleRoot } from '../lib/copy-substrate.js';
 import { installStatusline, type InstallStatuslineReport } from '../lib/install-statusline.js';
+import { VALUE_TEST_BLOCK } from '../lib/init-value-test-block.js';
 import { resolveHome } from '../lib/resolve-home.js';
 import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
 import { buildInitReport, renderJsonReport, type InitReport } from '../lib/init-report.js';
@@ -449,32 +450,37 @@ function dispatchSubstrateCopy(
       catalogCounts['root-docs'] += 1;
     }
   }
-  const claudeCounts = [
-    catalogCounts.skills > 0 ? `${catalogCounts.skills} skills` : null,
-    catalogCounts.rules > 0 ? `${catalogCounts.rules} rules` : null,
-    catalogCounts.agents > 0 ? `${catalogCounts.agents} agents` : null,
-    catalogCounts.luminaries > 0 ? `${catalogCounts.luminaries} luminaries` : null,
-  ].filter((s): s is string => s !== null);
-  if (claudeCounts.length > 0) {
-    say(
-      `bassclef init: Installed ${claudeCounts.join(', ')} under <repo>/.claude/.\n`
-    );
-  }
-  const otherCounts = [
-    catalogCounts.libs > 0 ? `${catalogCounts.libs} libs` : null,
-    catalogCounts.adrs > 0 ? `${catalogCounts.adrs} ADRs` : null,
-    catalogCounts.templates > 0 ? `${catalogCounts.templates} templates` : null,
-    catalogCounts['presence-templates'] > 0
-      ? `${catalogCounts['presence-templates']} presence-templates`
-      : null,
-    catalogCounts.standards > 0 ? `${catalogCounts.standards} standards` : null,
-    catalogCounts['root-docs'] > 0 ? `${catalogCounts['root-docs']} root-docs` : null,
-    catalogCounts.scripts > 0 ? `${catalogCounts.scripts} scripts` : null,
-  ].filter((s): s is string => s !== null);
-  if (otherCounts.length > 0) {
-    say(
-      `bassclef init: Installed ${otherCounts.join(', ')} under <repo>/.\n`
-    );
+  // cli#406 — catalog counts move behind --verbose. Default output
+  // leads with the Sam-verbatim value-test block printed by runReal
+  // at session close. Operators who want the inventory pass --verbose.
+  if (verbose) {
+    const claudeCounts = [
+      catalogCounts.skills > 0 ? `${catalogCounts.skills} skills` : null,
+      catalogCounts.rules > 0 ? `${catalogCounts.rules} rules` : null,
+      catalogCounts.agents > 0 ? `${catalogCounts.agents} agents` : null,
+      catalogCounts.luminaries > 0 ? `${catalogCounts.luminaries} luminaries` : null,
+    ].filter((s): s is string => s !== null);
+    if (claudeCounts.length > 0) {
+      say(
+        `bassclef init: Installed ${claudeCounts.join(', ')} under <repo>/.claude/.\n`
+      );
+    }
+    const otherCounts = [
+      catalogCounts.libs > 0 ? `${catalogCounts.libs} libs` : null,
+      catalogCounts.adrs > 0 ? `${catalogCounts.adrs} ADRs` : null,
+      catalogCounts.templates > 0 ? `${catalogCounts.templates} templates` : null,
+      catalogCounts['presence-templates'] > 0
+        ? `${catalogCounts['presence-templates']} presence-templates`
+        : null,
+      catalogCounts.standards > 0 ? `${catalogCounts.standards} standards` : null,
+      catalogCounts['root-docs'] > 0 ? `${catalogCounts['root-docs']} root-docs` : null,
+      catalogCounts.scripts > 0 ? `${catalogCounts.scripts} scripts` : null,
+    ].filter((s): s is string => s !== null);
+    if (otherCounts.length > 0) {
+      say(
+        `bassclef init: Installed ${otherCounts.join(', ')} under <repo>/.\n`
+      );
+    }
   }
   // Per bassclef-cli#120: Norman feedback discipline — surface a line only
   // when it names something the reader can act on. "0 files refused" tells a
@@ -744,6 +750,15 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   // Last thing written, and under --json the only thing on stdout.
   if (json) {
     renderJsonReport(report, (t) => { process.stdout.write(t); });
+  }
+
+  // cli#406 — Sam-verbatim value-test block. Only fires on a successful
+  // walker + non-JSON run. --json keeps its contract as the only
+  // stdout content. Prints the 5-min test adopters can run immediately.
+  // Shape pinned by tests/init-value-test-block.test.ts; source of
+  // truth is src/lib/init-value-test-block.ts.
+  if (!json && walker.code === 0) {
+    say(VALUE_TEST_BLOCK);
   }
 
   return walker.code;
