@@ -92,3 +92,34 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+  validate-cross-repo-contracts:
+    # Per ADR-059 step 4 (cli#415). Mirrors upstream's
+    # `.github/workflows/bassclef-pr-ci.yml` L437-464 — the dual-fire
+    # gate for the install-written-paths contract. Fails loud on drift
+    # at either the registry shape, the schema_ref file presence, the
+    # ajv compile, or the test_refs path presence.
+    name: Validate cross-repo contracts (ADR-059)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PR HEAD
+        uses: actions/checkout@v5
+
+      - name: Setup Node 22 (for ajv-cli)
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install ajv-cli + ajv-formats
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Verify jq present
+        run: command -v jq
+
+      - name: Run cross-repo contracts validator
+        run: bash scripts/validate-cross-repo-contracts.sh --strict
+
+      - name: Run Tier 0 characterization tests
+        run: bash scripts/tests/validate-cross-repo-contracts.test.sh

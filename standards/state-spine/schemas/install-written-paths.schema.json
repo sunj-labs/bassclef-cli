@@ -1,0 +1,53 @@
+{
+  "$comment": "tier: lite — Records paths bassclef install writers created. Discipline hooks consult this manifest (via lib/install-written-paths.sh) to skip install-written files, firing discipline on author-edited paths only. Per bassclef-upstream#2036 Finding #8.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Install-Written-Paths Manifest",
+  "description": "Records paths written by bassclef install writers so discipline hooks can skip them. Per bassclef-upstream#2036 Finding #8 structural cure.",
+  "type": "object",
+  "required": ["schema_version", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver for this manifest shape. V1 = 1.0.0."
+    },
+    "entries": {
+      "type": "array",
+      "description": "One entry per install-written path. Idempotent on (path, writer); one entry per path.",
+      "items": {
+        "type": "object",
+        "required": ["path", "writer", "written_at", "content_hash"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Project-relative path. Must not contain '../'. Must resolve under $CLAUDE_PROJECT_DIR."
+          },
+          "writer": {
+            "type": "string",
+            "enum": [
+              "bassclef-hook-connect",
+              "bassclef-sync-template",
+              "bassclef-sync-dispatcher",
+              "schedule-auto-save",
+              "bassclef-init-npm"
+            ],
+            "description": "Identifier of the install writer that created the path."
+          },
+          "written_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 UTC timestamp of the write."
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "description": "SHA-256 of file content at write time, prefixed with algorithm."
+          }
+        }
+      }
+    }
+  }
+}

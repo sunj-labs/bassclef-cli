@@ -59,8 +59,10 @@ describe('workflow Node version invariant (#66)', () => {
     // Count bumped 3 → 4 in Epic #194 Story 1 when pr-checks.yml added
     // a fourth Node pin. Ticket #193 will migrate all four to a shared
     // matrix or common runner definition in one PR.
+    // Count bumped 4 → 5 in cli#415 (ADR-059 step 4) when pr-checks.yml
+    // added validate-cross-repo-contracts (needs ajv-cli at Node 22).
     const pins = collectNodeVersionPins();
-    expect(pins.length).toBe(4);
+    expect(pins.length).toBe(5);
   });
 
   it('no workflow references "Node 20" as a step name (stale label check)', () => {

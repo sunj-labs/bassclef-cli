@@ -1,0 +1,144 @@
+{
+  "$comment": "tier: upstream",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bassclef.sunj-labs/standards/state-spine/schemas/cross-repo-contracts.schema.json",
+  "title": "CrossRepoContracts",
+  "description": "Registry of every cross-repo wire-format shared between sunj-labs/bassclef-upstream and sunj-labs/bassclef-cli (and future sibling repos). One entry per contract. Fields capture the five ingredients per ADR-059 § Exemplar: filename agreement + shared schema file + change ledger + CI drift check + both sides validate. The `extraction_stage` field tracks per-contract progress (declared / validated / smoked / legacy-removable) per Nygard N4. Non-JSON contracts use `sidecar_validator` per Klein K1. Partners pin against `registry_version`. Semver bump policy: (a) adding an entry to contracts[] → minor bump; (b) removing an entry → major bump; (c) adding an optional field to entry shape → minor; (d) adding a required field → major; (e) removing a field → major; (f) extraction_stage flip or content_hash change → patch bump.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registry_version", "generated_at", "contracts"],
+  "properties": {
+    "_tier": {
+      "type": "string",
+      "description": "Bassclef tier tag per ADR-043 D1. Underscore-prefix form keeps the field schema-safe while satisfying the tier-tag-required-at-write.sh hook per bassclef-upstream#1268.",
+      "enum": ["lite", "standard", "ultra", "upstream", "archive", "unknown"]
+    },
+    "registry_version": {
+      "type": "string",
+      "description": "Semver of the registry shape. Partners pin against this value.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO 8601 UTC timestamp when the registry was last written. Format pinned to YYYY-MM-DDTHH:MM:SSZ.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "contracts": {
+      "type": "array",
+      "description": "Every cross-repo wire-format. Ordered by name for deterministic diff.",
+      "items": {"$ref": "#/$defs/contract"},
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "format", "writer", "readers", "schema_ref", "test_refs", "ledger_ref", "extraction_stage"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique contract name (slug). E.g., install-written-paths, lite-manifest, bassclef-version.",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "format": {
+          "type": "string",
+          "description": "Wire-format on disk. Picks the validator path. json / jsonc → ajv against schema_ref. yaml / bash → sidecar_validator per Klein K1.",
+          "enum": ["json", "jsonc", "yaml", "bash"]
+        },
+        "writer": {
+          "$ref": "#/$defs/consumer",
+          "description": "The one entity that creates or updates the wire-format on disk. Multiple writers forbidden by design (per Hoare pre/post single-writer discipline). Future multi-writer support ships as a minor bump if template-sync requires it."
+        },
+        "readers": {
+          "type": "array",
+          "description": "Every entity that reads the wire-format. The writer MAY also appear here (declare read-write explicitly). Minimum one reader (otherwise the contract has no cross-repo surface).",
+          "items": {"$ref": "#/$defs/consumer"},
+          "minItems": 1
+        },
+        "schema_ref": {
+          "type": "string",
+          "description": "Repo-relative path to the authoritative schema file. For json/jsonc contracts this must be a JSON Schema file validated by ajv. For yaml/bash contracts this may be null when sidecar_validator carries the validation logic.",
+          "pattern": "^(standards/|null$)",
+          "maxLength": 300
+        },
+        "sidecar_validator": {
+          "type": "string",
+          "description": "Repo-relative path to a bash validator for non-JSON contracts (yaml, bash). Required when format is yaml or bash. Omit for json / jsonc.",
+          "pattern": "^(scripts/|lib/)",
+          "maxLength": 300
+        },
+        "test_refs": {
+          "type": "array",
+          "description": "Repo-relative paths to Tier 0 characterization tests pinning the contract shape. Minimum one entry.",
+          "items": {"type": "string", "maxLength": 300},
+          "minItems": 1
+        },
+        "ledger_ref": {
+          "type": "string",
+          "description": "Repo-relative path to the per-contract change ledger (if any). May point to the master cross-repo-contracts-changes.md ledger for contracts without a dedicated file.",
+          "pattern": "^standards/",
+          "maxLength": 300
+        },
+        "extraction_stage": {
+          "type": "string",
+          "description": "Per-contract progress. declared = registry entry only; validated = both sides run ajv against schema_ref; smoked = cold-adopter harness carries a characterization test; legacy-removable = compat shim retires per ADR-031 three-release-cycle rule.",
+          "enum": ["declared", "validated", "smoked", "legacy-removable"]
+        },
+        "description": {
+          "type": "string",
+          "description": "One-sentence human-readable description of what this contract carries.",
+          "maxLength": 500
+        },
+        "hoare_pre_post": {
+          "type": "object",
+          "description": "Optional pre/post conditions (per Hoare) the writer promises and readers depend on. Documentation shape — the validator does not enforce these directly; the test_refs do.",
+          "additionalProperties": false,
+          "properties": {
+            "precondition": {"type": "string", "maxLength": 500},
+            "postcondition": {"type": "string", "maxLength": 500}
+          }
+        },
+        "added_at": {
+          "type": "string",
+          "description": "ISO 8601 UTC timestamp when the entry first landed.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "added_in_adr": {
+          "type": "string",
+          "description": "ADR id that introduced this contract (e.g., ADR-055 for install-written-paths).",
+          "pattern": "^ADR-\\d{3}$"
+        }
+      }
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "path", "access", "consumer_type"],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "description": "GitHub repo slug.",
+          "enum": ["sunj-labs/bassclef-upstream", "sunj-labs/bassclef-cli", "sunj-labs/bassclef"]
+        },
+        "path": {
+          "type": "string",
+          "description": "Repo-relative path to the source file that reads or writes the contract.",
+          "maxLength": 300
+        },
+        "access": {
+          "type": "string",
+          "description": "read / write / read-write. Only one entry per contract may be the writer (top-level field); readers[] carry read or read-write.",
+          "enum": ["read", "write", "read-write"]
+        },
+        "consumer_type": {
+          "type": "string",
+          "description": "How this consumer validates the contract. ajv-runtime = validates at read time via ajv. hand-coded = hardcoded shape check (the gap ingredient #5 names). codegen = TypeScript types generated from schema. shell = bash reader with no runtime validation.",
+          "enum": ["ajv-runtime", "hand-coded", "codegen", "shell"]
+        }
+      }
+    }
+  }
+}

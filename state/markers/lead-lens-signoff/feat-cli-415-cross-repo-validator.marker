@@ -1,0 +1,7 @@
+# Lead-lens sign-off — feat/cli-415-cross-repo-validator
+- date: 2026-10-10T19:12:00Z
+- branch: feat/cli-415-cross-repo-validator
+- lead: jerome-saltzer-and-michael-schroeder (complete mediation)
+- findings-cleared: NO RED/AMBER findings surfaced
+- reviewer-marker: state/markers/reviewer/feat-cli-415-cross-repo-validator.md
+- sign-off-rationale: Dual-fire gate wires cleanly — validator fires on every cli PR; registry entry + schema_ref + test_refs all resolve under $REPO_ROOT; 10 Tier 0 tests characterize positive + bypass + 4 failure classes; typecheck + full suite 520/520 GREEN. 3 notes land in reviewer marker (test_refs delta, ajv-cli install weight, step ordering) — all expected and documented. No red / amber under the complete-mediation lens. Ship.
