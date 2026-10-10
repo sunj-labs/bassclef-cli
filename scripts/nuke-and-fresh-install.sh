@@ -32,6 +32,10 @@ Flags:
   --delete-github           also delete GitHub test repos matching *bassclef-smoke-test*
                             under the authenticated gh user. Prompts per hit by default.
   --yes                     auto-confirm --delete-github prompts (scripted use only)
+  --purge-adopter           one-flag full reset — implies --delete-github --yes.
+                            Deletes every matching GitHub test repo (no prompts) plus
+                            the standard workdir purge. For cold-adopter smoke sessions
+                            that collide with repos from a prior run.
   --install-upstream-pat    install the upstream bug-reporting PAT on this profile.
                             Reads from env var BASSCLEF_UPSTREAM_PAT. Use `read -s`
                             to pass it without the value hitting shell history:
@@ -113,6 +117,14 @@ while [ $# -gt 0 ]; do
       AUTO_YES=1
       shift
       ;;
+    --purge-adopter)
+      # One-flag convenience: implies --delete-github --yes.
+      # Cold-adopter smoke sessions typically want a full reset including
+      # every matching GitHub test repo from prior runs, no prompts.
+      DELETE_GITHUB=1
+      AUTO_YES=1
+      shift
+      ;;
     --install-upstream-pat)
       INSTALL_UPSTREAM_PAT=1
       shift
@@ -151,7 +163,11 @@ if [ "$DRY_RUN" -eq 1 ]; then
   echo "  4. npm install -g @thebassclef/lite@${VERSION}"
   if [ "$DELETE_GITHUB" -eq 1 ]; then
     if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-      echo "  5. list GitHub repos matching '*${GH_PATTERN}*' + prompt-confirm delete each"
+      if [ "$AUTO_YES" -eq 1 ]; then
+        echo "  5. list GitHub repos matching '*${GH_PATTERN}*' + auto-delete each (--yes)"
+      else
+        echo "  5. list GitHub repos matching '*${GH_PATTERN}*' + prompt-confirm delete each"
+      fi
     else
       echo "  5. --delete-github set but gh not authenticated; would skip"
     fi
