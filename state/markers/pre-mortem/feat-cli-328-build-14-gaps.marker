@@ -1,0 +1,10 @@
+# Pre-mortem marker — feat/cli-328-build-14-gaps
+- date: 2026-10-10
+- parent-ledger: docs/risk-ledgers/2026-10-10-session-p-cli-415-then-328.md
+- lens-2-risks-folded: R6 (3 SKILL body touches), R7 (Builder model pin), R8 (/launch stack-choice; Next.js examples)
+- lens-3-risks-folded: R9 (Phases 4-7 no driver today), R10 (architect-review evidence per-batch), R12 (/onboard-repo CI stretch)
+- impl-order-pinned:
+  1. /decompose 14 findings → confirm shipped-state (Finding 6 maybe partial); re-group by batches A/B/C/D
+  2. Per-batch: characterization driver RED-first → fix → PR → operator merge
+  3. /architect-review intersperses after batches land
+  4. R12 (Finding 14 /onboard-repo CI primitive) — defer to Session Q if scope stretches

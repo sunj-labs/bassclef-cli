@@ -1,0 +1,6 @@
+# Luminary marker — feat/cli-328-build-14-gaps
+- date: 2026-10-10
+- branch: feat/cli-328-build-14-gaps
+- lead: alan-cooper (operator experience of /build; menus should expose intent, not hide it)
+- supporting: [john-ousterhout, michael-feathers, kent-beck]
+- rationale: Cooper for /build's operator surface (14 findings all land at the handoff seam); Ousterhout for deep-module refactor of Phases 4-7; Feathers for characterization-first per Finding batch; Beck for Tier 0 RED-first on each driver per batch

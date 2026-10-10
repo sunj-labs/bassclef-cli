@@ -1,0 +1,10 @@
+# Temperance marker — feat/cli-328-build-14-gaps
+- date: 2026-10-10
+- branch: feat/cli-328-build-14-gaps
+- parent-session: session-p
+- scope: cli#328 — 14 /build Phase 4-7 gaps found by operator supervised-run 2026-10-03
+- scope-decision:
+  - right-thing: close the 14 /build gaps per cli#328 body; batched PRs (A naming, B gates, C Builder, D goal+stack)
+  - right-way: /decompose first → characterization driver per batch → fix → PR → architect-review intersperses after
+  - drift-trigger: pause past 375 turns (1.5× 250t ceiling); pause if Batch D grows into /onboard-repo CI primitive (R12 → Session Q)
+- shipped-state-check-pending: Finding 6 (/temperance gitignored-marker) → PR #346 shipped characterization driver 2026-10-04; need to verify whether SKILL fix landed too. cli#307 + cli#327 CLOSED — related gaps may map to findings 3 or 10.
