@@ -1,0 +1,9 @@
+# Temperance marker — feat/cli-415-cross-repo-validator
+- date: 2026-10-10
+- branch: feat/cli-415-cross-repo-validator
+- parent-session: session-p
+- scope: vendor 4 upstream files + wire validate-cross-repo-contracts CI job
+- scope-decision:
+  - right-thing: close the dual-fire gate upstream shipped tonight (steps 1-3 merged 320f445b)
+  - right-way: vendor-exact per cli#415 body; match upstream paths; CI job mirrors `.github/workflows/bassclef-pr-ci.yml` L437-464; ubuntu-24.04 pin per PR #414
+  - drift-trigger: pause if cli#415 scope exceeds 225 turns (1.5× 150t ceiling); pause if tier-tag mapping drift surfaces structural ADR work

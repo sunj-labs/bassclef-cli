@@ -1,0 +1,9 @@
+# Pre-mortem marker — feat/cli-415-cross-repo-validator
+- date: 2026-10-10
+- parent-ledger: docs/risk-ledgers/2026-10-10-session-p-cli-415-then-328.md
+- lens-1-risks-folded: R1 (tier-tag), R2 (schema diff), R3 (ubuntu pin), R4 (ajv-cli local run), R5 (negative test)
+- impl-order-pinned:
+  1. Vendor + diff schema before overwrite (R2)
+  2. Write negative test RED-first (R5 + Beck TDD)
+  3. Wire CI job at ubuntu-24.04 (R3)
+  4. Tier-tag mapping check (R1)

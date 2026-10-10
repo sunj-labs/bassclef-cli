@@ -1,0 +1,7 @@
+# Luminary marker — feat/cli-415-cross-repo-validator
+- date: 2026-10-10
+- branch: feat/cli-415-cross-repo-validator
+- lead: jerome-saltzer-and-michael-schroeder
+- supporting: [vaughn-vernon, michael-nygard, kent-beck, hyrum-wright]
+- rationale: Saltzer-Schroeder for complete-mediation (dual-fire gate); Vernon for ACL (registry is contract); Nygard for stability (fail-loud on drift); Beck for Tier 0 negative test RED-first; Hyrum for observable-contract (cli's install-written-paths.ts binds the schema)
+- source: cli#415 body Luminary map section
