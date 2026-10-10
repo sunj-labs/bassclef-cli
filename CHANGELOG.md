@@ -24,6 +24,26 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.13] - 2026-10-10
+### Added
+
+- Sam-verbatim 5-minute value test block at the end of `bassclef init` output. Per cli#406 + bassclef-upstream#2006. New shared constant at `src/lib/init-value-test-block.ts`. Sam reads one honest line proving bassclef is live, plus three slash-command cues (`/riff`, `/launch`, `/build`). Catalog counts move behind `--verbose` for operators who want the inventory.
+- 7 Beck RED-first Tier 0 tests at `tests/init-value-test-block.test.ts` pin the Sam-verbatim shape plus the --verbose coexistence plus the hook-banner preservation.
+- 7 Feathers characterization tests at `tests/init-write-bassclef-version-json.test.ts` pin walker behavior writing `bassclef-version.json` + manifest row (source=bundle) + install-written-paths entry (writer=bassclef-init-npm). Future tier-filter changes cannot silently drop the file. Per cli#411.
+
+### Changed
+
+- `bassclef init` default output no longer prints catalog counts (`N skills, M rules, K agents, L luminaries under <repo>/.claude/.`). Counts stay available via `bassclef init --verbose`. Hook banner (`Installed N of M hooks (lite tier)`) and refused-count line unchanged.
+
+### Fixed
+
+### Notes
+
+- cli#406 closes via PR #412. cli#411 closes via PR #413. Both auto-closed via Closes keywords on merge.
+- Full suite 520/520 GREEN (up from 513); Sam driver 4/4 pass; typecheck clean.
+
+
+
 ## [1.9.12] - 2026-10-08
 ### Added
 - Bassclef substrate pin bumped `v1.8.0` → `v1.9.3` — bundle sync carries the Session N cures (install-written-paths mediation + CLI init.manifest.json fallback, pre-commit-gate matcher, write-state-marker lite tier retag, artifact-ingestion HTML-comment tolerance, local-serve `--lan` cure) plus the v1.9.3 hotfix stamping `lite-manifest.json manifest_version` `0.0.0` → `1.17.1`.
