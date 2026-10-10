@@ -1,0 +1,8 @@
+# Temperance marker — Session P (/longrun)
+- date: 2026-10-10
+- branch: main (per-branch markers will fire when feature branches cut)
+- scope: cli#415 ADR-059 CLI validator (80-150t) then cli#328 /build 14 gaps (150-250t)
+- scope-decision:
+  - right-thing: close the dual-fire gate upstream shipped tonight (cli#415) + close the 14 /build Phase 4-7 gaps (cli#328)
+  - right-way: vendor-exact for cli#415 (pattern already proven upstream); batched PRs for cli#328 (A/B/C/D findings); /architect-review intersperses between the two
+  - drift-trigger: pause if either step exceeds 1.5× time budget (cli#415 past 225t OR cli#328 past 375t); pause on hard ceiling (auth / schema / security / prod); pause if cli#328 batch D (goal + stack) grows into /onboard-repo CI primitive work (R12 stretch) — defer to Session Q

@@ -1,0 +1,44 @@
+{
+  "_tier": "upstream",
+  "registry_version": "1.0.0",
+  "generated_at": "2026-10-10T00:00:00Z",
+  "contracts": [
+    {
+      "name": "install-written-paths",
+      "format": "json",
+      "description": "Manifest of paths bassclef install writers created. Upstream discipline hooks consult it (via lib/install-written-paths.sh) to skip install-written files, firing discipline on author-edited paths only. CLI's bassclef init writes it. Registry vendored from bassclef-upstream main 320f445b per ADR-059 step 4; test_refs points at cli's test (tests/init-install-written-paths.test.ts) rather than upstream's lib/tests/install-written-paths.test.sh — one-field delta per cli#415 body.",
+      "writer": {
+        "repo": "sunj-labs/bassclef-cli",
+        "path": "src/lib/install-written-paths.ts",
+        "access": "write",
+        "consumer_type": "hand-coded"
+      },
+      "readers": [
+        {
+          "repo": "sunj-labs/bassclef-upstream",
+          "path": "lib/install-written-paths.sh",
+          "access": "read-write",
+          "consumer_type": "shell"
+        },
+        {
+          "repo": "sunj-labs/bassclef-cli",
+          "path": "src/lib/install-written-paths.ts",
+          "access": "read-write",
+          "consumer_type": "hand-coded"
+        }
+      ],
+      "schema_ref": "standards/state-spine/schemas/install-written-paths.schema.json",
+      "test_refs": [
+        "tests/init-install-written-paths.test.ts"
+      ],
+      "ledger_ref": "standards/cross-repo-contracts-changes.md",
+      "extraction_stage": "declared",
+      "hoare_pre_post": {
+        "precondition": "File at state/install-written-paths.json exists and parses as JSON matching the schema; writer runs in bassclef-cli bassclef init OR upstream fallback at lib/install-written-paths.sh L250-256.",
+        "postcondition": "For every path P in entries[], upstream pre-commit-gate.sh skips discipline on P; writer identity in entries[].writer matches one of the writer enum values."
+      },
+      "added_at": "2026-10-10T00:00:00Z",
+      "added_in_adr": "ADR-055"
+    }
+  ]
+}

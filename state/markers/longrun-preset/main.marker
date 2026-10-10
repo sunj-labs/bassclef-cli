@@ -1,3 +1,6 @@
-preset: reversible-small
-trigger: operator-pivot
-scope: diagnose cli#361; name hypothesis; file cure OR status comment
+# /longrun preset marker — Session P
+- date: 2026-10-10
+- branch: main
+- preset: converged
+- trigger: whereami-PRIMARY
+- rationale: whereami next_in_flight_goal names Session P scope with top-3 options; cli#415 added post-closeout
