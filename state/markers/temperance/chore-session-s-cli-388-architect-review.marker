@@ -1,0 +1,10 @@
+# Temperance marker — chore/session-s-cli-388-architect-review
+
+- date: 2026-10-11
+- branch: chore/session-s-cli-388-architect-review
+- scope-decision: Review cli#388 Tier A full harness (6 drivers + 2 libs + 2 workflows). Produce review doc + file 5 Q1 findings as follow-on tickets. Verdict READY expected.
+- right-thing: Session S plan Option c Step 4; cli#388 deferred from Session L PR 8; the sweep review across the full harness.
+- right-way: Read artifacts first (FEATH-R2), draft doc per Session P precedent, cap findings at 5 Q1 (OUST-R2), file follow-ons via gh.
+- simplest: One review doc + 5 follow-on tickets. No code change. Reversible via git revert.
+- blast-radius: Low. Doc touches `docs/architecture/reviews/`. No adopter-observable surface changes.
+- drift-trigger: Review exceeds 90 turns (should run ~60-80). More than 5 Q1 findings surface (should cap).

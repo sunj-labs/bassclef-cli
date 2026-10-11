@@ -1,0 +1,8 @@
+# ADR-deviation marker — chore/session-s-cli-388-architect-review
+
+- date: 2026-10-11
+- branch: chore/session-s-cli-388-architect-review
+- adr_governing: ADR-011 (cli-side cure-anchor drivers + flow-layer test taxonomy)
+- outcome: ADR-honored
+
+Rationale: branch adds an architect-review doc at docs/architecture/reviews/. The doc reviews the Tier A harness that ADR-011 D1 (regression drivers) + D3 (flow-layer drivers) govern. Verdict honors both decisions — no shape change, no taxonomy shift. Five Q1 findings refine the surface without reshaping the ADR.
