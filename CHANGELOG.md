@@ -24,6 +24,23 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.15] - 2026-10-12
+### Added
+
+### Changed
+
+- Bassclef substrate bundle refreshed from sibling bassclef-upstream HEAD (tagged `v1.9.6`, commit `452ce75c`). No cli source change; the republish propagates one upstream cure via `prepublishOnly` sibling-copy into `dist/lite/`.
+
+### Fixed
+
+- Install-written-paths register timeout cured. `lib/install-written-paths.sh` + `.claude/hooks/session-reflection.d/83-install-written-paths-rebuild.sh` ship the bulk-rebuild path (`install_written_paths_rebuild_from_lite_manifest`) that replaces the 451×700ms serial-register loop PR #2174 introduced. Prior behavior left `state/install-written-paths.json` with ~8 of 451 entries every session because the serial path timed out before the full catalog landed. Fresh adopters pick up the fast lib via `bassclef init`; existing cli adopters already pick it up via `bassclef-sync` at next session. Carriers: bassclef-upstream#2200 (ticket), bassclef-upstream#2201 (PR), bassclef-upstream `452ce75c` (merge SHA).
+
+### Notes
+
+- cli source unchanged in this release; only the bundled substrate under `dist/lite/` moves. Verified pre-bump: `diff -q dist/lite/lib/install-written-paths.sh ~/src/sunj-labs/bassclef-upstream/lib/install-written-paths.sh` returned "differ" (bundle was stale against upstream HEAD), so the `prepublishOnly` re-copy carries the cure.
+- Peer `bassclef-upstream-b1` coordinated the republish: `~/src/sunj-labs/bassclef-upstream/docs/release-notes/v1.9.6.md` + public release at https://github.com/sunj-labs/bassclef/releases/tag/v1.9.6.
+- Operator pre-authorized the npm publish; OIDC trusted publisher path means no Touch ID gate (same shape used for v1.9.13 + v1.9.14).
+
 ## [1.9.14] - 2026-10-10
 ### Added
 

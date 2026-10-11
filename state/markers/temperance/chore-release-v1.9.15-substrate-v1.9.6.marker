@@ -1,0 +1,18 @@
+# Temperance marker — chore/release-v1.9.15-substrate-v1.9.6
+
+- date: 2026-10-12
+- branch: chore/release-v1.9.15-substrate-v1.9.6
+- scope-decision: patch bump + republish to carry bassclef substrate v1.9.6 cure (install_written_paths bulk-rebuild) into dist/lite — no cli source change.
+
+## 6 answers
+
+0. RIGHT THING? Yes. Operator asked to cut v1.9.6; peer confirmed cli-side bundle `dist/lite/lib/install-written-paths.sh` is byte-different from upstream (diff -q "differ").
+1. SIMPLEST? Yes. `npm run bump patch` + `prepublishOnly` sibling-copy. Zero cli source change.
+2. BRUTE FORCE? No. Read scripts/prepublish-bundle-substrate.mjs + scripts/bump-version.mjs + bassclef-upstream 452ce75c before firing.
+3. BLAST RADIUS? Medium — every @thebassclef/lite npm adopter. Mitigated by 523/523 vitest + 4/4 shell flow + CI gate + OIDC trusted publisher.
+4. VERIFICATION? Workflow run `+ @thebassclef/lite@1.9.15` line + `npm view` after ~3 min registry lag.
+5. REVERSIBLE? Partially. npm unpublish within 72h; 1.9.14 stays live so adopters can pin backward.
+
+## Drift-trigger
+
+Any vitest fail > 1 OR workflow run showing anything other than `+ @thebassclef/lite@1.9.15` means STOP and diagnose.
