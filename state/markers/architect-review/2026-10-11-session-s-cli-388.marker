@@ -1,0 +1,10 @@
+# Architect-review coverage marker — cli#388 Tier A full harness
+
+- date: 2026-10-11
+- session: S
+- scope: 11 artifacts (2 libs + 1 registry + 6 drivers + 2 workflows); 1382 lines total
+- lead: michael-feathers
+- supporting: [john-ousterhout, jerome-saltzer-and-michael-schroeder]
+- verdict: READY
+- findings-filed: 5 Q1 (F-TierA-01 through F-TierA-05)
+- doc: docs/architecture/reviews/2026-10-11-session-s-cli-388-tier-a-full-harness.md
