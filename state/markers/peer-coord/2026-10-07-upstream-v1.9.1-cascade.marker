@@ -1,0 +1,18 @@
+# Peer coordination marker — upstream v1.9.1 released
+- date: 2026-10-07 (updated: release live)
+- peer: bassclef-upstream-77 (uds:/tmp/cc-socks/76310.sock)
+- release_page: https://github.com/sunj-labs/bassclef/releases/tag/v1.9.1
+- public_bassclef_merge_sha: 5aeb7893
+- cures_merged_upstream:
+    - #2130 bf2ddb26 — bassclef-sync install-class postcondition (closes cli#361)
+    - #2131 d59a3dfe — /launch --local bind honesty + --lan opt-in (closes cli#314)
+    - #2132 2db15252 — /build zero-step guard + accessor stderr pass-through (closes cli#327)
+- offered_by_peer:
+    - npm publish @thebassclef/lite@1.9.1 — operator Touch ID required; peer offered to time with Session N
+- sibling_smoke_owed_here:
+    - After bassclef-sync pulls v1.9.1 substrate, confirm DEGRADED banner flips to RESTORED on 8 project-class hooks
+    - Run SessionStart on bassclef-cli real repo as adopter proof
+- current_session_coupling:
+    - Session N cli#241 cure ready to commit (gate 2 PASSED; scripts/smoke-drive-riff.sh)
+    - Timing option: fold cli#241 cure into same npm publish as v1.9.1 substrate pull
+- blocking: no

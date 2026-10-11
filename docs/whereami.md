@@ -1,5 +1,8 @@
 ---
 tier: lite
+last_updated:
+  at: 2026-10-10T21:45:00Z
+  session: 2026-10-10-session-r-cli-373-filed-upstream-2177.md
 ---
 
 # Whereami — bassclef-cli

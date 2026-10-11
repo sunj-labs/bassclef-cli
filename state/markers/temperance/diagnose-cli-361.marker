@@ -1,0 +1,6 @@
+# Temperance marker — diagnose cli#361 (8 missing hooks)
+- date: 2026-10-05
+- branch: main (diagnose stays on main until cure branch spawns)
+- scope-decision: Right thing — identify which hypothesis explains 8 hooks failing to resolve after bassclef-sync self-heal. Right way — run /diagnose BEFORE writing any cure. Drift trigger — do NOT write cure code before the diagnosis names a specific hypothesis.
+- parent_chain: tonight's SessionStart DEGRADED banner → cli#361 (whereami SECONDARY 2)
+- out_of_scope: Session J integration bridge (pushed to next session); any cure that touches 2+ hooks before diagnosis points there

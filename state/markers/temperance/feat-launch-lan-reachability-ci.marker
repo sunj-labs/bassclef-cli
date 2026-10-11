@@ -1,0 +1,6 @@
+# Temperance marker — feat/launch-lan-reachability-ci
+- date: 2026-10-09
+- scope-decision: Extend smoke-drive-adopter-2143 driver with a real bind+curl test. Spawn local-serve.sh --lan against a scratch gallery, curl 127.0.0.1:PORT, assert HTTP 2xx, kill via state-file PID. Covers Path A from the design discussion.
+- simplest: One new test case in the existing driver file; no new file; python3-presence guards exit 77.
+- blast-radius: Small — the new case runs isolated against a scratch tmpdir; nothing touches shipped code.
+- reversible: Yes — one-case revert.

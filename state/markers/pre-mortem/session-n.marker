@@ -1,0 +1,8 @@
+# Pre-mortem marker — Session N
+- date: 2026-10-07
+- branch: session-n
+- ledger-path: docs/next-session-plan-2026-10-09-session-n-cli-side-scope.md (L70-85 — Cockburn/Feathers/Cooper, 5 risks total)
+- strongest-concerns-folded:
+  - R2 (Feathers): cli#235 "68 files refused" may be correct Phase 0 refuse-on-collision behavior. Fold: diagnose first; only cure if false negative.
+  - R1 (Cockburn): cli#241 Dockerfile change may break 6-of-6 Tier A docker-smoke. Fold: rebuild image + run every driver before commit.
+  - R3 (Feathers): current Session L jamie-riff fixture captured against old symlink shape. Fold: re-run capture after Dockerfile fix; update if shape shifts.

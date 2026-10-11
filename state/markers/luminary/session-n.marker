@@ -1,0 +1,8 @@
+# Luminary marker — Session N
+- date: 2026-10-07
+- branch: session-n
+- lead: michael-feathers (characterization — cli#235 may be shipped-behavior-not-bug; cli#241 fixture pins current docker symlink shape)
+- supporting:
+  - alistair-cockburn (walking skeleton — verify 6-of-6 docker-smoke green before any Dockerfile merge)
+  - alan-cooper (Jamie/Sam 90s first-touch budget)
+  - linus-torvalds (upstream filing carries concrete repro + harness-covered labels for cli#320)

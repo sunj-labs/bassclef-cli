@@ -1,0 +1,11 @@
+# Temperance marker — feat/v1.9.3-bundle-sync-plus-convergence
+- date: 2026-10-08
+- branch: feat/v1.9.3-bundle-sync-plus-convergence
+- scope-decision: Sync the v1.9.3 bundled substrate (manifest_version 1.17.1 cured), add install-written-paths convergence from cli-side so bassclef init writes the manifest the sibling lib reads, ship 5 adopter-anchor drivers for Session N upstream filings (#2138, #2139, #2140, #2142, #2143) + 4 flow drivers + flow registry per ADR-011, bump cli patch, release via OIDC trusted publisher.
+- right-thing: Yes — unblocks v1.9.3 adopter path; closes the open convergence commitment named in the v1.9.3 session chronicle.
+- simplest: Fold bundle-sync + convergence + driver primitives into one PR; drivers are additive scripts; convergence adds one TS lib + one call site in init.ts.
+- brute-force-check: No — plan is grounded in ADR-011 (just-merged) + sibling lib schema (just-read) + peer v1.9.3 confirmation.
+- blast-radius: cli adopter surface + published npm package; mitigated by Tier 0 characterization test on the convergence lib + GREEN docker-smoke on the bundle.
+- verification: npm test green locally, CI green on PR, docker cold-adopter smoke green post-publish, npm registry shows new tag.
+- reversible: Yes — next cli patch bump can revert any of the pieces.
+- drift-trigger: Scope grows beyond ADR-011 D3/D4 drivers OR Session N cure anchors OR peer coord surfaces a new blocker.

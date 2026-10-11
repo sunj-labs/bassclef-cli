@@ -1,0 +1,6 @@
+# Temperance marker — Session N scope-a
+- date: 2026-10-07
+- branch: session-n (will spawn feat/cli-241 then feat/cli-235)
+- scope-decision: Right thing — three Q1 first-touch defects (cli#235 init false-refuse, cli#241 /riff docker lens-read, cli#320 /personas email leak upstream route). Right way — Feathers characterization first; walking-skeleton 6-of-6 docker-smoke green before any merge. Drift trigger — step 2 (cli#241 Dockerfile cure) over 30 turns pauses and reshapes per plan R2.
+- parent_chain: cli#375 Tier A dynamic driver roadmap (Session N follows Session M)
+- out_of_scope: cli#388 architect-review sweep (b); /build Phase 3-7 LIVE (c); refresh captures to 1.9.11 (d); upstream substrate cures from Session M

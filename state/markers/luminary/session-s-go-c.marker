@@ -1,0 +1,21 @@
+# Luminary marker — Session S (Option c)
+
+- date: 2026-10-11
+- lead: john-ousterhout
+- supporting:
+  - linus-torvalds
+  - michael-feathers
+  - jerome-saltzer-and-michael-schroeder
+
+Per-step lead assignment:
+
+| Step | Lead lens | Why |
+|---|---|---|
+| 1 — marker cleanup | john-ousterhout | Deep module hygiene; session-start cognitive load |
+| 2 — whereami schema fix | tony-hoare | Pre/postcondition on frontmatter schema shape |
+| 3 — upstream fix ticket | linus-torvalds | Adopter contract; DEGRADED banner reaches every adopter |
+| 4 — Tier A architect-review | michael-feathers | Characterization tests pin actual behavior; harness drivers read-first |
+
+Supporting applies at review: @luminary jerome-saltzer-and-michael-schroeder catches incomplete mediation on any Tier A driver path the review skips.
+
+Per `.claude/rules/loop-discipline.md` Step 2a. Lead signs off red + amber findings per Step 5.5 before PR merge.

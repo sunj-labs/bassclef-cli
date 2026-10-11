@@ -1,0 +1,5 @@
+# Temperance marker — feat/purge-adopter-sibling-cache
+- date: 2026-10-10
+- scope-decision: Extend --purge-adopter to also rm sibling bassclef clone caches that keep stale version files alive (statusline fallback #3 + #4).
+- simplest: Add rm-rf lines in the --purge-adopter branch of the delete step.
+- blast-radius: Small; opt-in flag.
