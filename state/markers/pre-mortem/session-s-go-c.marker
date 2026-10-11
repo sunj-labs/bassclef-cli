@@ -1,0 +1,15 @@
+# Pre-mortem light marker — Session S (Option c)
+
+- date: 2026-10-11
+- lenses: [john-ousterhout, linus-torvalds, michael-feathers]
+- risk-ledger: docs/risk-ledgers/2026-10-11-session-s-go-c.md
+- risks-logged: 15 (5 per lens)
+
+Strongest risks folded into plan:
+
+- **OUST-R2** — Architect-review surfaces 10+ findings; overflow into Session T. Mitigation: cap this session at 5 Q1 findings; defer rest to filed follow-on tickets.
+- **LINUS-R1** — Marker cleanup via `git rm` destroys history another session relies on. Mitigation: `git add` + commit (preserve history) over `git rm`. Only remove via `git rm` when the marker schema itself is stale.
+- **FEATH-R3** — Review doc claims coverage without reading each Tier A driver source. Mitigation: cite each driver file path + top commit SHA inline per `.claude/rules/assert-only-after-verify.md`.
+- **LINUS-R3** — Upstream ticket filed with wrong rationale; peer pushes back. Mitigation: cite the SessionStart hook output verbatim + path to the missing hook.
+
+Per `.claude/rules/loop-discipline.md` Step 0.5. Full ledger at the path above.

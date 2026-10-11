@@ -1,0 +1,14 @@
+# Temperance marker — Session S (Option c)
+
+- date: 2026-10-11
+- scope: Option c (hygiene cluster + cli#388 Tier A architect-review)
+- turn budget: 100-130 total
+- right-thing: Close three nagging session-start signals AND land first system-wide review of Tier A harness. Both compound into Session T and beyond.
+- right-way: Hygiene first (3 small cures land independently, each reversible). Architect-review runs on a quieter main. One PR per cure (atomic). Review ships as its own doc under docs/architecture/reviews/.
+- drift-trigger:
+  - Any hygiene step exceeds 20 turns (budget is ~10 per item).
+  - Architect-review runs past 100 turns (overflow into Session T).
+  - Review surfaces more than 5 Q1 findings (cap scope; defer rest to tickets).
+  - Any cure requires an upstream change (routing — stop, file upstream ticket, keep cli-side open).
+
+Per `.claude/rules/sdlc-gates.md` scope-decision boundary. Session-level temperance; sub-step temperance fires per-cure as needed.

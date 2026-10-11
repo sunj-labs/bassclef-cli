@@ -1,0 +1,6 @@
+# Temperance marker — feat/nuke-purge-adopter-flag
+- date: 2026-10-10
+- scope-decision: Add --purge-adopter flag to scripts/nuke-and-fresh-install.sh that implies --delete-github + --yes. One-command full reset for cold-adopter smoke runs.
+- simplest: Flag + case entry in parse loop that sets both DELETE_GITHUB=1 and AUTO_YES=1. Help text update. No pattern change.
+- blast-radius: Small — new opt-in flag; no existing behavior change.
+- reversible: Yes.
