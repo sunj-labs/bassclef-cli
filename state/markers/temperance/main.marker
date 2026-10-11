@@ -1,7 +1,7 @@
-# Temperance marker — cli#295 bundle sync via Option b then a
-- date: 2026-10-03
-- branch: main
-- scope-decision: Run plan doc Step 1 only tonight. Option b then a — ping peer for v1.6.7 tag cut, then bundle sync against v1.6.7. Drivers (Steps 2-6) deferred to next session.
-- right-thing: cli#295 is the thread the plan doc names. Primary unblocked.
-- right-way: wait for v1.6.7 tag (preserves semver pin pattern); full ceremony per plan doc Step 1; close clean per operator prior preference.
-- drift-trigger: if cli#295 bundle sync bloats past 60 turns OR a driver Step starts this session, pause and re-anchor /temperance.
+# Temperance marker — main (Session S closeout)
+
+- date: 2026-10-11
+- scope: Session S closeout chore on main — chronicle + whereami flip + rescue resolution
+- right-thing: Close Session S cleanly; preserve audit trail; flip whereami so next session reads current state.
+- right-way: Direct main commit per Session P + Q + R precedent for closeout chores.
+- drift-trigger: Any substantive code change in this commit (closeout is docs + markers only).
