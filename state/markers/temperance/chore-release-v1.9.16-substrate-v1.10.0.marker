@@ -1,0 +1,7 @@
+# Temperance — chore/release-v1.9.16-substrate-v1.10.0
+
+- date: 2026-10-12
+- scope: patch bump + substrate bundle refresh for upstream v1.10.0 (17 commits since v1.9.6)
+- new building blocks shipped via prepublish sibling-copy — no cli source change expected
+- answers: right thing (operator standing orders), simplest (same pattern as v1.9.15), not brute-force (release notes read), medium blast radius (every adopter), verification via full test tier + release workflow + sigstore + npm registry, reversible via unpublish within 72h
+- drift-trigger: if test tier changes required, STOP for /architect-review per operator standing orders
