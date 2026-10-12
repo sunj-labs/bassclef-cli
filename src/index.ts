@@ -13,4 +13,4 @@
 // ADR-031 (we-don't-break-adopters). Add exports only when a real
 // consumer needs them — no speculative surface.
 
-export const version = '1.9.15' as const;
+export const version = '1.9.16' as const;
