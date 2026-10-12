@@ -24,10 +24,10 @@ bet 2026-08-06b.
 
 ### Notes
 
-## [1.9.16] - 2026-10-12
+## [1.9.16] - 2026-10-13
 ### Added
 
-- Bassclef substrate bundle refreshed to `v1.10.0` (release_sha `26a3d45d687c9805aeeaa81b0860f16e4544d5ea`, source_sha `9b4f9c924a5ad03cfd836b524a4f9754053a190c`, 17 commits since `v1.9.6`). Carriers under `dist/lite/` via `prepublishOnly` sibling-copy — zero cli source change.
+- Bassclef substrate bundle refreshed to `v1.10.1` (release_sha `90e9af92134f9d9bc90b7da5b02096a1dfdeff20`, source_sha `9aebf658b1b9c751758bb9a4e554bfbb515e7006`). Carries v1.10.0 scope (17 commits since `v1.9.6`) plus the Phase 2.7 hotfix in one patch cycle. Carriers under `dist/lite/` via `prepublishOnly` sibling-copy — zero cli source change.
 - 5 new substrate building blocks ship to adopters: `lib/prose-marker.sh` (shared marker writer + reader deep module); `.claude/hooks/turn-prose-density-measure.sh` (new Stop event hook, writes per-turn hyphenated-compound density marker); `.claude/skills/onboard-repo/concise-prompt.sh` (Phase 2.7 helper for Anthropic Concise output style opt-in); `standards/prose-marker-format.md` v1.0 (new standard; marker JSON shape + scorer registry + 25-term density allowlist); `scripts/measure-prose-baseline.py` (reusable measurement script).
 - `/onboard-repo` SKILL Phase 2.7 added — Y/n/skip prompt to enable Anthropic's Concise output style via jq read-modify-write on `~/.claude/settings.json`. Preserves every pre-existing operator setting. 11 Tier 0 tests cover Y/n/skip paths + field preservation + should-fire. Opt-in on adopter answer.
 
@@ -35,13 +35,15 @@ bet 2026-08-06b.
 
 ### Fixed
 
+- Phase 2.7 adopter-break cured. v1.10.0 shipped `.claude/skills/onboard-repo/concise-prompt.sh` with header `install-class: operator`, routing the helper to `~/.claude/skills/` (user scope). But Phase 2.7 of `/onboard-repo` sources the helper from `$CLAUDE_PROJECT_DIR` (project scope). Every adopter answering Y at Phase 2.7 would hit ENOENT. v1.10.1 hotfix flipped the header to `install-class: project`; lite-manifest regen 454 → 455 entries; helper now ships to adopter projects via `dist/lite/`. Peer catch 10 minutes post-v1.10.0 — Linus "we don't break adopters" held. Carriers: bassclef-upstream#2197 (parent), bassclef-upstream#2229 (hotfix PR), bassclef `#1539` (public PR), source SHA `9aebf658`.
+
 ### Notes
 
 - Opt-in flag `prose_discipline.scorer_track` in `.claude/bassclef-configs.jsonc` defaults to `false` per ADR-049. Adopters who do not set it see no behavior change from the new scorer stack. Default-off preserves adopter contract.
 - Scope spans Longrun 2 scorer stack Steps 2a-2g (except 2e, deferred). Follow-on upstream tickets open: `#2225` (Ogilvy mechanization), `#2227` (shorthand inside appositive).
-- Upstream release page: https://github.com/sunj-labs/bassclef/releases/tag/v1.10.0
-- Upstream PR: `bassclef-upstream#2228` (release notes merged on upstream main).
-- Public PR: `sunj-labs/bassclef#1538`.
+- Upstream release page: https://github.com/sunj-labs/bassclef/releases/tag/v1.10.1
+- Upstream PRs: `bassclef-upstream#2228` (v1.10.0 release notes) + `bassclef-upstream#2229` (v1.10.1 hotfix).
+- Public PRs: `sunj-labs/bassclef#1538` (v1.10.0) + `sunj-labs/bassclef#1539` (v1.10.1).
 
 ## [1.9.15] - 2026-10-12
 ### Added
