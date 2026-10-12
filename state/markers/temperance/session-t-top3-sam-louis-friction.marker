@@ -1,0 +1,21 @@
+# Temperance marker — session-t-top3-sam-louis-friction
+
+- date: 2026-10-12
+- scope: orchestrator-gated top-3 cli-session items for Sam/Louis first-5-10-min friction
+- tasks:
+  1. Verify cli#101 /onboard-repo returning-adopter cure vs live SKILL (~10 turns)
+  2. Verify + close duplicates: cli#108 (upstream#1719 CLOSED), cli#105-partA (upstream#1732 CLOSED), cli#107 (upstream#1728 umbrella) (~10 turns)
+  3. Diagnose cli#432 /state-a-problem brief 120s timeout per 4 Peirce hypotheses (~20-40 turns)
+
+## 6 answers
+
+0. RIGHT THING? Yes. Operator ran /eisenhower against Sam/Louis friction goal; hard audit against v1.9.6 cures confirmed these 3 are cli-side owed.
+1. SIMPLEST? Yes. Each task is verify-first, cure-only-if-still-broken. No speculative work.
+2. BRUTE FORCE? No. Read SKILL body + reproduce vs live install, then decide.
+3. BLAST RADIUS? Low per task. Verify = read-only. Close duplicates = ticket state only. /state-a-problem diagnose = read-only until repro confirms class.
+4. VERIFICATION? Each task has an explicit falsifier: #101 cured if first-run greeting routes to a safe branch; duplicates closed if live grep confirms cure; #432 class pinned by `--timeout 300` repro.
+5. REVERSIBLE? Yes — all three are investigative. Any cure is a separate PR with its own temperance + loop.
+
+## Drift-trigger
+
+If Task 1 opens a scope >30 turns (actual cure needed, not just verify), STOP and reshape. Operator picks whether to split into separate goal or continue.

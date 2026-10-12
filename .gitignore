@@ -89,6 +89,9 @@ coverage/
 
 # docker-smoke local run output (bind-mount landing)
 harness-out/
+
+# Live-driver captures from scripts/smoke-drive-*.sh — local only
+docs/smoke-captures/
 # >>> bassclef-sync managed symlinks (do not edit) >>>
 CLAUDE.md.bak.*
 # <<< bassclef-sync managed symlinks <<<
