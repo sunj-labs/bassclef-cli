@@ -191,6 +191,31 @@ fi
 
 echo ">>> ${SCRIPT_NAME} starting (version=${VERSION} workdir=${WORKDIR})" >&2
 
+# Preflight: warn if prior test repos exist and cleanup was not requested.
+# cli#434 cure — accumulated test repos cause "name already exists"
+# collisions during /onboard-repo Phase 2 GH-create step. Pre-smoke runs
+# landed on bassclef-smoke-test-4 after -1/-2/-3 were taken by prior runs.
+# Surfaces the pollution before the destructive steps so the operator can
+# re-run with --delete-github (or --purge-adopter) and start clean.
+if [ "$DELETE_GITHUB" -eq 0 ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  gh_user_check="$(gh api user --jq .login 2>/dev/null || true)"
+  if [ -n "$gh_user_check" ]; then
+    prior_repos="$(gh repo list "$gh_user_check" --limit 100 --json nameWithOwner 2>/dev/null \
+      | jq -r ".[] | select(.nameWithOwner | test(\"${GH_PATTERN}\")) | .nameWithOwner" 2>/dev/null \
+      | head -5)"
+    if [ -n "$prior_repos" ]; then
+      prior_count="$(printf '%s\n' "$prior_repos" | wc -l | tr -d ' ')"
+      echo >&2
+      echo "⚠ ${SCRIPT_NAME}: found ${prior_count}+ prior test repos matching '*${GH_PATTERN}*' on your gh account:" >&2
+      printf '    %s\n' $prior_repos >&2
+      echo >&2
+      echo "  /onboard-repo Phase 2 will hit 'name already exists' and iterate -2/-3/-4..." >&2
+      echo "  To start clean: re-run with --delete-github (or --purge-adopter for full reset)." >&2
+      echo >&2
+    fi
+  fi
+fi
+
 # Step 0: optional upstream PAT install.
 # Fires before the destructive steps so the operator sees the result up front.
 # Reads from env var BASSCLEF_UPSTREAM_PAT (set before the curl pipe so the
@@ -323,10 +348,18 @@ mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 
 # Step 5: git init with inline identity (cold profiles may lack global config).
+# Identity uses GitHub noreply shape so cold-adopter smoke runs see a
+# commit author that matches what a real adopter would carry post-`gh auth
+# login`. Prior fixture used `smoke <smoke@local>` which read as "test
+# scaffolding, swap me before committing real work" and triggered an identity
+# prompt mid-/onboard-repo flow. The noreply shape lets the agent treat the
+# fixture commit as a realistic prior commit instead. Per cli#435.
 if [ ! -d .git ]; then
   git init -q
-  GIT_AUTHOR_NAME=smoke GIT_AUTHOR_EMAIL=smoke@local \
-  GIT_COMMITTER_NAME=smoke GIT_COMMITTER_EMAIL=smoke@local \
+  GIT_AUTHOR_NAME="Cold Adopter Test" \
+  GIT_AUTHOR_EMAIL="cold-adopter-test@users.noreply.github.com" \
+  GIT_COMMITTER_NAME="Cold Adopter Test" \
+  GIT_COMMITTER_EMAIL="cold-adopter-test@users.noreply.github.com" \
   git commit --allow-empty -m "chore: nuke-and-fresh-install fixture" -q
 fi
 

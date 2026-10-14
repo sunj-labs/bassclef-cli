@@ -94,6 +94,14 @@ git init -q
 git config user.email "onboard-smoke@harness.local"
 git config user.name "Onboard Smoke Harness"
 
+# cli #436 cure — switch off main before firing /onboard-repo. Phase 0 of
+# /onboard-repo refuses to run on main (substrate scaffolding goes through
+# a PR, not a direct commit). Without this, every live-tier smoke run fails
+# at Phase 0 with ".claude/settings.json missing" because the skill never
+# got past the main-branch guard. Branch name matches the one /onboard-repo
+# itself proposes in its remediation output.
+git checkout -q -b chore/bassclef-bootstrap
+
 # cli #223 cure — make bassclef skills + rules visible in the scratch dir's
 # project scope. Otherwise Claude replies "no /onboard-repo skill registered"
 # because npm install of @thebassclef/lite dual-writes hooks to ~/.claude/hooks

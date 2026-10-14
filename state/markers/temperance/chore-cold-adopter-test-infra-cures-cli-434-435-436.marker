@@ -1,0 +1,13 @@
+# Temperance marker — cli#434 + cli#435 + cli#436 bundled cures
+
+date: 2026-10-13
+branch: chore/cold-adopter-test-infra-cures-cli-434-435-436
+scope: three small cli-local cures from v1.9.16 cold-adopter smoke review
+  - cli#434: nuke-and-fresh-install teardown deletes created GH repos
+  - cli#435: fixture smoke identity unseed (noreply shape) so /onboard-repo preflight can run
+  - cli#436: smoke-drive-onboard-repo creates chore/bassclef-bootstrap branch after git init
+right-thing: all three gate the Shape e rollout per upstream#2242 ADR; must land before clean-room runner (cli-local infra work)
+simplest-correct: 3 narrow edits — one per driver/fixture
+brute-force-check: no (operator directed; each cure is a one-concept change)
+blast-radius: cli test infra only; no adopter contract change; v1.9.16 already shipped
+verification: run existing scripts/tests/* against the branch; expect same GREEN; new behavior catches would need cold-adopter smoke to verify (next release cycle)
