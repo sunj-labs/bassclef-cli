@@ -1,8 +1,8 @@
 ---
-id: 2026-10-11T21-53-43Z-session-rescue
-created_by_session: session-end-hook-2026-10-11T21-53-43Z
+id: 2026-10-17T22-26-51Z-session-rescue
+created_by_session: session-end-hook-2026-10-17T22-26-51Z
 created_in: desktop
-created_at: 2026-10-11T21:53:43Z
+created_at: 2026-10-17T22:26:51Z
 pending_action: resume-unfinished-session
 requires_capability: [git-push, network]
 priority: high
@@ -20,7 +20,9 @@ This is the forward-pointer deferred-action entry per bassclef #226
 WS-3 — the next capable session picks up the unfinished work instead
 of silently losing it. Reasons flagged:
 
+- no chronicle written or updated in last 24h
 - uncommitted changes in working tree
+- whereami last_updated is 2026-10-11 (stale, not today/yesterday)
 
 Common triggers: context exhaustion, OS-level interruption, sandbox
 teardown, agent completed work but didn't run /session-end.
@@ -36,8 +38,8 @@ proceed.
 ## On completion
 
 - [ ] All flagged obligations resolved
-- [ ] `git mv "docs/deferred-actions/2026-10-11T21-53-43Z-session-rescue.md" "docs/deferred-actions/completed/2026-10-11T21-53-43Z-session-rescue.md"`
-- [ ] `git commit -m "chore: resolve session-rescue 2026-10-11T21-53-43Z"`
+- [ ] `git mv "docs/deferred-actions/2026-10-17T22-26-51Z-session-rescue.md" "docs/deferred-actions/completed/2026-10-17T22-26-51Z-session-rescue.md"`
+- [ ] `git commit -m "chore: resolve session-rescue 2026-10-17T22-26-51Z"`
 
 ## Cross-refs
 
