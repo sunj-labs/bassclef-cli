@@ -1,12 +1,12 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-10-18T12:30:00Z
+  at: 2026-10-18T13:30:00Z
   session: 2026-10-18-session-u-v1-9-18-release-cold-adopter-defects.md
 ---
 
 <!--
-operator_recap (Session U, 2026-10-18T12:30Z): @thebassclef/lite@1.9.18 LIVE on npm — first release bundling bassclef v1.11.0 end-to-end. Closed cli#188 (dynamic substrate pin) + cli#438 (pin bump) + cli#439 (dev-repo bassclef-version.json) + cli#180 + cli#209. Three PRs merged (#440, #442, #443) + one PR open (#449 ADR-012). Cold-adopter smoke caught 6 defects CI missed — filed as cli#444 + upstream#2253-#2257 + 4 cli follow-ons (#445-#448) addressing the gap class. Statusline + version drift class fully cured end-to-end: dev-repo + tarball + cold-adopter workdir all read v1.11.0 from the pinned source.
+operator_recap (Session U + v1.11.1 peer notification, 2026-10-18T13:30Z): @thebassclef/lite@1.9.18 LIVE on npm bundling bassclef v1.11.0. Peer bassclef-upstream-c7 shipped bassclef v1.11.1 within hours, curing all 5 upstream defects filed from cold-adopter smoke (upstream#2253-#2257). Session V plan at `docs/next-session-plan-2026-10-18-session-v-v1.9.19-republish.md` prescribes republish bundling v1.11.1 as @thebassclef/lite@1.9.19 + post-publish cold-adopter smoke verification. Branch main at `31d2c16`. Open PR #449 (ADR-012). cli follow-ons #441 (bump postcondition), #444-#448 (gap-class closers) await scheduling.
 -->
 
 
