@@ -1,0 +1,5 @@
+# Temperance marker — Session V v1.9.19 republish
+- date: 2026-10-18
+- branch: feat/v1.9.19-bump-v1.11.1 (pending creation)
+- scope-decision: Ship v1.9.19 bundling bassclef v1.11.1 to npm. Right thing — adopters stop hitting cured bugs. Right way — single atomic PR per the Session U proven path.
+- drift-trigger: Any temptation to fold cli#441 bump-postcondition cure OR cli#444 nuke-script cure OR touch any substrate code OR cure new defects surfaced mid-flight. STOP and defer to v1.9.20 or later. Scope add is explicit "tests re-run" only.

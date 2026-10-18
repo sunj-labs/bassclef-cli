@@ -1,0 +1,9 @@
+# Luminary marker — Session V v1.9.19 republish
+- date: 2026-10-18
+- branch: feat/v1.9.19-bump-v1.11.1
+- lead: linus-torvalds
+  rationale: We don't break adopters. v1.11.1 cures 5 cold-adopter defects. Publish latency = adopter pain. Lead lens for ship-the-cures discipline.
+- supporting:
+  - tony-hoare — Bundle sync is a pre/postcondition contract. .bassclef-pin reads v1.11.1 (precondition); dist/lite/bassclef-version.json reads v1.11.1 (postcondition). Verify both before publish.
+  - michael-nygard — Release cycle shape mirrors Session U (v1.9.18). Stability pattern = proven path.
+  - michael-feathers — Characterization tests pin REAL bundle shape; re-run full tier catches any regression from v1.11.0 → v1.11.1 drift.
