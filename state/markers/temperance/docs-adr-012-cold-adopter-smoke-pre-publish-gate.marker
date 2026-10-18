@@ -1,0 +1,4 @@
+# Temperance marker — ADR-012 draft
+- scope-decision: Draft ADR-012 (status: proposed) formalizing cold-adopter smoke as a pre-publish gate. Design doc only; mechanical implementation tracked at cli#447. No code change.
+- lead-luminary: linus-torvalds (adopter contract) + michael-feathers (characterization at adopter boundary).
+- blast-radius: low — doc only, status proposed.
