@@ -1,0 +1,10 @@
+# Temperance marker — feat/v1.9.18-bump
+- date: 2026-10-18
+- branch: feat/v1.9.18-bump
+- scope-decision: Cut v1.9.18 bundling cli#188 + cli#438 + cli#439 + andon-cure (PR #442). Preserves v1.9.17 as the historical "would have shipped" tag that tripped andon. v1.9.18 is the first version to actually reach npm with the v1.11.0 substrate.
+- drift-trigger: hard-floor publish-pipeline edits beyond the one-line pin advance; any auth/security/schema surface.
+- blast-radius: low — bump only; code already landed via #440 + #442.
+- verification: npm run bump patch succeeds; full test matrix green; local pack+andon clean; publish succeeds on CI.
+- reversible: yes — can delete tag/release, revert bump commit.
+- lead-luminary: linus-torvalds (ship the cure to adopters now; v1.11.0 content has waited long enough).
+- supporting: tony-hoare (postcondition — pin advance surfaces current substrate), michael-nygard (clean release cycle).

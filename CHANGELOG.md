@@ -24,6 +24,19 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.18] - 2026-10-18
+### Added
+
+### Changed
+
+### Fixed
+
+- **Andon-cure for v1.11.0 bundle.** The v1.9.17 publish workflow (run 39084375792) andon-tripped on `you@example.com` in bundled `dist/lite/.claude/skills/onboard-repo/SKILL.md:419`. bassclef v1.11.0 added git-identity preflight prose using git's canonical doc example; cli#188 dynamic pin surfaced the content for the first time. One per-file FILE_ALLOWLIST entry in `scripts/andon-scan.mjs` for `/you@example\.com/` in the onboard-repo SKILL cures the trip without weakening leak-detection in other shipped files. ADR-004 §Ordered steps check 9 amended inline (RFC 2606 reserved-placeholder carve-out). 2 new vitest cases pin the entry. PR #442, SHA 2b5d1658.
+
+### Notes
+
+- **v1.9.17 was tagged but never shipped to npm.** The GitHub release exists at `v1.9.17` (commit `4af3b11`); the publish workflow failed at the andon step before the publish job could run. v1.9.18 ships the same substrate bundle as v1.9.17 plus the andon-cure needed for the publish to actually succeed. First npm release carrying the v1.11.0 bundle + cli#188 dynamic-pin cure.
+
 ## [1.9.17] - 2026-10-17
 ### Added
 
