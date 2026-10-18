@@ -24,6 +24,32 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.17] - 2026-10-17
+### Added
+
+- `.bassclef-pin` at repo root — single-source-of-truth for the bassclef substrate tag the publish workflow checks out. Closes cli#188 recommended shape B. The sync PR that advances bundled substrate now advances this file instead of three places in `.github/workflows/publish.yml`.
+- `bassclef-version.json` at bassclef-cli repo root — closes cli#439. Statusline resolver's first non-env candidate (`$cwd/bassclef-version.json`) wins; dev-repo statusline stops depending on sibling freshness or adjacent checkouts in HOME. Verified: statusline reads `v1.11.0` from local file.
+- `scripts/sync-bassclef-version.mjs` — helper that reads `.bassclef-pin` + sibling `~/src/sunj-labs/bassclef/bassclef-version.json` and writes the dev-repo root copy. Idempotent. Env `BASSCLEF_SIBLING_ROOT` overrides sibling path.
+- 14 new Tier 0 tests: `scripts/tests/bassclef-pin.test.sh` (8/8) + `scripts/tests/sync-bassclef-version.test.sh` (6/6).
+- 2 new use case docs: `docs/use-cases/UC-script-188-dynamic-substrate-pin.md`; `docs/use-cases/UC-script-439-dev-repo-version-file.md` (filed under cli#439).
+
+### Changed
+
+- Bassclef substrate bundle refreshed from `v1.10.1` to `v1.11.0` via `.bassclef-pin` bump. Closes cli#438 at root. Three substantive adopter-visible fixes in v1.11.0 ship to adopters:
+  - `/onboard-repo` preflight cluster (bassclef-upstream#2248): closes 6 cold-adopter friction tickets (#2232 + #2233 + #2234 + #2235 + #2236 + #2237). New Phase 0 subsections (CLI check + OAuth probe + git identity preflight). Phase 1.0 writes temperance marker up-front. Phase 1.0a repo-name collision helper. Phase 1.2 free + private preflight. Phase 2.0 VALUE-first opt-in prompt pattern.
+  - New hook `.claude/hooks/pre-push-shellcheck.sh` (bassclef-upstream#2108). PreToolUse Bash matcher on `git push`. Scans staged `.sh` files; BLOCKs on un-allowlisted shellcheck findings. 17 Tier 0 tests pass. Lite manifest advances 456 → 457 entries.
+  - `lib/tier-dependency-audit.sh` `walk_graph_bfs_inbound` rewritten from O(N × M) to O(N + M). 11000-node BFS now completes in under 1 second (was >120 seconds). 53/53 existing lib tests still pass. Unblocks the tier-graph-closure sanity sweep that forced `SKIP_TIER_GRAPH_CLOSURE_CHECK=1` on prior releases.
+- `.github/workflows/publish.yml` — pin lifted from 3 hardcoded YAML sites to 1 file (`.bassclef-pin`). Both `checks` + `publish` jobs read the file via a new `Read .bassclef-pin` step and reference `${{ env.BASSCLEF_PIN }}` in the sibling checkout. Assertion step compares resolved tag against `$BASSCLEF_PIN` (not a hardcoded string). ADR-004 + ADR-007 honored; §Acceptance delta of ADR-007 carries a one-line amendment pointing at `.bassclef-pin`.
+
+### Fixed
+
+- Three cold-adopter test infra cures from the 2026-10-13 smoke on `cold-adopter-1@<machine>`. `scripts/smoke-drive-onboard-repo.sh` now creates branch `chore/bassclef-bootstrap` after `git init` so `/onboard-repo` Phase 0 can proceed (cli#436). `scripts/nuke-and-fresh-install.sh` seeds the fixture commit identity as `cold-adopter-test@users.noreply.github.com` to match GitHub noreply shape (cli#435) and fires a preflight WARN when prior test repos exist on the gh account without `--delete-github` (cli#434). No adopter contract change; cli test infra only. PR #437, SHA 6df608f.
+
+### Notes
+
+- Luminary rotation — Linus Torvalds (we-don't-break-adopters at the publish-pipeline surface — one release cycle fixes the drift AND the structural source so cold adopters never see v1.8.0 bundled again). Supporting: Tony Hoare (pre/postcondition on pin file + version file consistency); David Parnas (information hiding — publish workflow doesn't know what version ships, pin owns that fact); Michael Nygard (single source of truth); Michael Feathers (characterization tests on workflow + file shape); Kent Beck (Tier 0 strict TDD).
+- Patch-level bump chosen — `.bassclef-pin` + root `bassclef-version.json` are cli-internal; adopter contract stays `npm install -g @thebassclef/lite && bassclef init`.
+
 ## [1.9.16] - 2026-10-13
 ### Added
 

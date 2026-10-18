@@ -1,0 +1,12 @@
+# Temperance marker — cli#188 + cli#439 + cli#438 v1.11.0 bundle
+- date: 2026-10-18
+- branch: feature/cli-188-dynamic-pin
+- scope-decision: Make the publish-workflow substrate pin dynamic via `.bassclef-pin` (cli#188 shape B); bump pin to v1.11.0 (closes cli#438 at root); write bassclef-version.json at dev-repo root sourced from the same pin (cli#439). One release cycle, three closures. Durable (not patch) by lifting the pin to a single source of truth.
+- drift-trigger: hard ceilings — auth, schema, security, prod-deploy; scope creep into cli#290/cli#180/cli#209 retroactive triage (deferred to post-publish closeout sweep); npm publish stays operator-gated per project CLAUDE.md.
+- right-thing: operator-confirmed priority; peer-confirmed need (bassclef v1.11.0 live, cli#438 at root)
+- simplest: shape B from cli#188 ticket body (one file + 3 workflow edits + 1 Tier 0 test); smaller than alternatives A (bassclef-version.json read) and C (package.json field)
+- blast-radius: medium — publish.yml changes are adopter-observable (how we ship); mitigation = Tier 0 test + operator PR review + operator-gated publish
+- verification: new Tier 0 test for pin shape + full test matrix pre-PR + operator PR review + post-publish tarball verify
+- reversible: yes — revert the PR; pin file deletion + workflow revert = back to v1.8.0 hardcoded pin
+- lead-luminary: linus-torvalds (we don't break adopters — pin bump + structural fix in one release cycle so cold adopters never see v1.8.0 bundled again)
+- supporting: tony-hoare (precondition contract — pin file presence; Tier 0 test pins behavior); michael-feathers (characterization test on workflow shape); kent-beck (Tier 0 strict-TDD on new primitive)
