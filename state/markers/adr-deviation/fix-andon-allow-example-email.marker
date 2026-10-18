@@ -1,0 +1,6 @@
+# ADR-deviation marker — fix/andon-allow-example-email
+- date: 2026-10-18
+- branch: fix/andon-allow-example-email
+- adr_governing: ADR-004 (publish pipeline safety contract)
+- outcome: ADR-honored
+- rationale: Change adds a per-file + per-pattern allowlist entry — explicitly supported mechanism per ADR-004 §Ordered steps check 9 + the FILE_ALLOWLIST surface in `scripts/andon-scan.mjs` lines 65-74. Comment at line 64 reads: "Baseline allow list — regexes that are allowed to match ANYWHERE in specific shipped files. Kept narrow. Additions require an ADR amendment." This change ships both the entry AND the ADR-004 §Ordered steps amendment that documents the entry's rationale. No decision reversal; the allowlist shape IS the ADR-sanctioned extension point for canonical placeholder content.

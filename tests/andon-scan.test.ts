@@ -26,6 +26,8 @@
 // [x] T11: CODE_OF_CONDUCT.md allows conduct@bassclef.dev (per-file allowlist)
 // [x] T12: CODE_OF_CONDUCT.md does NOT allow hello@bassclef.dev (regex-specific)
 // [x] T13: promote SKILL.md allows hello@bassclef.dev (per-file allowlist)
+// [x] T13a: onboard-repo SKILL.md allows you@example.com placeholder (RFC 2606)
+// [x] T13b: onboard-repo SKILL.md does NOT allow other emails (regex-specific)
 // [x] T14: intentionality anchor — filename mention in prose passes (accepted risk)
 //
 // Test fixtures build the offending paths from string parts so the
@@ -127,6 +129,24 @@ describe('andon-scan scanContent', () => {
     const content = '| lite (npm-shipped) | `email:hello@bassclef.dev` (or your address) |';
     const hits = scanContent('substrate/.claude/skills/promote/SKILL.md', content, []);
     expect(hits).toEqual([]);
+  });
+
+  it('T13a: onboard-repo SKILL.md allows you@example.com placeholder (RFC 2606; ADR-004 Amendment 2026-10-18)', () => {
+    // bassclef v1.11.0 /onboard-repo preflight cluster (upstream#2232)
+    // uses git's canonical doc example. Per ADR-004 §Ordered steps check 9
+    // Amendment 2026-10-18, the per-file allowlist carries this one pattern.
+    const content = 'git config --global user.email "you@example.com"';
+    const hits = scanContent('dist/lite/.claude/skills/onboard-repo/SKILL.md', content, []);
+    expect(hits).toEqual([]);
+  });
+
+  it('T13b: onboard-repo SKILL.md does NOT allow other emails (regex-specific)', () => {
+    // Per-file allowlist for onboard-repo is scoped to you@example.com only.
+    // A real-looking address in this file should still trip.
+    const content = 'contact leaked-maintainer@private.example.org for help';
+    const hits = scanContent('dist/lite/.claude/skills/onboard-repo/SKILL.md', content, []);
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0].term).toContain('leaked-maintainer@private.example.org');
   });
 
   it('T14: intentionality anchor — filename mention in prose passes (accepted risk)', () => {
