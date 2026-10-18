@@ -1,12 +1,14 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-10-18T13:30:00Z
-  session: 2026-10-18-session-u-v1-9-18-release-cold-adopter-defects.md
+  at: 2026-10-18T16:35:00Z
+  session: 2026-10-18-session-v-v1-9-19-republish.md
 ---
 
 <!--
-operator_recap (Session U + v1.11.1 peer notification, 2026-10-18T13:30Z): @thebassclef/lite@1.9.18 LIVE on npm bundling bassclef v1.11.0. Peer bassclef-upstream-c7 shipped bassclef v1.11.1 within hours, curing all 5 upstream defects filed from cold-adopter smoke (upstream#2253-#2257). Session V plan at `docs/next-session-plan-2026-10-18-session-v-v1.9.19-republish.md` prescribes republish bundling v1.11.1 as @thebassclef/lite@1.9.19 + post-publish cold-adopter smoke verification. Branch main at `31d2c16`. Open PR #449 (ADR-012). cli follow-ons #441 (bump postcondition), #444-#448 (gap-class closers) await scheduling.
+operator_recap (Session V closeout, 2026-10-18T16:35Z): @thebassclef/lite@1.9.19 LIVE on npm bundling bassclef v1.11.1. Sigstore logIndex 3313776506; published at 2026-10-18T16:26:25Z. PR #451 merged (`bc38e9ac`); release at https://github.com/sunj-labs/bassclef-cli/releases/tag/v1.9.19. Tarball bassclef-version.json verified reads v1.11.1 (release_sha 3b0203d5). 4 upstream cold-adopter cures delivered to adopters (upstream#2253 pre-push-shellcheck install-written-paths consultation + #2254 state-marker SKIP bypass + #2255 oauth probe gtimeout fallback + #2256 Concise preamble + #2257 auto-save fallback; plus housekeeping #2261). Session V turn count ~45 (budget 80-120; came in under). Full tier GREEN: vitest 525/525 + typecheck + install harness 11/11 + 3 Tier 0 (28/28) + pack+andon clean + fast shell 14/14 + CI 3/3 (docker 11m58s + test 38s + ADR-059 10s) = 578 local + 3 CI. Loop discipline: temperance + luminary + pre-mortem light + /loop iteration 1 (one RED on cli#441 postcondition — deferred). Chronicle at docs/chronicle/2026-10-18-session-v-v1-9-19-republish.md. Risk ledger at docs/risk-ledgers/2026-10-18-session-v-v1.9.19.md. Branch main at `bc38e9ac`. Open PR #449 (ADR-012; strategic; next-session scheduling). cli#441 fired 2x now (defer-count=2 across Sessions U + V) — near-term cycle candidate. cli#444-#448 await scheduling. Dependabot #423 (node 25-slim) awaits triage. **Next-session PRIMARY**: operator or peer-coord cold-adopter smoke on `giveisusfree` post-publish per plan doc Ask 3. Expected: all 4 upstream cures land clean.
+
+prior_operator_recap: Session U + v1.11.1 peer notification, 2026-10-18T13:30Z — @thebassclef/lite@1.9.18 LIVE on npm bundling bassclef v1.11.0. Peer bassclef-upstream-c7 shipped bassclef v1.11.1 within hours, curing all 5 upstream defects filed from cold-adopter smoke (upstream#2253-#2257). Session V plan at `docs/next-session-plan-2026-10-18-session-v-v1.9.19-republish.md` prescribed republish bundling v1.11.1 as @thebassclef/lite@1.9.19 + post-publish cold-adopter smoke verification. Branch main at `31d2c16`. Open PR #449 (ADR-012). cli follow-ons #441 (bump postcondition), #444-#448 (gap-class closers) await scheduling.
 -->
 
 
