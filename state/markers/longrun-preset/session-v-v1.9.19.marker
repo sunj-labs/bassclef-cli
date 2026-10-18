@@ -1,0 +1,4 @@
+# Session V preset marker
+- date: 2026-10-18
+- preset: converged
+- trigger: plan-doc docs/next-session-plan-2026-10-18-session-v-v1.9.19-republish.md

@@ -24,6 +24,22 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.19] - 2026-10-18
+### Added
+
+### Changed
+
+- Bassclef substrate bundle refreshed from `v1.11.0` to `v1.11.1` via `.bassclef-pin` bump. Carries 4 upstream cures filed from the Session U cold-adopter smoke on `giveisusfree`:
+  - `pre-push-shellcheck.sh` consults `lib/install-written-paths.sh` and honors a state-marker SKIP bypass (bassclef-upstream#2253 + #2254). First `git push` after `bassclef init` no longer BLOCKs on 72 shellcheck findings in bassclef-shipped `.sh` files.
+  - `/onboard-repo` OAuth preflight uses `claude-oauth-probe.sh` with `gtimeout`/shim fallback (bassclef-upstream#2255). Reports OAUTH_OK on macOS without gnu coreutils.
+  - `auto-save-schedule.sh` probes `$CLAUDE_PROJECT_DIR/.claude/hooks/` first (bassclef-upstream#2257). Installer succeeds without a `~/src/sunj-labs/bassclef` sibling.
+  - `/onboard-repo` Phase 2.7 Concise prompt carries a preamble + default flipped Y → n (bassclef-upstream#2256). Opt-in stays explicit.
+  - Trailing housekeeping — `~` → `$HOME` prose cleanup (bassclef-upstream#2261).
+
+### Fixed
+
+### Notes
+
 ## [1.9.18] - 2026-10-18
 ### Added
 

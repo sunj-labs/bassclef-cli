@@ -1,0 +1,8 @@
+# Pre-mortem light marker — Session V v1.9.19 republish
+- date: 2026-10-18
+- branch: feat/v1.9.19-bump-v1.11.1
+- mode: light (3 lenses × 5 risks)
+- lenses: linus-torvalds, tony-hoare, michael-nygard
+- ledger: docs/risk-ledgers/2026-10-18-session-v-v1.9.19.md
+- folded: L1+L2 (sibling verify) + L3+H2+H5 (pack+andon + explicit postcondition grep) + H3 (bump-postcondition grep) + N5 (temperance drift-trigger)
+- deferred: cli#441 cure (file follow-up only if H3 fires) + Dependabot #423 + cold-adopter smoke (Ask 3; post-publish)
