@@ -1,0 +1,6 @@
+# ADR-deviation marker — feat/v1.9.18-bump
+- date: 2026-10-18
+- branch: feat/v1.9.18-bump
+- adr_governing: ADR-004 (publish pipeline) + ADR-007 (install harness)
+- outcome: ADR-honored
+- rationale: Bump + release cycle; no mechanism change. v1.9.18 ships the same substrate as the tagged-but-unpublished v1.9.17 plus the andon-cure merged in PR #442. No ADR semantics touched.
