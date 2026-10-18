@@ -1,0 +1,6 @@
+# ADR-deviation marker — feature/cli-188-dynamic-pin
+- date: 2026-10-18
+- branch: feature/cli-188-dynamic-pin
+- adr_governing: ADR-004 (publish pipeline safety contract) + ADR-007 (install harness contract)
+- outcome: ADR-honored
+- rationale: Both ADRs mandate "pin substrate at checkout time so bundles are reproducible." The decision stays honored. This change refactors the MECHANISM — the pin moves from a hardcoded YAML value to a single-source file at repo root. Deterministic bundle at a pinned tag is still the invariant. ADR-007 §Acceptance delta carries a one-line amendment to point at the new file location; no decision reversal.
