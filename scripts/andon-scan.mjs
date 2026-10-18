@@ -71,6 +71,12 @@ const FILE_ALLOWLIST = [
   // architect-review 2026-08-31 (Parnas information hiding).
   { file: 'CODE_OF_CONDUCT.md', patterns: [/conduct@bassclef\.dev/] },
   { file: '.claude/skills/promote/SKILL.md', patterns: [/hello@bassclef\.dev/] },
+  // bassclef v1.11.0 /onboard-repo preflight cluster (upstream#2232) uses
+  // git's canonical doc example `you@example.com` to show adopters the
+  // git identity command shape. `example.com` is RFC 2606 reserved — a
+  // placeholder, not a routable address. Per ADR-004 §Ordered steps
+  // check 9 amendment 2026-10-18.
+  { file: '.claude/skills/onboard-repo/SKILL.md', patterns: [/you@example\.com/] },
 ];
 
 // Scan the shipped file's PATH itself. Returns hits when the path

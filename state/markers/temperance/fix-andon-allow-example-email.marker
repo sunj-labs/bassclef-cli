@@ -1,0 +1,10 @@
+# Temperance marker — fix/andon-allow-example-email
+- date: 2026-10-18
+- branch: fix/andon-allow-example-email
+- scope-decision: Add FILE_ALLOWLIST entry in scripts/andon-scan.mjs for `you@example.com` in the bundled onboard-repo SKILL. One-line ADR-004 amendment documenting RFC 2606 reserved-domain acceptance in instructional prose. Needed to unblock v1.9.17 publish (CI run 39084375792 andon TRIPPED). Follows the prior andon per-file-allowlist precedent documented in `state/markers/*/fix-andon-scan-path-check-plus-per-file-allowlist.marker` (same discipline shape).
+- drift-trigger: hard-floor publish-pipeline edits beyond this one entry; scope creep into widening TERMS or path discipline; any auth or security surface.
+- blast-radius: medium — publish-pipeline safety primitive; narrow per-file + per-pattern scope keeps it tight; ADR amendment documents the carve-out so future readers see the rationale.
+- verification: vitest for the new allowlist entry; `npm pack --dry-run --json | node scripts/andon-scan.mjs` locally → exit 0.
+- reversible: yes — delete FILE_ALLOWLIST entry + revert ADR amendment.
+- lead-luminary: jerome-saltzer-and-michael-schroeder (economy of mechanism — one narrow entry per file, no broadening of global TERMS).
+- supporting: linus-torvalds (adopter contract — publish must proceed so v1.11.0 cures land), david-parnas (per-file discrimination keeps knowledge local).

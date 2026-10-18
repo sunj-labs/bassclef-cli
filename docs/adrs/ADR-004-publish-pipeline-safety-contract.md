@@ -249,6 +249,39 @@ covers the sister class — silent-empty tarball. Together, both cures
 close the two failure classes that surfaced during the 0.1.0 launch
 attempt.
 
+**Amendment 2026-10-18 — RFC 2606 reserved placeholder emails in instructional prose (cli#188 follow-on):**
+
+Before this amendment, the generic email regex at `scripts/andon-scan.mjs:52`
+caught any email anywhere in shipped content. When cli#188 shipped the
+dynamic substrate pin and v1.9.17 bundled bassclef v1.11.0 for the first
+time, the pin advance surfaced git-identity preflight prose in the
+bundled `/onboard-repo` SKILL body. That prose uses the canonical git
+documentation example `you@example.com` to show adopters the shape of
+`git config --global user.email`. Publish workflow run 39084375792
+andon-tripped on this exact string.
+
+Per diagnose (`state/markers/diagnose/fix-andon-allow-example-email.marker`),
+`example.com` is RFC 2606 reserved — a placeholder, not a routable
+address. The cure follows the pre-existing per-file FILE_ALLOWLIST
+pattern: one new entry allowing `/you@example\.com/` in
+`.claude/skills/onboard-repo/SKILL.md` only. The global TERMS list
+stays unchanged; email-leak detection in all other shipped files
+holds.
+
+**Accepted risk:** a different file bundling the same placeholder
+would need its own FILE_ALLOWLIST entry. Alternative was widening the
+global TERMS regex to exclude `@example.com` / `@example.org` /
+`@example.net` / `.example` TLDs; rejected because narrower per-file
+discrimination keeps the knowledge local to the file that carries the
+placeholder (Parnas information hiding). Vitest coverage pins the
+entry per `tests/andon-scan.test.ts`.
+
+**Sister concern:** the dynamic pin (cli#188) unmasked a latent gap in
+andon's term list. `.claude/rules/sibling-smoke-after-substrate-change.md`
+is the discipline that catches this class pre-publish; a follow-on
+ticket tracks extending sibling smoke to cover publish-pipeline checks
+against the current substrate before the pin advances.
+
 **tier-filter.mjs:**
 
 - For each file listed as shipped whose extension is `.md`, `.mdx`,
