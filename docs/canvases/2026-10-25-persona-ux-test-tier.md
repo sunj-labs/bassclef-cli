@@ -65,53 +65,53 @@ cli#448 proposes three insertion points. They **ride together** — each covers 
 
 Steps compound. Each produces an artifact the next consumes.
 
-### WU-0 — prep · scope + personas pinned
+### Step 0 — prep · scope + personas pinned
 
 - **Produces**: this canvas + personas enumerated (Sam cold-adopter + Louis daily operator + Jamie prototype loop).
 - **Consumes**: session-start.
 - **Risk**: 🟢 low — scope read + canvas author.
 - **Time**: 10-20 turns.
 
-### WU-1 — Prong B first (mechanical floor; cheapest)
+### Step 1 — Prong B first (mechanical floor; cheapest)
 
 - **Produces**: `.claude/hooks/pre-commit-naked-prompt-check.sh` + Tier 0 tests + settings.json wire.
-- **Consumes**: WU-0 persona pins + `.claude/rules/plain-english-discipline.md` (grade-8 wordlist).
+- **Consumes**: Step 0 persona pins + `.claude/rules/plain-english-discipline.md` (grade-8 wordlist).
 - **Risk**: 🟢 low — pre-commit hook with regex. BLOCK radius = adopter can commit; WARN never blocks shipping.
 - **Why first**: closes the "naked Y/n" class in one commit. Mechanical floor compounds across every future SKILL edit.
 - **Time**: 30-50 turns.
 - **Luminary lead**: Kent Beck.
 
-### WU-2 — Prong A second (reviewer gate; per-PR judgment)
+### Step 2 — Prong A second (reviewer gate; per-PR judgment)
 
 - **Produces**: Reviewer agent amendment at `~/.claude/agents/reviewer.md` + checklist row + persona-context loader + marker contract (`state/markers/reviewer/<branch>.md` carries `persona_ux_review` field).
-- **Consumes**: WU-1 pre-commit hook (so reviewer runs **after** mechanical floor is clean) + persona files at `docs/personas/`.
+- **Consumes**: Step 1 pre-commit hook (so reviewer runs **after** mechanical floor is clean) + persona files at `docs/personas/`.
 - **Risk**: 🟡 med — reviewer agent extension touches cross-cutting discipline. Needs loop-discipline iteration 1.
 - **Why second**: builds on mechanical floor; adds judgment layer where tier-0 regex cannot reach.
 - **Time**: 50-80 turns.
 - **Luminary lead**: Alan Cooper + Donald Norman.
 
-### WU-3 — Prong C third (persona-UX fixture tier; most expensive)
+### Step 3 — Prong C third (persona-UX fixture tier; most expensive)
 
 - **Produces**: `scripts/tests/persona-ux/` directory with 3 fixture scripts (one per persona) + runner at `scripts/run-persona-ux.sh` + README naming the review protocol.
-- **Consumes**: WU-0 persona pins + bundled SKILL at `dist/lite/.claude/skills/onboard-repo/SKILL.md`.
+- **Consumes**: Step 0 persona pins + bundled SKILL at `dist/lite/.claude/skills/onboard-repo/SKILL.md`.
 - **Risk**: 🟡 med — fixture renders onboard flow; needs careful prompt capture + persona-context injection.
 - **Why third**: covers the semantic class that regex + reviewer alone miss. Lives beside tier-06 (interactive flow) — same CI schedule, different output format.
 - **Time**: 60-100 turns.
 - **Luminary lead**: Michael Feathers (characterization) + Alan Cooper (persona).
 
-### WU-4 — Backfill against the 4 Session U cures
+### Step 4 — Backfill against the 4 Session U cures
 
 - **Produces**: 4 persona-UX fixture outputs (one per cure) pinned at `state/persona-ux/baseline/`.
-- **Consumes**: WU-3 fixture tier + the 4 shipped v1.11.1 cured prompts.
+- **Consumes**: Step 3 fixture tier + the 4 shipped v1.11.1 cured prompts.
 - **Risk**: 🟢 low — characterization run against known-good state.
-- **Why**: establishes the baseline so WU-3 can detect drift in future releases. Closes the UX-quality column of the cure coverage matrix.
+- **Why**: establishes the baseline so Step 3 can detect drift in future releases. Closes the UX-quality column of the cure coverage matrix.
 - **Time**: 30-50 turns.
 - **Luminary lead**: Michael Feathers.
 
-### WU-5 — Retire the stale regression
+### Step 5 — Retire the stale regression
 
 - **Produces**: `smoke-drive-regression-onboard-free-tier-403.test.sh` updated to match current prose (bassclef-upstream#2235 wording), OR retired with ticket citation.
-- **Consumes**: WU-4 baseline (confirms the semantic coverage lives in Prong C now).
+- **Consumes**: Step 4 baseline (confirms the semantic coverage lives in Prong C now).
 - **Risk**: 🟢 low — one test file.
 - **Why last**: Session V surfaced that the regression's literals have drifted from the shipped SKILL prose. Fix the characterization pattern after Prong C can take over the semantic coverage.
 - **Time**: 10-20 turns.
@@ -121,7 +121,7 @@ Steps compound. Each produces an artifact the next consumes.
 
 1. **Does Prong C live as a shell script with Claude dispatch, or as a Node fixture?** Shell + Claude mirrors the existing smoke-drive-* pattern (familiar). Node fixture avoids Claude cost but asks a different question (what the SKILL body renders to, not what Claude says back).
 2. **Does the Reviewer gate (Prong A) auto-dispatch on PR open, or require operator `/code-review` invocation?** Auto fires on every matching PR; operator invocation keeps cost explicit.
-3. **Does WU-4 baseline capture happen inside this session chain, or get deferred until Prong C renders against each new release?** First path = canonical fixture snapshot; second = living characterization that updates per release.
+3. **Does Step 4 baseline capture happen inside this session chain, or get deferred until Prong C renders against each new release?** First path = canonical fixture snapshot; second = living characterization that updates per release.
 4. **Prong C persona set — just Sam, or Sam + Louis + Jamie?** Sam-only covers the cold-adopter surface (highest value). Full three personas cover daily-operator + prototype prose changes too (full coverage).
 
 ## Entry state for next session
@@ -129,7 +129,7 @@ Steps compound. Each produces an artifact the next consumes.
 Session V closeout artifacts:
 - v1.9.19 LIVE on npm; bundles bassclef v1.11.1.
 - 4 upstream cold-adopter cures delivered (upstream#2253 shellcheck, #2255 oauth probe, #2256 Concise preamble, #2257 auto-save; plus housekeeping #2261).
-- Full stack rerun: **49/50 PASS** in characterization mode (SMOKE_LIVE unset). 1 stale regression (free-tier-403) deferred to WU-5.
+- Full stack rerun: **49/50 PASS** in characterization mode (SMOKE_LIVE unset). 1 stale regression (free-tier-403) deferred to Step 5.
 - Open ticket: cli#448 (persona-driven UX review) — THIS canvas closes it.
 
 ## Refs
