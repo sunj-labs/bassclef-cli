@@ -1,0 +1,10 @@
+# Luminary marker — Session W Thread 1 (cli#444)
+- date: 2026-10-25
+- branch: fix/cli-444-purge-adopter-scope-hardstop
+- lead: linus-torvalds — the flag name is a promise. --purge-adopter says
+  "one-flag full reset". A run that skips deletes and reports success breaks
+  that contract. The lead lens verifies the ship at Step 5.5.
+- supporting: donald-norman — signifier plus feedback. Print the exact fix
+  command, not just the error. The adopter should not have to guess.
+- consulted: jerome-saltzer-and-michael-schroeder — fail-safe defaults.
+  Check the scope before any destructive step, not midway through.

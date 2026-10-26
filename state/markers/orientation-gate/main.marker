@@ -1,8 +1,9 @@
-# Orientation gate marker — Session J prep
-- date: 2026-10-05
+# Orientation-gate marker — Session W prep
+- date: 2026-10-25
 - branch: main
-- active_goal: Session J dynamic driver integration bridge
-- parent_chain: cli#375 Tier A roadmap → cli walking skeleton (goal 2026-09-26d) → cli#254 OOAD scaffold
-- parent_drivers: honest adopter simulation; walking skeleton walks at every layer; mocks forbidden
-- open_acceptance: 2 real captures replace mocks; 2 drivers GREEN against real captures; docker-smoke CI triggers on scripts/tests/**
-- out_of_scope: remaining 4 Tier A drivers (sprint/riff/launch/build); architect-review (fires at closeout)
+- whereami read: docs/whereami.md (operator_recap Session V-tail 2026-10-25T14:00Z)
+- plan doc read: docs/next-session-plan-2026-10-25-session-w-cli-444-and-persona-ux-step-1.md
+- canvas read: docs/canvases/2026-10-25-persona-ux-test-tier.md (status draft; 6 steps; 3 prongs)
+- parent chain: no docs/iteration-bets/ active goal doc; plan doc + canvas carry the thread
+- parent_drivers: cli#199 (epic parent) + cli#448 (persona-UX ticket) + cli#444 (nuke-script defect)
+- out_of_scope this session: upstream#2267-#2270 (held by peer d2), PR #449 (ADR-012 strategic), PR #423 (Dependabot triage)

@@ -1,0 +1,10 @@
+# Pre-mortem marker — Session W Thread 1 (cli#444)
+- date: 2026-10-25
+- branch: fix/cli-444-purge-adopter-scope-hardstop
+- mode: light (3 lenses)
+- ledger: docs/risk-ledgers/2026-10-25-cli-444-purge-adopter-scope-hardstop.md
+- lenses: linus-torvalds, donald-norman, jerome-saltzer-and-michael-schroeder
+- risks surfaced: 18 (6 per lens)
+- folded: 16 · dropped: 2 (L4 exit-code collision, L6 cached-copy — both cleared by source check)
+- strongest concern folded: S1 — scope check must run before ~/.claude backup
+  and npm install, so a failed run changes nothing.

@@ -1,0 +1,16 @@
+# Temperance marker — Session W Thread 1 (cli#444)
+- date: 2026-10-25
+- branch: fix/cli-444-purge-adopter-scope-hardstop
+- scope class: b (script extension) per /longrun Step 0.86
+- right thing: --purge-adopter must honor its own promise. When the gh token
+  lacks delete_repo, stop before touching adopter state and print the exact
+  fix command. Cure A + C per cli#444 recommendation.
+- right way: scope pre-check moves to the TOP of the script, ahead of the
+  ~/.claude backup and npm install. A failed run changes nothing. Beck
+  RED-first; extend the existing sibling test at
+  scripts/tests/nuke-and-fresh-install.test.sh (12 tests today).
+- scope drift trigger: if this needs a second file beyond the script + its
+  test, pause and re-anchor. Non-scope delete failures stay advisory —
+  that boundary is deliberate and goes in the PR Out of scope.
+- out of scope: Thread 2 (separate branch + PR per pr-strategy.md),
+  upstream#2267-#2270 (peer d2 holds), PR #449, PR #423.

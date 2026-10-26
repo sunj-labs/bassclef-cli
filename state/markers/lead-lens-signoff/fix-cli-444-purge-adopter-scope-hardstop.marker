@@ -1,0 +1,13 @@
+# Lead-lens sign-off — Session W Thread 1 (cli#444)
+- date: 2026-10-26
+- branch: fix/cli-444-purge-adopter-scope-hardstop
+- lead luminary: linus-torvalds
+- findings cleared: no red or amber findings.
+- lens verdict: the flag now honors its own promise. --purge-adopter either
+  completes the purge or stops having changed nothing. The three ways an
+  adopter could previously be left half-reset are each closed and pinned by
+  a test: the pre-check (T16, T17), the dry-run preview (T13-T15), and a
+  permission revoked mid-run (T21).
+- adopter contract check: no prior working invocation changes behavior.
+  Runs without a delete flag are untouched (T19). Dry-run still exits 0
+  (T15). An unreadable scope list fails soft rather than guessing (T20).
