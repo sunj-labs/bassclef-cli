@@ -1,0 +1,9 @@
+# Temperance marker — cli#453 coherence audit, first-touch pass
+- date: 2026-10-26
+- branch: docs/cli-453-coherence-audit-first-touch
+- scope: read 7 skills in dist/lite, write findings. No fixes. No hooks.
+- read here, cite upstream: the assembled package is what adopters get;
+  the fix lands in bassclef-upstream, so every finding names the upstream path.
+- drift trigger: writing a fix, or starting the 8th skill.
+- out of scope: the 7 recurring skills, the shallow sweep of the other 59,
+  any fix PR, upstream#2272, cli#454.

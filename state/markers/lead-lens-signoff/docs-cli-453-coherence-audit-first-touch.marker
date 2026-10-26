@@ -1,0 +1,19 @@
+# Lead-lens sign-off — cli#453 audit script
+- date: 2026-10-26
+- branch: docs/cli-453-coherence-audit-first-touch
+- lead luminary: alan-cooper
+- findings cleared: two, both caught during the read and both corrected
+  before commit.
+  1. A claimed finding that three skill descriptions show a unicode escape
+     to the reader. A YAML parse showed the escape decodes to an em-dash.
+     Dropped from the findings table and recorded under honest limits so
+     the next reader does not re-raise it.
+  2. The split-count table was derived by subtraction and read 9 and 11.
+     Measured by running the script per group it is 7 and 9. Corrected,
+     and the table now says it was measured.
+- lens verdict: the audit answers the question a person would ask — can a
+  new user read this — and ranks findings by whether a new user would stop
+  reading. The two highest findings are structural rather than word-level,
+  which is what the lens predicts when the word-list checks already pass.
+- accepted gap carried forward: the script has no test. Stated in the
+  pre-mortem ledger and in the audit, not hidden.
