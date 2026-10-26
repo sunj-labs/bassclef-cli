@@ -1,0 +1,12 @@
+# Luminary marker — cli#453 audit script
+- date: 2026-10-26
+- branch: docs/cli-453-coherence-audit-first-touch
+- lead: alan-cooper — the audit asks whether the wording serves a person's
+  goal. That lens is what turned the first step from building a check into
+  reading the skills, and it is what ranked the missing reader/detail
+  boundary above the yes/no rule the ticket was filed for.
+- supporting: michael-feathers — read what the text actually does before
+  naming it. Caught the unicode-escape finding as false before it shipped,
+  and caught that the split table had been derived by subtraction rather
+  than measured.
+- supporting: donald-norman — the output names the fix, not just the fault.

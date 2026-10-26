@@ -1,0 +1,14 @@
+# Pre-mortem marker — cli#453 audit script
+- date: 2026-10-26
+- branch: docs/cli-453-coherence-audit-first-touch
+- mode: light (3 lenses)
+- ledger: docs/risk-ledgers/2026-10-26-cli-453-audit-script.md
+- lenses: alan-cooper, michael-feathers, michael-nygard
+- risks surfaced: 15 · folded 12 · partly folded 2 · dropped 1
+- strongest concern folded: C3 — the inflated count on the two unfolded
+  skills could send a reader chasing 77 non-problems. The audit states why
+  the number is inflated, and the script's tail line points at the cheap
+  structural fix first.
+- accepted gap: no test file. scripts/*.sh is Tier 1 per
+  .claude/rules/testing-tier-config.md, so a warning rather than a block.
+  Exit codes 0, 1, 2 each exercised by hand. Test belongs with the sweep.
