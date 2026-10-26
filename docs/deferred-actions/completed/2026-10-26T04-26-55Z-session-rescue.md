@@ -45,3 +45,22 @@ proceed.
 - bassclef #226 — parent bet
 - `.claude/rules/session-artifacts.md`
 - `.claude/hooks/session-end.sh` — the hook that wrote this entry
+
+
+---
+
+## Resolution — Pattern B, 2026-10-26
+
+Resolved during Session W closeout. The flagged obligation was
+"uncommitted changes in working tree". The work is done:
+
+- Chronicle written at `docs/chronicle/2026-10-26-session-w-cli-444-plus-persona-ux-audit.md`.
+- `docs/whereami.md` updated with the Session W recap and a fresh timestamp.
+- Working tree clean. Three PRs merged this session (#452, #455, #456).
+
+The uncommitted changes the hook saw were mid-session marker writes plus a
+junk-named file left by a malformed `sed`. The junk file was removed and the
+markers were committed with their branches.
+
+Pattern B per `.claude/rules/deferred-actions.md` — the command's intent is
+satisfied, so this moves to `completed/`.
