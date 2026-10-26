@@ -1,8 +1,8 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-10-25T14:00:00Z
-  session: 2026-10-25-session-v-tail-canvas-and-full-stack-rerun.md
+  at: 2026-10-25T22:00:00Z
+  session: 2026-10-25-session-v-tail-cold-adopter-triage-and-session-w-prep.md
 ---
 
 <!--
