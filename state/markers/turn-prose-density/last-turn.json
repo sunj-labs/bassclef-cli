@@ -1,6 +1,6 @@
 {
   "metric": "turn-prose-density",
-  "value": 10,
-  "measured_at": "2026-10-26T01:09:26Z",
+  "value": 6,
+  "measured_at": "2026-10-26T01:18:05Z",
   "source": "lib/prose-marker.sh"
 }
