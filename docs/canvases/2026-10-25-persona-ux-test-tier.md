@@ -117,6 +117,171 @@ Steps compound. Each produces an artifact the next consumes.
 - **Time**: 10-20 turns.
 - **Luminary lead**: Michael Feathers.
 
+## Amendment 1 — 2026-10-26 · what the first build attempt found
+
+Session W tried to build Prong B and stopped. Three findings reshape the
+canvas. The Shape and Build sequence sections above are kept as written;
+this amendment supersedes them where the two disagree.
+
+### Finding 1 — Prong B cannot run in bassclef-cli
+
+A pre-commit check in this repo that scans staged onboarding SKILL diffs
+can never fire. The file is never staged here.
+
+- `.gitignore:76` ignores `.claude/skills/`. `git ls-files .claude/skills`
+  returns 0 files.
+- `.gitignore:20` ignores `dist/`. `git ls-files dist/lite` returns 0 files.
+- `scripts/prepublish-bundle-substrate.mjs:86` resolves the substrate source
+  to `../bassclef-upstream`. The bundle is copied in at publish time.
+- `.claude/skills/onboard-repo/SKILL.md` is tracked in bassclef-upstream only.
+
+The canvas names hook paths but never names which repo each prong lives in.
+That omission is what let the plan read as local work.
+
+### Finding 2 — Prong B is not a new hook upstream
+
+Two upstream hooks already match the exact path and already read the file.
+The work is a new section in each, not a new file plus a new wire.
+
+- `substrate-clarity-gate.sh:64` matches `*/.claude/skills/*/SKILL.md` and
+  runs before an edit lands. Wired at `.claude/settings.json:230`.
+- `pre-commit-gate.sh:360` already scans `git diff --cached` for
+  `.claude/skills/*/SKILL.md` for the reserved-name check.
+
+### Finding 3 — the text comes in two kinds, and a source scan sees one
+
+Read in context, the three onboarding prompts are not alike.
+
+**Written out word for word.** Lines 1344 and 1757 of the onboarding SKILL
+are verbatim blocks the model renders as-is. A machine reading the file can
+check these.
+
+**Written as an instruction.** Line 645 reads
+`# Prompt operator: "Does this repo deploy to prod? [y/N]"` — a note telling
+the model to ask something. The model writes the sentence the adopter reads.
+A machine reading the file sees the instruction, not the wording. This one
+carries no explanation at all, and it governs production deploys.
+
+So the concern is wider than yes/no prompts. Coherence covers headers, status
+lines, error text, the order things appear in, and whether the whole flow
+sounds like one voice. None of that matches a yes/no pattern, and a machine
+reading source cannot see generated wording at all.
+
+This flips the weight of the three prongs.
+
+| Prong | What it reads | What it catches | What it cannot see |
+|---|---|---|---|
+| **B** — machine, source | the file as written | a verbatim block missing its explanation | generated wording · coherence · tone · ordering |
+| **A** — person, proposed change | the diff, with a persona in mind | tone and framing on changed lines | wording that drifted elsewhere · the flow as a whole |
+| **C** — the run | everything the adopter actually sees | generated wording · coherence · voice · ordering | nothing — this is the real view |
+
+Prong C is the answer to cli#448. Prong B is a cheap floor over part of the
+surface. Prong A sits between them.
+
+### Repo placement — corrected
+
+| Prong | Repo | Why there |
+|---|---|---|
+| B — machine, source | bassclef-upstream | the only place the file is open for editing |
+| A — person, proposed change | bassclef-upstream | changes to the text are proposed there |
+| C — the run | bassclef-cli | only the assembled package holds the real shipped skill to run |
+
+Two of three stay here. Prong B moves, and only its machine half.
+
+### Why the cli-side check is not redundant with the upstream ones
+
+`publish.yml:122` pins the substrate to a release tag. So this repo can
+assemble and publish wording written before any upstream check existed. At
+that moment nobody is typing and nobody is committing. A check reading the
+assembled package is the only one looking. Same moment as the pre-publish
+gate proposed in PR #449 (ADR-012), so it joins that gate rather than
+inventing a second one.
+
+---
+
+## Amendment 2 — 2026-10-26 · Step 1 replaced by a read, not a build
+
+The cheapest first step needs no machinery. Before any hook ships, read the
+skills a first-time user actually meets and write down what confuses them.
+Nothing can be automated well until we know what we are looking for, and six
+yes/no prompts were never the real target.
+
+### Step 1 (new) — coherence audit of the first-touch skills
+
+- **Produces**: `docs/audits/2026-MM-DD-persona-coherence-first-touch.md` —
+  one row per skill per finding, each row naming the persona that bounces and
+  the line that causes it. Plus a short list of the patterns that recur, which
+  becomes the rule the later checks enforce.
+- **Consumes**: `docs/personas/README.md` (this repo's pointer to the persona
+  files, which live upstream and carry `tier: upstream`) + the assembled
+  package at `dist/lite/.claude/skills/`.
+- **Risk**: 🟢 low — a read and a document. Changes no shipped behavior.
+- **Why first**: it tells us what the machine rule should say. Writing the
+  hook first guesses the rule.
+- **Time**: 40-70 turns for 14 skills.
+- **Luminary lead**: Alan Cooper (does this serve the person's goal) with
+  Donald Norman (does the wording tell them what happens next).
+
+**Scope — 14 skills.** 73 skills carry `tier: lite`, which is too many for a
+first pass. The shortlist below is a judgment call, grounded in Sam's
+documented 15-30 minute path (`docs/personas/sam.md` Tasks + Approach) and
+Louis's recurring loop across several surfaces. It is not derived from usage
+data, because we have none.
+
+First touch — what Sam meets inside 30 minutes:
+
+`onboard-repo` · `whereami` · `sprint` · `skills` · `howdoi` · `launch` · `verify`
+
+Recurring — what Louis runs every week:
+
+`longrun` · `session-end` · `session-log` · `kiss` · `temperance` · `diagnose` · `promote`
+
+Second wave, if the first pass is cheap: `riff` · `stage` · `build` ·
+`value-prop` · `state-a-problem`.
+
+**What each read checks.** Six questions, taken from Sam's `bounces_on` list
+plus the coherence concern in Amendment 1.
+
+1. Does any sentence use a word only a bassclef user knows?
+2. Does a question say what happens if the person says yes?
+3. Does a question say how to undo it?
+4. When the skill tells the person to do something, does it name the path or
+   command, or assume they know?
+5. Does the voice stay the same from first screen to last, or does it read
+   like a different author mid-flow?
+6. Does the order make sense to someone who does not already know the system?
+
+**Why the audit reads the assembled package, not the source.** The source
+lives upstream and this repo cannot edit it. The assembled package is what
+adopters receive, and it is what the later run-based check will read, so the
+audit and the check look at the same thing.
+
+### The later steps, renumbered
+
+Prior Step 1 (Prong B) becomes Step 2 and moves upstream. Prior Step 2
+(Prong A) becomes Step 3 and stays upstream. Prior Step 3 (Prong C) becomes
+Step 4 and stays here. Steps 4 and 5 become Steps 5 and 6. Each still
+consumes what the one before it produces, and each now names its repo.
+
+### Tickets filed 2026-10-26
+
+| Ticket | Repo | Prong | What it is |
+|---|---|---|---|
+| #453 | bassclef-cli | — | Read the 14 first-touch skills. Produces the pattern list the checks encode. Do this first. |
+| upstream#2272 | bassclef-upstream | B | Machine check on text written word for word. Two sections in two hooks that already exist. |
+| #454 | bassclef-cli | C | Run the flow against the assembled package and read it as a conversation. Joins the gate in PR #449. |
+
+Prong A — the human review on proposed changes — is not yet filed. It needs
+the pattern list from #453 to have a rubric worth reviewing against.
+
+### Open question answered
+
+Open question 4 above asks whether Prong C covers Sam only or all three
+personas. The audit answers it with data instead of a guess: if the findings
+cluster on one persona, scope the run-based check to that persona first.
+
+---
+
 ## Open questions for next-session kickoff
 
 1. **Does Prong C live as a shell script with Claude dispatch, or as a Node fixture?** Shell + Claude mirrors the existing smoke-drive-* pattern (familiar). Node fixture avoids Claude cost but asks a different question (what the SKILL body renders to, not what Claude says back).
@@ -143,3 +308,12 @@ Session V closeout artifacts:
 - `.claude/rules/writing-craft-discipline.md` — Ogilvy six-tests for Prong A rubric.
 - `.claude/rules/operator-facing-prose.md` — gloss discipline for naked-prompt detection.
 - `docs/personas/sam.md` — cold-adopter persona (primary Prong C fixture target).
+- `docs/personas/README.md` — pointer to the persona files; they live in
+  bassclef-upstream and carry `tier: upstream`, so they never sync here.
+- PR #452 — `cli#444` fix; the session that produced Amendment 1.
+- PR #449 — ADR-012, pre-publish gate; sibling moment for the cli-side check.
+- `scripts/prepublish-bundle-substrate.mjs` — assembles `dist/lite/`, the
+  surface the audit and the run-based check both read.
+- #453 — the coherence audit; new Step 1
+- #454 — the run-based check; Prong C
+- upstream#2272 — the machine check on source text; Prong B
