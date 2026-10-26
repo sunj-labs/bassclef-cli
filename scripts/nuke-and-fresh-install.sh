@@ -33,6 +33,9 @@ Flags:
                             under the authenticated gh user. Prompts per hit by default.
   --yes                     auto-confirm --delete-github prompts (scripted use only)
   --purge-adopter           one-flag full reset — implies --delete-github --yes.
+                            Needs the delete_repo permission on your gh token:
+                              gh auth refresh -h github.com -s delete_repo
+                            Without it the script stops before changing anything.
                             Deletes every matching GitHub test repo (no prompts) plus
                             the standard workdir purge. For cold-adopter smoke sessions
                             that collide with repos from a prior run.
@@ -141,6 +144,55 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+# cli#444 — read the delete_repo permission off the gh token.
+#
+# --purge-adopter promises a full reset. When the token cannot delete repos,
+# the promise cannot be kept, so the script stops before it changes anything
+# rather than skipping the deletes and reporting success.
+#
+# Exit states:
+#   0 — token carries delete_repo
+#   1 — scope list is readable and lacks delete_repo
+#   2 — cannot tell (gh absent, not authenticated, or no scope line printed)
+#
+# Callers hard-stop only on 1. State 2 fails soft — some auth types print no
+# scope line, and a guess either way would be wrong. The delete loop still
+# catches a real permission failure.
+gh_delete_repo_scope_state() {
+  command -v gh >/dev/null 2>&1 || return 2
+  gh auth status >/dev/null 2>&1 || return 2
+
+  local scope_line
+  scope_line="$(gh auth status 2>&1 | grep -i 'Token scopes:' | head -1 || true)"
+  [ -n "$scope_line" ] || return 2
+
+  case "$scope_line" in
+    *delete_repo*) return 0 ;;
+    *)             return 1 ;;
+  esac
+}
+
+# Print the cause, the cure, and what to do next. $1 is "live" or "dry-run".
+scope_fix_block() {
+  local mood="$1"
+  echo >&2
+  echo "⚠ ${SCRIPT_NAME}: your GitHub token is missing the delete_repo permission." >&2
+  echo "  Without it the test repos stay on GitHub, so the purge cannot finish." >&2
+  echo >&2
+  echo "  Add the permission:" >&2
+  echo >&2
+  echo "    gh auth refresh -h github.com -s delete_repo" >&2
+  echo >&2
+  echo "  Then re-run this command exactly as you ran it." >&2
+  if [ "$mood" = "live" ]; then
+    echo "  Nothing was changed — no backup taken, no package installed, no repo deleted." >&2
+    echo "  ${SCRIPT_NAME}: stopping before any destructive step." >&2
+  else
+    echo "  Dry-run only — a live run would stop here, before any destructive step." >&2
+  fi
+  echo >&2
+}
+
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_PATH="${HOME}/.claude.bak.${TIMESTAMP}"
 
@@ -184,12 +236,32 @@ if [ "$DRY_RUN" -eq 1 ]; then
     echo "  7. git init -q + empty fixture commit"
     echo "  8. bassclef init"
   fi
+  if [ "$DELETE_GITHUB" -eq 1 ]; then
+    scope_state=0
+    gh_delete_repo_scope_state || scope_state=$?
+    if [ "$scope_state" -eq 1 ]; then
+      scope_fix_block "dry-run"
+    fi
+  fi
+
   echo
   echo "No state changed. Remove --dry-run to execute."
   exit 0
 fi
 
 echo ">>> ${SCRIPT_NAME} starting (version=${VERSION} workdir=${WORKDIR})" >&2
+
+# Scope pre-check (cli#444 cure C). Runs ahead of every destructive step so a
+# token that cannot delete repos costs the adopter nothing. Fires only when a
+# delete was actually requested.
+if [ "$DELETE_GITHUB" -eq 1 ]; then
+  scope_state=0
+  gh_delete_repo_scope_state || scope_state=$?
+  if [ "$scope_state" -eq 1 ]; then
+    scope_fix_block "live"
+    exit 4
+  fi
+fi
 
 # Preflight: warn if prior test repos exist and cleanup was not requested.
 # cli#434 cure — accumulated test repos cause "name already exists"
@@ -310,10 +382,24 @@ if [ "$DELETE_GITHUB" -eq 1 ]; then
         fi
         case "${answer:-n}" in
           y|Y|yes|YES)
-            if gh repo delete "$repo" --yes >/dev/null 2>&1; then
+            delete_err=""
+            if delete_err="$(gh repo delete "$repo" --yes 2>&1)"; then
               echo "${SCRIPT_NAME}:   deleted ${repo}" >&2
             else
-              echo "${SCRIPT_NAME}:   delete failed for ${repo} (missing scope? requires 'delete_repo' PAT scope)" >&2
+              # cli#444 cure A — a permission revoked after the pre-check passed.
+              # Stop on the first such failure instead of looping through the
+              # rest and reporting success. Other failures stay advisory: a repo
+              # someone else already deleted should not block the run.
+              case "$delete_err" in
+                *delete_repo*|*"Must have admin rights"*)
+                  echo "${SCRIPT_NAME}:   delete failed for ${repo}" >&2
+                  scope_fix_block "live"
+                  exit 4
+                  ;;
+                *)
+                  echo "${SCRIPT_NAME}:   delete failed for ${repo} (not a permission error; continuing)" >&2
+                  ;;
+              esac
             fi
             ;;
           *)
