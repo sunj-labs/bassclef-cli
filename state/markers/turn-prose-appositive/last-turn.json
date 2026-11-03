@@ -1,6 +1,6 @@
 {
   "metric": "turn-prose-appositive",
-  "value": 3,
-  "measured_at": "2026-11-03T01:05:28Z",
+  "value": 4,
+  "measured_at": "2026-11-03T01:06:58Z",
   "source": "lib/prose-marker.sh"
 }
