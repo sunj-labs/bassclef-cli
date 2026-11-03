@@ -41,6 +41,7 @@ import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifes
 import { copySubstrate, CopyFailure, resolveBundleRoot } from '../lib/copy-substrate.js';
 import { installStatusline, type InstallStatuslineReport } from '../lib/install-statusline.js';
 import { VALUE_TEST_BLOCK } from '../lib/init-value-test-block.js';
+import { renderBrandMark } from '../lib/init-brand-mark.js';
 import { resolveHome } from '../lib/resolve-home.js';
 import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
 import { buildInitReport, renderJsonReport, type InitReport } from '../lib/init-report.js';
@@ -758,6 +759,14 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   // Shape pinned by tests/init-value-test-block.test.ts; source of
   // truth is src/lib/init-value-test-block.ts.
   if (!json && walker.code === 0) {
+    // cli#460 — brand mark above the ready block. Same guard as the
+    // value-test block, so the --json contract is untouched: stdout
+    // stays the report alone. Width comes from stdout when stdout is a
+    // terminal; piped output reports undefined and keeps the mark, so
+    // smoke captures show what an adopter sees. Grid + fallback rule
+    // per bassclef-upstream#2337; shape pinned by
+    // tests/init-brand-mark.test.ts.
+    say(`${renderBrandMark(pkgVersion, process.stdout.columns)}\n`);
     say(VALUE_TEST_BLOCK);
   }
 

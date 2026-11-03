@@ -1,0 +1,11 @@
+# Lead-lens sign-off — cli#460
+- date: 2026-11-02
+- branch: feat/460-init-brand-mark
+- lead: michael-feathers
+- findings: no red, no amber.
+- rationale: the lead lens asked for one thing — that silent corruption of the
+  grid becomes a loud failure. Three tests pin it: row count (11), per-row width
+  budget (27), and the exact non-ASCII codepoint set (U+00B7, U+2580, U+2584,
+  U+2588). A lookalike glyph from an editor paste fails test 3 by name. The
+  seven pre-mortem risks each have a named cure and each cure has a test.
+- suite: 536 of 536 pass across 63 files. Build clean. tsc --noEmit clean.

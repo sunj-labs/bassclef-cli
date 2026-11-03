@@ -1,0 +1,9 @@
+# Temperance marker — cli#460 init brand mark
+- date: 2026-11-02
+- branch: feat/460-init-brand-mark
+- scope-decision: smallest shape is one pure function in a new lib file plus one
+  call site in init.ts, following the init-value-test-block.ts pattern exactly.
+  Blast radius: the human banner on a successful non-json init only. The --json
+  path is untouched, so adopter tooling that parses the report cannot break.
+- drift-trigger: if this needs a postinstall script, a color layer, or a change to
+  the report shape, stop and re-scope. Any of those three is a different ticket.
