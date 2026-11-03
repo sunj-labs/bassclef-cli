@@ -1,0 +1,10 @@
+# Luminary marker — 1.9.20 release prep
+- date: 2026-11-03
+- branch: chore/release-1.9.20
+- lead: david-ogilvy
+- supporting: [linus-torvalds]
+- lead-lens: the notes are read by someone deciding whether to upgrade. One
+  change, said plainly, with the honest answer to "do I need to do anything"
+  (no). Measured mean grade 7.8.
+- torvalds: --json output is unchanged, so nothing parsing it breaks. The notes
+  say so explicitly rather than leaving the reader to wonder.
