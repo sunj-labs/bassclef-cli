@@ -1,0 +1,10 @@
+# Temperance marker — 1.9.20 release prep
+- date: 2026-11-03
+- branch: chore/release-1.9.20
+- scope-decision: version bump + release notes only. One adopter-visible change
+  in this version — the init mark from #460. scripts/nuke-and-fresh-install.sh
+  does not ship (verified via npm pack --dry-run), so #452 is not user-facing
+  and stays out of the notes.
+- drift-trigger: do NOT create a tag, a GitHub Release, or run npm publish. The
+  npm-publish environment has no reviewer gate (cli#462), so a Release would
+  publish unattended. guardrails.md:15 forbids that with no exceptions.
