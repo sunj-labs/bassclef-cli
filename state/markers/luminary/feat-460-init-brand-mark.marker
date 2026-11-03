@@ -1,0 +1,14 @@
+# Luminary marker — cli#460
+- date: 2026-11-02
+- branch: feat/460-init-brand-mark
+- lead: michael-feathers
+- supporting: [tony-hoare, donald-norman]
+- lead-lens: characterization. The glyph grid is data that an editor paste or a
+  font substitution can silently corrupt. The test pins the exact codepoint set
+  and row count so corruption fails loudly instead of shipping a broken mark.
+- hoare: renderBrandMark is pure. Precondition is a version string and an
+  optional width. Postcondition is either the full mark or text-only, never a
+  wrapped grid. Width comes in as an argument so the contract is testable
+  without a TTY.
+- norman: a wrapped mark reads as corruption, not as a narrow terminal. Dropping
+  it below 53 columns is the honest signifier.

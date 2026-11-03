@@ -1,0 +1,19 @@
+# Pre-mortem light — cli#460 (3 lenses)
+- date: 2026-11-02
+- branch: feat/460-init-brand-mark
+- risk-ledger: inline below (scope too small for a separate doc)
+
+## feathers — what ships broken and stays quiet
+1. Editor paste swaps a block glyph for a lookalike. Cure: test pins codepoints.
+2. Row count drifts when someone edits the grid. Cure: test pins 11 rows.
+3. A row grows past 27 cols and collides with the text column. Cure: test pins width.
+
+## hoare — contract breaks
+4. Width read from process.stdout inside the lib makes the test need a TTY.
+   Cure: width is an argument.
+5. Version hardcoded in the grid drifts from package.json. Cure: interpolated.
+
+## norman — the adopter misreads it
+6. Narrow terminal wraps the mark; adopter reads corruption. Cure: drop below 53.
+7. Mark lands in --json stdout and breaks a parser. Cure: same !json guard as
+   VALUE_TEST_BLOCK; parity test asserts no block glyph in json stdout.
