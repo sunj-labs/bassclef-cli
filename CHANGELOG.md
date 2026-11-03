@@ -24,6 +24,25 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.20] - 2026-11-03
+### Added
+
+- `bassclef init` prints the bassclef mark above "Bassclef is ready." On a
+  window narrower than 53 columns it prints two lines of text and skips the
+  mark, because a mark split across lines reads as broken output. (#460)
+
+### Changed
+
+### Fixed
+
+### Notes
+
+- `bassclef init --json` is unchanged. Anything parsing that output sees
+  exactly what it saw before.
+- The mark uses four characters that ship with every Mac and Linux terminal.
+  No font install needed. Design spec at `design/brand-mark.md` in
+  bassclef-upstream (#2337).
+
 ## [1.9.19] - 2026-10-18
 ### Added
 
