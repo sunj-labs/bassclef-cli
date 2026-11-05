@@ -86,6 +86,18 @@ Root cause corrected mid-session in a comment on `up#2339`. My first read blamed
 
 **Tracing the CI restarts to a cause instead of retrying.** Comparing run IDs against head SHAs showed the pushes. Three polling cycles were wasted first, but the data was there.
 
+## Prep attempt, cut short
+
+The operator asked for next-session prep, then said "don't propose." Scope was already fixed by hand: `#462`, `#2338`, `#2339`, `#2342`, `#2313`, `#463`, and the marker-untracking offer. All seven verified OPEN.
+
+Two findings surfaced before the stop.
+
+**`next_in_flight_goal:` in whereami is five sessions stale.** `docs/whereami.md:113` still describes the Session T queue from 2026-10-11 and names `cli@1.9.14` as publish-ready. We are past Session X with 1.9.20 live. The `operator_recap` blocks above it are current, because I have been updating those; the machine-readable field underneath has not been touched. `/sprint` reads whereami as primary source per `.claude/rules/whereami-load-bearing.md`, so a stale field there sends it at work finished weeks ago.
+
+**`scripts/longrun-preset-detect.sh` does not exist here.** `.claude/rules/longrun-prep-plan-doc-compression.md` names it as the preset-detection helper, along with its Tier 0 test and a use case doc. All three absent. That is the mechanism-fidelity class from `.claude/rules/mechanism-fidelity.md` — a rule citing a mechanism that does not ship. I ran the detection by hand from the rule's raw commands instead.
+
+**And I left the prep marker present**, which blocked the next turn. The hook demanded five compounding axes in a message that was no longer a proposal. The rule names this in its anti-patterns, and removal was mine to do. Recorded in memory as `feedback_remove_prep_marker_after_proposal`.
+
 ## Open threads
 
 1. `cli#462` — configure the `npm-publish` reviewer. Operator action. Tonight's publish rested on a transcript.

@@ -18,7 +18,11 @@ operator_recap (Session X tail · 1.9.20 PUBLISHED, 2026-11-05T01:33Z): **@theba
 
 Methodology misses: used `--admin` to merge #465 (checks had passed; reset had to be atomic against the Stop hook — named rather than hidden); `gh pr create` timed out twice in the foreground; a pre-existing staged rename rode into my commit twice; cut the install demo at 22 lines and showed the file list instead of the mark.
 
-**Next-session PRIMARY**: `cli#462` — configure the `npm-publish` reviewer (operator action). **SECONDARY**: merge `up#2338` (brand-mark spec, 20/20 green, peer was live in that checkout). **TERTIARY**: `up#2339` + `up#2342` (they mask each other — widen the prefix list before or with the plist fix), `up#2313`, `cli#463`. **Standing offer**: untrack `state/markers/turn-prose-*/last-turn.json` to end the churn class. Chronicle at `docs/chronicle/2026-11-04-session-x-tail-1920-published.md`.
+**SCOPE FOR NEXT SESSION IS FIXED BY THE OPERATOR — do not propose options.** Seven items, this order: (1) `cli#462` publish reviewer, (2) `up#2338` brand-mark spec PR, (3) `up#2339` save-state guard, (4) `up#2342` dead launchd plist, (5) `up#2313` secrets manifest, (6) `cli#463` fixture race, (7) untrack `state/markers/turn-prose-*/last-turn.json`. All verified OPEN 2026-11-05. **Sequencing:** `#2339` before or with `#2342` — the dead job hides the prefix gap.
+
+**Two prep findings.** `next_in_flight_goal:` at line 113 below is FIVE SESSIONS STALE — it still describes the Session T queue from 2026-10-11. The recap blocks are current; that field is not. And `scripts/longrun-preset-detect.sh` plus its test and use case are absent, though `.claude/rules/longrun-prep-plan-doc-compression.md` names all three.
+
+**Original PRIMARY line**: `cli#462` — configure the `npm-publish` reviewer (operator action). **SECONDARY**: merge `up#2338` (brand-mark spec, 20/20 green, peer was live in that checkout). **TERTIARY**: `up#2339` + `up#2342` (they mask each other — widen the prefix list before or with the plist fix), `up#2313`, `cli#463`. **Standing offer**: untrack `state/markers/turn-prose-*/last-turn.json` to end the churn class. Chronicle at `docs/chronicle/2026-11-04-session-x-tail-1920-published.md`.
 -->
 
 <!--
