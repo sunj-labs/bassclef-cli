@@ -1,0 +1,19 @@
+# Temperance marker — untrack turn-prose per-turn markers
+- date: 2026-11-05
+- branch: fix/untrack-turn-prose-markers
+- scope-decision: Right thing — stop two tracked per-turn marker files from
+  being auto-committed and pushed every turn, which restarts a 12-minute
+  smoke. Right way — add the two missing .gitignore lines beside the six
+  sibling transient-marker lines already there, then git rm --cached the
+  two files. No hook edits here; the upstream cure is up#2366.
+- drift-trigger: If this grows past the two files plus their .gitignore
+  lines, stop. Reclassifying which marker dirs are transient is up#1235
+  and up#1694, not this branch.
+- drift-trigger-fired: Yes, once, and recorded rather than argued past.
+  Widened from two directories to three: added state/markers/turn-prose-surface/
+  alongside the two churning ones. Reason — it is provably transient by its own
+  rule text (.claude/rules/compounding-sequence-fresh-analysis.md step 5 says to
+  remove the marker after the proposal lands), it currently has zero tracked
+  files so the line changes nothing today, and leaving it out invites the same
+  bug on the next session that forgets the removal. This is prevention within
+  the same family, not the reclassification that up#1235 and up#1694 own.

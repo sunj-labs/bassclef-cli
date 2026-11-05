@@ -37,6 +37,14 @@ state/markers/diagnose/
 state/markers/session-timing/
 state/markers/turn-grade/
 state/markers/turn-prose-flags/
+# cli#466 follow-on — same per-turn write cadence as turn-prose-flags above.
+# Two Stop hooks rewrite these every turn (turn-prose-density-measure.sh,
+# turn-prose-kiss-check.sh). Tracked, they were auto-committed and pushed
+# per turn, restarting the 12-min lite-adopter smoke. Root cure upstream at
+# bassclef-upstream#2366 (save-state.sh git add -u ignores its own pathspecs).
+state/markers/turn-prose-density/
+state/markers/turn-prose-appositive/
+state/markers/turn-prose-surface/
 
 # cli#169 — vitest test-run history (local-only per ADR-049; never committed).
 # Vitest JSON reporter writes here on every `npm test`; `npm run test:report`
