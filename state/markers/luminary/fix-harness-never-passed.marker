@@ -1,0 +1,10 @@
+# Luminary marker — the install harness has never passed
+- date: 2026-11-05
+- branch: fix/harness-never-passed
+- lead: michael-nygard — a check that cannot fail visibly is not a check. Six
+  failures went unread because the result gated nothing and ran after the
+  event it was meant to judge. The lens question at Step 5.5: after this,
+  does a failure reach someone?
+- supporting: john-ousterhout (one owner for the lite bundle, not two),
+  michael-feathers (the harness IS the characterization test for the packed
+  artifact; it has simply never run against a complete one)

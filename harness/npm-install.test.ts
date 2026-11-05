@@ -104,13 +104,31 @@ describe('npm install harness — full local scenario', () => {
 const shouldRunPublished = process.env.HARNESS_INCLUDE_PUBLISHED === '1';
 const publishedIt = shouldRunPublished ? it : it.skip;
 
+// The package and version come from the environment, not from literals here.
+// This test used to fetch @thebassclef/core@0.0.2 — a package name three
+// renames old, pinned to a version from the first release. Because the
+// scenario is env-gated it skipped in local dev and only ran on release, so
+// the staleness never surfaced as a failure.
+//
+// HARNESS_PUBLISHED_VERSION is set by harness.yml from the release tag.
+// Falling back to package.json keeps a manual run honest rather than
+// silently testing whatever `latest` happens to be.
+const PUBLISHED_PACKAGE = process.env.HARNESS_PUBLISHED_PACKAGE ?? '@thebassclef/lite';
+const PUBLISHED_VERSION =
+  process.env.HARNESS_PUBLISHED_VERSION ??
+  (
+    JSON.parse(fs.readFileSync(path.resolve(repoRoot, 'package.json'), 'utf8')) as {
+      version: string;
+    }
+  ).version;
+
 describe('npm install harness — published scenario (env-gated)', () => {
   publishedIt(
-    'published scenario: fetch @thebassclef/core@0.0.2 from live registry; 3 verbs pass',
+    `published scenario: fetch ${PUBLISHED_PACKAGE}@${PUBLISHED_VERSION} from live registry; 3 verbs pass`,
     async () => {
       const run = new HarnessRun('published', {
-        packageName: '@thebassclef/core',
-        version: '0.0.2',
+        packageName: PUBLISHED_PACKAGE,
+        version: PUBLISHED_VERSION,
         failFast: false,
       });
       const outcome = await run.run();

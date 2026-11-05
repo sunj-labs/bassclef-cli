@@ -94,6 +94,29 @@ jobs:
       - name: Build cli (dist/ needed for local pack)
         run: npm run build
 
+      - name: Read .bassclef-pin
+        # The build above empties dist/ (vite emptyOutDir), so dist/lite/ is
+        # gone by this point. The harness globalSetup rebuilds it, and the
+        # bundler needs the substrate source — which on a runner means
+        # cloning it. Same pin, same source as publish.yml:97-135.
+        run: |
+          PIN=$(tr -d '[:space:]' < .bassclef-pin)
+          echo "BASSCLEF_PIN=$PIN" >> "$GITHUB_ENV"
+          echo "Pin: $PIN"
+
+      - name: Checkout sibling bassclef at pinned tag (substrate source)
+        # Mirrors publish.yml so the harness packs the same substrate the
+        # publish would. Sourcing from the public mirror rather than the R&D
+        # upstream is deliberate there, and the harness must match it or it
+        # would be testing a different tarball than the one that ships.
+        uses: actions/checkout@v5
+        with:
+          repository: sunj-labs/bassclef
+          ref: ${{ env.BASSCLEF_PIN }}
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
+          fetch-depth: 1
+
       - name: Wait for npm registry propagation
         # Pre-mortem R1.1 — just-published version may 404 on npm pack for
         # first 30-60s after release. Poll npm view until the version shows.
@@ -118,6 +141,18 @@ jobs:
         # Runs vitest against harness/npm-install.test.ts. HARNESS_INCLUDE_PUBLISHED
         # in job env enables the published-scenario test. Local scenario always
         # runs. Extension unit tests always run (mock CliCaptured; no subprocess).
+        #
+        # BASSCLEF_SIBLING_ROOT points the globalSetup's bundler at the clone
+        # above. Without it the bundler looks for ../bassclef-upstream, which
+        # does not exist on a runner. This workflow had failed six releases
+        # running for the adjacent reason — nothing rebuilt dist/lite/ after
+        # the build, so the harness packed a tarball with no substrate.
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
+          # The published scenario used to hardcode @thebassclef/core@0.0.2 —
+          # a package name three renames old. It reads these instead.
+          HARNESS_PUBLISHED_PACKAGE: '@thebassclef/lite'
+          HARNESS_PUBLISHED_VERSION: ${{ steps.resolve.outputs.version }}
         run: npm run harness:npm-install
 
       - name: Report harness outcome
