@@ -1,0 +1,15 @@
+# Temperance marker — the install harness has never passed
+- date: 2026-11-05
+- branch: fix/harness-never-passed
+- scope-decision: Right thing — make the harness build what it packs, so six
+  releases of silent failure become a real signal. Right way — reuse the
+  fixture owner shipped tonight for cli#463 rather than author a second
+  mechanism, so one thing owns the lite bundle across both suites.
+- blast-radius: vitest.harness.config.ts plus one workflow. The harness
+  currently gates nothing, so a change here cannot make any release worse
+  than it already is.
+- verification: `npm run build && npm run harness:npm-install` must pass the
+  local scenario. Falsified if init still exits 4.
+- drift-trigger: Moving the harness into publish.yml is a SEPARATE step and a
+  separate PR. It changes release timing, which the operator should see land
+  on its own. If this branch starts editing publish.yml, stop.

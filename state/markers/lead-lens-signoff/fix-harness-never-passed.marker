@@ -1,0 +1,33 @@
+# Lead-lens sign-off — the install harness has never passed
+- date: 2026-11-05
+- branch: fix/harness-never-passed
+- lead: michael-nygard
+- findings-cleared:
+  - RED-1: the local scenario failed — init exit 4, wiring manifest absent
+    from the packed tarball. Cause: `npm run build` empties dist/ and the
+    bundler is wired to `prepublishOnly`, which npm never runs on `npm pack`.
+    Cured by giving the harness the same fixture owner the source suite got
+    under cli#463.
+  - RED-2 (would have failed in CI only): the globalSetup's bundler defaults
+    to ../bassclef-upstream, which does not exist on a runner. Found by
+    reading harness.yml rather than by a failing run, because the workflow
+    only fires on release. Cured by mirroring publish.yml's pin read and
+    mirror checkout, and setting BASSCLEF_SIBLING_ROOT on the run step.
+  - RED-3: the published scenario fetched @thebassclef/core@0.0.2 — a package
+    name three renames old, pinned to the first release ever cut. It never
+    failed loudly because the scenario is env-gated and skipped in local dev.
+    Cured by reading the package and version from the environment, with the
+    workflow supplying them from the release tag.
+- verification: 12 of 12, both scenarios, including a live fetch of
+  @thebassclef/lite@1.9.20 from the registry. Before this branch the local
+  scenario failed and the published one tested a dead package.
+- lens-verdict: PASS on the mechanism, with one reservation stated below.
+- reservation: the harness still only runs on `release: published`, so a
+  failure still arrives after the publish it judges. The lens question —
+  "does a failure now reach someone?" — is answered only half way. Moving it
+  into publish.yml's checks job is the other half, and it ships separately
+  because it changes release timing and the operator should see that land on
+  its own.
+- iteration_count: 1 (no rework; each RED was a distinct defect, not a retry)
+- wu_id: harness repair, step 1 of the sequence
+- lens_used: [michael-nygard, john-ousterhout, michael-feathers]
