@@ -1,0 +1,9 @@
+# Luminary marker — cli#462 publish gate
+- date: 2026-11-05
+- branch: feat/462-publish-gate
+- lead: saltzer-schroeder — fail-safe defaults. The gate's resting state is
+  ON; every failure path leans toward "approval required" rather than
+  "publish freely". This lens verifies the ship at Step 5.5.
+- supporting: michael-nygard (visible state — status prints what is actually
+  true, including can_admins_bypass), tony-hoare (read-back verification as
+  postcondition; exit 0 is not proof)

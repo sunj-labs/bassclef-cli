@@ -1,0 +1,28 @@
+# Lead-lens sign-off — cli#462 publish gate
+- date: 2026-11-05
+- branch: feat/462-publish-gate
+- lead: saltzer-schroeder (fail-safe defaults)
+- findings-cleared:
+  - RED-1 (real defect, caught by T02): read_env called `exit 3` inside a
+    command substitution, so it killed only the subshell. The caller carried
+    on with an empty body and reported exit 2 instead of 3 — a precondition
+    failure masquerading as an unreadable gate. Cured by making read_env a
+    pure pass-through and checking the substitution status in each caller's
+    own scope. This is exactly the fail-safe-defaults failure the lead lens
+    exists to catch: the wrong exit code would have told the operator "cannot
+    determine state" when the truth was "the environment is missing."
+  - RED-2 (test fixture): T08's fake started ON, so do_on took its idempotent
+    path and never reached the read-back check. Added a put-stays-off mode so
+    the postcondition is actually exercised.
+  - RED-3 (test fixture): assertion looked for "publish-gate on" where the
+    script prints the full invocation. Needle corrected.
+- verification: 36 of 36 Tier 0 assertions pass. Script also exercised against
+  the live API — `status` reported OFF matching `gh api` directly, and `off`
+  without authorization refused while leaving protection_rules at length 0.
+- lens-verdict: PASS. Every failure path leans toward "approval required":
+  unparseable response reports UNKNOWN and exits 2 rather than ON; missing
+  environment refuses rather than creating an unprotected one; a write whose
+  read-back disagrees reports the gate as not protecting publish.
+- iteration_count: 2 (RED then GREEN)
+- wu_id: cli#462
+- lens_used: [saltzer-schroeder, michael-nygard, tony-hoare]
