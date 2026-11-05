@@ -17,6 +17,15 @@ export default defineConfig({
     // failures behind test failures. Run `npm run build && npm test`
     // explicitly, per the split-mechanism discipline in Evil Martians'
     // 2026 guide (bet L98).
+    //
+    // The globalSetup below does not cross that decision (cli#463). It never
+    // compiles src/; it asserts dist/cli.js already exists and fails naming
+    // the missing build, so a build failure still reads as a build failure.
+    // What it builds is the dist/lite/ substrate bundle — a fixture, not the
+    // product. Four test files used to rebuild that fixture in `beforeEach`
+    // and raced each other after `npm run build` emptied dist/, failing ~20
+    // tests on assertions that look like `init` defects.
+    globalSetup: ['./tests/setup/ensure-lite-fixture.ts'],
 
     coverage: {
       // istanbul provider — compatible with subprocess-spawning tests (runCli).
