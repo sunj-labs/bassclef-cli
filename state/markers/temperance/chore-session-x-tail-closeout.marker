@@ -1,0 +1,6 @@
+# Temperance marker — Session X tail closeout
+- date: 2026-11-05
+- branch: chore/session-x-tail-closeout
+- scope-decision: closing artifacts only — tail chronicle, whereami, rescue-entry
+  move, artifact sweep. No code. No new work.
+- drift-trigger: if any open thread tempts a fix, stop. They are ticketed.
