@@ -1,0 +1,12 @@
+# Temperance marker — cli#462 publish gate
+- date: 2026-11-05
+- branch: feat/462-publish-gate
+- scope-decision: Right thing — give the operator a default-ON approval gate
+  on npm publish plus a one-shot override, now that ADR-004 sanctions it
+  (amended at 7b2725e). Right way — a tracked shell script with Tier 0
+  tests, because .gitignore:84 ignores .claude/skills/ and zero skills are
+  tracked in this repo, so a SKILL.md could never commit here.
+- drift-trigger: If this branch starts editing publish.yml, stop. The gate
+  is repo configuration plus a script; the workflow already names the
+  environment and needs no change. Also stop if it grows a second
+  environment or a wait_timer — both were considered and rejected.

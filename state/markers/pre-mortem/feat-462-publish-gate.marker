@@ -1,0 +1,11 @@
+# Pre-mortem marker — cli#462 publish gate
+- date: 2026-11-05
+- branch: feat/462-publish-gate
+- mode: light (3 lenses)
+- ledger: docs/risk-ledgers/2026-11-05-cli-462-publish-gate.md
+- lenses: saltzer-schroeder, michael-nygard, tony-hoare
+- risks-surfaced: 16
+- folded-before-code: read-back verification on every mutation; status fails
+  to UNKNOWN not ON; off requires an explicit authorization argument;
+  can_admins_bypass surfaced in status; audit line per mutation; environment
+  existence asserted before any write.
