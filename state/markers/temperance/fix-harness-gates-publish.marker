@@ -1,0 +1,13 @@
+# Temperance marker — harness gates the publish
+- date: 2026-11-05
+- branch: fix/harness-gates-publish
+- scope-decision: Right thing — run the package before the gate, so a broken
+  tarball stops rather than ships. Right way — one step at the end of job 1,
+  reusing the harness repaired in the parent PR, local scenario only.
+- blast-radius: the publish path. Mitigated by position — the step is last in
+  job 1, so every cheap check fails first, and job 2 is untouched.
+- verification: YAML parses; the harness step is last in checks; publish still
+  declares needs: checks and environment: npm-publish. Full proof needs a
+  real release.
+- drift-trigger: If this branch starts reconciling ADR-004's drifted step list
+  or editing job 2, stop. Both are separate changes.

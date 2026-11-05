@@ -1,0 +1,25 @@
+# ADR-deviation marker — harness gates the publish
+- date: 2026-11-05
+- branch: fix/harness-gates-publish
+- adr_governing: ADR-004 (publish pipeline safety contract)
+- outcome: ADR-deviation
+- lens-a-supporting-adr: tony-hoare — ADR-004 pins an ordered step list as a
+  contract, and adding a step changes it. The list is also already wrong
+  (Node 20 vs 22; five steps missing), so the honest move is to say so rather
+  than add a thirteenth line to a list that misdescribes twelve.
+- lens-b-supporting-deviation: michael-nygard — every check in job 1 reads a
+  file list; none ran the package. A tarball can pass the six-file floor and
+  still fail to initialise, which the harness demonstrated on its first
+  honest run. A contract that inspects but never executes is not protecting
+  the thing it names.
+- decision-rationale: The operator asked for the package to be tested before
+  release. ADR-004's list is a pinned contract, so adding a step amends it.
+  Three facts make amending right. An npm version can never be reused, so the
+  answer is only free before the gate. The harness already existed and only
+  ever ran after the event it judged. And its result gated nothing, so six
+  failures went unread. Hoare's objection is answered by naming the drift in
+  the amendment instead of papering over it — reconciling the full list is a
+  separate change with its own review.
+- new-adr-filed: none — amends ADR-004, which already carries an amendment
+  from earlier today. Operator instruction 2026-11-05: "reorganize the
+  sequence so package is tested before release."

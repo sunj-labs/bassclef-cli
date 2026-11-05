@@ -206,6 +206,30 @@ jobs:
             exit 1
           fi
 
+      - name: Install harness — pack, install, run the three verbs
+        # The last check before the gate, and the only one that runs the
+        # package rather than inspecting it. Every step above reads the
+        # tarball's file list; this one installs it into a temp prefix and
+        # calls --version, init, and sync --dry-run. A tarball can pass a
+        # file-count floor and still fail to initialise.
+        #
+        # Positioned here on purpose. An npm version can never be reused, so
+        # a failure found after publishing cannot be withdrawn — only
+        # superseded. This is the last moment the answer is still free.
+        #
+        # LOCAL SCENARIO ONLY. HARNESS_INCLUDE_PUBLISHED is deliberately
+        # unset: the version does not exist on the registry yet, so the
+        # published scenario would fail on infrastructure rather than on the
+        # package. harness.yml still runs both after the release, which
+        # confirms the registry actually serves what we built.
+        #
+        # The harness had never passed before the fix in the parent PR —
+        # harness.yml ran it only on release: published, where its result
+        # gated nothing. Six releases failed unread.
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
+        run: npm run harness:npm-install
+
   publish:
     name: Publish to npm
     runs-on: ubuntu-24.04

@@ -1,0 +1,9 @@
+# Luminary marker — harness gates the publish
+- date: 2026-11-05
+- branch: fix/harness-gates-publish
+- lead: michael-nygard — put the check where a failure can still stop
+  something. Position is the whole fix; the test itself did not change.
+- supporting: tony-hoare (ADR-004's step list is a contract, so amend it
+  openly and name where it has drifted), saltzer-schroeder (the gate asks
+  "did a human agree"; this asks "does it work" — two different questions,
+  and the second had no answer)

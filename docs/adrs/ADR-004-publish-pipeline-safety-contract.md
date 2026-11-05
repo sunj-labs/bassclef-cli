@@ -12,6 +12,47 @@ superseded_by: null
 
 # ADR-004 — Pin the safety contract for the publish pipeline
 
+## Amendment 2026-11-05b — the package is run before the gate, not after
+
+Job 1 gains a final step: the install harness packs the tarball, installs it
+into a temp prefix, and calls `--version`, `init` and `sync --dry-run`.
+
+**Why.** Every other check in job 1 inspects the tarball's *file list*. None
+ran the package. A tarball can clear the six-file `dist/lite/` floor and still
+fail to initialise — which is exactly what the harness caught on its first
+honest run. An npm version can never be reused, so a defect found after
+publishing cannot be withdrawn, only superseded. The last moment the answer is
+still free is before the gate.
+
+**Why it was not already here.** The harness existed and ran in
+`harness.yml`, triggered on `release: published` — the same event as this
+workflow. It therefore ran *beside* the publish rather than before it, and its
+result gated nothing. It had also never passed: six releases failed unread,
+because `npm run build` empties `dist/` and nothing rebuilt the substrate
+bundle before the pack.
+
+**Local scenario only.** `HARNESS_INCLUDE_PUBLISHED` stays unset here. The
+version does not exist on the registry yet, so the published scenario would
+fail on infrastructure rather than on the package. `harness.yml` still runs
+both after the release, which confirms the registry serves what we built.
+
+**Cost.** The publish now waits on a pack plus an install plus three CLI
+calls. Accepted: the alternative is learning the answer after the version is
+spent.
+
+### The step list below has drifted, and this amendment does not fix it
+
+Noted rather than silently corrected. The ordered-steps list says Node 20;
+`publish.yml` uses Node 22. The list also omits five steps that exist in job
+1 — the `.bassclef-pin` read, the mirror checkout, the pin-resolves assert,
+the `dist/lite/` bundle, and the six-file floor.
+
+Reconciling the whole list is its own change with its own review. Adding the
+harness step while claiming the surrounding list is accurate would be worse
+than saying so here.
+
+The harness step is step 12, last in job 1, immediately before the gate.
+
 ## Amendment 2026-11-05 — the gate becomes operator-held, default ON
 
 The block below read "No auto-publish. Every release requires operator
