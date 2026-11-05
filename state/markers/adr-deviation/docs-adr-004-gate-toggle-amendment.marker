@@ -1,0 +1,31 @@
+# ADR-deviation marker — ADR-004 gate toggle amendment
+- date: 2026-11-05
+- branch: docs/adr-004-gate-toggle-amendment
+- adr_governing: ADR-004 (publish pipeline safety contract)
+- outcome: ADR-deviation
+- lens-a-supporting-adr: saltzer-schroeder — fail-safe defaults. The ADR's
+  own Environment-gate section accepts a single maintainer only because
+  "layered mitigations replace the missing separation," and the approval
+  click is one of those layers. An off switch that persists silently IS the
+  undetected state the repo already sat in. The amendment is only safe if
+  the off state is one-shot and self-restoring, not a mode.
+- lens-b-supporting-deviation: alan-cooper — goal-directed design. The gate
+  exists to carry the operator's intent, not to outlast it. A gate its owner
+  cannot set aside gets routed around instead; this repo has the precedent,
+  an --admin merge on PR #465 one session ago. An explicit, default-ON,
+  logged toggle is more honest than ad-hoc bypass.
+- decision-rationale: The operator asked for a default-approval gate with an
+  override for nights they would rather trust the release and sleep. ADR-004
+  blocks that outright ("No auto-publish. Every release requires operator
+  approval at the Environment gate"), so the toggle needs the block amended
+  rather than quietly crossed. Three facts make amending correct. The ADR
+  files that block under "Blocks (until reconsidered)" and carries its own
+  Revisit trigger, so reconsidering is the sanctioned path. The gate is
+  empty today — protection_rules is [] — so default-ON-with-toggle is
+  strictly stronger than what actually runs. And Saltzer's objection is
+  answerable in the design: the override is one-shot inside a single
+  /publish trust dispatch, which clears the reviewer and restores it after
+  the publish, so no night ends with the gate open.
+- new-adr-filed: none — amends ADR-004 in place per its own
+  "until reconsidered" clause. Operator approved the amendment path on
+  2026-11-05 after being shown both lenses.

@@ -12,6 +12,61 @@ superseded_by: null
 
 # ADR-004 — Pin the safety contract for the publish pipeline
 
+## Amendment 2026-11-05 — the gate becomes operator-held, default ON
+
+The block below read "No auto-publish. Every release requires operator
+approval at the Environment gate." It now reads "by default." The operator
+may clear the approval requirement for a single publish via
+`/publish trust`, which restores it immediately afterward.
+
+**Why reconsider.** The operator asked for an override on nights they would
+rather trust the release than stay awake for it. Their words, 2026-11-05:
+"Some nights, I'll want to just trust what we're going to do and go to
+sleep." A gate that only ever waits is right when the operator is awake and
+wrong when they are not — the run simply sits pending until morning.
+
+**Why this is amendment rather than deviation.** The block sits under
+"Blocks (until reconsidered)" and this section carries its own Revisit
+trigger. Reconsidering is the path the ADR named for itself.
+
+**What GitHub does and does not offer.** An environment either waits for a
+click (`required_reviewers`) or waits a fixed timer and then proceeds
+(`wait_timer`). There is no pre-authorize-a-future-deployment rule. Any
+in-between signal — a repo variable, a magic tag, a dispatch input — is
+writable by the agent, so it would not be a gate. An operator-run toggle is
+therefore the only honest shape.
+
+**The Saltzer objection, and the answer.** The Environment gate section
+below accepts a single maintainer only because "layered mitigations replace
+the missing separation," and the approval click is one of those layers.
+Removing it permanently would weaken the stack. So the override is
+**one-shot, not a mode**: `/publish trust` clears the reviewer, publishes,
+and restores the reviewer within the same dispatch. No night ends with the
+gate open. A persistent off state is the exact condition this repo was
+already in undetected, which is what `cli#462` records.
+
+**Decision.**
+
+1. The `npm-publish` environment carries `required_reviewers` naming the
+   operator. That is the resting state.
+2. `/publish` — default. Waits at the gate.
+3. `/publish trust` — clears the reviewer, publishes, restores it. Writes an
+   audit line naming the version and the time.
+4. If a dispatch fails between clear and restore, session-start reports the
+   gate as open and re-arms it. A gate found open with no publish in flight
+   is a defect, not a state.
+
+**Unchanged.** No token-based publish path. No publish from a laptop. The
+`checks` job still runs ungated and its output still lands before the gate.
+Trusted publishing, provenance and `--ignore-scripts` are untouched.
+
+Lenses: `@luminary saltzer-schroeder` (fail-safe defaults — argued for
+keeping the block; answered by making the override one-shot) and
+`@luminary alan-cooper` (goal-directed — a gate its owner cannot set aside
+gets routed around). Marker at
+`state/markers/adr-deviation/docs-adr-004-gate-toggle-amendment.marker`.
+Operator approved the amendment path 2026-11-05.
+
 ## Amendment 2026-09-07 — target renamed `@thebassclef/core` → `@thebassclef/lite`
 
 The published package name changes from `@thebassclef/core` to `@thebassclef/lite`
@@ -373,8 +428,11 @@ supersession pending.
 
 **Blocks (until reconsidered):**
 
-- No auto-publish. Every release requires operator approval at the
-  Environment gate.
+- No auto-publish **by default**. Every release waits for operator
+  approval at the Environment gate, unless the operator clears it for
+  that one publish via `/publish trust`, which restores the gate
+  afterward. Amended 2026-11-05; the original block allowed no override
+  at all.
 - No token-based publish path. `NPM_TOKEN` is not stored, not
   configured, not accepted.
 - No publish from a laptop. Trusted publisher only accepts the

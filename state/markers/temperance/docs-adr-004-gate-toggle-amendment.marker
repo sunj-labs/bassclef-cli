@@ -1,0 +1,12 @@
+# Temperance marker — ADR-004 amendment + mechanize plan
+- date: 2026-11-05
+- branch: docs/adr-004-gate-toggle-amendment
+- scope-decision: Right thing — amend ADR-004's auto-publish block so the
+  operator-held toggle is sanctioned before any code ships, and file the
+  plan for verifying published bytes. Right way — amendment section at the
+  top of the ADR following the 2026-09-07 precedent, plus one edit to the
+  Blocks bullet it contradicts. No script, no skill, no workflow edit on
+  this branch.
+- drift-trigger: If this branch starts carrying publish-gate.sh or the
+  /publish skill, stop and split. The ADR has to land first so the code
+  cites an amended decision rather than contradicting an accepted one.
