@@ -1,0 +1,20 @@
+# Temperance marker — fix/463-lite-fixture-race
+- date: 2026-11-05
+- branch: fix/463-lite-fixture-race
+- scope-decision: Right thing — give the dist/lite/ fixture one owner so
+  `npm run build && npm test` stops failing 19 tests for a reason unrelated
+  to the code. Right way — one vitest globalSetup that builds the fixture if
+  absent, then delete the four copied self-heals. Simplest correct shape: the
+  alternative, making the four self-heals mutually exclusive with a lock, adds
+  machinery to preserve a pattern that should not exist.
+- blast-radius: the four init-* test files plus vitest.config.ts. The setup
+  never compiles src/, so a missing build still fails as a missing build —
+  which is the objection vitest.config.ts records against globalSetup, and
+  the reason the cure respects it rather than overriding it.
+- verification: `npm run build && npm test` must reach 536 passed. Falsified
+  if a DIFFERENT set of tests starts failing, which would mean the self-heals
+  were load-bearing for something I have not found.
+- reversible: yes — delete one file, revert one config line, restore four
+  beforeEach blocks from git.
+- drift-trigger: If this branch starts touching tests/harness/prepublish-bundle.test.ts,
+  stop. That file drives the bundler as its own subject and must keep doing so.

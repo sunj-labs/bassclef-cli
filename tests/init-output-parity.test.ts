@@ -62,23 +62,9 @@ let fakeHome: string;
 
 beforeAll(() => {
   // Fixture precondition: dist/lite/ must exist. `npm run build` (vite)
-  // cleans dist/, so we self-heal by running prepublish when the
-  // fixture is missing. Env-gated on the substrate build to keep the
-  // fixture minimal and fast in CI.
-  if (!existsSync(DIST_LITE) || !existsSync(join(DIST_LITE, '.claude/settings.json'))) {
-    const r = spawnSync(process.execPath, [
-      resolve(REPO_ROOT, 'scripts/prepublish-bundle-substrate.mjs'),
-    ], {
-      encoding: 'utf8',
-      timeout: 30000,
-      env: { ...process.env },
-    });
-    if (r.status !== 0) {
-      throw new Error(
-        `prepublish failed to seed dist/lite/ fixture: ${r.stderr || r.stdout}`
-      );
-    }
-  }
+  // cleans dist/, so the fixture is rebuilt once by the globalSetup in
+  // vitest.config.ts (cli#463). The self-heal that used to sit here raced
+  // its three siblings over the same directory after a build.
 });
 
 beforeEach(() => {

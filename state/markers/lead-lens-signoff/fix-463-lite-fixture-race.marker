@@ -1,0 +1,27 @@
+# Lead-lens sign-off — cli#463 fixture race
+- date: 2026-11-05
+- branch: fix/463-lite-fixture-race
+- lead: john-ousterhout
+- findings-cleared:
+  - RED-1 (the defect): `npm run build && npm test` failed 19 of 536 across
+    3 files. Cured by one globalSetup; now 536 of 536, typecheck clean.
+  - RED-2 (my own, caught by running the suite rather than trusting the edit):
+    I removed the four self-heals with a regex whose `\}` matched the INNER
+    if-block's brace, not the outer one. Three files were left syntactically
+    broken. Vitest reported "3 failed | 60 passed" with "512 passed (512)" —
+    zero failing assertions and 24 tests simply absent. A green-looking test
+    count with a quietly smaller total is the shape to distrust. Restored from
+    git and redid the removal with exact-match edits.
+- conflict-resolved: vitest.config.ts carries a comment rejecting globalSetup
+  because it would hide build failures behind test failures. That objection
+  is sound and is preserved, not overridden: the setup never compiles src/.
+  Demonstrated rather than asserted — moved dist/cli.js aside and the suite
+  failed with "dist/cli.js is missing ... Run `npm run build` first." The
+  config comment is amended to record the distinction so the next reader does
+  not think the decision was crossed.
+- verification: 536/536 after a build; typecheck clean; missing-build path
+  exercised by hand.
+- lens-verdict: PASS.
+- iteration_count: 2
+- wu_id: cli#463
+- lens_used: [john-ousterhout, michael-nygard, tony-hoare]

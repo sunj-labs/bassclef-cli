@@ -68,16 +68,9 @@ let workDir: string;
 let fakeHome: string;
 
 beforeEach(() => {
-  if (!existsSync(DIST_LITE) || !existsSync(join(DIST_LITE, '.claude/settings.json'))) {
-    const r = spawnSync(process.execPath, [
-      resolve(REPO_ROOT, 'scripts/prepublish-bundle-substrate.mjs'),
-    ], { encoding: 'utf8', timeout: 30000, env: { ...process.env } });
-    if (r.status !== 0) {
-      throw new Error(
-        `prepublish failed to seed dist/lite/ fixture: ${r.stderr || r.stdout}`
-      );
-    }
-  }
+  // dist/lite/ fixture is built once by the globalSetup in vitest.config.ts
+  // (cli#463). The per-test self-heal that used to sit here raced its three
+  // siblings over the same directory.
   fakeHome = mkdtempSync(join(HOME, '.bassclef-init-version-json-fakehome-'));
   workDir = mkdtempSync(join(fakeHome, '.bassclef-init-version-json-work-'));
 });

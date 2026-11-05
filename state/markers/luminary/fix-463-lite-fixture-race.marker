@@ -1,0 +1,11 @@
+# Luminary marker — cli#463 fixture race
+- date: 2026-11-05
+- branch: fix/463-lite-fixture-race
+- lead: john-ousterhout — the fixture had no owner, so four files each owned
+  it. One setup with one job replaces four copies of a repair. The comments
+  in those copies pointed at each other, which is what a missing owner looks
+  like in review.
+- supporting: michael-nygard (the failure was invisible in the right way —
+  it named `init` assertions, not the fixture, and moved between runs),
+  tony-hoare (the setup checks its own postcondition: the bundler exiting 0
+  is not evidence the fixture landed)
