@@ -1,0 +1,24 @@
+# Lead-lens sign-off — brass chip + condensed figlet
+- date: 2026-11-06
+- branch: feat/brass-mark
+- lead: jony-ive (material honesty)
+- findings-cleared:
+  - RED-1 through RED-8: the eight assertions that should fail did fail on
+    the old module — 11 rows where 4 were wanted, ragged widths, non-ASCII
+    present, and five chip tests against a function that did not exist.
+    All green after the rewrite.
+  - No RED on the rest. The nine pre-mortem folds were designed in rather
+    than discovered: mechanical charset assertion, even-width assertion,
+    colour-off degrade tested, undefined-width path kept, narrow fallback
+    kept, version from the argument, old grid tests rewritten not dropped,
+    chip pinned, and a test proving the new mark is narrower than 53.
+- verification: 17 of 17 in the mark suite; 542 of 542 across the repo, up
+  from 536; typecheck clean; install run by hand and the mark read correctly.
+- lens-verdict: PASS. The mark is now made of the medium it prints into.
+  Every character is in every font, so the two failures that killed the old
+  one cannot recur — not "are unlikely to", cannot.
+- iteration_count: 1
+- wu_id: cli#460 brass mark
+- lens_used: [jony-ive, ellen-lupton, vitaly-friedman]
+- deferred: michael-bierut argued for the real clef glyph. Operator deferred
+  it to cli#475 rather than rejecting it; reasoning recorded there.
