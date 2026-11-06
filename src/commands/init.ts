@@ -194,6 +194,7 @@ export function runInit(argv: readonly string[]): number {
       allowRoot: args.allowRoot,
       targetDir,
       say,
+      verbose: args.verbose,
       settingsPreserved: dryRunSettingsPreserved,
     });
     if (args.json) {
@@ -277,6 +278,67 @@ function readOneLineFromStdin(): string {
 // Fails loudly with exit codes 4 (manifest missing) + 5 (schema
 // incompatible) per ADR-055 D4. Prints hook-count banner per ADR-055 D5.
 // Returns the dispatch's exit code so runInit can propagate it.
+/** Bucket name for files the run wrote to the project root. */
+export const REPO_ROOT_GROUP = 'repo root';
+
+/**
+ * The one directory whose children are reported separately.
+ *
+ * Under `.claude/` the children are different kinds of thing to an
+ * adopter — hooks fire, skills are invoked, rules are read — so folding
+ * them into one count hides the distinction that matters. Everywhere else
+ * the top-level name is enough: `standards/` has ten subdirectories and
+ * nobody installing bassclef needs them itemized.
+ */
+const GROUP_EXPAND_DEPTH_2 = '.claude';
+
+/**
+ * Count copied files per directory, for the default banner.
+ *
+ * The directory is what holds the file, so the filename is dropped before
+ * the key is built. That is the fix for the 171-line banner: the pre-cure
+ * key kept the first two segments of the full path, and for a file one
+ * level deep the second segment IS the filename, so every such file
+ * became its own group.
+ *
+ * Depth is one level, except under `.claude/` where it is two. A file at
+ * the project root has no containing directory, so it lands in one named
+ * bucket rather than under `.` or an empty string.
+ *
+ * Keys come back sorted, with the root bucket last. Walker order is not
+ * meaningful to a reader, and sorting keeps the `.claude/` rows adjacent.
+ *
+ * @param copied - relative paths, as the walker recorded them.
+ * @returns directory to count. Counts sum to `copied.length`.
+ */
+export function groupCopiedByDirectory(
+  copied: readonly string[]
+): ReadonlyMap<string, number> {
+  const counts = new Map<string, number>();
+  for (const path of copied) {
+    const segments = path.split('/').filter((s) => s.length > 0);
+    const directories = segments.slice(0, -1);
+    let key: string;
+    if (directories.length === 0) {
+      key = REPO_ROOT_GROUP;
+    } else if (directories[0] === GROUP_EXPAND_DEPTH_2) {
+      key = directories.slice(0, 2).join('/');
+    } else {
+      key = directories[0] as string;
+    }
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const sorted = new Map<string, number>();
+  for (const key of [...counts.keys()].sort()) {
+    if (key === REPO_ROOT_GROUP) continue;
+    sorted.set(key, counts.get(key) as number);
+  }
+  const root = counts.get(REPO_ROOT_GROUP);
+  if (root !== undefined) sorted.set(REPO_ROOT_GROUP, root);
+  return sorted;
+}
+
 interface DispatchOutcome {
   code: number;
   /** Present when the walker ran. Absent when it failed before copying. */
@@ -337,32 +399,79 @@ function dispatchSubstrateCopy(
   if (result.copied.length === 0 && result.refused.length === 0 && result.errored.length === 0) {
     return { code: 0, result };
   }
-  // Group copied files by top-level directory for the summary line.
-  const groupCounts = new Map<string, number>();
-  for (const path of result.copied) {
-    const parts = path.split('/');
-    const top = parts.length >= 2 ? parts.slice(0, 2).join('/') : parts[0] ?? '';
-    groupCounts.set(top, (groupCounts.get(top) ?? 0) + 1);
-  }
-  for (const [directory, count] of groupCounts) {
-    say(`  ${directory}: ${count} files copied\n`);
-  }
-  const parts: string[] = [];
-  if (result.copied.length > 0) parts.push(`${result.copied.length} substrate files copied`);
-  // cli#235 — user-scope dual-write hits identical content from prior
-  // install; report separately so adopters see honest total without a
-  // misleading "path collision" bucket.
-  if (result.unchanged.length > 0) parts.push(`${result.unchanged.length} already-present`);
-  if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
-  if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
-  say(`bassclef init: ${parts.join(', ')}.\n`);
-  // Per bassclef-cli#60: print the grand total so the reader sees one
-  // number that matches the on-disk footprint (1 config file — substrate.config.md
-  // — plus the walker output).
+  // cli#477 — the inventory moves behind --verbose; the default prints a
+  // summary.
+  //
+  // Measured on a real run 2026-11-06: 201 lines of stdout, 171 of them
+  // from the loop below. The grouping key was the cause. It joined the
+  // first TWO path segments, so a file one level deep — `lib/state.sh`,
+  // `templates/spec-template.md` — became its own group, and a line that
+  // claimed to summarize a directory named a single file instead.
+  //
+  // Debug fidelity does not live in this banner. Every file the run
+  // touched is recorded in `.bassclef/init.manifest.json` with its
+  // outcome and its SHA-256 (writeManifest, below), including refused and
+  // errored files per ADR-010 D4. A test that wants the file set reads
+  // the manifest. A reader who wants it on screen passes --verbose, which
+  // keeps the pre-cure output verbatim.
   const grandTotal = 1 + result.copied.length;
-  say(
-    `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
-  );
+
+  if (verbose) {
+    // Pre-cure shape, unchanged. Pinned by
+    // tests/init-reporting-characterization.test.ts, which now runs
+    // against --verbose rather than the default.
+    const groupCounts = new Map<string, number>();
+    for (const path of result.copied) {
+      const parts = path.split('/');
+      const top = parts.length >= 2 ? parts.slice(0, 2).join('/') : parts[0] ?? '';
+      groupCounts.set(top, (groupCounts.get(top) ?? 0) + 1);
+    }
+    for (const [directory, count] of groupCounts) {
+      say(`  ${directory}: ${count} files copied\n`);
+    }
+    const parts: string[] = [];
+    if (result.copied.length > 0) parts.push(`${result.copied.length} substrate files copied`);
+    // cli#235 — user-scope dual-write hits identical content from prior
+    // install; report separately so adopters see honest total without a
+    // misleading "path collision" bucket.
+    if (result.unchanged.length > 0) parts.push(`${result.unchanged.length} already-present`);
+    if (result.refused.length > 0) parts.push(`${result.refused.length} refused`);
+    if (result.errored.length > 0) parts.push(`${result.errored.length} error(s)`);
+    say(`bassclef init: ${parts.join(', ')}.\n`);
+    // Per bassclef-cli#60: print the grand total so the reader sees one
+    // number that matches the on-disk footprint (1 config file —
+    // substrate.config.md — plus the walker output).
+    say(
+      `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
+    );
+  } else {
+    for (const [directory, count] of groupCopiedByDirectory(result.copied)) {
+      say(`  ${directory}: ${count} ${count === 1 ? 'file' : 'files'}\n`);
+    }
+    // One total, not two. The pre-cure banner printed the substrate count
+    // and then a grand total that contained it, so the larger number read
+    // as a correction of the smaller one.
+    say(
+      `bassclef init: ${grandTotal} files installed (1 config + ${result.copied.length} substrate).\n`
+    );
+    // Both of these are actionable and both were buried. `refused` means
+    // an adopter file was already there and init left it alone — safe, and
+    // the reader still needs to know which flag changes it.
+    if (result.unchanged.length > 0) {
+      say(
+        `bassclef init: ${result.unchanged.length} already present and identical — nothing to do.\n`
+      );
+    }
+    if (result.refused.length > 0) {
+      say(
+        `bassclef init: ${result.refused.length} left alone — a file already existed. ` +
+          `Pass --force to overwrite, or --verbose to list them.\n`
+      );
+    }
+    if (result.errored.length > 0) {
+      say(`bassclef init: ${result.errored.length} error(s) — see above.\n`);
+    }
+  }
   // Norman N1 fold — banner names installed HOOK count + per-scope breakdown.
   // The declared count comes from settings.json (result.hookCount).
   // Cli 1.0.3 (bassclef-cli#87) — the tarball now ships helpers + fragments
@@ -745,6 +854,7 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     allowRoot,
     targetDir,
     say,
+    verbose,
     settingsPreserved: settingsRefused,
   });
 
@@ -910,7 +1020,7 @@ export function usage(): string {
     '  --dry-run          Print what would happen; write nothing.',
     '  --allow-root       Allow running as root. Default: refuse.',
     '  --allow-any-dir    Allow --dir outside your home directory. Default: refuse.',
-    '  --verbose          Print per-file result.',
+    '  --verbose          Print the full file inventory and statusline paths.',
     '',
     'Exit codes:',
     '  0 — success',
@@ -978,6 +1088,13 @@ interface StatuslinePlanOpts {
   allowRoot: boolean;
   targetDir: string;
   say: Say;
+  /**
+   * Print the per-target outcome with its absolute paths. Default output
+   * says only what happened, because the detailed line carried three
+   * absolute paths — which means it carried the operator's username —
+   * and named a file the reader was not asked to do anything about.
+   */
+  verbose: boolean;
   /**
    * Set by runReal when the walker refused to write .claude/settings.json
    * (existing file, --force not passed). Passed through to installStatusline
@@ -1069,7 +1186,22 @@ function maybeEmitStatuslinePlan(opts: StatuslinePlanOpts): void {
   else if (sv === 'preserved') parts.push(`preserved statusLine in ${report.settings.path} (pass --force to overwrite)`);
   else if (sv === 'unchanged') parts.push(`statusLine in ${report.settings.path} already matches`);
 
-  if (parts.length > 0) {
+  if (parts.length === 0) return;
+
+  if (opts.verbose) {
     opts.say(`bassclef init: statusline — ${parts.join('; ')}.\n`);
+    return;
+  }
+
+  // cli#477 — one line, no paths. "Preserved" is the only outcome the
+  // reader can act on, so it is the only one that names a flag.
+  const preserved = dv === 'preserved' || rv === 'preserved' || sv === 'preserved';
+  if (preserved) {
+    opts.say(
+      `bassclef init: statusline — kept your existing setup. ` +
+        `Pass --force to replace it, or --verbose for the paths.\n`
+    );
+  } else {
+    opts.say(`bassclef init: statusline ready.\n`);
   }
 }

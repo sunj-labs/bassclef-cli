@@ -1,0 +1,28 @@
+# Lead-lens sign-off — cli#477 init banner collapse
+- date: 2026-11-06
+- branch: fix/init-banner-collapse
+- lead: edward-tufte
+
+## Findings cleared
+
+- T1, T2, T3 (aggregation depth + key shape) — cleared. Depth rule is one
+  level, two under .claude/. Two tests pin it: group count under 30, and no
+  group key ending in a file extension.
+- N4, N5 (actionable facts stay visible and name their flag) — cleared.
+- F6, F7, F8 (characterization moved not weakened; manifest coverage added;
+  test totals compared) — cleared.
+
+No red findings. One amber raised and closed during the work: the first
+grouping rule used two levels everywhere and produced 27 group lines, with
+standards/ split into eleven. Reduced to one level outside .claude/, which
+gave 14. Measured, not estimated.
+
+## Verification performed
+
+- Real run, fresh target: 201 stdout lines before, 44 after. Inventory is 14
+  lines of the 44.
+- --verbose run: 204 lines; every pattern the characterization test pins still
+  present, in order.
+- --json: schema_version 3, totals.files 554, refused 0. Unchanged.
+- --dry-run: unchanged.
+- Full suite: 63 files, 551 tests, 0 failed.
