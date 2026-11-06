@@ -1,0 +1,9 @@
+{
+  "luminary_slug": "jony-ive",
+  "schema_version": 1,
+  "referenced_by_files": [
+    "tests/init-brand-mark.test.ts"
+  ],
+  "last_scanned": "2026-11-06T19:49:59Z",
+  "scanner_version": "1.0"
+}
