@@ -2,3 +2,4 @@
 2026-11-07T14:46:49Z	off	kingofrock	authorized_by=kingofrock note=written-by-hand-script-write-path-broken-see-cli-482
 2026-11-07T14:50:00Z	on	kingofrock	note=restored-after-1.9.21-publish-raw-call-see-cli-482
 2026-11-07T14:51:25Z	off	kingofrock	authorized_by=kingofrock note=retry-after-sigstore-502-script-write-broken-cli-482
+2026-11-07T15:11:46Z	on	kingofrock	note=restored-so-operator-can-approve-retry
