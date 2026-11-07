@@ -1,0 +1,15 @@
+# Temperance marker — 1.9.22 release
+- date: 2026-11-07
+- branch: release-1.9.22
+- scope-decision: Right thing — 1.9.21 shipped the install-output collapse and
+  left the mark unchanged, so a cold adopter still met eleven rows of block
+  art. That was the first thing the operator named as sloppy. Right way —
+  merge #476, which was already CLEAN with green checks, then cut a patch.
+- what it can break: display only. src/lib/init-brand-mark.ts is pure string
+  composition; no caller signature changed. Verified on main before cutting:
+  63 files, 556 tests, 0 failed, and a real init run prints the figlet.
+- why a second release rather than waiting: the mark is the most visible part
+  of a first install, and the old one is broken in a way that is measured, not
+  guessed — Monaco lacks both block characters it depends on.
+- drift-trigger: if this grows past the mark into the bass clef glyph (#475),
+  stop. That was deferred by operator decision.

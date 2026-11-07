@@ -1,0 +1,18 @@
+# Lead-lens sign-off — 1.9.22 release
+- date: 2026-11-07
+- branch: release-1.9.22
+- lead: jony-ive
+
+## Findings cleared
+
+- No red, no amber. #476 carried its own pre-mortem and sign-off; this release
+  adds the version bump and the changelog entry only.
+
+## Verification performed on main, after the merge
+
+- Full suite: 63 files, 556 tests, 0 failed.
+- Test total accounted rather than accepted: 549 to 556 is +6 brand-mark tests
+  from #476 and +1 bump-script test from #480. Per-file diff confirms both.
+- Real init run prints the four-row ASCII figlet, 31 lines total.
+- npm run bump completed without the false "build failed" that #479 fixed.
+  First real use of that fix.

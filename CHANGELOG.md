@@ -24,6 +24,30 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.22] - 2026-11-07
+### Changed
+
+- The install mark is now four rows of plain ASCII instead of eleven rows of
+  Unicode block characters. `bassclef init` prints 31 lines. (#460)
+
+### Fixed
+
+- The old mark failed two ways, both measured. 98 of its 135 characters were
+  solid block, so any terminal with line spacing above 1.0 turned it into a
+  mass. And Monaco carries neither `U+2580` nor `U+2584` — read from the font
+  binary, 1,624 codepoints, neither present — so a third of it was absent
+  there rather than blurred. The new mark uses printable ASCII only, which
+  every font has. (#460)
+
+### Notes
+
+- The mark is also narrower: 40 columns against 53. Below 40 columns `init`
+  prints the text alone, because a mark split across lines reads as broken
+  output rather than a narrow window.
+- Follow-up at #475 explores the real bass clef character. It does render via
+  font fallback and is one column wide, both verified. It was deferred by
+  choice, not on merit.
+
 ## [1.9.21] - 2026-11-07
 ### Added
 

@@ -1,0 +1,17 @@
+# Luminary marker — 1.9.22 release
+- date: 2026-11-07
+- branch: release-1.9.22
+- lead: jony-ive
+- supporting: [michael-feathers]
+
+## What each lens caught
+
+- jony-ive (lead) — material honesty. A character grid is not a bitmap. The
+  old mark asked terminal cells to behave like pixels, and they do not: line
+  spacing is the viewer's setting, and font coverage is the font's business.
+  The cure was to stop pretending and use the alphabet, which every font has.
+- michael-feathers — the grid is data that corrupts silently. A paste from a
+  figlet generator can carry a Unicode dash, and an edit can pad one row and
+  not its neighbours. Neither shows on the author's own machine. The sibling
+  tests assert the character set and the row widths mechanically for that
+  reason, and they were rewritten rather than dropped when the grid changed.
