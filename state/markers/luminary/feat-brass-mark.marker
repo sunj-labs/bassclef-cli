@@ -1,0 +1,13 @@
+# Luminary marker — brass chip + condensed figlet
+- date: 2026-11-06
+- branch: feat/brass-mark
+- lead: jony-ive — material honesty. A terminal is a character grid, not a
+  bitmap. The old mark pretended otherwise and broke on contact. The cure is
+  to use the medium as what it is: letterforms made of letters.
+- supporting: ellen-lupton (type is a voice carried by weight and rhythm —
+  the figlet and the chip are the same voice at two sizes), vitaly-friedman
+  (whitespace is load-bearing — the chip's padding is what makes it a mark
+  rather than coloured text)
+- deferred-lens: michael-bierut argued for the real clef glyph as a
+  generative mark. Operator deferred it to cli#475; the reasoning is recorded
+  there rather than lost.

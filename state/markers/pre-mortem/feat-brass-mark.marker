@@ -1,0 +1,12 @@
+# Pre-mortem marker — brass chip + condensed figlet
+- date: 2026-11-06
+- branch: feat/brass-mark
+- mode: light (3 lenses)
+- ledger: docs/risk-ledgers/2026-11-06-brass-mark.md
+- lenses: jony-ive, michael-nygard, michael-feathers
+- risks-surfaced: 9
+- folded-before-code: assert pure-ASCII mechanically rather than trusting the
+  source file; assert every figlet row is the same width; chip must degrade to
+  the bare word when colour is absent, tested with the colour path off; keep
+  the narrow-terminal fallback the old mark had; do not assume the caller
+  passes a width.

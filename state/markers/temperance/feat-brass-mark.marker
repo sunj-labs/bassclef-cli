@@ -1,0 +1,16 @@
+# Temperance marker — brass chip + condensed figlet
+- date: 2026-11-06
+- branch: feat/brass-mark
+- scope-decision: Right thing — replace a mark that is provably broken
+  (Monaco carries neither half-block; 73% fill blobs on line spacing) with
+  one that cannot fail. Right way — pure-ASCII figlet at install, brass chip
+  everywhere else, both verified against the four common terminal fonts.
+- blast-radius: src/lib/init-brand-mark.ts and its one caller at
+  src/commands/init.ts:769. The existing tests pin the OLD contract (11 rows,
+  27 cols, four codepoints, min 53) and will fail by design — this is a
+  deliberate redesign, not a regression.
+- verification: figlet is 4 rows x 40 cols, every row even width, and every
+  character is printable ASCII. Assert that mechanically, not by eye.
+- drift-trigger: If this branch starts collapsing the 206-line file inventory,
+  stop. That is a separate concern and its own PR. Also stop if the bass clef
+  glyph reappears — deferred to cli#475 by operator decision.
