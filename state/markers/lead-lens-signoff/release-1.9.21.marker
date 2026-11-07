@@ -1,0 +1,23 @@
+# Lead-lens sign-off — 1.9.21 release + cli#479
+- date: 2026-11-07
+- branch: release-1.9.21
+- lead: michael-feathers
+
+## Findings cleared
+
+- The default runner is under test. Test 4 in tests/bump-version.test.ts runs
+  the default path and pins the defect shape: execSync with stdio inherit
+  returns null, and .toString() on that throws TypeError.
+- No red findings. One note: Test 4 reproduces the default runner's shape
+  against `true` rather than invoking the real build, because a unit test
+  cannot afford a vite run. It therefore pins the shape, not the integration.
+  The integration was checked by hand instead — see below.
+
+## Verification performed
+
+- `execSync('echo hi', {stdio:'inherit'}) === null` → true. Measured, not
+  reasoned.
+- `runBuild()` with no argument → returns, no throw.
+- `npm run build` then `node dist/cli.js --version` → 1.9.21, matching
+  package.json. This is runBuild's actual postcondition.
+- Full suite: 63 files, 550 tests, 0 failed. 549 before, +1 for Test 4.

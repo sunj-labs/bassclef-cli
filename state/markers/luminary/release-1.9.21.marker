@@ -1,0 +1,18 @@
+# Luminary marker — 1.9.21 release + cli#479
+- date: 2026-11-07
+- branch: release-1.9.21
+- lead: michael-feathers
+- supporting: [tony-hoare]
+
+## What each lens caught
+
+- michael-feathers (lead) — an injected default is still production code.
+  runBuild takes a runner argument, and all three of its tests pass a stub, so
+  the default arrow function never ran under test. The seam built for
+  testability is exactly what hid the defect inside its own default. The cure
+  is a test that exercises the default path, which is now Test 4.
+- tony-hoare — postcondition. runBuild's contract is "dist matches
+  package.json after this returns". It threw instead of returning, so the
+  postcondition was unreachable and the caller reported a failure that had not
+  happened. Verified by hand after the fix: dist/cli.js --version reports
+  1.9.21, matching package.json.

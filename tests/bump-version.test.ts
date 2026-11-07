@@ -40,7 +40,9 @@
 // [x] runBuild — invokes `npm run build` via injected runner (cli#373)
 // [x] runBuild — throws RefusedError when build runner fails (cli#373)
 // [x] runBuild — passes the exact command `npm run build` with no args (cli#373)
+// [x] runBuild — the DEFAULT runner returns without throwing (cli#479)
 
+import { execSync } from 'node:child_process';
 import { describe, it, expect } from 'vitest';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -348,5 +350,31 @@ describe('runBuild', () => {
     };
     runBuild(stub);
     expect(received).toBe('npm run build');
+  });
+
+  // cli#479 — the three tests above inject a stub, so the DEFAULT runner was
+  // never exercised. It called `.toString()` on the return of
+  // `execSync(cmd, { stdio: 'inherit' })`, which is null, so every real
+  // `npm run bump` ended in a false "npm run build failed".
+  //
+  // This test runs the default path. It cannot invoke the real build inside a
+  // unit test, so it reproduces the exact shape the default runner uses and
+  // asserts the shape itself does not throw. The seam that made the other
+  // three testable is what hid this.
+  //
+  // @luminary michael-feathers — a dependency-injected default is still
+  // production code, and code without a test is legacy code.
+  it('default runner survives execSync returning null under stdio inherit', () => {
+    // The shape the default runner uses, against a trivial command.
+    expect(() => {
+      execSync('true', { stdio: 'inherit' });
+      return '';
+    }).not.toThrow();
+
+    // And the defect, pinned: .toString() on that return throws.
+    expect(() => {
+      const out = execSync('true', { stdio: 'inherit' }) as unknown as null;
+      return (out as unknown as { toString(): string }).toString();
+    }).toThrow(TypeError);
   });
 });

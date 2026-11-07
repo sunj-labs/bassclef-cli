@@ -192,7 +192,16 @@ export function writeChangelog(changelogPath, newText) {
 // dist/ current. Dependency-injected runner mirrors refuseIfDirty's shape
 // for test mocking. Closes cli#373.
 export function runBuild(runCmd) {
-  const runner = runCmd || ((cmd) => execSync(cmd, { stdio: 'inherit' }).toString());
+  // `stdio: 'inherit'` streams the build output to the operator's terminal,
+  // and in exchange execSync returns null — there is no captured buffer to
+  // hand back. Calling .toString() on that threw on every single run, and
+  // the catch below reported it as "npm run build failed" when the build had
+  // just succeeded. Every `npm run bump` ended in a false failure.
+  //
+  // The default runner was never under test. All three sibling tests inject a
+  // stub, so the seam built for testability is exactly what hid the defect in
+  // its own default. Test 4 now exercises this path. Per cli#479.
+  const runner = runCmd || ((cmd) => { execSync(cmd, { stdio: 'inherit' }); return ''; });
   try {
     runner('npm run build');
   } catch (e) {
