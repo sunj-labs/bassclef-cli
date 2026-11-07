@@ -1,0 +1,68 @@
+# Lead-lens sign-off — cli#477 init banner collapse
+- date: 2026-11-06
+- branch: fix/init-banner-collapse
+- lead: edward-tufte
+
+## Findings cleared
+
+- T1, T2, T3 (aggregation depth + key shape) — cleared. Depth rule is one
+  level, two under .claude/. Two tests pin it: group count under 30, and no
+  group key ending in a file extension.
+- N4, N5 (actionable facts stay visible and name their flag) — cleared.
+- F6, F7, F8 (characterization moved not weakened; manifest coverage added;
+  test totals compared) — cleared.
+
+No red findings. One amber raised and closed during the work: the first
+grouping rule used two levels everywhere and produced 27 group lines, with
+standards/ split into eleven. Reduced to one level outside .claude/, which
+gave 14. Measured, not estimated.
+
+## Verification performed
+
+- Real run, fresh target: 201 stdout lines before, 44 after. Inventory is 14
+  lines of the 44.
+- --verbose run: 204 lines; every pattern the characterization test pins still
+  present, in order.
+- --json: schema_version 3, totals.files 554, refused 0. Unchanged.
+- --dry-run: unchanged.
+- Full suite: 63 files, 551 tests, 0 failed.
+
+## Second pass — 2026-11-07
+
+Operator asked whether 44 lines was still too many. It was. The 14-line
+directory summary was inventory one grain coarser, and a reader cannot act
+on "standards: 102 files" either. Banner is now 4 lines on a clean install.
+
+- Dropped by default, kept under --verbose: the directory summary, the
+  statusline note on a clean install.
+- Kept after reverting a gate: "N config files created". On a partial
+  install it is the only evidence substrate.config.md landed, which
+  tests/init.test.ts "partial state" asserts. Changing that test to fit a
+  line budget would have been weakening it; the budget allowed the line.
+- Left alone, named: "1 config files created" should read "file". Two tests
+  pin the plural spelling, so the fix is its own change.
+
+## Findings cleared — second pass
+
+- Three tests failed on the first run of this pass. Two were my own, written
+  for the 14-line design and stale within the same session; rewritten to
+  assert the new contract, not weakened to pass. One was init.test.ts
+  "partial state", a real adopter concern; the source changed, not the test.
+- Test total read 549 against a 551 baseline while 4 tests were added. Chased
+  per the green-count-with-smaller-total discipline rather than accepted.
+  Cause: the 551 baseline ran on feat/brass-mark, where
+  tests/init-brand-mark.test.ts carries 17 tests; this branch is off
+  origin/main, where it carries 11. 551 - 6 + 2 + 2 = 549. Verified with
+  `git show feat/brass-mark:tests/init-brand-mark.test.ts`. Nothing absent.
+
+## CTA line (cli#477)
+
+Added one line to src/lib/init-value-test-block.ts, the Sam-verbatim block.
+The block walks the reader to /build, and /build opens a pull request. A pull
+request needs a GitHub remote, which init does not create, so today the
+reader finds out at step three. The line names the requirement rather than
+naming /onboard-repo, because that skill's Path A requires bassclef cloned
+as a peer at ~/src/<org>/bassclef — which an npm adopter does not have.
+
+Needs bassclef-upstream#2006 updated per the note in that file. Two tickets
+filed separately: Path C unwritten, and the Path A peer-clone prereq.

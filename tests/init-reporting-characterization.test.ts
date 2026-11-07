@@ -13,17 +13,39 @@
 // refused > 0). The order test drops that regex from the fresh-install
 // path. See tests/init-banner-noise-cleanup.test.ts for the new gates.
 //
+// Updated for cli#477 (2026-11-06): the inventory now prints under
+// --verbose, and the default banner summarizes instead. The two tests
+// that pin the inventory run against --verbose. Their patterns are
+// UNCHANGED — the output they assert on did not change, only the flag
+// that asks for it. That is the whole point of a characterization test:
+// it moved, it did not get weakened.
+//
+// A reader may ask why the per-file set is not pinned on the default
+// path. It never belonged on stdout. `.bassclef/init.manifest.json`
+// records every file with its outcome and its SHA-256, refused and
+// errored files included, per ADR-010 D4 — so the manifest tests below
+// are the ones that actually guard the file set.
+//
 // test-list:
 // [x] non-JSON run exits 0 on a fresh target
-// [x] non-JSON run prints its summary lines to stdout in a fixed order
+// [x] --verbose run prints its summary lines to stdout in a fixed order
 // [x] non-JSON run prints nothing to stderr on success
-// [x] non-JSON run prints the per-directory copy lines before the summary
+// [x] --verbose run prints the per-directory copy lines before the summary
+// [x] default run prints no per-file inventory line
+// [x] default run prints no indented list at all
+// [x] default run keeps the banner to five lines or fewer
+// [x] default run says nothing about a clean statusline install
+// [x] default run leaks no absolute path into the banner
+// [x] default run still prints the one total and the hook line
+// [x] manifest records every file the run touched, with an outcome
+// [x] manifest records a SHA-256 for every file the run created
+// [x] manifest records refused files, so a partial init looks partial
 // [x] sync on a 1-entry manifest reports exactly one managed file
 // [x] sync takes no action on a manifest entry whose template is unknown
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -61,8 +83,9 @@ describe('characterization — bassclef init without --json', () => {
     expect(r.status).toBe(0);
   });
 
-  it('prints its summary lines to stdout in a fixed order', () => {
-    const r = run('init', []);
+  it('prints its summary lines to stdout in a fixed order under --verbose', () => {
+    // cli#477 — these lines moved behind --verbose. Patterns unchanged.
+    const r = run('init', ['--verbose']);
     const lines = r.stdout.split('\n');
 
     // Each summary line, in the order init prints it today. Matching on a
@@ -87,8 +110,9 @@ describe('characterization — bassclef init without --json', () => {
     }
   });
 
-  it('prints the per-directory copy lines before the summary', () => {
-    const r = run('init', []);
+  it('prints the per-directory copy lines before the summary under --verbose', () => {
+    // cli#477 — same move, same pattern.
+    const r = run('init', ['--verbose']);
     const lines = r.stdout.split('\n');
     const firstCopyLine = lines.findIndex((l) => /^ {2}\S+: \d+ files copied$/.test(l));
     const totalLine = lines.findIndex((l) => /files total \(/.test(l));
@@ -100,6 +124,158 @@ describe('characterization — bassclef init without --json', () => {
     const r = run('init', []);
     expect(r.status).toBe(0);
     expect(r.stderr.trim()).toBe('');
+  });
+});
+
+// cli#477 — the default path. The two tests above pin what --verbose
+// still prints; these pin that the default does NOT print it, and that
+// the numbers a reader acts on survived the collapse.
+describe('bassclef init default output is a summary, not an inventory', () => {
+  it('prints no per-file inventory line', () => {
+    const r = run('init', []);
+    expect(r.status).toBe(0);
+    // The pre-cure banner emitted one of these per file, because the
+    // grouping key kept the filename. 171 of them on a real run.
+    const inventoryLines = r.stdout
+      .split('\n')
+      .filter((l) => /^ {2}\S+: \d+ files copied$/.test(l));
+    expect(
+      inventoryLines,
+      `default stdout carried ${inventoryLines.length} inventory lines; they belong behind --verbose`
+    ).toHaveLength(0);
+  });
+
+  it('prints no indented file or directory list at all', () => {
+    const r = run('init', []);
+    // The first pass at this cure kept a 14-line directory summary. It went
+    // too: a reader cannot act on "standards: 102 files" either. What is
+    // left is the count, where the hooks went, and anything needing a
+    // decision.
+    const indented = r.stdout
+      .split('\n')
+      .filter((l) => /^ {2}\S+: \d+ files?( copied)?$/.test(l));
+    expect(
+      indented,
+      `default stdout carried ${indented.length} list lines; they belong behind --verbose`
+    ).toHaveLength(0);
+  });
+
+  it('keeps the banner to four lines before the mark', () => {
+    const r = run('init', []);
+    const banner = r.stdout
+      .split('\n')
+      .filter((l) => l.startsWith('bassclef init: '));
+    // Four on a clean install: config created, files installed, hooks armed,
+    // where the substrate lives. Refused, errored and preserved-statusline
+    // lines are conditional and push it no higher than seven.
+    expect(
+      banner.length,
+      `banner is ${banner.length} lines:\n${banner.join('\n')}`
+    ).toBeLessThanOrEqual(5);
+    expect(banner.length).toBeGreaterThan(0);
+  });
+
+  it('still prints one total, the hook line, and the gitignore note', () => {
+    const r = run('init', []);
+    expect(r.stdout).toMatch(/files installed \(1 config \+ \d+ substrate\)/);
+    expect(r.stdout).toMatch(/Installed \d+ of \d+ hooks/);
+    expect(r.stdout).toMatch(/your substrate lives under/);
+  });
+
+  it('prints one total, not two', () => {
+    const r = run('init', []);
+    // The pre-cure banner printed the substrate count and then a grand
+    // total that contained it, so the second number read as a correction.
+    expect(r.stdout).not.toMatch(/substrate files copied/);
+  });
+
+  it('says nothing about the statusline when it installed cleanly', () => {
+    const r = run('init', []);
+    // A statusline that installed appears at the bottom of the next prompt.
+    // Announcing it costs a line and tells the reader nothing new. Only the
+    // "kept your existing setup" outcome prints, because that one is
+    // actionable.
+    const statusLines = r.stdout
+      .split('\n')
+      .filter((l) => l.includes('statusline'));
+    expect(statusLines, `unexpected statusline output: ${statusLines.join(' | ')}`).toHaveLength(0);
+  });
+
+  it('leaks no absolute path into the default banner', () => {
+    const r = run('init', []);
+    // The pre-cure statusline note carried three absolute paths. On a real
+    // install that means it carried the operator's username.
+    const leaks = r.stdout
+      .split('\n')
+      .filter((l) => l.startsWith('bassclef init: ') && /\s\/(Users|home|private|tmp)\//.test(l));
+    expect(leaks, `banner lines carrying an absolute path:\n${leaks.join('\n')}`).toHaveLength(0);
+  });
+});
+
+// cli#477 — the file set is guarded here, not on stdout. Per ADR-010 D1
+// and D4 the manifest names every file the run touched, so this is the
+// surface a test reads when it wants to know what init did.
+describe('init manifest is the record of what the run touched', () => {
+  interface ManifestFile {
+    path: string;
+    outcome: string;
+    source?: string;
+    content_hash_sha256?: string;
+  }
+
+  function readInitManifest(): { files: ManifestFile[] } {
+    const raw = readFileSync(join(workDir, '.bassclef/init.manifest.json'), 'utf8');
+    return JSON.parse(raw) as { files: ManifestFile[] };
+  }
+
+  it('records far more files than the default banner prints', () => {
+    const r = run('init', []);
+    expect(r.status).toBe(0);
+    const manifest = readInitManifest();
+    const bannerLines = r.stdout.split('\n').length;
+    expect(manifest.files.length).toBeGreaterThan(bannerLines);
+  });
+
+  it('gives every entry an outcome', () => {
+    run('init', []);
+    const manifest = readInitManifest();
+    const known = new Set(['created', 'unchanged', 'refused', 'error']);
+    for (const file of manifest.files) {
+      expect(known.has(file.outcome), `${file.path} has outcome ${file.outcome}`).toBe(true);
+    }
+  });
+
+  it('records a SHA-256 for every file it created', () => {
+    run('init', []);
+    const manifest = readInitManifest();
+    const created = manifest.files.filter((f) => f.outcome === 'created');
+    expect(created.length).toBeGreaterThan(0);
+    const missing = created.filter((f) => !f.content_hash_sha256);
+    expect(
+      missing.map((f) => f.path),
+      'created entries without a hash cannot be checked for adopter edits later'
+    ).toEqual([]);
+  });
+
+  it('records refused files, so a partial init looks partial', () => {
+    // Pre-create a file init would otherwise write. The walker preserves
+    // it; the manifest has to say so, per ADR-010 D4.
+    const target = join(workDir, '.claude', 'settings.json');
+    mkdirSync(join(workDir, '.claude'), { recursive: true });
+    writeFileSync(target, '{"adopterEdited":true}\n');
+
+    const r = run('init', []);
+    expect(r.status).toBe(0);
+
+    const manifest = readInitManifest();
+    const refused = manifest.files.filter((f) => f.outcome === 'refused');
+    expect(
+      refused.length,
+      'init preserved an existing file but the manifest did not record it'
+    ).toBeGreaterThan(0);
+
+    // And the adopter's content survived.
+    expect(readFileSync(target, 'utf8')).toContain('adopterEdited');
   });
 });
 

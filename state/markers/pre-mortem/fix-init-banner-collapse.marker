@@ -1,0 +1,32 @@
+# Pre-mortem marker — cli#477 init banner collapse
+- date: 2026-11-06
+- branch: fix/init-banner-collapse
+- mode: light (3 lenses)
+- risk-ledger: inline (small scope; no separate ledger doc)
+
+## edward-tufte — aggregation
+
+- T1 Grouping too coarse hides a family that matters. FOLDED: .claude/ keeps
+  two levels, because hooks, skills and rules are different kinds of thing.
+- T2 Grouping too fine reproduces the defect at a new depth. FOLDED: standards/
+  and scripts/ fold to one level; the test asserts under 30 group lines.
+- T3 A group key that still names a file would look fixed but not be. FOLDED:
+  the test rejects any key ending in a file extension.
+
+## don-norman — feedback
+
+- N4 Collapsing hides a real failure. FOLDED: refused, unchanged and errored
+  counts all still print by default, and each names its flag.
+- N5 Adopter cannot find the detail. FOLDED: the refused line says --verbose,
+  and the --help text for --verbose now says what it carries.
+
+## michael-feathers — characterization
+
+- F6 Tests weakened to pass. FOLDED: both patterns are unchanged; only the
+  invocation moved. Verified by hand against a real --verbose run.
+- F7 File-set coverage lost. FOLDED: four new tests read
+  .bassclef/init.manifest.json — outcome on every entry, SHA-256 on every
+  created entry, and a refused entry when a target already exists.
+- F8 Test count rises while a file silently fails to load. CHECKED: 542 tests
+  / 231 suites before, 551 / 233 after. Both totals moved up by exactly what
+  was added.

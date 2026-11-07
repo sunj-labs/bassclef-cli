@@ -1,0 +1,17 @@
+# Temperance marker — cli#477 init banner collapse
+- date: 2026-11-06
+- branch: fix/init-banner-collapse
+- scope-decision: Right thing — a cold adopter cannot read 201 lines, and the
+  two facts they can act on are buried in it. Right way — move the inventory
+  behind the flag that already means "show me the inventory" (--verbose, per
+  cli#406), rather than add a second flag for the same job. Smallest shape —
+  two files: src/commands/init.ts and its characterization test.
+- blast radius: adopter-visible stdout only. The three machine surfaces are
+  untouched and were each checked by hand: --json schema stayed 3,
+  --dry-run output is byte-identical, .bassclef/init.manifest.json still
+  records every file.
+- brute-force check — considered deleting the per-file lines outright. Rejected:
+  the debug read is real, and deleting would have weakened the characterization
+  test instead of moving it.
+- drift-trigger: if this starts touching the value-test block (cli#406) or the
+  --dry-run path, stop and re-scope. Both are explicitly out of scope on #477.

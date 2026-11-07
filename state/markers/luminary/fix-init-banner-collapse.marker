@@ -1,0 +1,19 @@
+# Luminary marker — cli#477 init banner collapse
+- date: 2026-11-06
+- branch: fix/init-banner-collapse
+- lead: edward-tufte
+- supporting: [don-norman, michael-feathers]
+
+## What each lens caught
+
+- edward-tufte (lead) — resolution. The banner was not printing too much ink;
+  it was printing the right data at the wrong level of aggregation. One line
+  per file is the detail view. A summary surface wants one line per directory.
+  Naming it that way found the cause: the grouping key kept the filename, so
+  the summary was silently rendering the detail view.
+- don-norman — signifier. "44 of 46 hooks" and "11 refused" are the only two
+  facts an adopter can act on, and neither named the flag that changes it.
+  The refused line now says --force and --verbose.
+- michael-feathers — characterization. The two tests that pinned the inventory
+  moved to --verbose with their patterns UNCHANGED. A test that gets weakened
+  to let a change through stops being a characterization test.
