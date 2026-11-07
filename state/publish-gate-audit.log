@@ -3,3 +3,4 @@
 2026-11-07T14:50:00Z	on	kingofrock	note=restored-after-1.9.21-publish-raw-call-see-cli-481
 2026-11-07T14:51:25Z	off	kingofrock	authorized_by=kingofrock note=retry-after-sigstore-502-script-write-broken-cli-481
 2026-11-07T15:11:46Z	on	kingofrock	note=restored-so-operator-can-approve-retry
+2026-11-07T18:24:41Z	off	kingofrock	authorized_by=kingofrock note=trust-1.9.22-script-write-broken-cli-481
