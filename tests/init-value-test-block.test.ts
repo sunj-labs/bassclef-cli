@@ -14,6 +14,8 @@
 // [x] --verbose init prints catalog counts (skills, rules, agents, luminaries)
 // [x] --verbose init still prints the Sam-verbatim block (both coexist with --verbose)
 // [x] hook banner "Installed N of M hooks (lite tier)" still fires in default mode
+// [x] default init warns that /launch and /build need a GitHub remote (cli#477)
+// [x] that warning names the requirement, not /onboard-repo (cli#477)
 //
 // Anchor luminary: @luminary michael-feathers — characterization at
 // Sam's first-touch surface. Anchor: @luminary kent-beck — RED before
@@ -104,6 +106,24 @@ describe('bassclef init — Sam 5-min value test block (cli#406)', () => {
     expect(r.status).toBe(0);
     expect(r.stdout).toContain('Bassclef is ready.');
     expect(r.stdout).toContain('/riff');
+  });
+
+  // cli#477 — the block walks the reader to /build, and /build opens a pull
+  // request. A pull request needs a remote, which init does not create.
+  it('warns that /launch and /build need a GitHub remote', () => {
+    const r = runCli([], workDir, fakeHome);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('/riff works on its own.');
+    expect(r.stdout).toContain('need a GitHub remote');
+  });
+
+  it('names the requirement rather than /onboard-repo', () => {
+    // /onboard-repo Path A requires bassclef cloned as a peer at
+    // ~/src/<org>/bassclef. An npm adopter does not have that, so pointing
+    // them at the skill sends them through a door that also fails.
+    const r = runCli([], workDir, fakeHome);
+    expect(r.status).toBe(0);
+    expect(r.stdout).not.toContain('/onboard-repo');
   });
 
   it('hook banner "Installed N of M hooks (lite tier)" still fires in default mode', () => {

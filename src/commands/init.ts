@@ -445,9 +445,11 @@ function dispatchSubstrateCopy(
       `bassclef init: ${grandTotal} files total (1 config + ${result.copied.length} substrate).\n`
     );
   } else {
-    for (const [directory, count] of groupCopiedByDirectory(result.copied)) {
-      say(`  ${directory}: ${count} ${count === 1 ? 'file' : 'files'}\n`);
-    }
+    // The directory summary is inventory too, one grain coarser. An adopter
+    // cannot act on "standards: 102 files", so it rides with the rest under
+    // --verbose. What stays is the count, where the hooks went, and anything
+    // that needs a decision.
+    //
     // One total, not two. The pre-cure banner printed the substrate count
     // and then a grand total that contained it, so the larger number read
     // as a correction of the smaller one.
@@ -756,6 +758,14 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   } else if (created === 0 && unchanged === plans.length) {
     say('bassclef init: already initialized. No changes.\n');
   } else {
+    // cli#477 considered moving this behind --verbose and reverted. On a
+    // fresh install it says little — there is one config file. But on a
+    // partial install it is the only evidence substrate.config.md landed,
+    // which is what tests/init.test.ts "partial state" asserts, and that is
+    // a real adopter concern. The line stays.
+    //
+    // Known nit left alone: "1 config files created" should read "file".
+    // Two tests pin the plural spelling, so the fix is its own change.
     say(`bassclef init: ${created} config files created, ${unchanged} unchanged.\n`);
   }
 
@@ -819,11 +829,20 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
   ]);
 
   // RFC N4 — folder guidance line after walker (only on success).
+  //
+  // cli#477 — the second sentence is stale on the default path. The
+  // .gitignore this run wrote already carries a bare `.claude/` entry, so
+  // telling the reader to add it asks for work init just did. It stays
+  // under --verbose, where the characterization test pins the full line.
   if (walker.code === 0) {
-    say(
-      `bassclef init: your substrate lives under .claude/. ` +
-        `Add .claude/ to .gitignore if you have not.\n`
-    );
+    if (verbose) {
+      say(
+        `bassclef init: your substrate lives under .claude/. ` +
+          `Add .claude/ to .gitignore if you have not.\n`
+      );
+    } else {
+      say(`bassclef init: your substrate lives under .claude/.\n`);
+    }
   }
 
   // Statusline install — cli-side pair to bassclef-upstream#1860. Runs
@@ -1193,15 +1212,16 @@ function maybeEmitStatuslinePlan(opts: StatuslinePlanOpts): void {
     return;
   }
 
-  // cli#477 — one line, no paths. "Preserved" is the only outcome the
-  // reader can act on, so it is the only one that names a flag.
+  // cli#477 — "preserved" is the only outcome the reader can act on, so it
+  // is the only one that prints by default. A statusline that installed
+  // cleanly needs no announcement: it appears at the bottom of the next
+  // prompt. Saying so costs a line and tells the reader nothing they are
+  // about to not see.
   const preserved = dv === 'preserved' || rv === 'preserved' || sv === 'preserved';
   if (preserved) {
     opts.say(
       `bassclef init: statusline — kept your existing setup. ` +
         `Pass --force to replace it, or --verbose for the paths.\n`
     );
-  } else {
-    opts.say(`bassclef init: statusline ready.\n`);
   }
 }

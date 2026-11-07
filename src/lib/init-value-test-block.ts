@@ -10,6 +10,16 @@
 // Do NOT edit without updating bassclef-upstream#2006 + this test:
 //   tests/init-value-test-block.test.ts
 //
+// cli#477 added the closing line, and it is the only addition to the
+// verbatim text. The reason: the block walks the reader to /build, and
+// /build opens a pull request. A pull request needs a GitHub remote,
+// which `bassclef init` does not create. Without the line the reader
+// finds that out at step three, after riffing and planning — the point
+// of highest investment. The line names the requirement rather than a
+// skill, because /onboard-repo Path A still requires bassclef cloned as
+// a peer at ~/src/<org>/bassclef, which an npm adopter does not have.
+// It also says which step is free, so first value stays one command away.
+//
 // Anchor luminary: @luminary michael-feathers — characterization pins
 // the exact Sam-verbatim words. Anchor: @luminary alan-cooper — Sam's
 // 3-level goal (end + experience + life).
@@ -31,4 +41,6 @@ Then choose one:
 
 When the plan looks right:
   /build
+
+/riff works on its own. /launch and /build open pull requests, so those need a GitHub remote.
 `;

@@ -32,6 +32,10 @@
 // [x] non-JSON run prints nothing to stderr on success
 // [x] --verbose run prints the per-directory copy lines before the summary
 // [x] default run prints no per-file inventory line
+// [x] default run prints no indented list at all
+// [x] default run keeps the banner to five lines or fewer
+// [x] default run says nothing about a clean statusline install
+// [x] default run leaks no absolute path into the banner
 // [x] default run still prints the one total and the hook line
 // [x] manifest records every file the run touched, with an outcome
 // [x] manifest records a SHA-256 for every file the run created
@@ -141,24 +145,34 @@ describe('bassclef init default output is a summary, not an inventory', () => {
     ).toHaveLength(0);
   });
 
-  it('names each directory once, not each file', () => {
+  it('prints no indented file or directory list at all', () => {
     const r = run('init', []);
-    const groupLines = r.stdout
+    // The first pass at this cure kept a 14-line directory summary. It went
+    // too: a reader cannot act on "standards: 102 files" either. What is
+    // left is the count, where the hooks went, and anything needing a
+    // decision.
+    const indented = r.stdout
       .split('\n')
-      .filter((l) => /^ {2}\S+: \d+ files?$/.test(l));
-    // A real bundle spans on the order of fifteen directories. The exact
-    // number moves with the bundle; the magnitude is the contract.
-    expect(groupLines.length).toBeGreaterThan(0);
+      .filter((l) => /^ {2}\S+: \d+ files?( copied)?$/.test(l));
     expect(
-      groupLines.length,
-      `expected a directory summary, got ${groupLines.length} lines`
-    ).toBeLessThan(30);
-    // No group key may end in a file extension — that was the defect.
-    for (const line of groupLines) {
-      expect(line, 'a group key named a file, not a directory').not.toMatch(
-        /^ {2}\S+\.(sh|md|json|jsonc|ts|mjs): /
-      );
-    }
+      indented,
+      `default stdout carried ${indented.length} list lines; they belong behind --verbose`
+    ).toHaveLength(0);
+  });
+
+  it('keeps the banner to four lines before the mark', () => {
+    const r = run('init', []);
+    const banner = r.stdout
+      .split('\n')
+      .filter((l) => l.startsWith('bassclef init: '));
+    // Four on a clean install: config created, files installed, hooks armed,
+    // where the substrate lives. Refused, errored and preserved-statusline
+    // lines are conditional and push it no higher than seven.
+    expect(
+      banner.length,
+      `banner is ${banner.length} lines:\n${banner.join('\n')}`
+    ).toBeLessThanOrEqual(5);
+    expect(banner.length).toBeGreaterThan(0);
   });
 
   it('still prints one total, the hook line, and the gitignore note', () => {
@@ -175,17 +189,26 @@ describe('bassclef init default output is a summary, not an inventory', () => {
     expect(r.stdout).not.toMatch(/substrate files copied/);
   });
 
-  it('keeps absolute paths out of the statusline note', () => {
+  it('says nothing about the statusline when it installed cleanly', () => {
     const r = run('init', []);
+    // A statusline that installed appears at the bottom of the next prompt.
+    // Announcing it costs a line and tells the reader nothing new. Only the
+    // "kept your existing setup" outcome prints, because that one is
+    // actionable.
     const statusLines = r.stdout
       .split('\n')
       .filter((l) => l.includes('statusline'));
-    expect(statusLines.length).toBeGreaterThan(0);
-    for (const line of statusLines) {
-      // The detailed note carried three absolute paths, which on a real
-      // install means it carried the operator's username.
-      expect(line, 'statusline note leaked an absolute path').not.toMatch(/\s\//);
-    }
+    expect(statusLines, `unexpected statusline output: ${statusLines.join(' | ')}`).toHaveLength(0);
+  });
+
+  it('leaks no absolute path into the default banner', () => {
+    const r = run('init', []);
+    // The pre-cure statusline note carried three absolute paths. On a real
+    // install that means it carried the operator's username.
+    const leaks = r.stdout
+      .split('\n')
+      .filter((l) => l.startsWith('bassclef init: ') && /\s\/(Users|home|private|tmp)\//.test(l));
+    expect(leaks, `banner lines carrying an absolute path:\n${leaks.join('\n')}`).toHaveLength(0);
   });
 });
 
