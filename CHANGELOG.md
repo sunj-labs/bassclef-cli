@@ -24,6 +24,43 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.21] - 2026-11-07
+### Added
+
+- `bassclef init --verbose` now carries the full file inventory and the
+  statusline paths. Everything the default output stopped printing moved
+  here, so nothing was lost. (#477)
+
+### Changed
+
+- `bassclef init` prints 34 lines instead of 201. Four of them are the
+  banner: config created, files installed, hooks armed, and where the
+  substrate lives. The per-file list, the directory summary, and the
+  statusline paths moved behind `--verbose`. (#477)
+- The install block now closes with a line saying `/riff` works on its own
+  while `/launch` and `/build` open pull requests, so those need a GitHub
+  remote. `bassclef init` creates no remote, and the reader used to find
+  that out three steps in. (#477)
+
+### Fixed
+
+- The directory summary named single files as directories. It built its key
+  from the first two segments of each path, so a file one level deep —
+  `lib/state.sh`, `templates/spec-template.md` — became its own group. 171
+  of the 201 output lines came from that one bug. (#477)
+- `bassclef init` no longer tells you to add `.claude/` to `.gitignore`. The
+  `.gitignore` it writes already carries that line. (#477)
+
+### Notes
+
+- `bassclef init --json` is unchanged: same `schema_version` 3, same counts.
+  Anything parsing that output sees no difference.
+- `bassclef init --dry-run` is unchanged.
+- `.bassclef/init.manifest.json` is unchanged. It still records every file
+  the run touched with its outcome and a SHA-256, refused and errored files
+  included. A script that wants the file set should read the manifest rather
+  than the banner.
+
 ## [1.9.20] - 2026-11-03
 ### Added
 

@@ -1,0 +1,17 @@
+# Temperance marker — 1.9.21 release + cli#479
+- date: 2026-11-07
+- branch: release-1.9.21
+- scope-decision: Right thing — ship the install-output collapse (#477, merged
+  as ec1b875) to npm. Right way — `npm run bump patch`, which touches all four
+  version files together. Hand-editing package.json leaves three stale, per
+  memory feedback_use_npm_run_bump_not_hand_edit.
+- bundled, and why: the bump refused with "npm run build failed" while the
+  build had just succeeded. Root cause is a defect in the bump script itself
+  (cli#479). The release cannot be verified without that fix, so the two ride
+  together per .claude/rules/pr-strategy.md "tight coupling that breaks atomic
+  verification". Not an operator preference.
+- what it can break: the bump script runs on every release. The fix is one
+  expression on a line that always threw, so the change can only reduce
+  failures. Default-runner behavior now has a test; it had none.
+- drift-trigger: if this starts touching publish.yml or the gate script, stop.
+  Neither is in scope.
