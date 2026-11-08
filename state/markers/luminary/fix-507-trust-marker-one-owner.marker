@@ -1,0 +1,12 @@
+# Luminary marker — cli#507
+- date: 2026-11-08
+- branch: fix/507-trust-marker-one-owner
+- lead: tony-hoare
+- supporting: [john-ousterhout, michael-feathers]
+- tony-hoare (lead) — the defect is a missing invariant: "gate ON implies no
+  open marker" is stated nowhere and checked nowhere. The fix makes it a
+  postcondition of every path that restores the gate.
+- john-ousterhout — the marker's lifecycle is split across four functions.
+  One consumer, called by both restore paths, is the deep-module shape.
+- michael-feathers — the existing tests pass because they build the states by
+  hand. The new tests drive the script through real verb sequences instead.

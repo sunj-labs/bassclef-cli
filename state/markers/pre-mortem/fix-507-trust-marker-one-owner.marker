@@ -1,0 +1,17 @@
+# Pre-mortem light — cli#507
+- date: 2026-11-08
+- branch: fix/507-trust-marker-one-owner
+- risk ledger: inline (2 lenses, small scope)
+- saltzer-schroeder
+  - R1 `consume_marker` deletes a marker the operator still needs → it only
+    fires on a path that has just put the gate back ON, so the window it
+    names is over. Folded: call it only after a verified-ON read-back.
+  - R2 a delete failure leaves the pair disagreeing again → fail-soft the
+    remove, then say so in the output rather than exiting 0 silently.
+  - R3 narrowing the audit sentence hides a real signal → the dropped clause
+    was never measured by that log. The marker-based line in `status` is
+    where the window gets reported. Folded: keep both lines distinct.
+- michael-nygard
+  - R4 `on`'s idempotent branch returns before any consume → that is the one
+    path that can reach ON-with-marker. Folded: consume in that branch too.
+  - R5 a test asserts the old sentence → grepped; nothing pins it.

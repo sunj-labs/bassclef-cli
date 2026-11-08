@@ -1,0 +1,21 @@
+# Lead-lens sign-off — cli#507
+- date: 2026-11-08
+- branch: fix/507-trust-marker-one-owner
+- lead: tony-hoare
+- findings cleared:
+  - R1 (consume discards a live authorization) — cleared. `consume_marker`
+    fires only after a read-back that says ON, or on the already-ON early
+    return. Both mean approval is required again, so the window is over.
+  - R4 (idempotent branch returns before any consume) — cleared. T46 drives
+    that exact path and asserts the marker is gone.
+  - R2 (silent delete failure) — cleared. `consume_marker` re-tests the path
+    and writes to stderr when the file survives.
+  - R3 (narrowing the audit line hides a signal) — cleared. The window is
+    still reported, from the marker, in `status`. T48 pins both halves: the
+    pairing sentence stays, the window clause goes.
+- invariant now held: a gate reading ON has no open marker beside it. Checked
+  on both restore paths and reported by `status` when an out-of-band restore
+  leaves one behind.
+- tests: 94 total, 94 passed, 0 failed. Was 93 total / 89 passed / 4 failed at
+  RED. Total grew by one, so no file failed to load.
+- shellcheck: clean at -S warning on the script and its tests.

@@ -1,0 +1,14 @@
+# Temperance marker — cli#507
+- date: 2026-11-08
+- branch: fix/507-trust-marker-one-owner
+- scope-decision: give the trust marker one consumer, and make `status` compare
+  the gate against the marker instead of printing both as facts. Narrow
+  `audit_pairing`'s closing line to what its log measures.
+- smallest shape: one new function (`consume_marker`), two callers, one
+  reconcile branch in `do_status`, one sentence shortened.
+- what this does NOT do: it does not teach `rearm` to detect a landed publish.
+  That is #506 and ships on its own branch after this merges.
+- blast radius: `scripts/publish-gate.sh` only. The gate's resting state stays
+  ON. Every change here moves state toward "approval required", never away.
+- drift-trigger: if the fix needs a change to `restore_gate`'s write, stop —
+  that write is shared with `rearm` and is out of scope.
