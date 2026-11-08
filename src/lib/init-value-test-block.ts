@@ -28,10 +28,23 @@
 // the other two cues did not. Three cues, two shapes. A reader scanning
 // for "what do I type" was given one rhythm and then a different one.
 //
-// What is NOT fixed here: two lines in this block are 94 and 93 columns
-// and wrap mid-sentence on an 80-column terminal. Rewrapping changes the
-// Sam-verbatim text, which needs bassclef-upstream#2006 updated first.
-// Filed separately rather than smuggled in under a spacing fix.
+// cli#484 also broke the two long lines at their sentence boundaries.
+// They were 94 and 93 columns and wrapped mid-sentence on an 80-column
+// terminal, which is the default width. No word changed and no sentence
+// moved — only where the newline falls.
+//
+// I first claimed this needed bassclef-upstream#2006 updated, and that
+// was wrong. #2006 quotes the target as a markdown blockquote, which
+// carries no column budget. It pins the words. It does not pin the wrap.
+//
+// A sibling test now asserts every line fits 80 columns WITH the indent
+// applied, so this cannot come back the way it arrived.
+//
+// The per-line test in init-value-test-block.test.ts could not have
+// caught any of this: it iterates this constant and asserts stdout
+// contains each line, so it only proves stdout and the constant agree
+// with each other. Edit the constant and it follows along. That is why
+// the sibling test pins the opening words as literals instead.
 //
 // Anchor luminary: @luminary michael-feathers — characterization pins
 // the exact Sam-verbatim words. Anchor: @luminary alan-cooper — Sam's
@@ -47,7 +60,8 @@ Try it on something small:
   claude
   /riff
 
-Describe a feature you're considering. You'll get three approaches before any code is written.
+Describe a feature you're considering.
+You'll get three approaches before any code is written.
 
 Then choose one:
 
@@ -57,5 +71,6 @@ When the plan looks right:
 
   /build
 
-/riff works on its own. /launch and /build open pull requests, so those need a GitHub remote.
+/riff works on its own.
+/launch and /build open pull requests, so those need a GitHub remote.
 `;
