@@ -1,0 +1,15 @@
+# Lead-lens sign-off — fix/smoke-tests-the-branch-not-the-registry
+- date: 2026-11-08
+- lead: michael-feathers
+- findings cleared:
+  - F1 (self, amber) — I first cut this branch off the 1.10.0 release branch,
+    so it carried the version bump as well. Re-cut from main and re-applied
+    the two files. The release stays its own PR.
+- RED shown before GREEN, both measured rather than asserted.
+  - F2 (self, RED in CI) — my first pack step ran the bundler with no sibling
+    checkout, and #482's own guard refused it: "no checkout at .../bassclef.
+    The pin names v1.12.0." The guard I shipped this morning caught my
+    incomplete workflow step this evening. Added the two steps publish.yml
+    and pr-checks.yml already use — read the pin, check the sibling out at
+    that tag — and set BASSCLEF_SIBLING_ROOT on the pack step.
+- verdict: cleared for merge.
