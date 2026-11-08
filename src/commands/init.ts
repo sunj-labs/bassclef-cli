@@ -41,7 +41,13 @@ import { MANIFEST_RELATIVE_PATH, readManifestShapeVersion } from '../lib/manifes
 import { copySubstrate, CopyFailure, resolveBundleRoot } from '../lib/copy-substrate.js';
 import { installStatusline, type InstallStatuslineReport } from '../lib/install-statusline.js';
 import { VALUE_TEST_BLOCK } from '../lib/init-value-test-block.js';
-import { renderBrandMark } from '../lib/init-brand-mark.js';
+import {
+  BRAND_MARK_INDENT,
+  BRAND_MARK_MIN_COLUMNS,
+  indentBlock,
+  renderBrandMark,
+  supportsColour,
+} from '../lib/init-brand-mark.js';
 import { resolveHome } from '../lib/resolve-home.js';
 import { HOOKS_SUBPATH, CLAUDE_TARGET_ROOT } from '../lib/paths.js';
 import { buildInitReport, renderJsonReport, type InitReport } from '../lib/init-report.js';
@@ -895,8 +901,28 @@ function runReal(plans: readonly FilePlan[], force: boolean, verbose: boolean, t
     // smoke captures show what an adopter sees. Grid + fallback rule
     // per bassclef-upstream#2337; shape pinned by
     // tests/init-brand-mark.test.ts.
-    say(`${renderBrandMark(pkgVersion, process.stdout.columns)}\n`);
-    say(VALUE_TEST_BLOCK);
+    // cli#484 — the banner is one block on one grid, and the leading
+    // newline is half the fix. Without it the art sits directly under the
+    // last `bassclef init:` line and the mark reads as jammed, which is
+    // what the cold-adopter capture of 1.9.22 showed.
+    //
+    // Colour is decided once, here, and handed down. Nothing below guesses.
+    // Piped stdout reports isTTY undefined and gets no ANSI, which keeps
+    // smoke captures and CI logs readable as the record of what an adopter
+    // sees.
+    const colour = supportsColour(process.env, process.stdout.isTTY);
+    const columns = process.stdout.columns;
+
+    // One grid for the whole block. When the terminal is too narrow for
+    // the mark, the mark drops its indent — so the prose drops it too,
+    // or the banner ends up with two grids.
+    const indent =
+      typeof columns === 'number' && columns < BRAND_MARK_MIN_COLUMNS
+        ? 0
+        : BRAND_MARK_INDENT;
+
+    say(`\n${renderBrandMark(pkgVersion, columns, { colour })}\n`);
+    say(indentBlock(VALUE_TEST_BLOCK, indent));
   }
 
   return walker.code;

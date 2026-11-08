@@ -62,24 +62,64 @@ export const BRAND_MARK_ART_WIDTH = 40;
 const TAGLINE = 'the agent band that backs your solos';
 
 /**
+ * The grid, in columns. One unit, used everywhere below the install log.
+ *
+ * This is the whole bounding device. The install log prints flush left;
+ * everything bassclef says about itself steps in by this much, and the
+ * eye reads the step as a change of speaker. No rule is drawn, because a
+ * drawn rule is what you add when the spacing is not doing its job.
+ *
+ * Exported because `init.ts` indents the value-test block by the same
+ * amount. Two call sites, one constant — if they ever disagree the
+ * banner has two grids, which is worse than having none.
+ *
+ * @see cli#484 — four lenses (Vignelli, Tufte, Rams, Ive) reached the
+ *   indent over a border independently. The rendered comparison and the
+ *   font-coverage evidence are linked from that ticket.
+ */
+export const BRAND_MARK_INDENT = 2;
+
+/**
  * Narrowest terminal that fits the composed mark.
  *
  * Derived rather than guessed: whichever is wider, the art or the
- * tagline. Below this the art is dropped and the text prints alone,
- * because a mark clipped mid-letter reads as a broken product rather
+ * tagline, plus the grid. Below this the art is dropped AND the indent
+ * is dropped, because when space runs out the grid is the first luxury
+ * to go. A mark clipped mid-letter reads as a broken product rather
  * than a narrow window.
  */
 export const BRAND_MARK_MIN_COLUMNS = Math.max(
   BRAND_MARK_ART_WIDTH,
   TAGLINE.length,
-);
+) + BRAND_MARK_INDENT;
 
 /** The name, lowercase, as it is typed. */
 const NAME = 'bassclef';
 
-/** Brass. 256-colour index 179, chosen to sit clear of status green and red. */
-const CHIP_ON = '[48;5;179m[38;5;233m[1m';
-const CHIP_OFF = '[0m';
+/**
+ * Brass. 256-colour index 179, chosen to sit clear of status green and red.
+ *
+ * One value, two devices. `CHIP_ON` fills a cell with brass and prints
+ * near-black on it — a solid plate. `ART_ON` draws in brass on the
+ * terminal's own ground — line art. Foreground and inverted read as
+ * distinct objects at the same hue, which is how the figlet and the chip
+ * can both be brass without the colour stopping to mean anything. The
+ * plate still outweighs the line art, so the hierarchy holds.
+ *
+ * A second, muted gold was tried for the art (index 137) and rejected:
+ * two golds that are close but not equal read as a mistake rather than a
+ * choice.
+ *
+ * These were raw ESC bytes in the file until cli#484. A control
+ * character in source survives nothing — not a copy-paste, not an editor
+ * that trims, not a diff viewer. `\x1b` is the same byte and it is
+ * visible to every one of those.
+ */
+const BRASS = 179;
+const CHIP_ON = `\x1b[48;5;${BRASS}m\x1b[38;5;233m\x1b[1m`;
+const ART_ON = `\x1b[38;5;${BRASS}m`;
+const DIM_ON = '\x1b[2m';
+const CHIP_OFF = '\x1b[0m';
 
 /**
  * The recurring mark — the name on a brass field, one space each side.
@@ -100,7 +140,66 @@ export function renderChip(opts: { colour: boolean }): string {
 }
 
 /**
+ * Whether this run should emit colour.
+ *
+ * Pure, so it can be tested without a pty. The caller reads the
+ * environment once and hands the answer down; nothing below here guesses.
+ *
+ * Order is deliberate. `FORCE_COLOR` is an explicit instruction and wins,
+ * including `FORCE_COLOR=0` meaning off. `NO_COLOR` is the cross-tool
+ * convention (no-color.org) and any value counts, even empty. `TERM=dumb`
+ * names a terminal that cannot render it. Everything else falls through to
+ * the real question: is a person looking at this, or is it going to a file?
+ *
+ * Piped output gets no colour, and that is load-bearing rather than
+ * polite — the cold-adopter smoke captures and CI logs are pipes, and
+ * escape codes in them would corrupt the record of what an adopter sees.
+ *
+ * @param env - the process environment to read.
+ * @param isTTY - `process.stdout.isTTY`, which is `undefined` when piped.
+ * @returns true when ANSI is safe to emit.
+ */
+export function supportsColour(
+  env: Record<string, string | undefined>,
+  isTTY: boolean | undefined,
+): boolean {
+  if (env.FORCE_COLOR !== undefined && env.FORCE_COLOR !== '') {
+    return env.FORCE_COLOR !== '0';
+  }
+  if (env.NO_COLOR !== undefined) return false;
+  if (env.TERM === 'dumb') return false;
+  return isTTY === true;
+}
+
+/**
+ * Indent every non-empty line of a block by `spaces` columns.
+ *
+ * Blank lines stay blank. Trailing whitespace on an otherwise empty line
+ * is invisible but shows up in diffs and in `git` warnings, and a reader
+ * selecting the text gets it too.
+ *
+ * @param text - the block to indent.
+ * @param spaces - columns to add. `0` returns the text untouched.
+ * @returns the indented block.
+ */
+export function indentBlock(text: string, spaces: number): string {
+  if (spaces <= 0) return text;
+  const pad = ' '.repeat(spaces);
+  return text
+    .split('\n')
+    .map((line) => (line === '' ? line : pad + line))
+    .join('\n');
+}
+
+/**
  * Compose the install mark.
+ *
+ * The chip is composed in here rather than beside here. That is the whole
+ * point of cli#484: `renderChip` existed, passed five tests, and was never
+ * called, because nothing asserted a relationship between the unit and the
+ * composition. The sibling test now asserts this output CONTAINS the chip.
+ * Do not inline the chip's escape codes to avoid the call — the call is
+ * the contract.
  *
  * @param version - version string printed beneath the art. The caller
  *   passes the same version the rest of the banner uses, so the mark
@@ -110,14 +209,32 @@ export function renderChip(opts: { colour: boolean }): string {
  *   text prints alone. `undefined` keeps the full mark: piped output has
  *   no width to overflow, and keeping it there is what lets smoke
  *   captures and CI logs show what an adopter actually sees.
+ * @param opts.colour - whether to emit ANSI. Defaults to `false`, so a
+ *   caller that forgets to ask gets the safe answer rather than escape
+ *   codes in a log file.
  * @returns the block to print, newline-terminated.
  */
-export function renderBrandMark(version: string, columns?: number): string {
-  const text = `${NAME} ${version}\n${TAGLINE}\n`;
+export function renderBrandMark(
+  version: string,
+  columns?: number,
+  opts: { colour?: boolean } = {},
+): string {
+  const colour = opts.colour === true;
+  const narrow = typeof columns === 'number' && columns < BRAND_MARK_MIN_COLUMNS;
 
-  if (typeof columns === 'number' && columns < BRAND_MARK_MIN_COLUMNS) {
-    return text;
-  }
+  // When colour is on the chip is a brass plate, and its own padding puts
+  // the plate's left edge on the grid. With colour off there is no plate,
+  // so the bare word goes on the grid instead — the padding would push it
+  // one column out of line with the art above it, for nothing.
+  const nameCell = colour ? renderChip({ colour: true }) : NAME;
+  const tagline = colour ? `${DIM_ON}${TAGLINE}${CHIP_OFF}` : TAGLINE;
+  const text = `${nameCell}  ${version}\n${tagline}\n`;
 
-  return `${BRAND_MARK_ART.join('\n')}\n\n${text}`;
+  if (narrow) return text;
+
+  const art = BRAND_MARK_ART.map((row) =>
+    colour ? `${ART_ON}${row}${CHIP_OFF}` : row,
+  ).join('\n');
+
+  return indentBlock(`${art}\n\n${text}`, BRAND_MARK_INDENT);
 }

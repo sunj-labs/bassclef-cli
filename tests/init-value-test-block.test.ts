@@ -17,6 +17,25 @@
 // [x] default init warns that /launch and /build need a GitHub remote (cli#477)
 // [x] that warning names the requirement, not /onboard-repo (cli#477)
 //
+// cli#484 — two lines of this block were 94 and 93 columns and wrapped
+// mid-sentence on an 80-column terminal, which is the default width.
+// Nothing caught it, and the test that looks like it should have cannot:
+//
+//   for (const line of VALUE_TEST_BLOCK.split('\n')) {
+//     expect(r.stdout).toContain(line);
+//   }
+//
+// That iterates the constant. Change the constant and it iterates the
+// new lines, so it only ever proves stdout and the constant agree with
+// each other. It is a real test of the wiring and no test at all of the
+// words — any wording change sails straight through it.
+//
+// So these two pin what that one cannot: the width, against a number
+// rather than against itself, and the opening words as literals.
+//
+// [x] every line fits 80 columns once the install indent is applied
+// [x] the Sam-verbatim opening words are pinned as literals, not by self-reference
+//
 // Anchor luminary: @luminary michael-feathers — characterization at
 // Sam's first-touch surface. Anchor: @luminary kent-beck — RED before
 // source. Anchor: @luminary alan-cooper — Sam 3-level goal.
@@ -28,6 +47,14 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VALUE_TEST_BLOCK } from '../src/lib/init-value-test-block.js';
+import { BRAND_MARK_INDENT } from '../src/lib/init-brand-mark.js';
+
+/**
+ * The narrowest terminal worth designing for. 80 columns is the default
+ * on macOS Terminal, iTerm, GNOME Terminal and Windows Terminal, and it
+ * is what a reader gets unless they have gone and changed it.
+ */
+const DEFAULT_TERMINAL_COLUMNS = 80;
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
@@ -58,6 +85,38 @@ beforeEach(() => {
 afterEach(() => {
   try { rmSync(workDir, { recursive: true, force: true }); } catch { /* ignore */ }
   try { rmSync(fakeHome, { recursive: true, force: true }); } catch { /* ignore */ }
+});
+
+// cli#484. These two pin what the per-line test structurally cannot.
+describe('the block fits a terminal, and says what it is meant to say', () => {
+  it('fits 80 columns once the install indent is applied', () => {
+    for (const line of VALUE_TEST_BLOCK.split('\n')) {
+      if (line === '') continue;
+      const printed = line.length + BRAND_MARK_INDENT;
+      expect(
+        printed,
+        `"${line.slice(0, 48)}…" prints at ${printed} columns and wraps mid-sentence on a default terminal`,
+      ).toBeLessThanOrEqual(DEFAULT_TERMINAL_COLUMNS);
+    }
+  });
+
+  it('pins the Sam-verbatim words as literals, not by self-reference', () => {
+    // Written out rather than derived. A test that reads the constant it
+    // is checking cannot fail when the constant changes, which is the
+    // whole reason the 94-column line survived this long.
+    expect(VALUE_TEST_BLOCK).toContain('Bassclef is ready.');
+    expect(VALUE_TEST_BLOCK).toContain(
+      'It added engineering workflows and automatic checks to Claude Code.',
+    );
+    expect(VALUE_TEST_BLOCK).toContain('Nothing else needs configuring.');
+    expect(VALUE_TEST_BLOCK).toContain('Try it on something small:');
+    expect(VALUE_TEST_BLOCK).toContain("Describe a feature you're considering.");
+    expect(VALUE_TEST_BLOCK).toContain(
+      "You'll get three approaches before any code is written.",
+    );
+    expect(VALUE_TEST_BLOCK).toContain('Then choose one:');
+    expect(VALUE_TEST_BLOCK).toContain('When the plan looks right:');
+  });
 });
 
 describe('bassclef init — Sam 5-min value test block (cli#406)', () => {

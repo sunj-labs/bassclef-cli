@@ -1,0 +1,8 @@
+# Temperance — fix-484-install-banner-brass-and-grid
+- date: 2026-11-08
+- branch: fix/484-install-banner-brass-and-grid
+- scope-decision: Smallest shape that fixes the reported defect. Call the chip, brass the figlet, one indent grid, uniform rhythm, plus the composition assertion that was missing. No border — four lenses say the indent is the bounding device.
+- right-thing: the brass was already written and never printed; printing it is the fix, not new design.
+- right-way: colour detected not assumed, so piped output and CI captures stay plain.
+- blast-radius: install banner only. --json contract untouched (guarded by the same !json branch). No schema, no auth, no hooks.
+- drift-trigger: if this reaches for rewrapping the 94-char prose, or a drawn border, stop — both are named out of scope on cli#484.
