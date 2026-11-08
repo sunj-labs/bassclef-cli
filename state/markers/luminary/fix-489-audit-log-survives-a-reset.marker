@@ -1,0 +1,9 @@
+# Luminary marker — fix/489-audit-log-survives-a-reset
+- date: 2026-11-08
+- lead: saltzer-schroeder — complete mediation. The gate had no record that
+  survived its own repository, and nothing read the record back.
+- supporting:
+  - michael-feathers — the check was calibrated against the real log, not a
+    fixture. That is what exposed the leading-`on` case and the thin T23.
+  - alan-cooper — `status` reports the pairing without being asked. A check
+    nobody runs is not a check.

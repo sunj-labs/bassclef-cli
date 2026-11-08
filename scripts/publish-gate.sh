@@ -14,6 +14,7 @@
 #   publish-gate.sh status
 #   publish-gate.sh on
 #   publish-gate.sh off --authorized-by <who>
+#   publish-gate.sh audit
 #
 # Why `off` needs an argument: the gate's whole value is that it cannot be
 # cleared by accident or by an agent acting on its own read of the room. The
@@ -34,7 +35,19 @@ set -uo pipefail
 REPO="${PUBLISH_GATE_REPO:-sunj-labs/bassclef-cli}"
 ENV_NAME="${PUBLISH_GATE_ENV:-npm-publish}"
 ENV_PATH="repos/${REPO}/environments/${ENV_NAME}"
+# cli#489 — two logs, one record of truth.
+#
+# `state/publish-gate-audit.log` is tracked in git. On 2026-11-08 an `off`
+# wrote its authorization line there, the commit that followed carried only
+# the script, and a `git reset --hard origin/main` reverted the log. The
+# authorization for an unattended publish was gone, and what remained was a
+# restore with no matching clear.
+#
+# So the tracked file is the view, and an untracked local file is the record.
+# A reset rewrites the view; the record survives, and `audit` reports when
+# the two disagree. Per the ticket's option 3.
 AUDIT="${PUBLISH_GATE_AUDIT:-state/publish-gate-audit.log}"
+AUDIT_LOCAL="${PUBLISH_GATE_AUDIT_LOCAL:-${HOME}/.bassclef/publish-gate-audit.log}"
 
 usage() {
   cat >&2 <<EOF
@@ -42,10 +55,12 @@ Usage:
   publish-gate.sh status
   publish-gate.sh on
   publish-gate.sh off --authorized-by <who>
+  publish-gate.sh audit
 
 status  read the gate without changing it
 on      require operator approval before npm publish (the resting state)
 off     clear the requirement for one publish; restore it with \`on\` after
+audit   read the log in order and report any clear without a restore
 
 Repo: ${REPO}   Environment: ${ENV_NAME}
 EOF
@@ -123,16 +138,142 @@ except Exception:
 PY
 }
 
+# Appends one line to both logs. The local record is the one that has to
+# land, so a failure there is said out loud rather than swallowed -- but it
+# does not fail the command, because by this point the gate's state has
+# already changed and reporting failure would be the larger lie.
 audit() {
   local verb="$1" who="$2" detail="$3"
-  local dir; dir="$(dirname "$AUDIT")"
-  [ -d "$dir" ] || mkdir -p "$dir" 2>/dev/null || return 0
-  printf '%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$verb" "$who" "$detail" >> "$AUDIT" 2>/dev/null || true
+  local stamp; stamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local line; line="$(printf '%s\t%s\t%s\t%s' "$stamp" "$verb" "$who" "$detail")"
+
+  local mirror_dir; mirror_dir="$(dirname "$AUDIT")"
+  if [ -d "$mirror_dir" ] || mkdir -p "$mirror_dir" 2>/dev/null; then
+    printf '%s\n' "$line" >> "$AUDIT" 2>/dev/null || true
+  fi
+
+  local local_dir; local_dir="$(dirname "$AUDIT_LOCAL")"
+  if [ -d "$local_dir" ] || mkdir -p "$local_dir" 2>/dev/null; then
+    if ! printf '%s\n' "$line" >> "$AUDIT_LOCAL" 2>/dev/null; then
+      echo "publish-gate: could not write the record at ${AUDIT_LOCAL}." >&2
+      echo "  The gate state changed; the record of it did not. Write this down:" >&2
+      echo "    ${line}" >&2
+    fi
+  else
+    echo "publish-gate: could not create $(dirname "$AUDIT_LOCAL") for the record." >&2
+    echo "  The gate state changed; the record of it did not. Write this down:" >&2
+    echo "    ${line}" >&2
+  fi
+}
+
+# Which file to believe. The local record survives a reset; the mirror does
+# not, so the mirror is read only when there is no record.
+audit_source() {
+  if [ -s "$AUDIT_LOCAL" ]; then
+    printf '%s' "$AUDIT_LOCAL"
+  elif [ -s "$AUDIT" ]; then
+    printf '%s' "$AUDIT"
+  else
+    printf '%s' ""
+  fi
+}
+
+# Walks the log in order and reports the first transition that cannot happen.
+#
+# It walks rather than counts on purpose. A check that compared the number of
+# `on` lines against the number of `off` lines would pass on a log holding two
+# of each in the wrong order -- which is a log whose first entry restores a
+# gate nothing had cleared. Pinned by T25.
+#
+# The resting state is ON, per ADR-004 §Amendment 2026-11-05.
+#
+# Prints findings. Returns 0 when every clear has its restore and the window
+# is closed; 2 otherwise.
+audit_pairing() {
+  local src; src="$(audit_source)"
+  if [ -z "$src" ]; then
+    echo "  audit: nothing recorded yet."
+    return 0
+  fi
+
+  local findings; findings="$(
+    awk -F'\t' '
+      BEGIN { state = "ON"; seen = 0 }
+      $2 == "off" {
+        if (state == "OFF") {
+          printf "  audit: %s clears a gate that was already clear -- the clear before it has no restore.\n", $1
+          bad = 1
+        }
+        state = "OFF"
+        last_off = $1
+        seen = 1
+        next
+      }
+      $2 == "on" {
+        # A restore on the first logged line means the clear that preceded it
+        # is older than the record. That is the real shape of this log: its
+        # first entry is an `on` from 2026-11-05, and the clear before it was
+        # a raw API call made while the script`s `off` was broken (cli#481),
+        # so no `off` line could have been written. Reported, not flagged --
+        # a check that calls its own opening line a defect on every run stops
+        # being read. Every later restore is still held to the rule (T30).
+        if (seen == 0) {
+          printf "  audit: the record begins at %s with a restore, so the clear before it is older than this log.\n", $1
+          state = "ON"
+          seen = 1
+          next
+        }
+        if (state == "ON") {
+          printf "  audit: %s restores a gate that was not clear -- this restore has no matching clear.\n", $1
+          bad = 1
+        }
+        state = "ON"
+        seen = 1
+        next
+      }
+      END {
+        if (state == "OFF") {
+          printf "  audit: the window opened at %s is still open -- no restore follows it.\n", last_off
+          bad = 1
+        }
+        if (!bad) print "  audit: every clear is paired with a restore, and the window is closed."
+        else print "  audit: UNPAIRED"
+      }
+    ' "$src" 2>/dev/null
+  )"
+
+  printf '%s\n' "$findings"
+  case "$findings" in
+    *"audit: UNPAIRED"*) return 2 ;;
+    *) return 0 ;;
+  esac
+}
+
+# The two logs should hold the same lines. When they do not, the mirror has
+# been rewritten -- which is the whole reason the record lives elsewhere.
+audit_divergence() {
+  [ -s "$AUDIT_LOCAL" ] || return 0
+  [ -s "$AUDIT" ] || return 0
+  if ! diff -q "$AUDIT_LOCAL" "$AUDIT" >/dev/null 2>&1; then
+    echo "  audit: the two logs diverge." >&2
+    echo "    record: ${AUDIT_LOCAL}" >&2
+    echo "    mirror: ${AUDIT}" >&2
+    echo "    The record is the one to trust. A reset or a branch switch rewrites the mirror." >&2
+  fi
+  return 0
 }
 
 # ---------------------------------------------------------------------------
 # Verbs
 # ---------------------------------------------------------------------------
+
+do_audit() {
+  audit_divergence
+  if audit_pairing; then
+    exit 0
+  fi
+  exit 2
+}
 
 do_status() {
   require_gh_auth
@@ -156,6 +297,12 @@ do_status() {
   # Part of the gate's real strength, so it prints every time, not only on
   # request. An admin can click through regardless of the reviewer list.
   echo "  can_admins_bypass: ${bypass}"
+
+  # cli#489 -- say whether the log pairs up, without being asked. An `on`
+  # with no `off` before it is the shape a lost authorization leaves, and
+  # nobody goes looking for it.
+  audit_divergence
+  audit_pairing || true
   exit 0
 }
 
@@ -269,6 +416,7 @@ case "${1:-}" in
   status) shift; do_status "$@" ;;
   on)     shift; do_on "$@" ;;
   off)    shift; do_off "$@" ;;
+  audit)  shift; do_audit "$@" ;;
   ""|-h|--help) usage; exit 3 ;;
   *) echo "publish-gate: unknown verb '${1}'" >&2; usage; exit 3 ;;
 esac

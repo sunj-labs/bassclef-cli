@@ -1,0 +1,28 @@
+# Lead-lens sign-off — fix/489-audit-log-survives-a-reset
+- date: 2026-11-08
+- lead: saltzer-schroeder
+- findings cleared:
+  - F1 (self, RED) — my tests wrote 24 lines into the operator's real record
+    at ~/.bassclef/publish-gate-audit.log. The pre-existing run() helper sets
+    PUBLISH_GATE_AUDIT only, so the new local write escaped to $HOME. Found by
+    running `status` against the live environment, not by reading the harness.
+    Every runner now redirects HOME as well as both paths; T31 pins the
+    default path so the redirect is meaningful; the real record was restored
+    from the mirror and verified byte-identical across a full suite run.
+  - F2 (self, RED) — my first pairing check reported the log's own first line
+    as a defect. The log opens with an `on` from 2026-11-05 because the clear
+    before it was a raw API call made while `off` was broken (#481), so no
+    `off` line could exist. A check that cries wolf on its opening line every
+    run stops being read. A leading `on` now reads as informational; T30 pins
+    that a later lone restore is still caught.
+  - F3 (self, amber) — T23's fixture was a single `on` line, which the
+    calibration correctly reclassifies as informational. The fixture was too
+    thin to tell the two cases apart. Widened to put the lone restore mid-log.
+- shown RED before GREEN:
+  - 16 assertions across T19-T28 failed against the old script, with
+    `unknown verb 'audit'` and an empty local log
+  - T29/T30 failed before the calibration; T31 failed before the HOME redirect
+  - ran the check against the REAL log with the reconstructed line removed:
+    it names 2026-11-08T02:25:49Z as a restore with no clear before it, which
+    is exactly the hole #489 was filed for
+- verdict: cleared for merge.
