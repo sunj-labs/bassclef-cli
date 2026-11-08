@@ -254,6 +254,40 @@ _docker_harness_map_exit_code() {
 _docker_harness_install_cli() {
   local version="${CLI_VERSION:-latest}"
 
+  # CLI_TARBALL installs the build under test instead of a registry version.
+  #
+  # Before this, the only input was CLI_VERSION — a registry version — so the
+  # harness could only ever exercise something already published. A PR smoke
+  # therefore tested `latest` and reported on the previous release. That is how
+  # a 13-minute green check reported 31 wired hooks against a branch whose own
+  # bundle carried 46: it never installed the branch.
+  #
+  # A path wins over a version. The workflow packs the branch and mounts it, so
+  # the PR run exercises the exact bytes the release would ship.
+  if [[ -n "${CLI_TARBALL:-}" ]]; then
+    if [[ ! -f "$CLI_TARBALL" ]]; then
+      echo "CLI_TARBALL is set to ${CLI_TARBALL} and no file is there." >&2
+      echo "  Refusing to fall back to the registry — that would test the" >&2
+      echo "  previous release and report it as this branch." >&2
+      return "${EXIT_INSTALL_FAIL:-21}"
+    fi
+
+    if [[ "${HARNESS_DRY_RUN:-0}" == "1" ]]; then
+      echo "DRY_RUN: would run: npm install -g ${CLI_TARBALL}"
+      return 0
+    fi
+    if [[ "${HARNESS_TEST_MODE:-0}" == "1" ]]; then
+      echo "TEST_MODE: skipping npm install"
+      return 0
+    fi
+
+    echo "installing from tarball: ${CLI_TARBALL}"
+    _docker_harness_retry_with_backoff \
+      "npm install -g ${CLI_TARBALL}" \
+      3 15 install
+    return $?
+  fi
+
   if [[ "${HARNESS_DRY_RUN:-0}" == "1" ]]; then
     echo "DRY_RUN: would run: npm install -g @thebassclef/lite@${version}"
     return 0
@@ -658,7 +692,11 @@ main() {
   # Falsification-test banner (R8 cure)
   echo "=========================================="
   echo "bassclef-cli Docker cold-adopter harness"
-  echo "target: @thebassclef/lite@${CLI_VERSION:-latest}"
+  if [[ -n "${CLI_TARBALL:-}" ]]; then
+    echo "target: ${CLI_TARBALL} (the build under test)"
+  else
+    echo "target: @thebassclef/lite@${CLI_VERSION:-latest} (registry)"
+  fi
   echo "expected: 0 on self-contained; non-zero on defect"
   echo "=========================================="
 

@@ -70,11 +70,38 @@ jobs:
             -f harness/docker/Dockerfile.cold-adopter \
             .
 
+      - name: Pack the branch under test
+        # On a pull request, smoke the branch rather than the registry.
+        #
+        # This step did not exist, and the run below defaulted CLI_VERSION to
+        # `latest`. So a PR smoke installed the previous release and reported
+        # on it: a 13-minute green check against the 1.10.0 branch said
+        # "Installed 31 of 31 hooks" while that branch's own bundle carried 46.
+        # The check could not have caught a regression in the change it was
+        # gating, because it never installed the change.
+        #
+        # A workflow_dispatch run with an explicit cli_version still targets
+        # the registry, which is what that input is for.
+        if: ${{ github.event_name == 'pull_request' }}
+        id: pack
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+          node scripts/prepublish-bundle-substrate.mjs
+          TARBALL="$(npm pack --silent --pack-destination "$GITHUB_WORKSPACE")"
+          echo "tarball=$GITHUB_WORKSPACE/$TARBALL" >> "$GITHUB_OUTPUT"
+          echo "Packed $TARBALL"
+          # Say what is in it, so the log carries the number the smoke should
+          # then report back.
+          tar -xzOf "$GITHUB_WORKSPACE/$TARBALL" package/dist/lite/.claude/settings.json \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); print("hook entries packed:", sum(len(b["hooks"]) for ev in d["hooks"].values() for b in ev))'
+
       - name: Run cold-adopter smoke
         id: smoke
         continue-on-error: true
         env:
           CLI_VERSION: ${{ github.event.inputs.cli_version || 'latest' }}
+          CLI_TARBALL_HOST: ${{ steps.pack.outputs.tarball }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # cli#254 CI token wire — SMOKE_GH_TOKEN routes V2i /promote-style
@@ -101,9 +128,21 @@ jobs:
           set +e
           # CT1 fold: never echo $SMOKE_GH_TOKEN. GitHub masks it via secrets.
           # context. Passing via -e keeps it out of the command string.
+          # Mount the packed branch read-only and point the harness at it.
+          # With no tarball (workflow_dispatch against a registry version) both
+          # stay empty and the harness takes its registry path.
+          MOUNT_ARGS=()
+          if [ -n "${CLI_TARBALL_HOST:-}" ] && [ -f "$CLI_TARBALL_HOST" ]; then
+            MOUNT_ARGS=(-v "$CLI_TARBALL_HOST:/tmp/cli-under-test.tgz:ro" -e CLI_TARBALL=/tmp/cli-under-test.tgz)
+            echo "smoke target: the packed branch"
+          else
+            echo "smoke target: registry @thebassclef/lite@$CLI_VERSION"
+          fi
+
           docker run \
             --rm \
             --platform=linux/amd64 \
+            "${MOUNT_ARGS[@]}" \
             -e CLI_VERSION="$CLI_VERSION" \
             -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
             -e CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_CODE_OAUTH_TOKEN" \

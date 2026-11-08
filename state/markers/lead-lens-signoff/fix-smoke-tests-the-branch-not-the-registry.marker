@@ -1,0 +1,9 @@
+# Lead-lens sign-off — fix/smoke-tests-the-branch-not-the-registry
+- date: 2026-11-08
+- lead: michael-feathers
+- findings cleared:
+  - F1 (self, amber) — I first cut this branch off the 1.10.0 release branch,
+    so it carried the version bump as well. Re-cut from main and re-applied
+    the two files. The release stays its own PR.
+- RED shown before GREEN, both measured rather than asserted.
+- verdict: cleared for merge.
