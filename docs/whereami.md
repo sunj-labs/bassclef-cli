@@ -1,12 +1,32 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-07T23:15:00Z
-  session: 2026-11-07-session-y-install-surface-and-two-releases.md
+  at: 2026-11-08T11:21:05Z
+  session: 2026-11-08-session-z-brass-grid-and-1923.md
 ---
 
 <!--
-operator_recap (Session Y · install surface fixed, 1.9.21 + 1.9.22 published, 2026-11-07T23:15Z): **Two releases shipped.** `@thebassclef/lite@1.9.22` is live. A cold adopter now reads 31 lines and a four-row ASCII mark, where three days ago they read 201 lines and eleven rows of block art. 1.9.21 (16:15:05Z, logIndex 3741296349) carried the output collapse; 1.9.22 (18:28:20Z, logIndex 3743231042) carried the mark and ran unattended under `trust`.
+operator_recap (Session Z · brass prints, 1.9.23 published unattended, 2026-11-08T11:21Z): **`@thebassclef/lite@1.9.23` is live**, published 02:25:17Z, Sigstore log index 3747789418, 492 files. It published with no operator click — the operator said "publish without my touch — trust", and `trust` turned out to be broken, so the session fixed it mid-flight before it could be used.
+
+**What a cold adopter sees now.** Brass wordmark and brass chip, two columns of indent separating the block from the install log, three command cues on the same rhythm, nothing wrapping mid-sentence. Widest printed line 71 columns, down from 96.
+
+**The defect the operator caught.** The brass chip shipped in 1.9.22 with five passing tests, correct ANSI and no caller. `renderBrandMark` composed its own plain line instead. The tests could not see it — five called `renderChip` directly, seven called `renderBrandMark`, and nothing asserted a relationship between them. The fix carries the missing assertion.
+
+**Design work ran live.** `/extract-intent` returned `apple-hig`, `jony-ive`, `aarron-walter` at 0.82. Two were set aside against their own declared anti-patterns; a developer CLI at install is literally Walter's exclusion. Added Vignelli (lead), Tufte, Rams, Lupton. Four of five reached the same answer by different routes — the indent is the border, no box. Font cmaps read directly: Monaco and Courier New lack the rounded corner `U+256D`, so any future border has to be square.
+
+**Two claims I got wrong, both corrected in the PR body.** I said rewrapping would break a test and cited the exact lines — it does not, because that test iterates the constant it checks and can never fail when the constant changes. I said it needed `up#2006` first — #2006 quotes a markdown blockquote, which pins words and carries no column budget. Tested rather than asserted the second time: 9/9 pass.
+
+**An audit hole I opened.** `state/publish-gate-audit.log` is tracked in git. My `git reset --hard origin/main` reverted it and destroyed the operator's authorization line, leaving a gate restore with no matching clear. Restored as a bounded RECONSTRUCTED entry; filed as `cli#489`. Second time in one session an authorization lost its record — the first was `#481`, where the verb was broken and wrote nothing.
+
+**Six defects in two days, one shape** — a path that runs in one place, never compared against the other: `#479` (stubbed runner), `#481` (stubbed API), `#482` (different repo locally than CI), `#484` (five tests, no caller), my watch script reading the wrong run, and my two wrong claims. Operator named the pattern and asked for the rule-level question; filed as `up#2428` — should assert-verify rank its evidence, with an execution outranking a read and a fix's proof being a test shown RED on the old code.
+
+**Open.** `cli#482` — the pin is `v1.11.1` from Oct 18, 39 commits behind, so 1.9.23 ships the same framework content 1.9.22 did (named in the release notes). `up#2238` — lite ships 79 rule files, 488,201 bytes against a 150,000-char limit, so every cold adopter opens with a warning; and `#1951` deduped two rules upstream yet both still ship in `dist/lite`. 1.9.23 has not been smoked on a real cold adopter. `cli#488` (a real `trust` verb) and `cli#489` both filed tonight.
+
+Next session plan at `docs/next-session-plan-2026-11-08-after-1923.md` — four steps: smoke 1.9.23, the pin, the audit log, the trust verb. Session log at `docs/chronicle/2026-11-08-session-z-brass-grid-and-1923.md`.
+-->
+
+<!--
+prior_operator_recap (Session Y · install surface fixed, 1.9.21 + 1.9.22 published, 2026-11-07T23:15Z): **Two releases shipped.** `@thebassclef/lite@1.9.22` is live. A cold adopter now reads 31 lines and a four-row ASCII mark, where three days ago they read 201 lines and eleven rows of block art. 1.9.21 (16:15:05Z, logIndex 3741296349) carried the output collapse; 1.9.22 (18:28:20Z, logIndex 3743231042) carried the mark and ran unattended under `trust`.
 
 **The 171-line bug.** The per-directory summary was naming single files as directories — its grouping key kept the first two path segments, so `lib/state.sh` became its own group. 171 of the 201 lines came from that. Inventory moved behind `--verbose`; two characterization tests moved with it, patterns unchanged, and four new tests read `.bassclef/init.manifest.json` instead, which is where the file set always belonged.
 
