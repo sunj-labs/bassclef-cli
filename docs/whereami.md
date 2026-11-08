@@ -1,12 +1,36 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-08T11:21:05Z
-  session: 2026-11-08-session-z-brass-grid-and-1923.md
+  at: 2026-11-08T14:02:00Z
+  session: 2026-11-08-session-aa-pin-audit-trust.md
 ---
 
 <!--
-operator_recap (Session Z · brass prints, 1.9.23 published unattended, 2026-11-08T11:21Z): **`@thebassclef/lite@1.9.23` is live**, published 02:25:17Z, Sigstore log index 3747789418, 492 files. It published with no operator click — the operator said "publish without my touch — trust", and `trust` turned out to be broken, so the session fixed it mid-flight before it could be used.
+operator_recap (Session AA · the pin, the record, a trust that re-arms, 2026-11-08T14:02Z): **Four PRs merged, all four steps of the plan doc done.** `#494` the pin, `#495` the audit record, `#496` the CI gap, `#500` the trust verb. Closed `#482` and `#489`. Five new tickets filed: `#492`, `#493`, `#497`, `#498`, `#499`.
+
+**The pin is the one thing waiting on you.** `.bassclef-pin` still names `v1.11.1` from Oct 18 and upstream is 41 commits ahead. The pin is now load-bearing — a build refuses when its source disagrees with it — but advancing it ships 41 commits of framework change to every adopter, and I would want them read first. Three ways were put to you: read the 41 commits and report the deltas (25-40 turns), leave the pin and make the refresh its own goal, or advance it on my judgement. The third would ship a framework set nobody read, which is what `#482` exists to stop. No answer yet.
+
+**Step 2 was worse than the ticket said — three divergent bundle sources, not two.** `pr-checks.yml:71` hardcoded `ref: v1.1.1` under a comment reading "Matches publish.yml pin". The pin names `v1.11.1`. One character apart, 27 days apart, both real tags. So the full suite validated a bundle built from one substrate version while publish shipped another. The test written to catch a hardcoded sibling tag read `publish.yml` and nothing else.
+
+**The field that matters is `release_tag`, not `version`.** My first cut compared `version`, which reads v1.11.1 both at the tag and on a release branch 41 commits past it, because the release process writes the marker before the version bump. It would have passed on a checkout emitting 46 hooks where CI emits 31. Measured both files at both refs before switching.
+
+**Step 1's three answers.** Brass renders (`38;5;179` figlet, chip on `48;5;179`). Something still wraps — the hook-install line is 102 columns, not 71; Session Z's figure held for the brass block and not for the install log above it (`#492`). Budget: 79 rule files, 481,327 bytes, 3.22x the limit — and **the warning does not appear in `-p` mode at all**, so no automated smoke can capture it. Posted to `up#2238` with the method. Also `"1 config files created"` confirmed on a real install (`#493`), and a cold adopter's first `claude` opens on the theme picker.
+
+**CI ran one bash Tier 0 suite out of eighteen.** The 23 assertions `#494` and `#495` added were enforced on this machine and nowhere else. `#496` runs fifteen. Its first run went red and found three suites that pass on macOS and fail on Linux — one with a macOS-only `stat` call where the mode is in fact correct (`#498`). That is what running them was for.
+
+**`#488` stays open on purpose.** `trust` and `rearm` ship and neither waits on the publish, which was the part that mattered. But nothing fires `rearm` on a schedule: the project SessionStart block holds one entry and the sync removed three project-scope hooks during this session, so adding a fourth the next sync may clear is worse than adding none. `status` names an open window, so the publish path always sees one. Commented on the ticket with what would close it.
+
+**Five things I got wrong, all caught in-session.** I asserted "both compounding files landed" on `up#2238` without checking — only one ships; the claim came from reading a local checkout and calling it a property of the published package, which is the `#482` shape catching me. I compared `version` instead of `release_tag`. My tests wrote 24 lines of fixture traffic into your live audit record, found by running `status` against the real environment rather than by reading the harness — every runner now redirects `HOME`, T31 pins the default path, and the record was restored and verified byte-identical. I marked a test-list line with no test behind it. And I wrote a shared function then left the old copy in `do_on`.
+
+**`/architect-review` skipped, with a reason.** Last review was 2026-10-11. This session was four PRs in build tooling, CI and one bash script, with no new module. Worth running on the pin advance instead, where the architecture question actually sits.
+
+**Three PRs open over 24h:** `#474` (Nov 5), `#449` (Oct 18), `#423` (Oct 11, a dependabot node bump).
+
+Session log at `docs/chronicle/2026-11-08-session-aa-pin-audit-trust.md`. Risk ledger at `docs/risk-ledgers/2026-11-08-session-aa-option-c.md`.
+-->
+
+<!--
+prior_operator_recap (Session Z · brass prints, 1.9.23 published unattended, 2026-11-08T11:21Z): **`@thebassclef/lite@1.9.23` is live**, published 02:25:17Z, Sigstore log index 3747789418, 492 files. It published with no operator click — the operator said "publish without my touch — trust", and `trust` turned out to be broken, so the session fixed it mid-flight before it could be used.
 
 **What a cold adopter sees now.** Brass wordmark and brass chip, two columns of indent separating the block from the install log, three command cues on the same rhythm, nothing wrapping mid-sentence. Widest printed line 71 columns, down from 96.
 
