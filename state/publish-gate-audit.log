@@ -5,3 +5,5 @@
 2026-11-07T15:11:46Z	on	kingofrock	note=restored-so-operator-can-approve-retry
 2026-11-07T18:24:41Z	off	kingofrock	authorized_by=kingofrock note=trust-1.9.22-script-write-broken-cli-481
 2026-11-07T18:28:50Z	on	kingofrock	note=restored-after-1.9.22-trust-publish-script-write-broken-cli-481
+2026-11-08T01:33:00Z	off	kingofrock	authorized_by=kingofrock note=RECONSTRUCTED-entry-lost-to-git-reset see-cli-489 operator-said-publish-without-my-touch-trust cleared-for-1.9.23 actual-time-before-308b56f-at-013418Z
+2026-11-08T02:25:49Z	on	kingofrock	reviewer=kingofrock id=5182332
