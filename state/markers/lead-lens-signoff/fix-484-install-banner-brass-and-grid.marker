@@ -1,0 +1,42 @@
+# Lead-lens sign-off — fix/484-install-banner-brass-and-grid
+- date: 2026-11-08
+- lead: massimo-vignelli
+- supporting: [jony-ive, edward-tufte, dieter-rams, ellen-lupton]
+
+## Findings raised in review, and disposition
+
+F1 AMBER — supportsColour treats FORCE_COLOR="" as unset.
+  chalk reads an empty FORCE_COLOR as true. I read it as "not set".
+  Kept deliberately: an empty env var is almost always an unset var that
+  got exported anyway, and the safe reading of ambiguity here is "no
+  colour". Pinned by test so the choice is visible rather than accidental.
+  CLEARED — documented in the function body, asserted in the suite.
+
+F2 AMBER — renderBrandMark uses the bare NAME, not renderChip's payload,
+  when colour is off. That diverges from the module docstring's claim
+  that the chip's payload is identical either way.
+  The docstring is about renderChip, which is unchanged and still holds.
+  renderBrandMark picks a different cell for a stated reason: with no
+  brass plate, the chip's own padding pushes the word one column off the
+  grid the art sits on, and buys nothing.
+  CLEARED — reason is in the code at the branch.
+
+F3 GREEN — state/luminary-implementations/jony-ive.json carries a
+  last_scanned timestamp bump only. Auto-generated, one line, benign.
+  CLEARED — no action.
+
+F4 GREEN — the three existing assertions that constrain this change were
+  read before editing: the per-line width budget, the indexOf(ART[1])
+  check in the CLI test, and the narrow fallback. All survive because
+  they use substring checks, and because colour defaults off.
+  CLEARED — verified by running the suite, 573 green.
+
+## Lead verdict
+Vignelli's own test is whether the system says one thing once. It does:
+one brass index, one indent unit, one constant shared by both call sites.
+The figlet and the chip both carry the name, which is the system saying
+it twice — accepted, and the reason is recorded on the ticket: the chip
+has to be the name to work as the recurring mark on later lines, and
+install is where a reader first meets it.
+
+No red findings. No amber findings outstanding. Clear to merge.

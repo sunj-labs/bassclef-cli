@@ -1,0 +1,21 @@
+# Pre-mortem light — fix-484-install-banner-brass-and-grid
+- date: 2026-11-08
+- scope: cli#484 install banner brass + indent grid
+- lenses: massimo-vignelli, jony-ive, michael-nygard
+
+## Vignelli — the grid fails
+1. Indent applied to the mark but not the prose → two grids, worse than one. Fold: one indent constant, applied once at the call site.
+2. Indent hardcoded at two call sites and they drift. Fold: single exported constant.
+3. Brass on figlet AND chip reads as two golds. Fold: one colour index (179), two devices (fg vs inverted).
+
+## Ive — unresolved seams
+4. Colour leaks into piped output and corrupts smoke captures. Fold: detect TTY; default to no colour when not a terminal.
+5. MIN_COLUMNS not raised for the indent → art clips at 40-41 cols instead of dropping. Fold: derive from art width + indent.
+6. Chip ANSI counted as visible width somewhere → ragged alignment. Fold: nothing right-aligns; chip is the last styled thing on its line.
+
+## Nygard — stability
+7. NO_COLOR ignored; adopters who set it see escapes. Fold: honour NO_COLOR, FORCE_COLOR, TERM=dumb.
+8. Indenting VALUE_TEST_BLOCK breaks the per-line toContain test. Checked first: test skips blanks and uses substring, so indent passes. Rewrap would fail — held out of scope.
+
+## Strongest concern folded before code
+Colour must be a decision the caller makes, not a constant the module assumes. renderBrandMark takes a colour flag; init.ts computes it once.

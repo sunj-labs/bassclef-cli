@@ -1,0 +1,8 @@
+# Luminary — fix-484-install-banner-brass-and-grid
+- date: 2026-11-08
+- lead: massimo-vignelli
+- supporting: [jony-ive, edward-tufte, dieter-rams, ellen-lupton]
+- matcher: voyage-3-lite+haiku-4-5 LIVE 0.82 → apple-hig, jony-ive, aarron-walter
+- matcher-overrides: apple-hig and aarron-walter set aside against their own declared anti_patterns (no native convention for a terminal banner; power-tool surface where personality slows the user). jony-ive kept.
+- what-the-lead-caught: the indent IS the grid, so a drawn border is decoration admitting the grid failed. Also: figlet + chip both saying "bassclef" is the system repeating itself — accepted anyway, because the chip must be the name to work as the recurring mark on later lines.
+- what-ive-caught: the missing blank line between install log and figlet is an unresolved seam, and that is the actual cause of "jammed", not the absence of a box.

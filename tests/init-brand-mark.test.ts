@@ -37,6 +37,28 @@
 // [x] default init prints the mark above "Bassclef is ready."
 // [x] init --json stdout carries no mark
 //
+// cli#484 — the chip shipped in #476 and never printed once. renderChip
+// was exported, had the five tests above, emitted correct ANSI, and had
+// no caller. Every test passed because each half was pinned alone and
+// nothing asserted a relationship between them. These are that assertion
+// plus the grid it arrived with.
+//
+// [x] the composed mark CONTAINS the chip — the missing assertion
+// [x] colour off composes no escape codes at all
+// [x] colour on puts brass on the art, not only on the chip
+// [x] art and chip use the same brass index — one colour, two devices
+// [x] every line of the wide mark starts on the grid
+// [x] the narrow fallback drops the indent with the art
+// [x] indentBlock leaves blank lines blank — no trailing whitespace
+// [x] indentBlock with 0 is the identity
+// [x] supportsColour: piped stdout (isTTY undefined) is false
+// [x] supportsColour: a terminal is true
+// [x] supportsColour: NO_COLOR beats a terminal
+// [x] supportsColour: NO_COLOR empty still counts, per no-color.org
+// [x] supportsColour: TERM=dumb beats a terminal
+// [x] supportsColour: FORCE_COLOR overrides a pipe
+// [x] supportsColour: FORCE_COLOR=0 means off even on a terminal
+//
 // Pre-mortem folds: docs/risk-ledgers/2026-11-06-brass-mark.md
 //   (I1 assert charset mechanically, I2 assert even widths, I3 test the
 //    colour-off degrade, N4 keep the undefined-width path, N5 keep the
@@ -57,9 +79,12 @@ import { fileURLToPath } from 'node:url';
 import {
   BRAND_MARK_ART,
   BRAND_MARK_ART_WIDTH,
+  BRAND_MARK_INDENT,
   BRAND_MARK_MIN_COLUMNS,
+  indentBlock,
   renderBrandMark,
   renderChip,
+  supportsColour,
 } from '../src/lib/init-brand-mark.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -175,6 +200,105 @@ describe('chip — the recurring mark', () => {
 
   it('is pure ASCII once colour is stripped', () => {
     expect(stripAnsi(renderChip({ colour: true })).match(NON_ASCII)).toBeNull();
+  });
+});
+
+// cli#484. The defect was not that any of these functions was wrong. It
+// was that renderBrandMark never called renderChip, and no test could
+// tell, because every test exercised one function at a time. The first
+// test in this block is the one that fails on the code that shipped.
+describe('the composition — brass actually reaches the output', () => {
+  it('the composed mark CONTAINS the chip, not a copy of its escape codes', () => {
+    const out = renderBrandMark('1.0.0', 120, { colour: true });
+    expect(
+      out,
+      'renderChip is exported, tested, and was never called — that is the bug this pins',
+    ).toContain(renderChip({ colour: true }));
+  });
+
+  it('puts brass on the art too, not only on the chip', () => {
+    const out = renderBrandMark('1.0.0', 120, { colour: true });
+    // The art row carries its own colour run, independent of the chip's.
+    expect(out).toMatch(/\x1b\[38;5;179m \_ {26}\_ {7}__/);
+  });
+
+  it('draws art and chip from one brass index — two devices, one colour', () => {
+    const out = renderBrandMark('1.0.0', 120, { colour: true });
+    const indices = [...out.matchAll(/\x1b\[(?:38|48);5;(\d+)m/g)].map((m) => m[1]);
+    const brass = indices.filter((i) => i !== '233'); // 233 is the ink on the plate
+    expect(
+      [...new Set(brass)],
+      `more than one gold in play: ${[...new Set(brass)].join(', ')} — two near-equal golds read as a mistake`,
+    ).toEqual(['179']);
+  });
+
+  it('composes no escape codes at all when colour is off', () => {
+    const out = renderBrandMark('1.0.0', 120, { colour: false });
+    expect(out).not.toContain('\x1b');
+  });
+
+  it('defaults to colour off — a forgetful caller gets the safe answer', () => {
+    expect(renderBrandMark('1.0.0', 120)).not.toContain('\x1b');
+  });
+});
+
+describe('the grid — indentation is the bounding device', () => {
+  it('starts every line of the wide mark on the grid', () => {
+    const out = renderBrandMark('1.0.0', 120);
+    for (const line of out.split('\n')) {
+      if (line === '') continue;
+      expect(
+        line.startsWith(' '.repeat(BRAND_MARK_INDENT)),
+        `line is off the grid: ${JSON.stringify(line)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('drops the indent with the art when the terminal is too narrow', () => {
+    const out = renderBrandMark('1.0.0', BRAND_MARK_MIN_COLUMNS - 1);
+    expect(out.startsWith(' ')).toBe(false);
+  });
+
+  it('accounts for the indent in the minimum width', () => {
+    expect(BRAND_MARK_MIN_COLUMNS).toBe(BRAND_MARK_ART_WIDTH + BRAND_MARK_INDENT);
+  });
+
+  it('leaves blank lines blank — an indented blank is invisible whitespace', () => {
+    expect(indentBlock('a\n\nb', 2)).toBe('  a\n\n  b');
+  });
+
+  it('is the identity at zero', () => {
+    expect(indentBlock('a\nb', 0)).toBe('a\nb');
+  });
+});
+
+describe('supportsColour — decided once, never guessed', () => {
+  it('is false for piped stdout, so captures and CI logs stay clean', () => {
+    expect(supportsColour({}, undefined)).toBe(false);
+  });
+
+  it('is true for a terminal', () => {
+    expect(supportsColour({}, true)).toBe(true);
+  });
+
+  it('honours NO_COLOR over a terminal', () => {
+    expect(supportsColour({ NO_COLOR: '1' }, true)).toBe(false);
+  });
+
+  it('honours NO_COLOR when empty — any value counts, per no-color.org', () => {
+    expect(supportsColour({ NO_COLOR: '' }, true)).toBe(false);
+  });
+
+  it('honours TERM=dumb over a terminal', () => {
+    expect(supportsColour({ TERM: 'dumb' }, true)).toBe(false);
+  });
+
+  it('lets FORCE_COLOR override a pipe', () => {
+    expect(supportsColour({ FORCE_COLOR: '1' }, undefined)).toBe(true);
+  });
+
+  it('reads FORCE_COLOR=0 as off, even on a terminal', () => {
+    expect(supportsColour({ FORCE_COLOR: '0' }, true)).toBe(false);
   });
 });
 
