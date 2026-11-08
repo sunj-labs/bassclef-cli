@@ -24,6 +24,56 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.10.0] - 2026-11-08
+### Added
+
+- **Fifteen more hooks reach a lite install.** The substrate pin moved from
+  `v1.11.1` to `v1.12.0`, and the wired hook set goes from 31 to 46. None were
+  removed. Upstream's v1.12.0 release reports that 24 of 97 hooks could not
+  install since 2026-09-15 — the files shipped and were never wired. Among the
+  fifteen: `adr-discipline-check`, `atomic-pr-check`, `bet-doc-gate`,
+  `destructive-command-guard`, `file-rename-discipline-check`,
+  `pre-gh-pr-body-scrub`, `pre-gh-pr-title-scrub`, `reviewer-dispatch-check`,
+  `role-entry-gate`. Seven of the fifteen can stop a tool call; the rest warn.
+
+### Changed
+
+- **The bundler reads `.bassclef-pin`, and refuses when its source disagrees.**
+  A local build previously read a different repository from the one CI reads,
+  producing 46 hooks locally against 31 in the published package, with nothing
+  reporting the difference. It now resolves the same repository CI does, checks
+  that checkout's `release_tag` against the pin, and prints what it built from
+  on every run. `#482`.
+- **PR checks build from the pin too.** The workflow had a hardcoded `v1.1.1`
+  while the pin named `v1.11.1` — a different tag, 27 days older. The full test
+  suite was validating a bundle built from one substrate version while publish
+  shipped another. `#482`.
+
+### Fixed
+
+- **The publish gate's record survives a branch switch.** The audit log was
+  tracked in git, so a `git reset --hard` rewrote it; an operator authorisation
+  for an unattended publish was lost that way. The record now lives outside the
+  repository, the tracked file remains as a view, and a new `audit` verb walks
+  the log in order and reports any clear without a matching restore. `#489`.
+- **`trust` is a real verb.** It was a spelling of `off`, and the only thing
+  restoring the gate afterwards was a sentence in a skill file. It now writes a
+  marker carrying who authorised the window and when it closes, and a new
+  `rearm` verb restores the gate from that marker. Neither waits on the publish
+  finishing. `#488`.
+
+### Notes
+
+- Adopters who installed `1.9.23` or earlier receive the v1.11.1 substrate.
+  Upgrading to this version is what delivers the hook-install fix.
+- A cold-adopter smoke ran against the packed tarball before release: 554 files
+  installed (unchanged), 46 of 46 hooks wired, session start clean, and an
+  ordinary write-add-commit completed unblocked. Baseline for comparison at
+  `docs/baselines/2026-11-08-cold-adopter-1.9.23-pre-pin.md`.
+- Known and unchanged: the standing-instruction total sits at 3.23x the
+  150,000-character limit, so a cold adopter still opens on a warning.
+  Tracked upstream at `#2238`.
+
 ## [1.9.23] - 2026-11-08
 ### Added
 
