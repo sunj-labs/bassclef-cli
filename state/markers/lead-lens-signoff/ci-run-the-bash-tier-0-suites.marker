@@ -1,0 +1,9 @@
+# Lead-lens sign-off — ci/run-the-bash-tier-0-suites
+- date: 2026-11-08
+- lead: saltzer-schroeder
+- findings cleared: no findings. Single-step workflow change; the step was
+  simulated verbatim against this tree before it shipped.
+- RED evidence: the step did not exist, and 17 of the 18 suites had never run
+  in CI. Measured by reading the workflow and by running all 87 files locally
+  (81 pass, 6 smoke drivers reporting their own states).
+- verdict: cleared for merge.

@@ -1,0 +1,9 @@
+# Temperance marker — ci/run-the-bash-tier-0-suites
+- date: 2026-11-08
+- scope-decision: one CI step, nothing else. It runs the 18 bash Tier 0
+  suites that need only bash and jq. Smoke drivers stay with docker-smoke.yml.
+- why now, and not filed for later: tonight's two merged PRs added 23 bash
+  assertions. CI ran none of them. Shipping the step is what makes those PRs'
+  Tier 0 claims true rather than aspirational.
+- drift trigger: any change to a test file itself. This PR touches only the
+  workflow.

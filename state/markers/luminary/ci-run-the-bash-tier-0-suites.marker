@@ -1,0 +1,7 @@
+# Luminary marker — ci/run-the-bash-tier-0-suites
+- date: 2026-11-08
+- lead: saltzer-schroeder — complete mediation. A gate that runs one suite
+  out of eighteen mediates one eighteenth of what it claims to.
+- supporting: michael-nygard — the smoke drivers are excluded deliberately;
+  several exit nonzero while the defect they characterize is open, so
+  including them would report an open ticket as a broken build.
