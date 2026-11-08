@@ -24,6 +24,45 @@ bet 2026-08-06b.
 
 ### Notes
 
+## [1.9.23] - 2026-11-08
+### Added
+
+### Changed
+
+- `bassclef init` prints the whole block below the install log on one
+  two-column grid, so the mark and the instructions read as one thing
+  rather than a single undifferentiated column. A blank line now
+  separates the install log from the mark.
+- The brass reaches the figlet as well as the chip. One colour value
+  (256-colour index 179) in two forms — the art drawn in brass, the chip
+  a solid brass plate.
+- All three command cues carry the same spacing. `/launch` and `/build`
+  previously had no blank line above them while `claude` and `/riff` did.
+- The two longest lines of the value block now break at their sentence
+  boundaries. They were 94 and 93 columns against a default terminal
+  width of 80, so both wrapped mid-sentence. No word changed.
+
+### Fixed
+
+- The brass chip now prints. `renderChip()` shipped in 1.9.22, passed
+  five tests, emitted correct ANSI, and had no caller — `renderBrandMark`
+  composed its own plain text line instead. (#484)
+- Colour is detected rather than assumed. `NO_COLOR`, `FORCE_COLOR` and
+  `TERM=dumb` are honoured, and piped output gets no escape codes, which
+  keeps cold-adopter smoke captures and CI logs readable. (#484)
+- `scripts/publish-gate.sh off` can clear the gate. It sent
+  `-F "reviewers=[]"`, which `gh` typed as the two-character *string*
+  `"[]"` where the API wanted an array, so every write came back 422 and
+  the gate had never once been clearable. (#481)
+
+### Notes
+
+- Repo tooling only for #481 — `scripts/publish-gate.sh` is not part of
+  the published package.
+- The ANSI constants were raw ESC bytes in the source and are now `\x1b`
+  escapes. A control character in source survives no copy-paste and no
+  editor that trims.
+
 ## [1.9.22] - 2026-11-07
 ### Changed
 
