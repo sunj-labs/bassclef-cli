@@ -1,0 +1,14 @@
+# Temperance marker — cli#506
+- date: 2026-11-08
+- branch: fix/506-trust-window-spent-on-publish
+- scope-decision: teach the trust window to close when the publish it paid for
+  lands. One query, one new test inside `trust_window_closed`, and a reason
+  string so callers can say why a window reads closed.
+- smallest shape: the fix is a read, not a write. The marker is local and the
+  publish is remote, so no write was ever possible.
+- what this does NOT do: nothing fires `rearm` on a schedule. That is still
+  #488's open item. This makes the trigger worth more, it does not supply one.
+- blast radius: `scripts/publish-gate.sh` only, which is not in dist/lite, so
+  no adopter reads it. Every new path leans toward "approval required".
+- drift-trigger: if the fix needs the workflow to write anything, stop — that
+  is the impossible shape the diagnosis ruled out.

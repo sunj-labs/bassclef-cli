@@ -1,0 +1,15 @@
+# Luminary marker — cli#506
+- date: 2026-11-08
+- branch: fix/506-trust-window-spent-on-publish
+- lead: saltzer-schroeder
+- supporting: [michael-feathers, tony-hoare]
+- saltzer-schroeder (lead) — fail-safe defaults decide the one real design
+  question here: what happens when the query cannot be answered. A query
+  that fails must not hold the gate open, so an unreadable history reads as
+  "window over" and the gate goes back on.
+- michael-feathers — the `spent` field had a test (T39) that passed against a
+  marker the test wrote by hand. Production could not reach that state. The
+  new tests drive the real decision instead of fabricating its outcome.
+- tony-hoare — `publish_landed_since` returns three states, not two. Collapsing
+  "none landed" and "could not ask" into one boolean is how the unsafe default
+  would have crept back in.

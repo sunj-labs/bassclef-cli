@@ -1,0 +1,24 @@
+# Lead-lens sign-off — cli#506
+- date: 2026-11-08
+- branch: fix/506-trust-window-spent-on-publish
+- lead: saltzer-schroeder
+- findings cleared:
+  - R1 (query failure holds the gate open) — cleared. T52 pins rc=2 restoring
+    the gate, and a live probe against a nonexistent workflow returns 2.
+  - R3 (a query on every status call) — cleared. The query sits after the
+    `expires_at` check, so a status call with no marker never reaches it.
+  - R4 (platform-dependent comparison) — cleared. jq string comparison on
+    fixed-width ISO-8601 UTC.
+  - R5 (tests passing on the old wording) — cleared in iteration 1; both
+    needles tightened and shown RED before the fix.
+  - R6 (masked exit status) — cleared. `if ! hits="$(...)"` with a separate
+    declaration.
+  - R2 (closing a window early) — accepted, not fixed. Named in the ticket
+    and in the code comment. The cost is an approval click; the alternative
+    is an unattended publish.
+- tests: 105 total, 105 passed, 0 failed. At RED: 105 total, 100 passed,
+  5 failed. Total grew from 94 after #507, so no file failed to load.
+- live verification: `publish_landed_since` run against the real API returns
+  LANDED at 2026-11-08T23:08:19Z for a window opened 23:00:00Z, none for one
+  opened tomorrow, and 2 for an unreadable workflow.
+- shellcheck: clean at -S warning.
