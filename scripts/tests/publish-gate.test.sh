@@ -28,6 +28,21 @@
 # [x] T14 off_readback_still_has_rule — exit 2; stderr names postcondition
 # [x] T15 unknown_verb — exit 3; stderr names usage
 # [x] T16 status_is_pure — no PUT fired; audit file unchanged
+#
+# cli#489 — the audit log is tracked, so a git reset erases authorizations.
+# [x] T19 mutation writes the line to BOTH the tracked mirror and the local record
+# [x] T20 local record's parent directory is created when absent
+# [x] T21 audit verb on a paired log — exit 0, says paired
+# [x] T22 audit verb on a log ending in off — exit 2, names the open window
+# [x] T23 audit verb on a mid-log `on` with no preceding off — exit 2, names it
+# [x] T24 audit verb on off,off — exit 2, names the double clear
+# [x] T25 audit verb walks order, not counts — equal counts in the wrong order fail
+# [x] T26 status surfaces the pairing result without being asked
+# [x] T27 mirror and local record diverge — reported
+# [x] T28 audit verb on a missing log — exit 0, says nothing recorded
+# [x] T29 a log whose FIRST line is `on` reads as a record that begins mid-window
+# [x] T30 that same log still catches a lone restore later in the file
+# [x] T31 with no override set, the record lands at $HOME/.bassclef/
 
 set -uo pipefail
 
@@ -140,7 +155,18 @@ run() {
   export FAKE_GH_PUTMARK="$WORK/put.mark"
   : > "$FAKE_GH_PUTLOG"
   AUDIT="$WORK/audit.log"
-  OUT="$(PATH="$WORK/bin:$PATH" PUBLISH_GATE_AUDIT="$AUDIT" bash "$SCRIPT" "$@" 2>&1)"
+  AUDIT_LOCAL="$WORK/local-audit.log"
+  # cli#489 — HOME is redirected as well as the two log paths. The script's
+  # local record defaults to $HOME/.bassclef/, so a test that sets only
+  # PUBLISH_GATE_AUDIT writes into the operator's real record. That happened
+  # while this change was being written: 24 lines of fixture traffic landed
+  # in the live log before `status` surfaced it. Setting HOME means a future
+  # test that forgets the variable still cannot reach outside its temp dir.
+  OUT="$(PATH="$WORK/bin:$PATH" \
+        HOME="$WORK/home" \
+        PUBLISH_GATE_AUDIT="$AUDIT" \
+        PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" \
+        bash "$SCRIPT" "$@" 2>&1)"
   RC=$?
   PUTS="$(cat "$FAKE_GH_PUTLOG" 2>/dev/null)"
   return 0
@@ -236,6 +262,182 @@ case "$PUTS" in
   *)
     assert_eq 1 1 "T18 off sends no -F reviewers string" ;;
 esac
+
+# ---------------------------------------------------------------------------
+# cli#489 — the audit log is tracked, so a git reset erases authorizations
+#
+# What happened: `off` wrote its line to state/publish-gate-audit.log in the
+# working tree, the commit that followed carried only the script, and a
+# `git reset --hard origin/main` reverted the log. The authorization for an
+# unattended publish was gone. The log then showed a restore with no matching
+# clear — the one shape an audit trail must never have.
+#
+# The cure is the ticket's option 3: an untracked local file is the record of
+# truth, the tracked file is the view. Plus a check that reads the log in
+# order and reports unpaired entries, which would have surfaced the hole the
+# same night instead of needing someone to notice the tail looked wrong.
+#
+# Per the pre-mortem (Saltzer 2, and the fold on counting): the check walks
+# state transitions. A check that counted `on` lines against `off` lines
+# would pass on a log with two of each in the wrong order.
+# ---------------------------------------------------------------------------
+
+# run_audit <mode> <seeded-log-contents> <args...>
+#   Seeds BOTH logs with the same content, then runs the script.
+#   Sets RC, OUT, and leaves the two paths in AUDIT and AUDIT_LOCAL.
+run_audit() {
+  local mode="$1"; local seed="$2"; shift 2
+  WORK="$(mktemp -d)"
+  make_fake_gh "$WORK/bin"
+  export FAKE_GH_MODE="$mode"
+  export FAKE_GH_PUTLOG="$WORK/puts.log"
+  export FAKE_GH_PUTMARK="$WORK/put.mark"
+  : > "$FAKE_GH_PUTLOG"
+  AUDIT="$WORK/audit.log"
+  AUDIT_LOCAL="$WORK/local/audit.log"
+  mkdir -p "$WORK/local"
+  if [[ -n "$seed" ]]; then
+    printf '%s\n' "$seed" > "$AUDIT"
+    printf '%s\n' "$seed" > "$AUDIT_LOCAL"
+  fi
+  OUT="$(PATH="$WORK/bin:$PATH" \
+        HOME="$WORK/home" \
+        PUBLISH_GATE_AUDIT="$AUDIT" \
+        PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" \
+        bash "$SCRIPT" "$@" 2>&1)"
+  RC=$?
+  PUTS="$(cat "$FAKE_GH_PUTLOG" 2>/dev/null)"
+  return 0
+}
+
+# Log lines are tab-separated: stamp, verb, login, detail.
+_line() { printf '%s\t%s\tkingofrock\t%s' "$1" "$2" "${3:-}"; }
+
+PAIRED="$(_line 2026-11-07T18:24:41Z off authorized_by=operator)
+$(_line 2026-11-07T18:28:50Z on reviewer=kingofrock)"
+
+ENDS_OFF="$(_line 2026-11-07T18:24:41Z off authorized_by=operator)"
+
+# Last night's shape: a restore with no clear before it.
+#
+# The lone restore has to sit mid-log. A single `on` as the only line in a
+# file is a different thing -- a record that begins mid-window, which is what
+# this log really does (T29). This fixture opens with a paired clear and
+# restore so the third line is unambiguously a restore of nothing.
+LONE_ON="$(_line 2026-11-07T18:24:41Z off authorized_by=operator)
+$(_line 2026-11-07T18:28:50Z on reviewer=kingofrock)
+$(_line 2026-11-08T02:25:49Z on reviewer=kingofrock)"
+
+DOUBLE_OFF="$(_line 2026-11-07T14:51:25Z off authorized_by=operator)
+$(_line 2026-11-07T18:24:41Z off authorized_by=operator)
+$(_line 2026-11-07T18:28:50Z on reviewer=kingofrock)"
+
+# Two of each verb. A counting check passes. The order is wrong: the first
+# entry restores a gate nothing had cleared.
+EQUAL_COUNTS_WRONG_ORDER="$(_line 2026-11-07T10:00:00Z on reviewer=kingofrock)
+$(_line 2026-11-07T11:00:00Z off authorized_by=operator)
+$(_line 2026-11-07T12:00:00Z off authorized_by=operator)
+$(_line 2026-11-07T13:00:00Z on reviewer=kingofrock)"
+
+run_audit put-then-off "" off --authorized-by operator
+assert_eq 0 "$RC" "T19 mutation exits 0"
+if [[ -s "$AUDIT" && -s "$AUDIT_LOCAL" ]]; then
+  pass "T19 mutation writes the line to BOTH logs"
+else
+  fail "T19 mutation writes the line to BOTH logs" "mirror=$(wc -c <"$AUDIT" 2>/dev/null) local=$(wc -c <"$AUDIT_LOCAL" 2>/dev/null)"
+fi
+
+# T20 — the local record's directory does not exist yet.
+WORK="$(mktemp -d)"
+make_fake_gh "$WORK/bin"
+export FAKE_GH_MODE=put-then-off FAKE_GH_PUTLOG="$WORK/puts.log" FAKE_GH_PUTMARK="$WORK/put.mark"
+: > "$FAKE_GH_PUTLOG"
+DEEP="$WORK/no/such/dir/audit.log"
+OUT="$(PATH="$WORK/bin:$PATH" HOME="$WORK/home" PUBLISH_GATE_AUDIT="$WORK/audit.log" PUBLISH_GATE_AUDIT_LOCAL="$DEEP" bash "$SCRIPT" off --authorized-by operator 2>&1)"
+RC=$?
+[[ -s "$DEEP" ]] && pass "T20 local record's parent directory is created when absent" \
+                 || fail "T20 local record's parent directory is created when absent" "no file at $DEEP (rc=$RC)"
+
+run_audit authed-on "$PAIRED" audit
+assert_eq 0 "$RC" "T21 audit on a paired log exits 0"
+assert_contains "$OUT" "paired" "T21 says paired"
+
+run_audit authed-off "$ENDS_OFF" audit
+assert_eq 2 "$RC" "T22 audit on a log ending in off exits 2"
+assert_contains "$OUT" "open" "T22 names the open window"
+
+run_audit authed-on "$LONE_ON" audit
+assert_eq 2 "$RC" "T23 audit on a lone restore exits 2"
+assert_contains "$OUT" "2026-11-08T02:25:49Z" "T23 names the unpaired line"
+
+run_audit authed-on "$DOUBLE_OFF" audit
+assert_eq 2 "$RC" "T24 audit on off,off exits 2"
+assert_contains "$OUT" "2026-11-07T18:24:41Z" "T24 names the second clear"
+
+run_audit authed-on "$EQUAL_COUNTS_WRONG_ORDER" audit
+assert_eq 2 "$RC" "T25 audit walks order, not counts"
+assert_contains "$OUT" "2026-11-07T10:00:00Z" "T25 names the first bad transition"
+
+run_audit authed-off "$ENDS_OFF" status
+assert_contains "$OUT" "open" "T26 status surfaces the pairing result"
+
+# T27 — the two logs disagree. The local record is the one to trust, and the
+# operator needs to hear that they differ.
+run_audit authed-on "$PAIRED" audit
+printf '%s\n' "$(_line 2026-11-08T09:00:00Z off authorized_by=someone-else)" >> "$AUDIT"
+OUT="$(PUBLISH_GATE_AUDIT="$AUDIT" PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" HOME="$WORK/home" PATH="$WORK/bin:$PATH" bash "$SCRIPT" audit 2>&1)"
+RC=$?
+assert_contains "$OUT" "diverge" "T27 divergence between mirror and local record is reported"
+
+run_audit authed-on "" audit
+assert_eq 0 "$RC" "T28 audit on a missing log exits 0"
+assert_contains "$OUT" "nothing recorded" "T28 says nothing recorded"
+
+# T29 + T30 — calibrated against the real log, 2026-11-08.
+#
+# The first line of state/publish-gate-audit.log is an `on` from
+# 2026-11-05T10:37:13Z. The clear that preceded it was made with a raw API
+# call, because the script's `off` never worked until #481 was fixed, so no
+# `off` line could have been written. The record simply begins mid-window.
+#
+# A check that reports its own first line as a defect on every run gets
+# ignored, and then it is not a check. So a leading `on` reads as
+# informational. Every restore after the first line is still held to the
+# rule -- T30 pins that, using the real shape of the night the
+# authorization was lost.
+FIRST_LINE_ON="$(_line 2026-11-05T10:37:13Z on reviewer=kingofrock)
+$(_line 2026-11-07T14:46:49Z off authorized_by=operator)
+$(_line 2026-11-07T14:50:00Z on reviewer=kingofrock)"
+
+FIRST_LINE_ON_THEN_LONE_ON="${FIRST_LINE_ON}
+$(_line 2026-11-08T02:25:49Z on reviewer=kingofrock)"
+
+run_audit authed-on "$FIRST_LINE_ON" audit
+assert_eq 0 "$RC" "T29 a leading on is not a finding"
+assert_contains "$OUT" "begins" "T29 says the record begins mid-window"
+
+run_audit authed-on "$FIRST_LINE_ON_THEN_LONE_ON" audit
+assert_eq 2 "$RC" "T30 a lone restore later in the file is still a finding"
+assert_contains "$OUT" "2026-11-08T02:25:49Z" "T30 names the lone restore"
+
+# T31 — the default path, pinned.
+#
+# With no PUBLISH_GATE_AUDIT_LOCAL set, the record has to land under
+# $HOME/.bassclef/. This is the assertion that makes the runners' HOME
+# redirect meaningful: it proves the default really does follow HOME, so a
+# redirected HOME really does contain the writes.
+WORK="$(mktemp -d)"
+make_fake_gh "$WORK/bin"
+export FAKE_GH_MODE=put-then-off FAKE_GH_PUTLOG="$WORK/puts.log" FAKE_GH_PUTMARK="$WORK/put.mark"
+: > "$FAKE_GH_PUTLOG"
+OUT="$(PATH="$WORK/bin:$PATH" HOME="$WORK/home" PUBLISH_GATE_AUDIT="$WORK/audit.log" \
+      bash "$SCRIPT" off --authorized-by operator 2>&1)"
+RC=$?
+if [[ -s "$WORK/home/.bassclef/publish-gate-audit.log" ]]; then
+  pass "T31 with no override set, the record lands at \$HOME/.bassclef/"
+else
+  fail "T31 with no override set, the record lands at \$HOME/.bassclef/" "nothing at $WORK/home/.bassclef/ (rc=$RC)"
+fi
 
 echo ""
 echo "  total=$_tests_total passed=$_tests_passed failed=$_tests_failed"

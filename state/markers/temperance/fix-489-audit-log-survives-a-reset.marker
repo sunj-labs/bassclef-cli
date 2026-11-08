@@ -1,0 +1,9 @@
+# Temperance marker — fix/489-audit-log-survives-a-reset
+- date: 2026-11-08
+- scope-decision: ship #489 only — dual-write the audit line, add an `audit`
+  verb that walks transitions, surface it from `status`, report divergence.
+- out of scope, deliberately: a `--sync` that repairs the mirror from the
+  record. The divergence report plus a record that survives is the cure;
+  repairing it automatically would let the mirror be trusted again.
+- drift trigger: anything touching the gate's API write path. That is #488's
+  ground and this PR does not go there.
