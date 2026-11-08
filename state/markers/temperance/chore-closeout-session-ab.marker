@@ -1,0 +1,7 @@
+# Temperance marker — Session AB closeout
+- date: 2026-11-08
+- branch: chore/closeout-session-ab
+- scope-decision: write the session log for the second half of 2026-11-08 and
+  update whereami. Documentation only, no code.
+- why a branch: the Session AA closeout commit went direct to main, which
+  broke `guardrails.md:5`. Disclosed in #501. This one goes through a PR.

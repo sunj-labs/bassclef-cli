@@ -1,9 +1,33 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-08T14:02:00Z
-  session: 2026-11-08-session-aa-pin-audit-trust.md
+  at: 2026-11-08T23:45:00Z
+  session: 2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md
 ---
+
+<!--
+operator_recap (Session AB · the pin advances, 1.10.0 ships, the window learns to close, 2026-11-08T23:45Z): **Seven PRs merged. `@thebassclef/lite@1.10.0` is live on npm, carrying substrate `v1.12.0`.** I pulled the published tarball to check rather than trusting the publish log — `dist/lite/bassclef-version.json` reads `release_tag: v1.12.0`, and `dist/lite/.claude/hooks/` holds 55 `.sh` files.
+
+**Two version numbers, said plainly because I muddled them mid-session.** 1.10.0 is the installer. 1.12.0 is the substrate it carries. An adopter running `npm i -g @thebassclef/lite` today gets 1.12.0.
+
+**The pin moved to `v1.12.0` (`#503`) and the thing it gates was broken (`#505`).** The first CI run on the pin-advance branch failed, and what failed it was my own `#482` guard from six hours earlier: *no checkout at `../bassclef`. The pin names `v1.12.0`.* The Docker smoke had been installing whatever the registry served — the published package, not the branch. So every smoke run before tonight tested the last release against the new substrate and called it a pass. A guard written to stop one class of drift caught a second one four hours later, in a workflow nobody was looking at.
+
+**Two defects in the `#488` trust verb I shipped six hours earlier. Both fixed.** `#506`: nothing ever marked a window spent, so `rearm` could only close one on the deadline. Measured — window opened 23:08:06Z on a sixty-minute deadline, publish landed 23:14:30Z, gate stayed clear until 00:08. The five whys stop somewhere that changes the fix: the marker is a local file under `$HOME` and the publish runs on a GitHub runner that cannot reach it, so a write was never possible, only a read. Had I taken the defect at face value and added the missing write, it would have gone into the workflow and done nothing. `#507`: `on` restored the gate and left the marker, so one `status` call said "publish waits for approval", "trust window: open", and "the window is closed" at once. No function owned the marker — `trust` opened it, `rearm` closed it, `on` ignored it, `status` read it.
+
+**The gate is ON and reads coherently.** Verified after both merges.
+
+**Three things I got wrong.** I reported a failed publish that had succeeded — polled the registry three times, all before the 23:14:30Z publish timestamp, then wrote up candidate causes for a failure that never happened. The memory naming the ~3 minute registry lag was loaded and I did not apply it. Two of my new tests passed against the broken script because they asserted the word `publish`, which appears in both "Re-run this after the publish lands" and "publish waits for approval" — caught before the fix landed, needles tightened, both then went RED. And you told me the write-up was obtuse, which it was: the diagnosis was right and buried under four sections before reaching "is 1.12.0 live."
+
+**`#488`'s trigger is still open, and now worth more.** A scheduled `rearm` that can only read a deadline is weaker than one that can see the publish. Nothing fires it yet.
+
+**Two threads I owe you:** a reply to the peer about the wordlist split, and reading `up#2450`'s goal doc against `cli#454`.
+
+**`/architect-review` skipped twice now.** Last run 2026-10-11. Owed.
+
+**Three PRs open over 24h:** `#474` (Nov 5), `#449` (Oct 18), `#423` (Oct 11, a dependabot node bump).
+
+Session log at `docs/chronicle/2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md`.
+-->
 
 <!--
 operator_recap (Session AA · the pin, the record, a trust that re-arms, 2026-11-08T14:02Z): **Four PRs merged, all four steps of the plan doc done.** `#494` the pin, `#495` the audit record, `#496` the CI gap, `#500` the trust verb. Closed `#482` and `#489`. Five new tickets filed: `#492`, `#493`, `#497`, `#498`, `#499`.
