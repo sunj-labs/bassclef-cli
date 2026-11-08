@@ -136,3 +136,36 @@ jobs:
 
       - name: Run Tier 0 characterization tests
         run: bash scripts/tests/validate-cross-repo-contracts.test.sh
+
+      - name: Run every bash Tier 0 suite
+        # The step above ran one suite out of eighteen. scripts/tests/ holds
+        # 87 files; 69 are smoke drivers that belong to docker-smoke.yml, and
+        # the remaining 18 are plain unit suites that need nothing but bash
+        # and jq. Seventeen of those have never run in CI, so every assertion
+        # in them -- including the ones guarding the publish gate and the
+        # substrate pin -- was enforced on a developer's machine and nowhere
+        # else. Measured 2026-11-08: all 18 pass locally.
+        #
+        # Smoke drivers stay out on purpose. Several are written to exit
+        # nonzero while the defect they characterize is open, so running them
+        # here would report an open ticket as a broken build.
+        run: |
+          failed=""
+          total=0
+          for t in scripts/tests/*.test.sh; do
+            case "$(basename "$t")" in smoke-drive-*) continue ;; esac
+            total=$((total + 1))
+            echo "::group::$(basename "$t")"
+            if bash "$t"; then
+              echo "PASS $(basename "$t")"
+            else
+              failed="$failed $(basename "$t")"
+              echo "FAIL $(basename "$t")"
+            fi
+            echo "::endgroup::"
+          done
+          echo "ran $total bash Tier 0 suite(s)"
+          if [ -n "$failed" ]; then
+            echo "failing suites:$failed" >&2
+            exit 1
+          fi
