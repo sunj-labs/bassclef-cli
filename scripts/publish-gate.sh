@@ -48,6 +48,10 @@ ENV_PATH="repos/${REPO}/environments/${ENV_NAME}"
 # So the tracked file is the view, and an untracked local file is the record.
 # A reset rewrites the view; the record survives, and `audit` reports when
 # the two disagree. Per the ticket's option 3.
+# cli#506 — the workflow whose success spends a trust window.
+PUBLISH_WORKFLOW="${PUBLISH_GATE_WORKFLOW:-publish.yml}"
+PUBLISH_RUN_SCAN="${PUBLISH_GATE_RUN_SCAN:-20}"
+
 AUDIT="${PUBLISH_GATE_AUDIT:-state/publish-gate-audit.log}"
 AUDIT_LOCAL="${PUBLISH_GATE_AUDIT_LOCAL:-${HOME}/.bassclef/publish-gate-audit.log}"
 
@@ -83,7 +87,8 @@ on      require operator approval before npm publish (the resting state)
 off     clear the requirement for one publish; restore it with \`on\` after
 audit   read the log in order and report any clear without a restore
 trust   clear the gate for one publish, with a deadline it re-arms itself by
-rearm   restore the gate when the trust window has closed or been spent
+rearm   restore the gate once the trust window is over -- its publish
+        landed, its deadline passed, or it was marked spent
 
 Repo: ${REPO}   Environment: ${ENV_NAME}
 EOF
@@ -310,13 +315,75 @@ marker_field() {
 # comparison needs no `date -d` and works the same on BSD and GNU. That
 # matters: a portability bug here would leave the gate open on one platform
 # and not the other.
+# cli#506 — did a publish land since this window opened?
+#
+# Why this is a read and not a write. `spent` was read in three places and
+# written in none, so the deadline was the only thing that ever closed a
+# window. The write was never possible: the marker is a local file under
+# $HOME, and the publish runs on a GitHub runner that cannot reach it. The
+# only way the laptop learns the publish happened is to go and ask.
+#
+# Returns 0 = a successful publish landed at or after $1
+#         1 = none did
+#         2 = the history could not be read
+#
+# The timestamps are ISO-8601 UTC at a fixed width, so jq compares them as
+# strings and the result does not depend on the platform's `date`. Same
+# reasoning as the deadline comparison below it.
+publish_landed_since() {
+  local since="$1" hits
+  [ -n "$since" ] || return 1
+  if ! hits="$(gh run list --repo "$REPO" --workflow="$PUBLISH_WORKFLOW" \
+        --limit "$PUBLISH_RUN_SCAN" --json conclusion,createdAt \
+        --jq ".[] | select(.conclusion == \"success\") | select(.createdAt >= \"${since}\") | .createdAt" \
+        2>/dev/null)"; then
+    return 2
+  fi
+  [ -n "$hits" ] || return 1
+  # gh lists newest first, so the last match is the earliest publish that
+  # could have spent this window. That is the one worth naming.
+  PUBLISH_LANDED_AT="$(printf '%s\n' "$hits" | tail -1)"
+  return 0
+}
+
+# ISO-8601 UTC with a fixed width sorts correctly as a string, so the
+# comparison needs no `date -d` and works the same on BSD and GNU. That
+# matters: a portability bug here would leave the gate open on one platform
+# and not the other.
+#
+# cli#506 — sets TRUST_CLOSED_REASON so callers can say WHY a window reads
+# closed. "It is closed" and "it is closed because the publish landed" are
+# different messages to an operator deciding whether to look further.
 trust_window_closed() {
   local expires spent
+  TRUST_CLOSED_REASON=""
   spent="$(marker_field spent)"
-  [ "$spent" = "yes" ] && return 0
+  if [ "$spent" = "yes" ]; then
+    TRUST_CLOSED_REASON="it was marked spent by hand"
+    return 0
+  fi
   expires="$(marker_field expires_at)"
-  [ -n "$expires" ] || return 0
-  [[ "$(now_stamp)" > "$expires" ]]
+  if [ -z "$expires" ]; then
+    TRUST_CLOSED_REASON="the marker carries no deadline"
+    return 0
+  fi
+  if [[ "$(now_stamp)" > "$expires" ]]; then
+    TRUST_CLOSED_REASON="the deadline passed at ${expires}"
+    return 0
+  fi
+
+  # Inside the deadline. The window can still be over, if its publish landed.
+  publish_landed_since "$(marker_field opened_at)"
+  case $? in
+    0) TRUST_CLOSED_REASON="a publish landed at ${PUBLISH_LANDED_AT}"; return 0 ;;
+    2)
+      # Fail-safe (Saltzer). A query that cannot be answered must not hold
+      # the gate open. Nothing fires `rearm` on a schedule, so the cost of
+      # closing early is one extra approval, never an unattended publish.
+      TRUST_CLOSED_REASON="the publish history could not be read, so this leans toward approval"
+      return 0 ;;
+  esac
+  return 1
 }
 
 trust_window_open() {
@@ -468,22 +535,23 @@ do_rearm() {
     echo "  authorized by: $(marker_field authorized_by)"
     echo "  expires:       $(marker_field expires_at)"
     echo ""
+    echo "  No successful ${PUBLISH_WORKFLOW} run has landed since it opened."
     echo "  Re-run this after the publish lands, or after the deadline passes."
     exit 0
   fi
 
-  local who expires spent
+  # cli#506 — `trust_window_closed` just ran and set the reason. Read it
+  # before anything else touches the marker.
+  local who expires why
   who="$(marker_field authorized_by)"
   expires="$(marker_field expires_at)"
-  spent="$(marker_field spent)"
+  why="${TRUST_CLOSED_REASON:-the deadline passed at ${expires}}"
 
   require_gh_auth
   restore_gate
 
   rm -f "$TRUST_MARKER" 2>/dev/null || true
 
-  local why
-  if [ "$spent" = "yes" ]; then why="the window was spent"; else why="the deadline passed at ${expires}"; fi
   audit "on" "${RESTORE_LOGIN:-unknown}" "restored_by=rearm reason=${why// /-} authorized_by=${who}"
   echo "${ENV_NAME}: ${RESTORE_STATE} — publish waits for approval"
   echo "  re-armed because ${why}"
@@ -536,7 +604,7 @@ do_status() {
       echo "  trust window: stale — the gate is ON, so the window authorized by $(marker_field authorized_by) is over"
       echo "    clear the leftover marker with: bash scripts/publish-gate.sh on"
     elif trust_window_closed; then
-      echo "  trust window: past its deadline ($(marker_field expires_at)) — run \`publish-gate.sh rearm\`"
+      echo "  trust window: over — ${TRUST_CLOSED_REASON} — run \`publish-gate.sh rearm\`"
     else
       echo "  trust window: open, authorized by $(marker_field authorized_by), expires $(marker_field expires_at)"
     fi

@@ -1,0 +1,23 @@
+# Pre-mortem light — cli#506
+- date: 2026-11-08
+- branch: fix/506-trust-window-spent-on-publish
+- risk ledger: inline (3 lenses)
+- saltzer-schroeder
+  - R1 the query fails and the window stays open → that is the unsafe
+    direction. Folded: rc=2 reads as "window over". Verified live against a
+    workflow name that does not exist.
+  - R2 the query closes a window too early and a real publish needs approval
+    → nothing fires `rearm` automatically, so the cost is one approval click.
+    Accepted, and stated in the ticket.
+- michael-nygard
+  - R3 `status` now makes a network call on every run → only when a marker
+    exists. No marker, no query; the `expires_at` check returns first.
+  - R4 the timestamp comparison behaves differently on BSD and GNU → folded:
+    jq compares fixed-width ISO-8601 UTC as strings, same as the deadline.
+- michael-feathers
+  - R5 the new tests assert words the old script already prints → caught in
+    iteration 1. T49 and T53 passed on "publish", which appears in both the
+    refusal text and "publish waits for approval". Needles tightened to
+    "a publish landed at", then both went RED.
+  - R6 `local x="$(cmd)"` masks the command's exit status → folded: declared
+    separately and tested with `if ! hits="$(...)"`.

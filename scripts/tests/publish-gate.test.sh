@@ -55,7 +55,7 @@
 # [x] T39 rearm on a spent marker — restores the gate, exit 0
 # [x] T40 rearm consumes the marker — a second run has nothing to do
 # [x] T41 status names an open window and its deadline
-# [x] T42 status says so when the window is past its deadline
+# [x] T42 status says so when the window is past its deadline (cli#506 — now names the reason)
 # [x] T43 trust --ttl 5 records a five-minute deadline
 # [x] T44 trust refuses while a window is already open
 #
@@ -64,6 +64,13 @@
 # [x] T46 `on` when the gate is ALREADY on still consumes a stale marker
 # [x] T47 gate ON with a marker present — status calls it stale, not open
 # [x] T48 the audit line claims only what its log measures
+#
+# cli#506 — the window closes when the publish it paid for lands.
+# [x] T49 a successful publish after opened_at — rearm restores the gate
+# [x] T50 the only publish predates opened_at — rearm leaves the gate clear
+# [x] T51 a failed publish after opened_at — rearm leaves the gate clear
+# [x] T52 the run query fails — rearm restores the gate and says why
+# [x] T53 status names why a window reads closed
 
 set -uo pipefail
 
@@ -109,6 +116,28 @@ env_off='{"name":"npm-publish","can_admins_bypass":true,"protection_rules":[]}'
 if [[ "${1:-}" == "auth" ]]; then
   [[ "$mode" == "unauthed" ]] && { echo "not logged in" >&2; exit 1; }
   echo "Logged in to github.com as kingofrock"; exit 0
+fi
+
+# cli#506 — `rearm` now asks whether a publish landed, so the stub answers.
+# FAKE_GH_RUNS holds the JSON array `gh run list --json` would return.
+# FAKE_GH_RUNS_FAIL=1 makes the query fail, which is the path that has to
+# fail toward "approval required".
+if [[ "${1:-}" == "run" ]]; then
+  [[ "${FAKE_GH_RUNS_FAIL:-}" == "1" ]] && { echo "gh: could not reach the API" >&2; exit 1; }
+  runs="${FAKE_GH_RUNS:-[]}"
+  # The script passes --jq, so filter here the way gh would.
+  jq_expr=""
+  prev=""
+  for a in "$@"; do
+    [[ "$prev" == "--jq" ]] && jq_expr="$a"
+    prev="$a"
+  done
+  if [[ -n "$jq_expr" ]]; then
+    printf '%s' "$runs" | jq -r "$jq_expr" 2>/dev/null
+  else
+    printf '%s' "$runs"
+  fi
+  exit 0
 fi
 
 if [[ "${1:-}" == "api" ]]; then
@@ -559,7 +588,7 @@ assert_contains "$OUT" "trust" "T41 status names an open window"
 assert_contains "$OUT" "expires" "T41 status names its deadline"
 
 run_trust authed-off "$(_marker operator 2026-11-08T00:00:00Z "$(_past)" no)" status
-assert_contains "$OUT" "past its deadline" "T42 status says so when the window has closed"
+assert_contains "$OUT" "the deadline passed at" "T42 status says so when the window has closed"
 
 run_trust put-then-off "" trust --authorized-by operator --ttl 5
 assert_contains "$(cat "$MARKER" 2>/dev/null)" "ttl_minutes=5" "T43 trust --ttl 5 records a five-minute deadline"
@@ -599,6 +628,62 @@ OUT="$(PATH="$WORK/bin:$PATH" HOME="$WORK/home" \
       PUBLISH_GATE_TRUST_MARKER="$MARKER" bash "$SCRIPT" audit 2>&1)"
 assert_contains "$OUT" "paired with a restore" "T48 audit still reports pairing"
 assert_not_contains "$OUT" "the window is closed" "T48 audit claims only what its log measures"
+
+# ---------------------------------------------------------------------------
+# cli#506 — a window closes when its publish lands, not only on the clock
+#
+# The marker is a local file; the publish runs on a GitHub runner. Nothing on
+# the runner can write to the operator's home, so the window cannot be marked
+# spent by a write. It has to be found by a read. These tests drive that read.
+# ---------------------------------------------------------------------------
+
+# run_runs <mode> <marker> <runs-json> <fail?> <args...>
+run_runs() {
+  local mode="$1" marker_body="$2" runs="$3" runs_fail="$4"; shift 4
+  WORK="$(mktemp -d)"
+  make_fake_gh "$WORK/bin"
+  export FAKE_GH_MODE="$mode"
+  export FAKE_GH_PUTLOG="$WORK/puts.log"
+  export FAKE_GH_PUTMARK="$WORK/put.mark"
+  export FAKE_GH_RUNS="$runs"
+  export FAKE_GH_RUNS_FAIL="$runs_fail"
+  : > "$FAKE_GH_PUTLOG"
+  AUDIT="$WORK/audit.log"; AUDIT_LOCAL="$WORK/local-audit.log"; MARKER="$WORK/trust.marker"
+  [[ -n "$marker_body" ]] && printf '%s\n' "$marker_body" > "$MARKER"
+  OUT="$(PATH="$WORK/bin:$PATH" HOME="$WORK/home" \
+        PUBLISH_GATE_AUDIT="$AUDIT" PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" \
+        PUBLISH_GATE_TRUST_MARKER="$MARKER" bash "$SCRIPT" "$@" 2>&1)"
+  RC=$?
+  PUTS="$(cat "$FAKE_GH_PUTLOG" 2>/dev/null)"
+  unset FAKE_GH_RUNS FAKE_GH_RUNS_FAIL
+  return 0
+}
+
+_OPENED=2026-11-08T12:00:00Z
+_RUN_AFTER='[{"conclusion":"success","createdAt":"2026-11-08T12:05:00Z"}]'
+_RUN_BEFORE='[{"conclusion":"success","createdAt":"2026-11-08T11:00:00Z"}]'
+_RUN_FAILED='[{"conclusion":"failure","createdAt":"2026-11-08T12:05:00Z"}]'
+
+run_runs put-then-on "$(_marker operator "$_OPENED" "$(_future)" no)" "$_RUN_AFTER" "" rearm
+assert_eq 0 "$RC" "T49 rearm after a landed publish exits 0"
+assert_contains "$PUTS" "PUT" "T49 the restore fired"
+assert_contains "$OUT" "a publish landed at" "T49 says the landed publish is why"
+
+run_runs authed-off "$(_marker operator "$_OPENED" "$(_future)" no)" "$_RUN_BEFORE" "" rearm
+assert_eq 0 "$RC" "T50 rearm with only an older publish exits 0"
+assert_eq "" "$PUTS" "T50 leaves the gate clear"
+assert_contains "$OUT" "open" "T50 says the window is still open"
+
+run_runs authed-off "$(_marker operator "$_OPENED" "$(_future)" no)" "$_RUN_FAILED" "" rearm
+assert_eq "" "$PUTS" "T51 a failed publish does not close the window"
+
+run_runs put-then-on "$(_marker operator "$_OPENED" "$(_future)" no)" "[]" 1 rearm
+assert_eq 0 "$RC" "T52 rearm exits 0 when the run query fails"
+assert_contains "$PUTS" "PUT" "T52 fails toward approval — the restore fired"
+assert_contains "$OUT" "could not be read" "T52 says the publish history could not be read"
+
+run_runs authed-off "$(_marker operator "$_OPENED" "$(_future)" no)" "$_RUN_AFTER" "" status
+assert_contains "$OUT" "a publish landed at" "T53 status names the landed publish as the reason"
 
 echo ""
 echo "  total=$_tests_total passed=$_tests_passed failed=$_tests_failed"
