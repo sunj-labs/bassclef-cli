@@ -1,9 +1,7 @@
-# Orientation-gate marker — Session W prep
-- date: 2026-10-25
+# Orientation-gate marker — main
+- date: 2026-11-08
 - branch: main
-- whereami read: docs/whereami.md (operator_recap Session V-tail 2026-10-25T14:00Z)
-- plan doc read: docs/next-session-plan-2026-10-25-session-w-cli-444-and-persona-ux-step-1.md
-- canvas read: docs/canvases/2026-10-25-persona-ux-test-tier.md (status draft; 6 steps; 3 prongs)
-- parent chain: no docs/iteration-bets/ active goal doc; plan doc + canvas carry the thread
-- parent_drivers: cli#199 (epic parent) + cli#448 (persona-UX ticket) + cli#444 (nuke-script defect)
-- out_of_scope this session: upstream#2267-#2270 (held by peer d2), PR #449 (ADR-012 strategic), PR #423 (Dependabot triage)
+- whereami: read docs/whereami.md (181943 bytes; recap blocks Session Z/Y/X)
+- plan-doc: docs/next-session-plan-2026-11-08-after-1923.md (mtime Nov 8 11:40, carries ## Recommended session sequence)
+- preset: converged (plan-doc signal; helper scripts/longrun-preset-detect.sh ABSENT)
+- parent-chain: no active goal doc in docs/iteration-bets with open steps for cli; cascade goal lives upstream (docs/iteration-bets/2026-11-07a-go-live-cascade.md, branch docs/roadmap-release-cascade-go-live)

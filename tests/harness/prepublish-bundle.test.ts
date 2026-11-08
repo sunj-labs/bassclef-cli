@@ -676,3 +676,215 @@ describe('prepublish — cli 1.1.0 lite catalog reader (goal 2026-09-16)', () =>
     expect(parsed.entries.length).toBe(manifest.entries.length);
   });
 });
+
+// ============================================================
+// cli#482 — the bundler must read .bassclef-pin
+//
+// Why these tests exist. Every test above sets BASSCLEF_SIBLING_ROOT, so
+// the no-env path has never run under test. That path is the one a local
+// `npm run build` and `prepublishOnly` take, and it resolved the private
+// `../bassclef-upstream` at whatever the working tree held — a different
+// repo from the one CI reads at the pinned tag. 46 hooks against 31.
+//
+// Per Feathers: a test that writes the pin and reads it back exercises one
+// path twice. These seed two sibling repos with different manifests, so a
+// bundler reading the wrong one fails on the hook count rather than on a
+// missing file.
+//
+// test-list (Beck):
+// [x] P1: no env + pin file missing → nonzero, stderr names .bassclef-pin
+// [x] P2: no env + malformed pin → nonzero, stderr names the expected shape
+// [x] P3: no env → default source is ../bassclef, not ../bassclef-upstream
+// [x] P4: no env + both siblings present with different manifests → the
+//         emitted hook count comes from ../bassclef
+// [x] P5: no env + sibling version file missing → nonzero, names the path
+// [x] P6: no env + release_tag != pin → nonzero, names both values
+// [x] P7: no env + mismatch + BASSCLEF_PIN_MISMATCH=warn → exit 0 + warning
+// [x] P8: provenance on stdout names the source root and the pin
+// [x] P9: BASSCLEF_SIBLING_ROOT still wins and skips the pin check
+
+const PIN_OK = 'v1.11.1';
+
+function seedSiblingAt(root: string, manifest: WiringManifest, hookLeaves: readonly string[]): void {
+  mkdirSync(join(root, 'standards'), { recursive: true, mode: 0o755 });
+  writeFileSync(
+    join(root, 'standards', 'bassclef-wiring-manifest.json'),
+    JSON.stringify(manifest, null, 2),
+  );
+  const skillDir = join(root, '.claude', 'skills', 'default-fixture');
+  mkdirSync(skillDir, { recursive: true, mode: 0o755 });
+  writeFileSync(join(skillDir, 'SKILL.md'), '# default fixture skill\n');
+  writeFileSync(
+    join(root, 'lite-manifest.json'),
+    JSON.stringify({
+      tier: 'lite',
+      manifest_version: '1.6.1',
+      generated_at: '2026-09-16T00:00:00Z',
+      entries: [
+        { slug: 'default-fixture', type: 'skill', path: '.claude/skills/default-fixture/SKILL.md', tier: 'lite' },
+      ],
+    }, null, 2),
+  );
+  const tpl = join(root, 'presence', 'dist-templates');
+  mkdirSync(tpl, { recursive: true, mode: 0o755 });
+  writeFileSync(join(tpl, 'CLAUDE.md'), '# CLAUDE.md template\n');
+  writeFileSync(join(tpl, 'whereami.md'), '# whereami template\n');
+  writeFileSync(join(tpl, '.bassclef-source.json'), '{"source": "template"}\n');
+  writeFileSync(join(tpl, '.gitignore'), 'node_modules/\n');
+  const hooksDir = join(root, 'dist', 'lite', '.claude', 'hooks');
+  mkdirSync(hooksDir, { recursive: true, mode: 0o755 });
+  for (const leaf of hookLeaves) {
+    writeFileSync(join(hooksDir, leaf), `#!/bin/sh\necho ${leaf}\n`);
+  }
+}
+
+// cli#482 — `release_tag` is the field the bundler compares, because
+// `version` reads the same on a tag and on a release branch 41 commits
+// past it. The fixture carries both so a bundler checking the wrong one
+// passes P6 and fails nothing, which is what we are guarding against.
+function seedVersionFile(root: string, releaseTag: string, version = PIN_OK): void {
+  writeFileSync(
+    join(root, 'bassclef-version.json'),
+    JSON.stringify({ version, marker_tag: 'release-fixture', release_tag: releaseTag }, null, 2),
+  );
+}
+
+function writePin(value: string): void {
+  writeFileSync(join(bundleDir, '.bassclef-pin'), `${value}\n`);
+}
+
+// One lite hook. Stands for the public sibling at the pinned tag.
+function oneLiteHookManifest(): WiringManifest {
+  return {
+    version: '2.0.0',
+    hooks: {
+      SessionStart: [
+        { matcher: '', hooks: [{ type: 'command', command: '$HOME/.claude/hooks/public-one.sh', timeout: 10, tier: 'lite' }] },
+      ],
+    },
+  };
+}
+
+// Three lite hooks. Stands for the private sibling at HEAD, ahead of the tag.
+function threeLiteHookManifest(): WiringManifest {
+  return {
+    version: '2.0.0',
+    hooks: {
+      SessionStart: [
+        {
+          matcher: '',
+          hooks: [
+            { type: 'command', command: '$HOME/.claude/hooks/private-a.sh', timeout: 10, tier: 'lite' },
+            { type: 'command', command: '$HOME/.claude/hooks/private-b.sh', timeout: 10, tier: 'lite' },
+            { type: 'command', command: '$HOME/.claude/hooks/private-c.sh', timeout: 10, tier: 'lite' },
+          ],
+        },
+      ],
+    },
+  };
+}
+
+describe('prepublish-bundle — cli#482 reads .bassclef-pin', () => {
+  let fakePublic: string;
+
+  beforeEach(() => {
+    fakePublic = join(workDir, 'bassclef');
+    mkdirSync(fakePublic, { recursive: true, mode: 0o755 });
+  });
+
+  it('P1: no env + pin file missing → nonzero and stderr names .bassclef-pin', () => {
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toMatch(/\.bassclef-pin/);
+  });
+
+  it('P2: no env + malformed pin → nonzero and stderr names the expected shape', () => {
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, PIN_OK);
+    writePin('1.11.1-no-v-prefix');
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toMatch(/v<N>\.<N>\.<N>|v\[0-9\]|shape/i);
+  });
+
+  it('P3: no env → the default source is ../bassclef, not ../bassclef-upstream', () => {
+    // Only the public sibling is seeded. A bundler defaulting to
+    // ../bassclef-upstream finds nothing and fails.
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, PIN_OK);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).toBe(0);
+    expect(r.stdout + r.stderr).toMatch(/bassclef(?!-upstream)/);
+  });
+
+  it('P4: both siblings present with different manifests → the hook count comes from ../bassclef', () => {
+    // The Feathers fold. The two manifests declare different lite-hook
+    // counts, so whichever repo the bundler reads decides the number.
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, PIN_OK);
+    seedSiblingAt(fakeSibling, threeLiteHookManifest(), ['private-a.sh', 'private-b.sh', 'private-c.sh']);
+    seedVersionFile(fakeSibling, PIN_OK);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).toBe(0);
+    const settings = JSON.parse(
+      readFileSync(join(bundleDir, 'dist', 'lite', '.claude', 'settings.json'), 'utf8'),
+    );
+    const count = settings.hooks.SessionStart[0].hooks.length;
+    expect(count).toBe(1);
+  });
+
+  it('P5: no env + sibling version file missing → nonzero and stderr names the path', () => {
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toMatch(/bassclef-version\.json/);
+  });
+
+  it('P6: no env + release_tag != pin → nonzero and stderr names both values', () => {
+    // The real-world shape. `version` agrees with the pin; `release_tag`
+    // does not, because the checkout sits past the tag on a release
+    // branch. A bundler comparing `version` passes here and ships 46
+    // hooks where CI ships 31.
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, 'release-2026-11-08-201b234b', PIN_OK);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toMatch(/release-2026-11-08-201b234b/);
+    expect(r.stderr).toMatch(/v1\.11\.1/);
+  });
+
+  it('P7: no env + mismatch + BASSCLEF_PIN_MISMATCH=warn → exit 0 with a warning', () => {
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, 'release-2026-11-08-201b234b', PIN_OK);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '', BASSCLEF_PIN_MISMATCH: 'warn' });
+    expect(r.status).toBe(0);
+    expect(r.stderr).toMatch(/release-2026-11-08-201b234b/);
+  });
+
+  it('P8: provenance on stdout names the source root and the pin', () => {
+    seedSiblingAt(fakePublic, oneLiteHookManifest(), ['public-one.sh']);
+    seedVersionFile(fakePublic, PIN_OK);
+    writePin(PIN_OK);
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: '' });
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain(fakePublic);
+    expect(r.stdout).toContain(PIN_OK);
+  });
+
+  it('P9: BASSCLEF_SIBLING_ROOT still wins and skips the pin check', () => {
+    // Back-compat. CI sets the variable and carries no pin agreement
+    // inside the checkout it clones, so the override must not start
+    // requiring one.
+    seedSiblingAt(fakeSibling, threeLiteHookManifest(), ['private-a.sh', 'private-b.sh', 'private-c.sh']);
+    // No version file, and no pin written. The override path must not care.
+    const r = runScript({ BASSCLEF_SIBLING_ROOT: fakeSibling });
+    expect(r.status).toBe(0);
+  });
+});

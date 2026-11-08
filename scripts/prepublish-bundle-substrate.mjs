@@ -36,7 +36,17 @@
 //
 // Runs via package.json prepublishOnly. Reads sibling manifest via:
 //   1. env BASSCLEF_SIBLING_ROOT (test override / CI workflow)
-//   2. default ../bassclef-upstream relative to CWD
+//   2. .bassclef-pin + ../bassclef relative to CWD
+//
+// cli#482. The fallback used to be ../bassclef-upstream at whatever the
+// working tree held, and nothing read .bassclef-pin. CI reads the public
+// bassclef at the pinned tag, so a local build and a CI build produced
+// different bundles from different repos -- 46 hooks against 31 -- and
+// neither path said so. The fallback now names the same repo CI names,
+// checks its declared version against the pin, and prints what it read.
+//
+// BASSCLEF_PIN_MISMATCH=warn downgrades the version check to a warning.
+// For local work on a checkout that sits ahead of the pin.
 
 import {
   readFileSync,
@@ -68,6 +78,14 @@ const EXPECTED_WIRING_MAJOR = 2;
 const LITE_MANIFEST_REL = 'lite-manifest.json';
 const EXPECTED_LITE_MANIFEST_MAJOR = 1;
 
+// cli#482 -- pin resolution. Mirrors scripts/sync-bassclef-version.mjs,
+// which has read the pin against the public sibling's declared version
+// since cli#439. The bundler is the path that never did.
+const PIN_FILE_REL = '.bassclef-pin';
+const PIN_SHAPE = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
+const SIBLING_VERSION_REL = 'bassclef-version.json';
+const PUBLIC_SIBLING_DIR = 'bassclef';
+
 // Tier hierarchy per ADR-055 D7: ultra ⊇ standard ⊇ lite.
 const TIER_SUPERSETS = {
   lite: ['lite'],
@@ -80,10 +98,108 @@ function fail(message) {
   process.exit(1);
 }
 
+function readPin() {
+  const pinPath = resolve(process.cwd(), PIN_FILE_REL);
+  if (!existsSync(pinPath)) {
+    fail(
+      `${PIN_FILE_REL} missing at ${pinPath}. The bundle source is pinned by that ` +
+        `file, so without it there is nothing to build against.\n` +
+        `  Write the tag you mean to bundle, or set BASSCLEF_SIBLING_ROOT to a checkout.`
+    );
+  }
+  let pin;
+  try {
+    pin = readFileSync(pinPath, 'utf8').trim();
+  } catch (err) {
+    fail(`cannot read ${PIN_FILE_REL} at ${pinPath}: ${err.code ?? err.message}`);
+  }
+  if (!PIN_SHAPE.test(pin)) {
+    fail(
+      `${PIN_FILE_REL} value "${pin}" does not match the v<N>.<N>.<N> shape. ` +
+        `Expected something like v1.11.1.`
+    );
+  }
+  return pin;
+}
+
+// Reads the sibling's own declared release tag. Pure file read -- the
+// bundler stays free of git per @risk R2, so it compares what the checkout
+// says about itself rather than resolving a ref.
+//
+// cli#482: the field that matters is `release_tag`, not `version`.
+// Measured on the public sibling 2026-11-08:
+//
+//   at tag v1.11.1      version v1.11.1  release_tag v1.11.1                     31 lite hooks
+//   on a release branch version v1.11.1  release_tag release-2026-11-08-201b234b  46 lite hooks
+//
+// `version` reads v1.11.1 in both, because the release process writes the
+// new marker before the version bump. So checking `version` would have
+// passed on a checkout 41 commits past the tag and emitted 46 hooks where
+// CI emits 31 -- the exact divergence this ticket is about. `release_tag`
+// is the field that moves.
+function readSiblingVersion(root) {
+  const versionPath = join(root, SIBLING_VERSION_REL);
+  if (!existsSync(versionPath)) {
+    fail(
+      `${SIBLING_VERSION_REL} missing at ${versionPath}, so the checkout cannot say ` +
+        `which substrate version it carries.\n` +
+        `  Two ways forward:\n` +
+        `    1. clone sunj-labs/bassclef next to this repo and check out the pinned tag\n` +
+        `    2. set BASSCLEF_SIBLING_ROOT to a checkout you have already prepared`
+    );
+  }
+  let raw;
+  try {
+    raw = readFileSync(versionPath, 'utf8');
+  } catch (err) {
+    fail(`cannot read ${versionPath}: ${err.code ?? err.message}`);
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    fail(`${versionPath} is not valid JSON: ${err.message}`);
+  }
+  return {
+    declared: typeof parsed.release_tag === 'string' ? parsed.release_tag : '(no release_tag field)',
+    version: typeof parsed.version === 'string' ? parsed.version : null,
+  };
+}
+
 function resolveSiblingRoot() {
   const override = process.env.BASSCLEF_SIBLING_ROOT;
-  if (override && override.length > 0) return resolve(override);
-  return resolve(process.cwd(), '..', 'bassclef-upstream');
+  if (override && override.length > 0) {
+    return { root: resolve(override), how: 'BASSCLEF_SIBLING_ROOT', pin: null, declared: null, version: null };
+  }
+
+  const pin = readPin();
+  const root = resolve(process.cwd(), '..', PUBLIC_SIBLING_DIR);
+  if (!existsSync(root)) {
+    fail(
+      `no checkout at ${root}. The pin names ${pin}, and that is the repo the ` +
+        `publish workflow reads it from.\n` +
+        `  Two ways forward:\n` +
+        `    1. git clone sunj-labs/bassclef ${root}\n` +
+        `    2. set BASSCLEF_SIBLING_ROOT to a checkout you have already prepared`
+    );
+  }
+
+  const { declared, version } = readSiblingVersion(root);
+  if (declared !== pin) {
+    const lenient = process.env.BASSCLEF_PIN_MISMATCH === 'warn';
+    const msg =
+      `${root} is at ${declared} but ${PIN_FILE_REL} names ${pin}. ` +
+      `Bundling from a source that disagrees with the pin is how a local build ` +
+      `stops matching what CI publishes.\n` +
+      `  Three ways forward:\n` +
+      `    1. check the sibling out at ${pin}\n` +
+      `    2. advance ${PIN_FILE_REL} to ${declared} once you have read what changed\n` +
+      `    3. BASSCLEF_PIN_MISMATCH=warn to build anyway, for local work only`;
+    if (!lenient) fail(msg);
+    process.stderr.write(`prepublish-bundle-substrate: WARNING -- ${msg}\n`);
+  }
+
+  return { root, how: PIN_FILE_REL, pin, declared, version };
 }
 
 // ============================================================
@@ -849,7 +965,21 @@ function collectShFiles(dir, acc) {
 // ============================================================
 
 function main() {
-  const siblingRoot = resolveSiblingRoot();
+  const source = resolveSiblingRoot();
+  const siblingRoot = source.root;
+
+  // cli#482 option 3 -- say what this was built from, every time. The
+  // ticket asks for this regardless of which resolution lands, because
+  // one printed line would have surfaced the whole defect.
+  process.stdout.write(`bundle source: ${siblingRoot}\n`);
+  process.stdout.write(`  resolved via: ${source.how}\n`);
+  if (source.pin !== null) {
+    process.stdout.write(`  pin: ${source.pin}\n`);
+    process.stdout.write(`  source release_tag: ${source.declared}\n`);
+    if (source.version !== null) {
+      process.stdout.write(`  source version: ${source.version}\n`);
+    }
+  }
 
   // dist/lite/ tree per ADR-055 D1 — sole bundle path post-Phase 3.
   const distLite = buildDistLiteTree(siblingRoot);

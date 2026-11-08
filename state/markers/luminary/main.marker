@@ -1,7 +1,12 @@
-# Luminary marker — cli 1.0.1 hook routing
-- date: 2026-09-13
+# Luminary marker — session AA
+- date: 2026-11-08
 - branch: main
-- lead: michael-nygard — fail-loud stability pattern on hook copy; banner reports honest count; walker exits non-zero on partial copy
-- supporting: michael-feathers — characterization tests before walker touch; real settings.json fixture pins behavior
-- supporting: jerome-saltzer-and-michael-schroeder — complete mediation on user-scope writes; symlink refusal + chmod 0755 + $HOME containment
-- outside-council TBD at Step 8 RFC — likely linus-torvalds + hyrum-wright + brooks + cooper + ousterhout
+- lead: michael-feathers — every step here is a characterization problem. The
+  six-defect shape named in the plan doc is "a path that runs in one place,
+  never compared against the other." Feathers' cure is a test that pins the
+  real path, not a stub of it.
+- supporting:
+  - saltzer-schroeder — complete mediation. Steps 3 and 4 are both gates whose
+    record or re-arm is unmediated today.
+  - linus-torvalds — adopter contract. Step 2 changes what every install
+    receives; the pin move must be read before it is shipped.

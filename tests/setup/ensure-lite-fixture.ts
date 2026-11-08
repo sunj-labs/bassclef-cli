@@ -47,10 +47,18 @@ export default function setup(): void {
 
   if (existsSync(SETTINGS)) return;
 
+  // cli#482 — the bundler now refuses when the sibling checkout sits past
+  // the pinned tag, because shipping from a source that disagrees with the
+  // pin is how a local build stops matching what CI publishes. That guard
+  // is right for a publish and wrong here: this builds a test fixture, and
+  // a developer whose sibling is on a release branch should still be able
+  // to run the suite. So the fixture downgrades the guard to a warning and
+  // the bundler prints which source it read, which is what makes a
+  // confusing test failure traceable.
   const r = spawnSync(process.execPath, [BUNDLER], {
     encoding: 'utf8',
     timeout: 60000,
-    env: { ...process.env },
+    env: { ...process.env, BASSCLEF_PIN_MISMATCH: 'warn' },
   });
 
   if (r.status !== 0) {
