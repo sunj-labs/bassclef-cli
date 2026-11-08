@@ -70,7 +70,7 @@ jobs:
             -f harness/docker/Dockerfile.cold-adopter \
             .
 
-      - name: Pack the branch under test
+      - name: Read .bassclef-pin
         # On a pull request, smoke the branch rather than the registry.
         #
         # This step did not exist, and the run below defaulted CLI_VERSION to
@@ -83,7 +83,31 @@ jobs:
         # A workflow_dispatch run with an explicit cli_version still targets
         # the registry, which is what that input is for.
         if: ${{ github.event_name == 'pull_request' }}
+        id: read-pin
+        run: |
+          PIN=$(tr -d '[:space:]' < .bassclef-pin)
+          echo "BASSCLEF_PIN=$PIN" >> "$GITHUB_ENV"
+          echo "Pin: $PIN"
+
+      - name: Checkout sibling bassclef at the pinned tag
+        # The bundler refuses to build without a source that agrees with the
+        # pin (#482). That guard caught the first version of this step, which
+        # packed without a sibling checkout. Same three steps publish.yml and
+        # pr-checks.yml use.
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v5
+        with:
+          repository: sunj-labs/bassclef
+          ref: ${{ env.BASSCLEF_PIN }}
+          token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
+          path: bassclef
+          fetch-depth: 1
+
+      - name: Pack the branch under test
+        if: ${{ github.event_name == 'pull_request' }}
         id: pack
+        env:
+          BASSCLEF_SIBLING_ROOT: ${{ github.workspace }}/bassclef
         run: |
           npm ci --ignore-scripts
           npm run build
