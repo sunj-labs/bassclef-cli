@@ -1,0 +1,8 @@
+# Temperance — fix/smoke-tests-the-branch-not-the-registry
+- date: 2026-11-08
+- scope-decision: teach the harness to install the build under test, and make
+  the PR workflow pack the branch and pass it. Two files.
+- out of scope: the smoke's drive content, the registry path (workflow_dispatch
+  against a published version still works), and the 1.10.0 release itself.
+- drift trigger: anything inside the drive steps. This changes what gets
+  installed, not what gets exercised.

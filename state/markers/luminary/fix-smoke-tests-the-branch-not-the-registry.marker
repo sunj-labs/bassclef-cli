@@ -1,0 +1,10 @@
+# Luminary — fix/smoke-tests-the-branch-not-the-registry
+- date: 2026-11-08
+- lead: michael-feathers — the harness exercised a fixture (the previous
+  release) and reported on the subject. Point it at the real subject.
+- supporting:
+  - saltzer-schroeder — fail-safe. A missing tarball refuses rather than
+    falling back to the registry, because a silent fallback is exactly the
+    failure being fixed.
+  - michael-nygard — workflow_dispatch against a registry version is
+    unchanged, so the one existing use keeps working.
