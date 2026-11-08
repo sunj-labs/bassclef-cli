@@ -6,9 +6,16 @@
 # Validates two invariants:
 #   1. `.bassclef-pin` at repo root exists, holds exactly one trimmed
 #      line, matches the shape `v[0-9]+.[0-9]+.[0-9]+`.
-#   2. `.github/workflows/publish.yml` contains NO hardcoded tag like
-#      `ref: v1.X.Y` immediately after a sibling checkout of
+#   2. NO workflow under `.github/workflows/` carries a hardcoded tag
+#      like `ref: v1.X.Y` after a sibling checkout of
 #      `sunj-labs/bassclef`. All such refs come from `${{ env.BASSCLEF_PIN }}`.
+#
+# T9 + T10 widen the scope from publish.yml to every workflow. Added for
+# cli#482. This file read publish.yml alone, so `pr-checks.yml` sat on a
+# hardcoded `ref: v1.1.1` while the pin named v1.11.1 -- a different tag,
+# 27 days older. The full suite ran against one substrate version while
+# publish shipped another, and the test that existed to catch exactly
+# this was pointed at one file.
 #
 # Anchors:
 #   @luminary tony-hoare — the pin file + its shape is a precondition
@@ -27,6 +34,8 @@
 # [x] T6: publish.yml has at least one ref:${{ env.BASSCLEF_PIN }} after sibling repo
 # [x] T7: both jobs read .bassclef-pin via a "Read" step
 # [x] T8: assertion step uses $BASSCLEF_PIN env var not hardcoded
+# [x] T9: EVERY workflow that checks out sunj-labs/bassclef reads the pin
+# [x] T10: no workflow carries a hardcoded ref: v<N>.<N>.<N> after that repo
 
 set -euo pipefail
 
@@ -119,6 +128,45 @@ if [ -f "$WORKFLOW" ]; then
     _pass "T8: assertion step compares RESOLVED_TAG against \$BASSCLEF_PIN"
   else
     _fail "T8: assertion step does not use \$BASSCLEF_PIN for comparison"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# T9 + T10 — every workflow, not just publish.yml (cli#482)
+# ---------------------------------------------------------------------------
+
+# Each workflow that names `repository: sunj-labs/bassclef` must read the
+# pin, and must not pin a literal tag next to it.
+WF_DIR="$ROOT/.github/workflows"
+if [ -d "$WF_DIR" ]; then
+  MISSING_READ=""
+  HARDCODED=""
+  for wf in "$WF_DIR"/*.yml; do
+    [ -f "$wf" ] || continue
+    grep -qE "repository:[[:space:]]+sunj-labs/bassclef[[:space:]]*$" "$wf" || continue
+    base="$(basename "$wf")"
+
+    if ! grep -qE "\\.bassclef-pin" "$wf"; then
+      MISSING_READ="$MISSING_READ $base"
+    fi
+
+    # A literal tag on a `ref:` line anywhere in a workflow that checks out
+    # the sibling. Narrow on purpose: `ref: ${{ ... }}` never matches.
+    if grep -qE "^[[:space:]]+ref:[[:space:]]+v[0-9]+\\.[0-9]+\\.[0-9]+[[:space:]]*$" "$wf"; then
+      HARDCODED="$HARDCODED $base"
+    fi
+  done
+
+  if [ -z "$MISSING_READ" ]; then
+    _pass "T9: every workflow checking out sunj-labs/bassclef reads .bassclef-pin"
+  else
+    _fail "T9: these check out sunj-labs/bassclef without reading the pin:$MISSING_READ"
+  fi
+
+  if [ -z "$HARDCODED" ]; then
+    _pass "T10: no workflow carries a hardcoded ref: v<N>.<N>.<N> beside that checkout"
+  else
+    _fail "T10: hardcoded sibling tag in:$HARDCODED"
   fi
 fi
 

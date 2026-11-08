@@ -1,0 +1,21 @@
+# Lead-lens sign-off — fix/482-bundler-reads-the-pin
+- date: 2026-11-08
+- lead: michael-feathers
+- findings cleared:
+  - F1 (self, red) — my first cut compared `version`, which reads v1.11.1 on
+    both the tag and a release branch 41 commits past it. It would have passed
+    on a checkout emitting 46 hooks where CI emits 31 — the exact divergence
+    the ticket is about. Measured both files, switched to `release_tag`,
+    which does move. Fixture carries both fields so the weak check fails.
+  - F2 (self, red) — I marked a test-list line `[x] P10` with no matching test
+    function. Removed the line; P6 already covers that assertion.
+  - F3 (self, amber) — the new refusal would break a local `npm test` on a
+    clean tree, because the fixture builder runs the bundler with no env and
+    the sibling sits on a release branch. Fixture builder now passes
+    BASSCLEF_PIN_MISMATCH=warn, with the reason written down.
+- shown RED before GREEN:
+  - 8 of 9 new vitest cases failed against the old bundler (P9 green by
+    design, it pins the unchanged env-override path)
+  - T9 + T10 failed against the unmodified pr-checks.yml, naming it; green
+    after. Captured in-session rather than asserted.
+- verdict: cleared for merge.

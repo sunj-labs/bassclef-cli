@@ -1,7 +1,16 @@
-# Temperance marker — main (Session S closeout)
-
-- date: 2026-10-11
-- scope: Session S closeout chore on main — chronicle + whereami flip + rescue resolution
-- right-thing: Close Session S cleanly; preserve audit trail; flip whereami so next session reads current state.
-- right-way: Direct main commit per Session P + Q + R precedent for closeout chores.
-- drift-trigger: Any substantive code change in this commit (closeout is docs + markers only).
+# Temperance marker — session AA (post-1.9.23, option c)
+- date: 2026-11-08
+- branch: main (work moves to feat/* per step)
+- scope-decision: ship the four steps in docs/next-session-plan-2026-11-08-after-1923.md
+  in order — (1) cold-adopter smoke of 1.9.23, (2) cli#482 the pin + bundler,
+  (3) cli#489 audit log durability, (4) cli#488 a real trust verb.
+- right thing: the pin decides what adopters receive; the gate records decide
+  whether an unattended publish can be audited. Both are open holes with tickets.
+- right way: Docker cold-adopter harness for step 1 (NOT nuke-and-fresh-install on
+  this profile — line 339 moves ~/.claude mid-session and contaminates the
+  instruction-budget measurement). Beck RED-first on steps 2-4.
+- drift trigger: any step past 1.5x its plan-doc range → pause and re-anchor.
+  Step 2 not started with under 60 turns left (plan doc explicit).
+- out of scope, named: up#2238, up#2398, up#973 (upstream files), cli#475
+  (deferred on operator call), docs/canvases/2026-10-25-persona-ux-test-tier.md
+  and its children cli#448/#453/#454.

@@ -60,6 +60,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Read .bassclef-pin
+        # cli#482. This step did not exist, and the checkout below
+        # hardcoded `ref: v1.1.1` while .bassclef-pin named v1.11.1 --
+        # a different tag, 27 days older. The comment said "matches
+        # publish.yml pin" and it did not. So the full suite validated a
+        # bundle built from one substrate version while publish shipped
+        # another. scripts/tests/bassclef-pin.test.sh only read
+        # publish.yml, which is why nothing caught it.
+        run: |
+          PIN=$(tr -d '[:space:]' < .bassclef-pin)
+          echo "BASSCLEF_PIN=$PIN" >> "$GITHUB_ENV"
+          echo "Pin: $PIN"
+
       - name: Checkout sibling bassclef at pinned tag (for substrate source)
         # Matches publish.yml pin. See ADR-007 §Amendment 2026-09-13c
         # for the source-of-truth policy. Bundling needs a checkout of
@@ -68,7 +81,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: sunj-labs/bassclef
-          ref: v1.1.1
+          ref: ${{ env.BASSCLEF_PIN }}
           token: ${{ secrets.BASSCLEF_SOURCE_TOKEN }}
           path: bassclef
           fetch-depth: 1
