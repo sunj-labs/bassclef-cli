@@ -89,7 +89,21 @@ if [[ "${1:-}" == "api" ]]; then
 
   if [[ "$target" == *"environments/npm-publish"* ]]; then
     if [[ "$is_put" == 1 ]]; then
-      log_put "PUT $target $*"
+      # cli#481. This stub used to accept any body and exit 0, which is
+      # exactly how `-F "reviewers=[]"` shipped and stayed broken for
+      # weeks: the test checked that the script reached the call, never
+      # what the call carried. Now it refuses what GitHub refuses.
+      for a in "$@"; do
+        if [[ "$a" == reviewers=* ]]; then
+          echo "gh: Invalid request. Invalid value for reviewers (HTTP 422)" >&2
+          exit 1
+        fi
+      done
+      body=""
+      for a in "$@"; do
+        [[ "$a" == "--input" ]] && { body="$(cat)"; break; }
+      done
+      log_put "PUT $target $* ${body}"
       touch "${FAKE_GH_PUTMARK:-/dev/null}"
       exit 0
     fi
@@ -201,6 +215,27 @@ assert_contains "$OUT" "Usage" "T15 stderr names usage"
 run authed-on status
 assert_eq "" "$PUTS" "T16 status fired no PUT"
 assert_file_absent "$AUDIT" "T16 status wrote no audit line"
+
+# --- cli#481 ---------------------------------------------------------------
+# The bug was never in the control flow. `off` reached the PUT every time;
+# the PUT carried the two-character string "[]" where the API wanted an
+# array, so GitHub answered 422 and the gate stayed ON since it shipped.
+#
+# These pin the wire format. T17 would have failed on the old code.
+
+run put-then-off off --authorized-by operator
+assert_eq 0 "$RC" "T17 off succeeds when the body is well formed"
+assert_contains "$PUTS" '{"reviewers":[]}' "T17 off sends reviewers as a JSON array"
+assert_contains "$PUTS" "--input" "T17 off sends a JSON body, not -F typed fields"
+
+run put-then-off off --authorized-by operator
+case "$PUTS" in
+  *"reviewers=[]"*)
+    assert_eq "unreachable" "reviewers=[] on the wire" \
+      "T18 off must never send reviewers as an -F string — that is cli#481" ;;
+  *)
+    assert_eq 1 1 "T18 off sends no -F reviewers string" ;;
+esac
 
 echo ""
 echo "  total=$_tests_total passed=$_tests_passed failed=$_tests_failed"

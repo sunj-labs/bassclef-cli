@@ -1,0 +1,13 @@
+# Luminary — fix/481-publish-gate-off-sends-literal-string
+- date: 2026-11-08
+- lead: michael-feathers
+- supporting: [tony-hoare, michael-nygard]
+- what-the-lead-caught: the existing test stubs `gh`, so it characterises
+  the script talking to a stub and never the script talking to GitHub. The
+  cure is a test that pins the wire format — assert the body is valid JSON
+  with reviewers as an array, not that the function was reached.
+- hoare: do_off already has a real postcondition (read back, refuse to
+  claim OFF unless the read says OFF). That postcondition is why this
+  failed loudly for weeks instead of silently clearing nothing.
+- nygard: the failure mode is correct — gate stays ON when the write fails.
+  Fail-safe, not fail-open. Do not weaken that while fixing the write.
