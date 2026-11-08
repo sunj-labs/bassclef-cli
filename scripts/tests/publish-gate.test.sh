@@ -58,6 +58,12 @@
 # [x] T42 status says so when the window is past its deadline
 # [x] T43 trust --ttl 5 records a five-minute deadline
 # [x] T44 trust refuses while a window is already open
+#
+# cli#507 — the gate, the marker and the log each answered on their own.
+# [x] T45 `on` after `trust` consumes the marker — one owner, not four
+# [x] T46 `on` when the gate is ALREADY on still consumes a stale marker
+# [x] T47 gate ON with a marker present — status calls it stale, not open
+# [x] T48 the audit line claims only what its log measures
 
 set -uo pipefail
 
@@ -561,6 +567,38 @@ assert_contains "$(cat "$MARKER" 2>/dev/null)" "ttl_minutes=5" "T43 trust --ttl 
 run_trust authed-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" trust --authorized-by operator
 assert_eq 3 "$RC" "T44 trust refuses while a window is already open"
 assert_eq "" "$PUTS" "T44 no write fired"
+
+# ---------------------------------------------------------------------------
+# cli#507 — one owner for the marker
+#
+# These drive the script through real verb sequences rather than building the
+# end state by hand. T40 already proves `rearm` consumes the marker; the gap
+# was every OTHER path that puts the gate back ON (Feathers — the states the
+# fixtures never reach are the states that break).
+# ---------------------------------------------------------------------------
+
+run_trust put-then-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" on
+assert_eq 0 "$RC" "T45 on with an open marker exits 0"
+assert_file_absent "$MARKER" "T45 on consumes the marker"
+
+run_trust authed-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" on
+assert_eq 0 "$RC" "T46 on when already ON exits 0"
+assert_file_absent "$MARKER" "T46 the idempotent path still consumes a stale marker"
+
+run_trust authed-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" status
+assert_contains "$OUT" "stale" "T47 status calls an ON-gate marker stale"
+assert_not_contains "$OUT" "trust window: open" "T47 status does not report it as open"
+
+# A paired log, so the check reaches its closing sentence rather than the
+# "nothing recorded yet" early return.
+run_trust authed-on "" status
+printf '%s\n' "$PAIRED" > "$AUDIT"
+printf '%s\n' "$PAIRED" > "$AUDIT_LOCAL"
+OUT="$(PATH="$WORK/bin:$PATH" HOME="$WORK/home" \
+      PUBLISH_GATE_AUDIT="$AUDIT" PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" \
+      PUBLISH_GATE_TRUST_MARKER="$MARKER" bash "$SCRIPT" audit 2>&1)"
+assert_contains "$OUT" "paired with a restore" "T48 audit still reports pairing"
+assert_not_contains "$OUT" "the window is closed" "T48 audit claims only what its log measures"
 
 echo ""
 echo "  total=$_tests_total passed=$_tests_passed failed=$_tests_failed"

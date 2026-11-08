@@ -259,7 +259,11 @@ audit_pairing() {
           printf "  audit: the window opened at %s is still open -- no restore follows it.\n", last_off
           bad = 1
         }
-        if (!bad) print "  audit: every clear is paired with a restore, and the window is closed."
+        # cli#507 -- this used to end "and the window is closed." This log
+        # records gate transitions. It has no view of the trust marker, so
+        # it had no evidence for that clause. `status` reports the window
+        # from the marker; this line reports the pairing from the log.
+        if (!bad) print "  audit: every clear is paired with a restore."
         else print "  audit: UNPAIRED"
       }
     ' "$src" 2>/dev/null
@@ -318,6 +322,31 @@ trust_window_closed() {
 trust_window_open() {
   [ -f "$TRUST_MARKER" ] || return 1
   trust_window_closed && return 1
+  return 0
+}
+
+# cli#507 — one owner for the marker.
+#
+# Four functions used to touch it: `trust` opened it, `rearm` closed it, `on`
+# ignored it, `status` read it. `restore_gate` was factored out of `rearm` so
+# the write to production config lived once -- but only the write moved. The
+# consume stayed behind in `rearm`, so `on` put the gate back and left a
+# marker claiming an open window. `status` then printed both as facts.
+#
+# The invariant this holds: a gate that reads ON has no open marker beside it.
+# Every path that restores the gate calls this (Hoare -- the postcondition is
+# the same whichever verb got there).
+#
+# Fail-soft on the remove, and say so. A delete that silently failed would put
+# the two back out of step, which is the defect this closes.
+consume_marker() {
+  [ -f "$TRUST_MARKER" ] || return 0
+  rm -f "$TRUST_MARKER" 2>/dev/null || true
+  if [ -f "$TRUST_MARKER" ]; then
+    echo "publish-gate: the gate is ON but the marker at ${TRUST_MARKER} could not be removed." >&2
+    echo "  Delete it by hand, or \`status\` will keep naming a window that is over." >&2
+    return 1
+  fi
   return 0
 }
 
@@ -495,8 +524,18 @@ do_status() {
   echo "  can_admins_bypass: ${bypass}"
 
   # cli#488 -- a window nobody is told about is a window nobody closes.
+  #
+  # cli#507 -- and a window reported next to a contradicting gate state is
+  # worse than one not reported at all. This used to print the gate, then the
+  # marker, with nothing comparing them, so one call could say "publish waits
+  # for approval" and "trust window: open" together. Only one of those can be
+  # true. The gate is the authority: it is what GitHub enforces. A marker
+  # beside an ON gate is a leftover, so say that.
   if [ -f "$TRUST_MARKER" ]; then
-    if trust_window_closed; then
+    if [ "${state#ON}" != "$state" ]; then
+      echo "  trust window: stale — the gate is ON, so the window authorized by $(marker_field authorized_by) is over"
+      echo "    clear the leftover marker with: bash scripts/publish-gate.sh on"
+    elif trust_window_closed; then
       echo "  trust window: past its deadline ($(marker_field expires_at)) — run \`publish-gate.sh rearm\`"
     else
       echo "  trust window: open, authorized by $(marker_field authorized_by), expires $(marker_field expires_at)"
@@ -521,6 +560,14 @@ do_on() {
     ON*)
       echo "${ENV_NAME}: already ON ($(gate_state "$before" | cut -d' ' -f2-)) — nothing to do"
       echo "  can_admins_bypass: $(admin_bypass "$before")"
+      # cli#507 — this early return is the one path that could reach
+      # ON-with-a-marker, because it never gets as far as the restore. A
+      # marker sitting beside an ON gate names a window that is over.
+      if [ -f "$TRUST_MARKER" ]; then
+        if consume_marker; then
+          echo "  cleared a stale trust window (authorized by $(marker_field authorized_by))"
+        fi
+      fi
       exit 0
       ;;
   esac
@@ -532,9 +579,17 @@ do_on() {
   # in do_off about not rewriting a working write.
   restore_gate
 
+  # cli#507 — only after the read-back says ON. The window a marker names is
+  # over once approval is required again, so consuming it here cannot discard
+  # an authorization that still has work to do.
+  local had_marker=""
+  [ -f "$TRUST_MARKER" ] && had_marker="$(marker_field authorized_by)"
+  consume_marker || true
+
   audit "on" "$RESTORE_LOGIN" "reviewer=${RESTORE_LOGIN} id=${RESTORE_UID_OUT}"
   echo "${ENV_NAME}: ${RESTORE_STATE} — publish waits for approval"
   echo "  can_admins_bypass: ${RESTORE_BYPASS}"
+  [ -n "$had_marker" ] && echo "  closed the trust window authorized by ${had_marker}"
   exit 0
 }
 
