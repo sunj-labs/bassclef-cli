@@ -1,0 +1,22 @@
+# Lead-lens sign-off — fix/481-publish-gate-off-sends-literal-string
+- date: 2026-11-08
+- lead: michael-feathers
+- supporting: [tony-hoare, michael-nygard]
+
+## Findings and disposition
+F1 GREEN — verified against the real API before writing a test. Ran the
+  fixed `off` against GitHub: gate flipped to OFF, read-back confirms,
+  audit line written. The fix is not theoretical.
+F2 GREEN — stub hardened to refuse what GitHub refuses, so the test now
+  characterises the contract instead of the control flow. T17 proven RED
+  on the old code: three assertions fail plus T13.
+F3 AMBER — do_on left on the -F bracket form. Deliberate: it works, and
+  rewriting a working write to production config for symmetry is risk
+  without benefit. Recorded in the code comment so the asymmetry is a
+  choice rather than an oversight. CLEARED.
+F4 GREEN — fail-safe preserved. A rejected write still leaves the gate
+  ON and the script still refuses to claim success without a read-back.
+
+## Lead verdict
+Feathers' test is whether the characterization pins real behaviour. It
+does now, and it did not before. No red findings. Clear to merge.

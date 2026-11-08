@@ -1,0 +1,8 @@
+# Temperance — fix/481-publish-gate-off-sends-literal-string
+- date: 2026-11-08
+- scope-decision: One line in do_off, plus a test that pins the wire format
+  rather than the control flow. Do NOT touch do_on — it works, and changing
+  a working write to production config for symmetry is not worth the risk.
+- blast-radius: the npm-publish environment on one repo. The script reads
+  back and refuses to claim success, so a wrong write fails loudly.
+- drift-trigger: if this turns into a rewrite of publish-gate.sh, stop.

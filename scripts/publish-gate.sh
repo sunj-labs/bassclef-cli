@@ -222,7 +222,28 @@ do_off() {
   if ! before="$(read_env)"; then env_unreadable; fi
   login="$(operator_login)"
 
-  gh api "$ENV_PATH" --method PUT -F "reviewers=[]" >/dev/null 2>&1 \
+  # cli#481. This was `-F "reviewers=[]"`, and it never once worked.
+  #
+  # `gh api -F` types its value: it reads true/false/null and integers,
+  # and treats everything else as a string. So `[]` went over the wire as
+  # the two-character string "[]", the API wanted an array, and the PUT
+  # came back 422 every time. The gate has never been clearable since it
+  # shipped.
+  #
+  # Sending the body as JSON removes the guessing — `--input` passes the
+  # bytes through and the array stays an array.
+  #
+  # do_on is NOT changed to match. It uses `-F "reviewers[][type]=User"`,
+  # which is the bracket form gh expands into an array correctly, and it
+  # works. Rewriting a working write to production config for the sake of
+  # symmetry buys nothing and risks the one path that currently functions.
+  #
+  # Safe to send `reviewers` alone: the environment carries no
+  # deployment_branch_policy and no wait_timer rule, so there is nothing
+  # else in the body to preserve. Checked before writing, and the
+  # read-back below is the real guard either way.
+  printf '{"reviewers":[]}' \
+    | gh api "$ENV_PATH" --method PUT --input - >/dev/null 2>&1 \
     || die_postcondition "the write to ${ENV_NAME} was rejected; the gate state is unchanged."
 
   local after state
