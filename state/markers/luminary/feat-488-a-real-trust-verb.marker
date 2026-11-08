@@ -1,0 +1,10 @@
+# Luminary marker — feat/488-a-real-trust-verb
+- date: 2026-11-08
+- lead: saltzer-schroeder — fail-safe defaults. A re-arm that depends on the
+  publish path completing fails open. The marker carries its own deadline so
+  the window closes whether the publish finished, failed or was cancelled.
+- supporting:
+  - john-ousterhout — the restore write now exists once. `do_on` and `rearm`
+    both call it, so the two cannot drift apart.
+  - linus-torvalds — `off`, `on` and `status` behave exactly as before. The
+    two new verbs are additive.

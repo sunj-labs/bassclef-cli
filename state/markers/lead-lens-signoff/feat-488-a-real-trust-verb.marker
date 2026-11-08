@@ -1,0 +1,16 @@
+# Lead-lens sign-off — feat/488-a-real-trust-verb
+- date: 2026-11-08
+- lead: saltzer-schroeder
+- findings cleared:
+  - F1 (self, amber) — I had written `restore_gate` for sharing and then left
+    `do_on` with its own copy of the same write. Two copies of a write to
+    production config is the shape that drifts. `do_on` now calls it. Safe
+    because T07, T08 and T09 pin do_on's behavior and all three still pass;
+    the encoding is byte-identical to what shipped.
+  - F2 (self, green) — shellcheck flagged `RESTORE_UID` unused. Removed, and
+    the value do_on's audit line needs is returned under its own name.
+  - F3 (scope, named not fixed) — nothing fires `rearm` automatically. Stated
+    in the PR and in the SKILL rather than implied. #488 stays open.
+- shown RED before GREEN: 19 assertions across T32-T44 failed against the old
+  script, which had no `trust` verb and no marker.
+- verdict: cleared for merge, with #488 left open for the trigger.

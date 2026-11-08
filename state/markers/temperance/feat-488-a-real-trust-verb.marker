@@ -1,0 +1,12 @@
+# Temperance marker — feat/488-a-real-trust-verb
+- date: 2026-11-08
+- scope-decision: ship the `trust` verb and a `rearm` verb that restores the
+  gate from the marker. Route the SKILL's trust mode to the verb.
+- what this does NOT do, stated up front: nothing fires `rearm` on a
+  schedule. The publish path sees an open window because Step 1 runs
+  `status`. A window left open between publishes stays open. #488 stays open
+  for that.
+- drift trigger: wiring a session-start hook. The project settings
+  SessionStart block is managed by the sync, which removed three
+  project-scope hooks this session. Picking a home for it is a decision
+  with an adopter-visible surface, not mine to guess at midnight.

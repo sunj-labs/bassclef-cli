@@ -15,6 +15,8 @@
 #   publish-gate.sh on
 #   publish-gate.sh off --authorized-by <who>
 #   publish-gate.sh audit
+#   publish-gate.sh trust --authorized-by <who> [--ttl <minutes>]
+#   publish-gate.sh rearm
 #
 # Why `off` needs an argument: the gate's whole value is that it cannot be
 # cleared by accident or by an agent acting on its own read of the room. The
@@ -49,6 +51,23 @@ ENV_PATH="repos/${REPO}/environments/${ENV_NAME}"
 AUDIT="${PUBLISH_GATE_AUDIT:-state/publish-gate-audit.log}"
 AUDIT_LOCAL="${PUBLISH_GATE_AUDIT_LOCAL:-${HOME}/.bassclef/publish-gate-audit.log}"
 
+# cli#488 — the trust window's marker.
+#
+# `trust` used to mean `off`, and the only thing restoring the gate afterwards
+# was a sentence in SKILL.md telling the agent to do it. On 2026-11-07 the
+# sentence was read. A promise kept by prose is kept as often as the prose is
+# read, which is not a mechanism.
+#
+# The marker carries who authorized the window and when it closes. `rearm`
+# restores the gate from it without needing the publish to have finished, and
+# consumes it on use -- one authorization, one publish.
+#
+# It sits beside the record, outside any repository, for the same reason the
+# record does: a marker a `git reset` can erase would fail to re-arm, and
+# that fails unsafe.
+TRUST_MARKER="${PUBLISH_GATE_TRUST_MARKER:-${HOME}/.bassclef/publish-trust.marker}"
+TRUST_TTL_DEFAULT=60
+
 usage() {
   cat >&2 <<EOF
 Usage:
@@ -56,11 +75,15 @@ Usage:
   publish-gate.sh on
   publish-gate.sh off --authorized-by <who>
   publish-gate.sh audit
+  publish-gate.sh trust --authorized-by <who> [--ttl <minutes>]
+  publish-gate.sh rearm
 
 status  read the gate without changing it
 on      require operator approval before npm publish (the resting state)
 off     clear the requirement for one publish; restore it with \`on\` after
 audit   read the log in order and report any clear without a restore
+trust   clear the gate for one publish, with a deadline it re-arms itself by
+rearm   restore the gate when the trust window has closed or been spent
 
 Repo: ${REPO}   Environment: ${ENV_NAME}
 EOF
@@ -267,6 +290,179 @@ audit_divergence() {
 # Verbs
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# The trust window
+# ---------------------------------------------------------------------------
+
+now_stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+# Reads one key=value from the marker. Missing key prints nothing.
+marker_field() {
+  [ -f "$TRUST_MARKER" ] || return 0
+  awk -F= -v k="$1" '$1 == k { sub(/^[^=]*=/, "", $0); print; exit }' "$TRUST_MARKER" 2>/dev/null
+}
+
+# ISO-8601 UTC with a fixed width sorts correctly as a string, so the
+# comparison needs no `date -d` and works the same on BSD and GNU. That
+# matters: a portability bug here would leave the gate open on one platform
+# and not the other.
+trust_window_closed() {
+  local expires spent
+  spent="$(marker_field spent)"
+  [ "$spent" = "yes" ] && return 0
+  expires="$(marker_field expires_at)"
+  [ -n "$expires" ] || return 0
+  [[ "$(now_stamp)" > "$expires" ]]
+}
+
+trust_window_open() {
+  [ -f "$TRUST_MARKER" ] || return 1
+  trust_window_closed && return 1
+  return 0
+}
+
+# Restores the gate. Shared by `on` and `rearm` so the two cannot drift.
+# Prints the resulting state. Dies on a failed read-back (Hoare).
+restore_gate() {
+  local login uid before after state
+  if ! before="$(read_env)"; then env_unreadable; fi
+  login="$(operator_login)"
+  uid="$(operator_id)"
+  [ -n "$login" ] && [ -n "$uid" ] || die_precondition "could not resolve the authenticated user from \`gh api user\`."
+
+  gh api "$ENV_PATH" --method PUT \
+    -F "reviewers[][type]=User" \
+    -F "reviewers[][id]=${uid}" >/dev/null 2>&1 \
+    || die_postcondition "the write to ${ENV_NAME} was rejected. Run \`gh api ${ENV_PATH}\` to see the current state."
+
+  if ! after="$(read_env)"; then env_unreadable; fi
+  state="$(gate_state "$after")"
+  case "$state" in
+    ON*) : ;;
+    *) die_postcondition "wrote the reviewer but the read-back says ${state}. The gate is NOT protecting publish." ;;
+  esac
+  RESTORE_LOGIN="$login"
+  RESTORE_UID_OUT="$uid"
+  RESTORE_STATE="$state"
+  RESTORE_BYPASS="$(admin_bypass "$after")"
+}
+
+do_trust() {
+  local who="" ttl="$TRUST_TTL_DEFAULT"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --authorized-by) shift; who="${1:-}" ;;
+      --ttl)           shift; ttl="${1:-}" ;;
+      *) usage; exit 3 ;;
+    esac
+    shift
+  done
+
+  if [ -z "$who" ]; then
+    echo "publish-gate: refusing to open a trust window without --authorized-by <who>." >&2
+    echo "" >&2
+    echo "  The argument is the record of who decided. It lands in the log and in" >&2
+    echo "  the marker, and the marker is what re-arms the gate afterwards." >&2
+    echo "" >&2
+    echo "  bash scripts/publish-gate.sh trust --authorized-by operator" >&2
+    exit 3
+  fi
+
+  case "$ttl" in
+    ''|*[!0-9]*) die_precondition "--ttl wants a whole number of minutes; got \"${ttl}\"." ;;
+  esac
+
+  # One window at a time. Two open windows mean two authorizations and one
+  # marker, and the second would overwrite the first's record.
+  if trust_window_open; then
+    echo "publish-gate: a trust window is already open." >&2
+    echo "  authorized by: $(marker_field authorized_by)" >&2
+    echo "  expires:       $(marker_field expires_at)" >&2
+    echo "" >&2
+    echo "  Use it, or close it first:" >&2
+    echo "    bash scripts/publish-gate.sh rearm" >&2
+    exit 3
+  fi
+
+  require_gh_auth
+  local before login
+  if ! before="$(read_env)"; then env_unreadable; fi
+  login="$(operator_login)"
+
+  # Same JSON body as `off`, for the reason written there: `gh api -F` types
+  # its value and sent `[]` as a two-character string, which the API refused
+  # every time (cli#481).
+  printf '{"reviewers":[]}' \
+    | gh api "$ENV_PATH" --method PUT --input - >/dev/null 2>&1 \
+    || die_postcondition "the write to ${ENV_NAME} was rejected; the gate state is unchanged."
+
+  local after state
+  if ! after="$(read_env)"; then env_unreadable; fi
+  state="$(gate_state "$after")"
+  if [ "$state" != "OFF" ]; then
+    die_postcondition "cleared the reviewer but the read-back says ${state}. Treat the gate as still ON and retry."
+  fi
+
+  local opened expires dir
+  opened="$(now_stamp)"
+  expires="$(date -u -v+"${ttl}"M +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+            || date -u -d "+${ttl} minutes" +%Y-%m-%dT%H:%M:%SZ)"
+  dir="$(dirname "$TRUST_MARKER")"
+  if [ -d "$dir" ] || mkdir -p "$dir" 2>/dev/null; then
+    printf 'authorized_by=%s\nopened_at=%s\nexpires_at=%s\nttl_minutes=%s\nspent=no\n' \
+      "$who" "$opened" "$expires" "$ttl" > "$TRUST_MARKER" 2>/dev/null || true
+  fi
+  if [ ! -s "$TRUST_MARKER" ]; then
+    echo "publish-gate: the gate is clear but the marker did not land at ${TRUST_MARKER}." >&2
+    echo "  Nothing will re-arm it on its own. Run \`publish-gate.sh on\` when the publish lands." >&2
+  fi
+
+  audit "off" "${login:-unknown}" "authorized_by=${who} via=trust expires_at=${expires}"
+  echo "${ENV_NAME}: OFF — the next publish runs unattended"
+  echo "  authorized by: ${who}"
+  echo "  expires:       ${expires} (${ttl} min)"
+  echo "  can_admins_bypass: $(admin_bypass "$after")"
+  echo ""
+  echo "  The gate re-arms itself from the marker:"
+  echo "    bash scripts/publish-gate.sh rearm"
+  exit 0
+}
+
+do_rearm() {
+  if [ ! -f "$TRUST_MARKER" ]; then
+    echo "${ENV_NAME}: nothing to re-arm — no trust window is recorded."
+    exit 0
+  fi
+
+  if ! trust_window_closed; then
+    echo "${ENV_NAME}: the trust window is still open — leaving the gate clear."
+    echo "  authorized by: $(marker_field authorized_by)"
+    echo "  expires:       $(marker_field expires_at)"
+    echo ""
+    echo "  Re-run this after the publish lands, or after the deadline passes."
+    exit 0
+  fi
+
+  local who expires spent
+  who="$(marker_field authorized_by)"
+  expires="$(marker_field expires_at)"
+  spent="$(marker_field spent)"
+
+  require_gh_auth
+  restore_gate
+
+  rm -f "$TRUST_MARKER" 2>/dev/null || true
+
+  local why
+  if [ "$spent" = "yes" ]; then why="the window was spent"; else why="the deadline passed at ${expires}"; fi
+  audit "on" "${RESTORE_LOGIN:-unknown}" "restored_by=rearm reason=${why// /-} authorized_by=${who}"
+  echo "${ENV_NAME}: ${RESTORE_STATE} — publish waits for approval"
+  echo "  re-armed because ${why}"
+  echo "  the window authorized by ${who} is closed, and its marker is gone"
+  echo "  can_admins_bypass: ${RESTORE_BYPASS}"
+  exit 0
+}
+
 do_audit() {
   audit_divergence
   if audit_pairing; then
@@ -298,6 +494,15 @@ do_status() {
   # request. An admin can click through regardless of the reviewer list.
   echo "  can_admins_bypass: ${bypass}"
 
+  # cli#488 -- a window nobody is told about is a window nobody closes.
+  if [ -f "$TRUST_MARKER" ]; then
+    if trust_window_closed; then
+      echo "  trust window: past its deadline ($(marker_field expires_at)) — run \`publish-gate.sh rearm\`"
+    else
+      echo "  trust window: open, authorized by $(marker_field authorized_by), expires $(marker_field expires_at)"
+    fi
+  fi
+
   # cli#489 -- say whether the log pairs up, without being asked. An `on`
   # with no `off` before it is the shape a lost authorization leaves, and
   # nobody goes looking for it.
@@ -308,12 +513,8 @@ do_status() {
 
 do_on() {
   require_gh_auth
-  local before login uid
+  local before
   if ! before="$(read_env)"; then env_unreadable; fi
-  login="$(operator_login)"
-  uid="$(operator_id)"
-  [ -n "$login" ] && [ -n "$uid" ] || die_precondition "could not resolve the authenticated user from \`gh api user\`."
-
 
   # Idempotent: already ON is success, not an error.
   case "$(gate_state "$before")" in
@@ -324,22 +525,16 @@ do_on() {
       ;;
   esac
 
-  gh api "$ENV_PATH" --method PUT \
-    -F "reviewers[][type]=User" \
-    -F "reviewers[][id]=${uid}" >/dev/null 2>&1 \
-    || die_postcondition "the write to ${ENV_NAME} was rejected. Run \`gh api ${ENV_PATH}\` to see the current state."
+  # cli#488 — the write lives in restore_gate, which `rearm` also calls. Two
+  # copies of a write to production config is the shape that drifts: one gets
+  # a fix and the other does not. The encoding is unchanged from what shipped
+  # (the `reviewers[][...]` bracket form gh expands correctly), per the note
+  # in do_off about not rewriting a working write.
+  restore_gate
 
-  local after state
-  if ! after="$(read_env)"; then env_unreadable; fi
-  state="$(gate_state "$after")"
-  case "$state" in
-    ON*) : ;;
-    *) die_postcondition "wrote the reviewer but the read-back says ${state}. The gate is NOT protecting publish. Retry, or set it in Settings → Environments." ;;
-  esac
-
-  audit "on" "$login" "reviewer=${login} id=${uid}"
-  echo "${ENV_NAME}: ${state} — publish waits for approval"
-  echo "  can_admins_bypass: $(admin_bypass "$after")"
+  audit "on" "$RESTORE_LOGIN" "reviewer=${RESTORE_LOGIN} id=${RESTORE_UID_OUT}"
+  echo "${ENV_NAME}: ${RESTORE_STATE} — publish waits for approval"
+  echo "  can_admins_bypass: ${RESTORE_BYPASS}"
   exit 0
 }
 
@@ -417,6 +612,8 @@ case "${1:-}" in
   on)     shift; do_on "$@" ;;
   off)    shift; do_off "$@" ;;
   audit)  shift; do_audit "$@" ;;
+  trust)  shift; do_trust "$@" ;;
+  rearm)  shift; do_rearm "$@" ;;
   ""|-h|--help) usage; exit 3 ;;
   *) echo "publish-gate: unknown verb '${1}'" >&2; usage; exit 3 ;;
 esac
