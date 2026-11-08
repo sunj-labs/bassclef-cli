@@ -43,6 +43,21 @@
 # [x] T29 a log whose FIRST line is `on` reads as a record that begins mid-window
 # [x] T30 that same log still catches a lone restore later in the file
 # [x] T31 with no override set, the record lands at $HOME/.bassclef/
+#
+# cli#488 — a real trust verb that re-arms the gate itself.
+# [x] T32 trust without --authorized-by — exit 3, no write fired
+# [x] T33 trust with authorization — clears the gate, read-back OFF, exit 0
+# [x] T34 trust writes the marker with who authorized it and a deadline
+# [x] T35 trust's audit line records the deadline
+# [x] T36 rearm with no marker — exit 0, says there is nothing to re-arm
+# [x] T37 rearm inside the window — leaves the gate clear, says it is open
+# [x] T38 rearm past the deadline — restores the gate, exit 0
+# [x] T39 rearm on a spent marker — restores the gate, exit 0
+# [x] T40 rearm consumes the marker — a second run has nothing to do
+# [x] T41 status names an open window and its deadline
+# [x] T42 status says so when the window is past its deadline
+# [x] T43 trust --ttl 5 records a five-minute deadline
+# [x] T44 trust refuses while a window is already open
 
 set -uo pipefail
 
@@ -438,6 +453,114 @@ if [[ -s "$WORK/home/.bassclef/publish-gate-audit.log" ]]; then
 else
   fail "T31 with no override set, the record lands at \$HOME/.bassclef/" "nothing at $WORK/home/.bassclef/ (rc=$RC)"
 fi
+
+# ---------------------------------------------------------------------------
+# cli#488 — a real trust verb that re-arms the gate itself
+#
+# `trust` worked only because the skill routed it to `off`, and the only thing
+# restoring the gate afterwards was a sentence in SKILL.md telling the agent
+# to do it at Step 7. On 2026-11-07 that sentence was read. That is not a
+# mechanism: a promise kept by prose is kept as often as the prose is read.
+#
+# So `trust` now writes a marker carrying who authorized it and a deadline,
+# and `rearm` restores the gate from that marker without needing the publish
+# to have finished. The marker is consumed on use -- one authorization, one
+# publish (pre-mortem, Saltzer 4).
+#
+# The marker lives beside the record, outside any repository, for the same
+# reason the record does: a marker a `git reset` can erase would fail to
+# re-arm, which fails unsafe.
+# ---------------------------------------------------------------------------
+
+# run_trust <mode> <marker-contents-or-empty> <args...>
+run_trust() {
+  local mode="$1"; local marker_body="$2"; shift 2
+  WORK="$(mktemp -d)"
+  make_fake_gh "$WORK/bin"
+  export FAKE_GH_MODE="$mode"
+  export FAKE_GH_PUTLOG="$WORK/puts.log"
+  export FAKE_GH_PUTMARK="$WORK/put.mark"
+  : > "$FAKE_GH_PUTLOG"
+  AUDIT="$WORK/audit.log"
+  AUDIT_LOCAL="$WORK/local-audit.log"
+  MARKER="$WORK/trust.marker"
+  [[ -n "$marker_body" ]] && printf '%s\n' "$marker_body" > "$MARKER"
+  OUT="$(PATH="$WORK/bin:$PATH" \
+        HOME="$WORK/home" \
+        PUBLISH_GATE_AUDIT="$AUDIT" \
+        PUBLISH_GATE_AUDIT_LOCAL="$AUDIT_LOCAL" \
+        PUBLISH_GATE_TRUST_MARKER="$MARKER" \
+        bash "$SCRIPT" "$@" 2>&1)"
+  RC=$?
+  PUTS="$(cat "$FAKE_GH_PUTLOG" 2>/dev/null)"
+  return 0
+}
+
+# A marker body. `expires_at` in the past means the window has closed.
+_marker() {
+  printf 'authorized_by=%s\nopened_at=%s\nexpires_at=%s\nspent=%s\n' "$1" "$2" "$3" "$4"
+}
+
+_future() { date -u -v+30M +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '+30 minutes' +%Y-%m-%dT%H:%M:%SZ; }
+_past()   { date -u -v-30M +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '-30 minutes' +%Y-%m-%dT%H:%M:%SZ; }
+
+run_trust authed-on "" trust
+assert_eq 3 "$RC" "T32 trust without --authorized-by exits 3"
+assert_eq "" "$PUTS" "T32 no write fired"
+
+run_trust put-then-off "" trust --authorized-by operator
+assert_eq 0 "$RC" "T33 trust with authorization exits 0"
+assert_contains "$PUTS" "PUT" "T33 the write fired"
+assert_contains "$OUT" "OFF" "T33 read-back confirms the gate is clear"
+
+run_trust put-then-off "" trust --authorized-by operator
+if grep -q 'authorized_by=operator' "$MARKER" 2>/dev/null && grep -q 'expires_at=' "$MARKER" 2>/dev/null; then
+  pass "T34 trust writes the marker with who authorized it and a deadline"
+else
+  fail "T34 trust writes the marker with who authorized it and a deadline" "marker: $(cat "$MARKER" 2>/dev/null | tr '\n' ' ')"
+fi
+
+run_trust put-then-off "" trust --authorized-by operator
+assert_contains "$(cat "$AUDIT_LOCAL" 2>/dev/null)" "expires_at=" "T35 trust's audit line records the deadline"
+
+run_trust authed-on "" rearm
+assert_eq 0 "$RC" "T36 rearm with no marker exits 0"
+assert_contains "$OUT" "nothing to re-arm" "T36 says there is nothing to re-arm"
+
+run_trust authed-off "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" rearm
+assert_eq 0 "$RC" "T37 rearm inside the window exits 0"
+assert_eq "" "$PUTS" "T37 leaves the gate clear"
+assert_contains "$OUT" "open" "T37 says the window is open"
+
+run_trust put-then-on "$(_marker operator 2026-11-08T00:00:00Z "$(_past)" no)" rearm
+assert_eq 0 "$RC" "T38 rearm past the deadline exits 0"
+assert_contains "$PUTS" "PUT" "T38 the restore fired"
+assert_contains "$OUT" "ON" "T38 read-back confirms the gate is back"
+
+run_trust put-then-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" yes)" rearm
+assert_eq 0 "$RC" "T39 rearm on a spent marker exits 0"
+assert_contains "$PUTS" "PUT" "T39 the restore fired"
+
+run_trust put-then-on "$(_marker operator 2026-11-08T00:00:00Z "$(_past)" no)" rearm
+if [[ ! -f "$MARKER" ]]; then
+  pass "T40 rearm consumes the marker"
+else
+  fail "T40 rearm consumes the marker" "marker still at $MARKER"
+fi
+
+run_trust authed-off "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" status
+assert_contains "$OUT" "trust" "T41 status names an open window"
+assert_contains "$OUT" "expires" "T41 status names its deadline"
+
+run_trust authed-off "$(_marker operator 2026-11-08T00:00:00Z "$(_past)" no)" status
+assert_contains "$OUT" "past its deadline" "T42 status says so when the window has closed"
+
+run_trust put-then-off "" trust --authorized-by operator --ttl 5
+assert_contains "$(cat "$MARKER" 2>/dev/null)" "ttl_minutes=5" "T43 trust --ttl 5 records a five-minute deadline"
+
+run_trust authed-on "$(_marker operator 2026-11-08T00:00:00Z "$(_future)" no)" trust --authorized-by operator
+assert_eq 3 "$RC" "T44 trust refuses while a window is already open"
+assert_eq "" "$PUTS" "T44 no write fired"
 
 echo ""
 echo "  total=$_tests_total passed=$_tests_passed failed=$_tests_failed"
