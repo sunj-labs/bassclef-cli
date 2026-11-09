@@ -1,0 +1,10 @@
+# Temperance marker — /publish SKILL staleness
+- date: 2026-11-09
+- branch: docs/publish-skill-matches-the-gate
+- scope-decision: make the /publish skill describe what the gate script now
+  does. Three places went stale when #508 and #509 merged.
+- smallest shape: documentation only. No change to the script, no new verb.
+- what this does NOT do: it does not add a trigger for `rearm`. That is still
+  #488's open item and the skill already says so.
+- drift-trigger: if a fix needs a change to `publish-gate.sh`, stop — the
+  script is correct and the prose is what drifted.

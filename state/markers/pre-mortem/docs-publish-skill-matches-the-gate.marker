@@ -1,0 +1,23 @@
+# Pre-mortem light — cli#511
+- date: 2026-11-09
+- branch: docs/publish-skill-matches-the-gate
+- risk ledger: inline (2 lenses)
+- linus-torvalds
+  - R1 the gitignore change un-ignores the 100 synced skills, and the next
+    `git add -A` sweeps 575 files again — the thing the 2026-09-17 ignore was
+    added to stop. Folded: `.claude/skills/*` ignores every entry inside, so
+    only the named exception escapes. Verified with `git check-ignore` on both
+    a synced skill and this one.
+  - R2 the negation silently does nothing and the file stays untracked, so the
+    fix ships as a no-op. Folded: both recipes were tried in a scratch repo
+    first. Negating under an excluded directory leaves the file ignored,
+    because git will not descend into an excluded directory.
+- michael-feathers
+  - R3 the prose says what I believe the script does rather than what it does.
+    Folded: each new claim was read back against `scripts/publish-gate.sh`.
+    Two failed and were corrected before commit — "three reasons" (the script
+    sets five) and "created after" (the query is at-or-after, line 338).
+  - R4 the other four files in the ignored directories get swept in as though
+    they were ours too. Folded: each was compared against public bassclef and
+    bassclef-upstream. Two exist upstream, two exist nowhere. None is cli-own.
+    Enumerated in #511, untouched here.
