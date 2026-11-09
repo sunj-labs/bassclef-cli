@@ -1,7 +1,7 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-09T00:05:00Z
+  at: 2026-11-09T00:18:27Z
   session: 2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md
 ---
 

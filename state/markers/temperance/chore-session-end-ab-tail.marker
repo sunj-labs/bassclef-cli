@@ -1,0 +1,8 @@
+# Temperance marker — /session-end tail
+- date: 2026-11-09
+- branch: chore/session-end-ab-tail
+- scope-decision: append the tail of Session AB to its log. Three PRs landed
+  after the closeout merged, so the log stops short of where the session did.
+- smallest shape: one section plus the gate-evidence and timing lines. No new
+  log file — same session.
+- blast radius: docs/chronicle + docs/whereami.md.
