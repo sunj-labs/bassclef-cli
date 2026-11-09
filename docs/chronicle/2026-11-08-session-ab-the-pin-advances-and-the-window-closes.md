@@ -135,6 +135,71 @@ and the write-up buried it under four sections of ceremony before getting to
 - run `42533691096`'s log; `gh run list --workflow=publish.yml`
 - the npm registry API for `@thebassclef/lite`
 
+## The tail — three PRs after the closeout
+
+The closeout merged as `#510`. Then the operator asked whether `/publish trust`
+had been built. It had. Checking whether the skill had gone stale after `#508`
+and `#509` turned up something larger.
+
+**The `/publish` skill had never been in git.** `git log --all` on its path
+returns nothing. `.gitignore:84` ignored `.claude/skills/` wholesale, and the
+skill exists in neither public bassclef nor upstream, so the sync cannot put
+it back. One copy, on one machine, one `git clean -xdf` from gone — and it is
+the skill that drives the release gate. `#512` tracks it and fixes the stale
+prose. `#511` filed and closed. `#513` caught whereami up.
+
+**The signal I nearly walked past.** An empty `git log` on a path reads like
+"no recent changes" and can mean "never tracked". A second signal said the
+same and I misread that too: the skill was the only one of 101 absent from
+`~/.claude/skills/`, and I guessed that meant the command would not resolve.
+It resolves. The gap meant the sync has no record of the skill, because it is
+not the sync's.
+
+**The gitignore form matters.** `.claude/skills/` excludes the directory, and
+git will not descend into an excluded directory, so a `!` negation underneath
+does nothing. The fix ignores the contents instead — `.claude/skills/*` plus
+`!.claude/skills/publish`. Both recipes were tried in a scratch repo first.
+Every synced skill stays ignored, so the protection added 2026-09-17 after
+`git add -A` swept 575 files still holds.
+
+**Four other files sit in those ignored directories and are not ours.** Two
+stale copies that exist upstream, two orphans of the `compounding-axis` to
+`compounding-sequence` rename that exist nowhere. Enumerated in `#511`. The
+orphan pair deserves its own sweep: both rule bodies load every session and
+are near-identical.
+
+**Two more wrong claims, caught before the commit.** New prose in the skill
+said "three reasons" where the script sets five, and "created after" where the
+query is at-or-after. Each new sentence was read back against
+`scripts/publish-gate.sh`; those two failed.
+
+The repo's own three-marker gate blocked the first commit attempt on `#512`,
+correctly, because the skill had just become a tracked substrate path. Not
+overridden.
+
+## Session timing
+
+- started_at `2026-11-08T18:39:33Z`, from
+  `/tmp/claude-session-timing-cf12146cf5c1d771b627295a0c9df73e`
+- ended_at `2026-11-09T00:18:27Z`, from `.claude/LAST_SAVE`
+- duration about 5h39m
+
+That marker covers this process only. Earlier work from the same day is in the
+Session AA log and in the first half of this one.
+
+## Gate evidence — the tail
+
+| Gate | Fired | Evidence |
+|---|---|---|
+| /temperance | yes | 5 markers across the session's branches |
+| /luminary | yes | 3 markers — `tony-hoare`, `saltzer-schroeder`, `linus-torvalds` as leads |
+| /pre-mortem light | yes | 3 markers, inline ledgers, 15 risks total |
+| lead-lens sign-off | yes | 3 markers, 14 findings cleared and 1 accepted |
+| /diagnose | yes | 2 markers; sandboxed repro before any fix code |
+| three-marker gate | **fired against me** | blocked the first `#512` commit; markers written rather than overridden |
+| PR review on every change | yes | 10 PRs this session, no direct push to main |
+| /architect-review | **skipped** | third time. Last run 2026-10-11. Owed. |
+
 ## What's next
 
 `#488`'s trigger is still open and is now worth more than it was: a scheduled
