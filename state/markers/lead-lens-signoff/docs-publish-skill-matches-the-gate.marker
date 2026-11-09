@@ -1,0 +1,19 @@
+# Lead-lens sign-off — cli#511
+- date: 2026-11-09
+- branch: docs/publish-skill-matches-the-gate
+- lead: linus-torvalds
+- findings cleared:
+  - R1 (the ignore stops protecting the synced copies) — cleared.
+    `git check-ignore` reports `.claude/skills/verify/SKILL.md` IGNORED and
+    `.claude/skills/publish/SKILL.md` tracked. The rules, agents, luminaries
+    and hooks ignores are unchanged.
+  - R2 (the negation is a no-op) — cleared. Both recipes tested in a scratch
+    repo before editing this one.
+  - R3 (prose asserting what the script does not do) — cleared. Two of my own
+    claims were wrong and were fixed before the commit.
+  - R4 (sweeping in files that are not ours) — cleared. Four files named in
+    #511 and left alone.
+- no findings on the staleness edits: each replaced sentence names the ticket
+  that changed the behaviour, so a reader can check the claim against it.
+- not verified by test: this is prose. The gate script's 105 tests are
+  unchanged and still green; nothing here touches them.

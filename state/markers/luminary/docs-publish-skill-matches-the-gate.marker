@@ -1,0 +1,15 @@
+# Luminary marker — cli#511
+- date: 2026-11-09
+- branch: docs/publish-skill-matches-the-gate
+- lead: linus-torvalds
+- supporting: [michael-feathers, david-ogilvy]
+- linus-torvalds (lead) — the question is what belongs to the source tree and
+  what belongs to the machine. The ignore was right about the hundred skills
+  the sync copies in and wrong about the one this repo wrote. The lens is what
+  kept the fix to a narrow exception instead of reverting the ignore.
+- michael-feathers — the skill documents a mechanism, so the mechanism is the
+  source of record. Every claim in the new prose was read back against the
+  script, and two of mine were wrong.
+- david-ogilvy — honesty test. "It does not need the publish to have finished"
+  was true when written and misleading now. The fix says which half still
+  holds, rather than deleting the sentence and leaving a reader guessing.

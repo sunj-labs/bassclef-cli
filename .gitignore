@@ -81,7 +81,17 @@ state/events/test-runs/
 # files belong to the operator's machine, not to the cli source tree.
 # Only .claude/settings.json and .claude/bassclef-configs.jsonc are ours.
 # Added 2026-09-17 after `git add -A` swept ~575 of them into a PR.
-.claude/skills/
+# One exception: .claude/skills/publish is OURS. It drives this repo's
+# release gate and exists in neither public bassclef nor upstream, so the
+# sync cannot put it back. Ignoring it left the skill on one machine, never
+# in git, one `git clean -xdf` from gone. Per #511.
+#
+# The form matters. `.claude/skills/` excludes the directory and git will not
+# descend into it, so a `!` negation underneath has no effect. Ignoring the
+# CONTENTS instead leaves room for the exception, and `git add -A` still
+# cannot sweep the synced copies.
+.claude/skills/*
+!.claude/skills/publish
 .claude/rules/
 .claude/agents/
 .claude/luminaries/
