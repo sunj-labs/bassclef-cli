@@ -1,0 +1,8 @@
+# Temperance marker — whereami catch-up
+- date: 2026-11-09
+- branch: docs/whereami-511-512
+- scope-decision: append #511 and #512 to the Session AB recap. The closeout
+  merged before those two landed, so the recap is two PRs behind.
+- smallest shape: one paragraph inside the existing recap block, plus the
+  session-log line. No new recap block — same session.
+- blast radius: docs/whereami.md only.

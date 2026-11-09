@@ -1,7 +1,7 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-08T23:45:00Z
+  at: 2026-11-09T00:05:00Z
   session: 2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md
 ---
 
@@ -25,6 +25,16 @@ operator_recap (Session AB · the pin advances, 1.10.0 ships, the window learns 
 **`/architect-review` skipped twice now.** Last run 2026-10-11. Owed.
 
 **Three PRs open over 24h:** `#474` (Nov 5), `#449` (Oct 18), `#423` (Oct 11, a dependabot node bump).
+
+**After the closeout, two more PRs.** You asked whether `/publish trust` was built. It is — `modes: [status, publish, trust]`, and it resolves. Checking whether the skill had gone stale after `#508` and `#509` turned up something bigger: **the `/publish` skill had never been in git.** `.gitignore:84` ignored `.claude/skills/` wholesale, and the skill exists in neither public bassclef nor upstream, so the sync could not put it back. One copy, on this machine, one `git clean -xdf` from gone — and it is the skill that drives the release gate. `#512` tracks it and fixes the stale prose. Filed and closed `#511`.
+
+**The signal I nearly walked past.** `git log` on the skill's path came back empty. That reads like "no recent changes" and actually meant "never tracked". A second signal said the same and I misread it too: the skill was the only one of 101 missing from `~/.claude/skills/`, and I guessed that meant the command would not resolve. It resolves. The gap meant the sync has no record of the skill, because it is not the sync's. Memory written.
+
+**The gitignore form matters.** `.claude/skills/` excludes the directory, and git will not descend into an excluded directory, so a `!` negation underneath does nothing. The fix ignores the contents instead — `.claude/skills/*` plus `!.claude/skills/publish`. Every synced skill stays ignored, so the protection added on 2026-09-17 after `git add -A` swept 575 files still holds. Both recipes were tried in a scratch repo first.
+
+**Four other files sit in those ignored directories and are not ours.** Two stale copies that exist upstream, two orphans of the `compounding-axis` to `compounding-sequence` rename that exist nowhere. Enumerated in `#511`. The orphan pair is worth a sweep on its own — `compounding-axis-fresh-analysis.md` and `compounding-sequence-fresh-analysis.md` both load every session, and their bodies are near-identical.
+
+**Two more of my own claims were wrong, both caught before the commit.** New prose in the skill said "three reasons" where the script sets five, and "created after" where the query is at-or-after. Each new sentence was read back against `scripts/publish-gate.sh`; those two failed.
 
 Session log at `docs/chronicle/2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md`.
 -->
