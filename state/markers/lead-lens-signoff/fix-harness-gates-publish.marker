@@ -1,0 +1,27 @@
+# Lead-lens sign-off — harness gates the publish
+- date: 2026-11-05
+- branch: fix/harness-gates-publish
+- lead: michael-nygard
+- findings-cleared:
+  - No RED on the change itself — it moves an existing check, and the check
+    was proven green in the parent PR (12 of 12, both scenarios).
+  - Caught while writing it: ADR-004's ordered-steps list has drifted from
+    the workflow. It says Node 20 where publish.yml uses Node 22, and omits
+    five steps that exist (pin read, mirror checkout, pin assert, dist/lite
+    bundle, six-file floor). Named in the amendment rather than reconciled,
+    because fixing the whole list is a separate change. Adding a thirteenth
+    line to a list that misdescribes twelve would have been worse.
+  - Caught while writing it: the published scenario cannot run pre-publish —
+    the version is not on the registry, so it would fail on infrastructure
+    rather than on the package. HARNESS_INCLUDE_PUBLISHED stays unset in the
+    checks job; harness.yml still runs both after release.
+- verification: publish.yml parses; the harness is step 17, last in checks;
+  job 2 still declares needs: checks and environment: npm-publish, so the
+  order is pack-and-run, then human gate, then publish.
+- lens-verdict: PASS, with the limit stated. A failure can now stop a
+  publish, which is what the lens asks. Full proof needs a real release —
+  nothing here exercises the gate end to end, and I have not pretended
+  otherwise.
+- iteration_count: 1
+- wu_id: harness repair, step 2 of the sequence
+- lens_used: [michael-nygard, tony-hoare, saltzer-schroeder]
