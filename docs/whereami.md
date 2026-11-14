@@ -1,9 +1,19 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-09T00:18:27Z
-  session: 2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md
+  at: 2026-11-14T23:58:00Z
+  session: 2026-11-14-session-ac-verify-516-and-hold-the-stop-hook.md
 ---
+
+<!--
+operator_recap (Session AC · verify #516, keep the Stop hook off the PR branch, 2026-11-14T23:58Z): **PR #516 is verified and waits on your merge.** A fresh box session loaded 90 rules, and the sync that ran was the repo copy, because `$HOME/.claude/hooks/bassclef-sync.sh` does not exist. Both Test plan boxes are ticked, CI is green, and the head is still `77f4a88`.
+
+**The Stop hook still pushes onto open PR branches.** You chose to fix it upstream in sunj-labs/bassclef-upstream#973, in its own session. Until then, move any `docs/deferred-actions/*-session-rescue.md` out at the end of every turn. Six were moved this session.
+
+**Hook-cadence banner deferred.** Its promote is cli#207, now with today's evidence. Seven settings backups deleted.
+
+Session log at `docs/chronicle/2026-11-14-session-ac-verify-516-and-hold-the-stop-hook.md`.
+-->
 
 <!--
 operator_recap (Session AB · the pin advances, 1.10.0 ships, the window learns to close, 2026-11-08T23:45Z): **Seven PRs merged. `@thebassclef/lite@1.10.0` is live on npm, carrying substrate `v1.12.0`.** I pulled the published tarball to check rather than trusting the publish log — `dist/lite/bassclef-version.json` reads `release_tag: v1.12.0`, and `dist/lite/.claude/hooks/` holds 55 `.sh` files.
