@@ -95,7 +95,8 @@ state/events/test-runs/
 .claude/rules/
 .claude/agents/
 .claude/luminaries/
-.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/bassclef-sync.sh
 .claude/embeddings/
 .claude/bassclef-orientation.md
 .claude/*.bak.*

@@ -20,6 +20,11 @@
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-git-push-clean-artifacts.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-failure-diagnosis.sh",
+            "timeout": 5
           }
         ]
       },
@@ -319,6 +324,11 @@
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/persona-name-scrub-check.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/memory-write-audit.sh",
+            "timeout": 5
           }
         ]
       }
@@ -328,8 +338,28 @@
         "hooks": [
           {
             "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/bassclef-sync.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/bassclef-sync.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/vendored-dispatcher-refresh.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/session-reflection.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/session-start-recap-inject.sh",
+            "timeout": 5
           }
         ]
       }
@@ -464,6 +494,7 @@
           }
         ]
       }
-    ]
+    ],
+    "InstructionsLoaded": []
   }
 }
