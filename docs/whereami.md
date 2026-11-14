@@ -1,9 +1,17 @@
 ---
 tier: lite
 last_updated:
-  at: 2026-11-09T00:18:27Z
-  session: 2026-11-08-session-ab-the-pin-advances-and-the-window-closes.md
+  at: 2026-11-14T23:05:00Z
+  session: 2026-11-14-session-ac-the-dispatcher-and-the-thrashing-save.md
 ---
+
+<!--
+operator_recap (Session AC · the dispatcher gets tracked, and the Stop hook thrashes the PR, 2026-11-14T23:05Z): **PR #516 is up as a draft, CI green, head `77f4a88`.** It tracks the sync dispatcher so a box session loads its 90 rules instead of 0. Two test-plan boxes need a fresh box session to tick.
+
+**The Stop hook pushed three junk commits onto #516** (`736895c`, `465476d`, `2f387e6`). I dropped each one by force-push, with the operator's yes. Cause: `session-end.sh:96` runs `save-state.sh` without `--auto`, so the branch guard at `save-state.sh:174` never fires. Filed as **#517** (`p1`), paired with sunj-labs/bassclef-upstream#2519 (context budget per turn). Those two are the practical blockers for building from mobile.
+
+**Next:** (1) fresh box session, and first move any new rescue file out of the tree; (2) verify #516 and tick its boxes; (3) operator decides the three `.claude/settings.json.bak-*` files; (4) open PRs #474, #449, #423 wait on decisions.
+-->
 
 <!--
 operator_recap (Session AB · the pin advances, 1.10.0 ships, the window learns to close, 2026-11-08T23:45Z): **Seven PRs merged. `@thebassclef/lite@1.10.0` is live on npm, carrying substrate `v1.12.0`.** I pulled the published tarball to check rather than trusting the publish log — `dist/lite/bassclef-version.json` reads `release_tag: v1.12.0`, and `dist/lite/.claude/hooks/` holds 55 `.sh` files.
