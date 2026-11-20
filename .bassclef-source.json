@@ -1,0 +1,7 @@
+{
+  "source_url": "https://api.github.com/repos/sunj-labs/bassclef/tarball/main",
+  "tier": "ultra",
+  "auth_method": "Bearer",
+  "token_env": "BASSCLEF_TOKEN",
+  "auto_sync": true
+}
